@@ -1,0 +1,46 @@
+@startuml DroitHarvester
+title Utilisation du Harvester
+
+actor "Animateur du réseau 'Litchi'" as user
+control "POE-A" as poea
+control "POE-X" as poex
+database "Base de données de POE-A" as db
+
+user -> poea : Liste Plateformes
+
+activate poea
+poea -> poex : demande les données
+activate poex
+note over of poex #ff9eff
+Voir fetch du harvester
+pour plus de détails
+end note
+poex --> poea : envoie les plateformes
+
+deactivate poex
+poea -> poea : Créer un tableau vide
+
+alt "Pour chaque plateforme"
+
+poea -> poea :Récupérer le mail du responsable de la plateforme
+
+alt#Gold #Lavender "le mail du responsable est le même mail que le user"
+poea -> poea :Ajouter la plateforme dans le tableau
+poea -X poea :Continuer la boucle
+end alt
+
+poea -> poea :Récupérer l'id de la plateforme
+poea -> poea :Préfixer l'id par le client_id du harvester\nex: otelo_228
+
+poea -> db :Récupérer le mappage réseau interne
+db --> poea :(id_plateforme_exterieur) otelo_228 -> (Réseau interne) Litchi
+
+alt#Gold #Lavender "Le user est animateur du réseau interne (ici Litchi)"
+poea -> poea :Ajouter la plateforme dans le tableau
+end alt
+end alt
+
+poea --> user : Renvoie le tableau
+deactivate poea
+
+@enduml

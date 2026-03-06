@@ -1,0 +1,27 @@
+@startuml ConnexionHarvester
+title Connexion au Harvester
+
+control "POE-A" as poea
+control "POE-B" as poeb
+activate poea
+poea -> poeb : Demande un JWT
+note left #FF5555
+POST /api/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+client_id=
+client_secret=
+end note
+activate poeb
+poeb -> poeb : Vérifie l'existence du User où le\nclient_id et le client_secret matchent
+
+alt "Le User existe et les credentials sont corrects"
+    poeb -> poeb : Génère un JWT
+    poeb --> poea : Répond avec le JWT
+    poea -> poea :Stocke le JWT pour les prochaines requêtes
+else "Le User n'existe pas ou les credentials sont incorrects"
+    poeb --> poea : Répond avec une erreur d'authentification
+end alt
+
+@enduml

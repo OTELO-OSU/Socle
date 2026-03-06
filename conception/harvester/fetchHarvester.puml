@@ -1,0 +1,53 @@
+@startuml FetchHarvester
+title Fetch du Harvester
+
+actor "Frontend POE-A" as user
+control "POE-A" as poea
+control "POE-X" as poex
+
+user -> poea : Liste Plateformes
+
+activate poea
+poea -> poea : Récupère tous les harvesters qu'ils possèdent
+poea -> poea : Créer un tableau vide
+
+alt "Pour chaque harvester"
+
+poea -> poea :Récupère le token en cache pour le harvester X
+
+poea -> poex : Récupère les données du harvester X en utilisant le token
+activate poex
+poex -> poex : Vérifie la validité du token
+alt #LightGreen "Le token est valide"
+    poex -> poex : Récupère les données du harvester X
+    poex --> poea : Répond avec les données du harvester X
+    deactivate poex
+    poea -> poea : Ajoute les données du harvester X dans le tableau
+else #Pink "Le token est expiré ou invalide"
+    poex --> poea : Répond avec une erreur d'authentification
+    poea -> poex : Demande un token en utilisant le client_id et le client_secret du harvester X
+    activate poex
+    poex -> poex : Vérifie l'existence du User où le\nclient_id et le client_secret matchent
+    alt #LightSeaGreen "Le User existe et les credentials sont corrects"
+        poex -> poex : Génère un JWT
+        poex --> poea : Répond avec le JWT
+        deactivate poex
+        poea -> poea :Stocke le JWT pour les prochaines requêtes
+        poea -> poex : Récupère les données du harvester X en utilisant le nouveau token
+        activate poex
+        poex --> poea : Répond avec les données du harvester X
+    else #HotPink "Le User n'existe pas ou les credentials sont incorrects"
+        poex --> poea : Répond avec une erreur d'authentification
+        deactivate poex
+        poea -X poea : Supprime le token en cache pour le harvester X et ne ré-itère pas la\ndemande de données pour ce harvester
+    end alt
+
+end alt
+end alt
+
+poea -> poea : Ajoute ses propres données dans le tableau
+
+poea --> user : Renvoie le tableau
+deactivate poea
+
+@enduml

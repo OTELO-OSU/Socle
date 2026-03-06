@@ -1,0 +1,20 @@
+@startuml AjoutHarvester
+title Ajout d'un Harvester
+
+control "POE-A" as poea
+control "POE-B" as poeb
+poea -> poeb : Envoie un mail pour demander un compte machine
+activate poeb
+poeb -> poeb : Créer un compte machine en spécifiant le client_id
+note right of poeb #FF5555
+Lors de la création du compte machine, un
+token d'ajout d'harvester est généré
+Il est créér en suivant la convention suivante :
+atob(client_id).atob(client_secret).atob(url)
+end note
+poeb --> poea : Répond au mail avec le token d'ajout d'harvester
+deactivate poeb
+activate poea
+poea -> poea : Ajoute le token Harvester dans l'admin de son POE
+
+@enduml
