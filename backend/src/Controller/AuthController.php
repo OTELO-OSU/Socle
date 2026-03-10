@@ -14,8 +14,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AuthController extends AbstractController
 {
     public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params) {}
+
     #[Route('/connexionFede', methods: ['GET'])]
-    public function loginCAS(Request $request): Response
+    public function connexionFede(Request $request): Response
     {
         try {
             $mail = $request->headers->get('mail');
