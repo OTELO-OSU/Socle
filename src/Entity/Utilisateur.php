@@ -6,9 +6,10 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur
+class Utilisateur implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,6 +37,9 @@ class Utilisateur
     #[ORM\Column]
     private ?bool $admis = null;
 
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
     /**
      * @var Collection<int, RefreshToken>
      */
@@ -51,6 +55,11 @@ class Utilisateur
     public function __construct()
     {
         $this->refreshTokens = new ArrayCollection();
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->id;
     }
 
     public function getId(): ?int
@@ -140,6 +149,23 @@ class Utilisateur
         $this->admis = $admis;
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Sur une base de JWT pas besoin
     }
 
     /**
