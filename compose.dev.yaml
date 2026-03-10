@@ -1,0 +1,24 @@
+services:
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: poe
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "poe", "-U", "root"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - ./docker/volumes/database:/var/lib/postgresql/data:rw
+  ###< doctrine/doctrine-bundle ###
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
