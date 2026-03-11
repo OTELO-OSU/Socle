@@ -47,11 +47,11 @@ final class AuthController extends AbstractController
             $prenom = $request->headers->get('givenname');
             $nom = $request->headers->get('sn');
             $token = $this->authService->connexionFede($mail, $prenom, $nom);
-            $response = new RedirectResponse($this->params->get('frontend_link') . "/callbackCas?status=success");
+            $response = new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=success");
             $response->headers->setCookie($token["cookie"]);
             return $response;
         } catch (UtilisateurFedeExistePasException $e) {
-            return new RedirectResponse($this->params->get('frontend_link') . "/inscription?" . http_build_query([
+            return new RedirectResponse($this->params->get('front_host') . "/inscription?" . http_build_query([
                 'ssmdp' => true,
                 'payload' => $e->getPayload(),
             ]));
