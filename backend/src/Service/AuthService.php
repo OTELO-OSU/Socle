@@ -45,7 +45,7 @@ class AuthService
     /**
      * @return Cookie
      */
-    function genererTokenCookieAvecRefreshToken(Utilisateur $user)
+    private function genererTokenCookieAvecRefreshToken(Utilisateur $user)
     {
         $token = $this->tokenManager->create($user);
 
