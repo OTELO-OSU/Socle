@@ -57,7 +57,7 @@ class AuthService
         $cookie = Cookie::create('refresh_token', $refreshToken)
             // Expiration dans 7 jours
             ->withExpires(time() + 604800)
-            ->withHttpOnly(false)
+            ->withHttpOnly(true)
             ->withSecure(true)
             ->withSameSite('None')
             ->withPath('/');
