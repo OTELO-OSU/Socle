@@ -15,6 +15,30 @@ final class AuthController extends AbstractController
 {
     public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params) {}
 
+    #[Route('/connexion', methods: ['POST'])]
+    public function connexion(Request $request): Response
+    {
+        $authorizationHeader = $request->headers->get('Authorization');
+        if (!$authorizationHeader) return $this->json(['error' => 'Le header autorisation est requis !'], 401);
+
+        if (strpos($authorizationHeader, 'Basic ') !== 0) return $this->json(['error' => 'Encodage du header autorisation invalide'], 401);
+
+        $base64Credentials = substr($authorizationHeader, 6);
+        $decodedCredentials = base64_decode($base64Credentials);
+
+        if (!\str_contains($decodedCredentials, ":")) return $this->json(['error' => 'Encodage du header autorisation invalide'], 401);
+
+        // Récupération du username et du password
+        list($username, $password) = explode(':', $decodedCredentials);
+
+        $couple = $this->authService->connexionBasic($username, $password);
+
+        $response = $this->json(['token' => $couple['token']]);
+        $response->headers->setCookie($couple['cookie']);
+        return $response;
+    }
+
+
     #[Route('/connexionFede', methods: ['GET'])]
     public function connexionFede(Request $request): Response
     {

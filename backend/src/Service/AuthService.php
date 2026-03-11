@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\RefreshToken;
 use App\Entity\Utilisateur;
+use App\Exception\auth\EmailOuMotDePasseIncorrectException;
 use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurMailNonValideException;
 use App\Exception\auth\UtilisateurNonAdmisException;
@@ -11,13 +12,34 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $tokenManager,
+        private readonly UserPasswordHasherInterface $passwordHasher
     ) {}
+
+    function connexionBasic(string $email, string $password)
+    {
+        $userRepo = $this->em->getRepository(Utilisateur::class);
+        /** @var Utilisateur | null $user */
+        $user = $userRepo->findOneBy(["email" => $email]);
+
+        // Si l'email n'existe pas
+        if (is_null($user)) throw new EmailOuMotDePasseIncorrectException();
+
+        // Si le mot de passe n'est pas bon
+        if (!$this->passwordHasher->isPasswordValid($user, $password)) throw new EmailOuMotDePasseIncorrectException();
+
+        if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
+        if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
+
+        return $this->genererTokenCookieAvecRefreshToken($user);
+    }
+
     function connexionFede(string $email, string $prenom, string $nom)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);

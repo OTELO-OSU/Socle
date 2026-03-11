@@ -6,10 +6,11 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur implements UserInterface
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -166,6 +167,11 @@ class Utilisateur implements UserInterface
     public function eraseCredentials(): void
     {
         // Sur une base de JWT pas besoin
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->mdp;
     }
 
     /**
