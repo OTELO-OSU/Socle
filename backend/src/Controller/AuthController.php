@@ -58,6 +58,19 @@ final class AuthController extends AbstractController
         }
     }
 
+    #[Route('/refresh', methods: ['POST'])]
+    public function refresh(Request $request): Response
+    {
+        $refreshToken = $request->cookies->get('refresh_token');
+        if (!$refreshToken) return $this->json(['message' => 'Aucun refresh token n\'a été envoyé.'], 400);
+
+        $couple = $this->authService->checkRefreshToken($refreshToken);
+        $response = $this->json(['token' => $couple['token']], 200);
+        $response->headers->setCookie($couple['cookie']);
+        return $response;
+    }
+
+
     #[Route('/deconnexion', methods: ['POST'])]
     public function deconnexion(Request $request): Response
     {

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\RefreshToken;
 use App\Entity\Utilisateur;
 use App\Exception\auth\EmailOuMotDePasseIncorrectException;
+use App\Exception\auth\RefreshTokenInvalideOuExpireException;
 use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurMailNonValideException;
 use App\Exception\auth\UtilisateurNonAdmisException;
@@ -53,6 +54,22 @@ class AuthService
             "token" => $token,
             "cookie" => $cookie
         ];
+    }
+
+    function checkRefreshToken(string $refreshToken)
+    {
+        /** @var RefreshToken $refreshToken */
+        // Récupération du record refreshToken
+        $refreshToken = $this->em->getRepository(RefreshToken::class)->findOneBy(['token' => $refreshToken]);
+
+        // Vérification que le refreshToken soit existant et pas expiré
+        if (!$refreshToken || $refreshToken->getExpiration() < new \DateTime()) throw new RefreshTokenInvalideOuExpireException();
+
+        // Suppression de l'ancien refreshToken
+        $this->em->remove($refreshToken);
+        $this->em->flush();
+
+        return $this->genererTokenCookieAvecRefreshToken($refreshToken->getUtilisateur());
     }
 
     function deconnexion(string $refreshToken): void
