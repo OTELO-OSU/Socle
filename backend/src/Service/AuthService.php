@@ -25,8 +25,7 @@ class AuthService
         if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
-        $token = $this->tokenManager->create($user);
-        $cookie = $this->genererCookieAvecRefreshToken($user);
+        return $this->genererTokenCookieAvecRefreshToken($user);
 
         return [
             "token" => $token,
@@ -46,8 +45,10 @@ class AuthService
     /**
      * @return Cookie
      */
-    function genererCookieAvecRefreshToken(Utilisateur $user)
+    function genererTokenCookieAvecRefreshToken(Utilisateur $user)
     {
+        $token = $this->tokenManager->create($user);
+
         // Création d'un token
         $refreshToken = bin2hex(random_bytes(64));
 
@@ -71,6 +72,9 @@ class AuthService
             ->withSameSite('None')
             ->withPath('/');
 
-        return $cookie;
+        return [
+            "token" => $token,
+            "cookie" => $cookie
+        ];
     }
 }
