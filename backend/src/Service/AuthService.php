@@ -9,8 +9,10 @@ use App\Exception\auth\RefreshTokenInvalideOuExpireException;
 use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurMailNonValideException;
 use App\Exception\auth\UtilisateurNonAdmisException;
+use App\Exception\auth\UtilisateurOrcidExistePasException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -20,7 +22,8 @@ class AuthService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $tokenManager,
-        private readonly UserPasswordHasherInterface $passwordHasher
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly OrcidService $orcidService
     ) {}
 
     function connexionBasic(string $email, string $password)
@@ -55,6 +58,20 @@ class AuthService
             "cookie" => $cookie
         ];
     }
+
+    function connexionOrcid(string $code)
+    {
+        $accessToken = $this->orcidService->getTokenOrcid($code);
+        $profile = $this->orcidService->getProfileOrcid($accessToken);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["sub_orcid" => $profile["sub"]]);
+
+        if (!$user) throw new UtilisateurOrcidExistePasException();
+        if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
+        if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
+
+        return $this->genererTokenCookieAvecRefreshToken($user);
+    }
+
 
     function checkRefreshToken(string $refreshToken)
     {

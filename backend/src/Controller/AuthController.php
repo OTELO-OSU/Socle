@@ -58,6 +58,16 @@ final class AuthController extends AbstractController
         }
     }
 
+    #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]
+    public function connexionOrcid(string $code): Response
+    {
+        $couple = $this->authService->connexionOrcid($code);
+        $response = $this->json(['token' => $couple['token']]);
+        $response->headers->setCookie($couple['cookie']);
+        return $response;
+    }
+
+
     #[Route('/refresh', methods: ['POST'])]
     public function refresh(Request $request): Response
     {
