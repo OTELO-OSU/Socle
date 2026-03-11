@@ -18,7 +18,7 @@ class AuthService
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $tokenManager,
     ) {}
-    function loginByCas(string $email, string $prenom, string $nom)
+    function connexionFede(string $email, string $prenom, string $nom)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
         if (!$user) throw new UtilisateurFedeExistePasException($email, $prenom, $nom);
