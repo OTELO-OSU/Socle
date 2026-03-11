@@ -33,4 +33,17 @@ final class AuthController extends AbstractController
             ]));
         }
     }
+
+    #[Route('/deconnexion', methods: ['POST'])]
+    public function deconnexion(Request $request): Response
+    {
+        $response = new Response();
+        $refreshToken = $request->cookies->get('refresh_token');
+        if ($refreshToken) {
+            $this->authService->deconnexion($refreshToken);
+            $response->headers->clearCookie('refresh_token');
+        }
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 }

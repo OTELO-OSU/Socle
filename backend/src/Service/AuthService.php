@@ -34,6 +34,15 @@ class AuthService
         ];
     }
 
+    function deconnexion(string $refreshToken): void
+    {
+        $refreshTokenEntity = $this->em->getRepository(RefreshToken::class)->findOneBy(["token" => $refreshToken]);
+        if ($refreshTokenEntity) {
+            $this->em->remove($refreshTokenEntity);
+            $this->em->flush();
+        }
+    }
+
     /**
      * @return Cookie
      */
