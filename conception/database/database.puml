@@ -1,0 +1,304 @@
+@startuml Base de données
+title Base de données
+
+entity "utilisateur" as user << (U, Orchid) >> {
+  *id : int
+  --
+  *prenom: string
+  *nom: string
+  *email : string
+  *mdp : string
+  sub_orcid : string
+  *email_valide : boolean
+  *admis : boolean
+  *role : jsonb
+}
+
+entity "utilisateur_machine" as userMachine << (U, BlueViolet) >> {
+  #utilisateur_id : int
+  --
+  *client_id: string
+  *client_secret: string
+}
+
+entity "utilisateur_inscription" as userInscription << (U, PaleVioletRed) >> {
+  #utilisateur_id : int
+  --
+  plateforme_demande_id: int
+  unite_demande_id: int
+  osu_demande: bool
+}
+
+entity "utilisateur_inscription_oauth" as userInscriptionOauth << (U, PaleVioletRed) >> {
+  *id : int
+  --
+  *token : string
+  *expiration : datetime
+  sub_orcid : string
+  prenom: string
+  nom: string
+  email : string
+}
+
+entity "utilisateur_verification" as userVerification << (U, Violet) >> {
+  #utilisateur_id : int
+  --
+  *token: string
+  *expiration: datetime
+  email: string
+}
+
+entity "refresh_token" as refreshToken {
+  *id : int
+  --
+  *utilisateur_id : int
+  *token : string
+  *expiration : datetime
+}
+
+entity "plateforme" as plateforme << (P, Red) >> {
+  *id : int
+  --
+  *pseudo_id : string
+}
+
+entity "plateforme_historique" as plateformeHistorique << (H, Red) >> {
+  *id : int
+  --
+  *plateforme_id : int
+  *annee: int
+  *nom_officiel : string
+  forme_developpee_nom_officiel : string
+  site_web : string
+  ville_id : int
+  logo_url : string
+  autre_type_labellisation : string
+  laboratoire_operateur_id : int (entite)
+  latitude : float
+  longitude : float
+  espace_bureau : float
+  espace_laboratoire : float
+  materiel_consommable : float
+  contrat_entretien : float
+  etude_prestation : float
+  fluide_energie : float
+  mission_frais_generaux : float
+  determination_tarif_plateforme_id : int
+  contribution_tutelle_taux : int
+  contribution_fond_public_taux : int
+  contribution_fond_prive_taux : int
+  contribution_credit_taux : int
+  contribution_projet_recherche_taux : int
+  contribution_structure_pia_taux : int
+  dotation_instrument_national : int
+  labellisation_qualite : int
+  nom_labelisation_qualite : string
+  procedure_transparente_tous : bool
+  procedure_transparente_prestation_exterieure : bool
+  accueil_international_taux : int
+  modele_77_2424_taux : int
+  modele_77_1224_taux : int
+  modele_57_2424_taux : int
+  modele_57_1224_taux : int
+  modele_57_1224_taux : int
+  utilisation_fonctionnement_taux : int
+  utilisation_maintenance_taux : int
+  utilisation_developemment_taux : int
+  utilisation_panne_taux : int
+  utilisation_temps_mort_taux : int
+  utilisation_equipe_operante_taux : int
+  utilisation_collaboration_interne_taux : int
+  utilisation_collaboration_externe_taux : int
+  utilisation_prestation_service_taux : int
+  bges_realise : bool
+  bges_domicile_travail : float
+  bges_mission : float
+  bges_mission_ext : float
+  bges_consommable : float
+  bges_equipement : float
+  bges_envoi_echantillon : float
+  bges_batiment : float
+  bges_dechet : float
+  publication_equipe_operante : int
+  publication_collaboration_interne : int
+  publication_collaboration_externe : int
+  publication_autre_type : int
+  publication_these : int
+}
+
+entity "plateforme_historique_tutelle" as plateformeHistoriqueTutelle {
+    *plateforme_historique_id : int
+    *tutelle_id : int (entite)
+    --
+    *principale : boolean
+}
+
+entity "plateforme_historique_personnel" as plateformeHistoriquePersonnel {
+    *plateforme_historique_id : int
+    *utilisateur_id : int
+    --
+    *responsable_scientifique : boolean
+    *responsable_technique : boolean
+}
+
+entity "poste_futur" as posteFutur {
+    *id: int
+    --
+    *plateforme_historique_id : int
+    *employeur_id : int (entite)
+    *corps_id : int
+    *bap_id : int
+    *emploi_type_id : int
+    *quotite : int
+    *rang_numerateur : int
+    *rang_denominateur : int
+}
+
+entity "instrument" as instrument {
+  *id : int
+  --
+  *plateforme_historique_id : int
+  *nom_officiel : string
+  marque : string
+  modele : string
+  annee_acquisition : int
+  *cout : float
+  valeur_remplacement: float
+  duree_utilisation : int
+  operation_id : int
+  annee_achat_envisagee: int
+}
+
+entity "financement_instrument" as financementInstrument {
+  *instrument_id : int
+  *financeur_id : int
+  --
+  *taux : int
+}
+
+entity "publication" as publication {
+  *id : int
+  --
+  *plateforme_historique_id : int
+  *doi : string
+}
+
+entity "entite" as entite << (E, Gold) >> {
+  *id : int
+  --
+  *nom : string
+  acronyme : string
+  statut_juridique : string
+  employeur: boolean
+  laboratoire: boolean
+  categorie_id : int
+}
+
+entity "bap" as bap {
+  *lettre : char
+  --
+  *nom : string
+}
+
+entity "section_cnrs" as sectionCnrs {
+  *numero : int
+  --
+  *nom : string
+}
+
+entity "cnu" as cnu {
+  *numero : int
+  --
+  *nom : string
+}
+
+entity "corps" as corps {
+  *id : int
+  --
+  *nom : string
+  acronyme : string
+}
+
+entity "grade" as grade {
+  *id : int
+  --
+  *nom : string
+}
+
+entity "corps_grade" as corpsGrade {
+  *corps_id : int
+  *grade_id : int
+}
+
+entity "ville" as ville {
+  *id : int
+  --
+  *nom : string
+  *numero_departement : int
+  *departement : string
+}
+
+entity "operation" as operation {
+  *id : int
+  --
+  *nom : string
+  description : string
+}
+
+entity "determination_tarif_methode" as determinationTarif {
+  *id : int
+  --
+  *nom : string
+}
+
+entity categorie {
+  *id : int
+  --
+  *nom : string
+}
+
+entity "contribution_tutelle" as contributionTutelle {
+  *plateforme_historique_id : int
+  *financeur_id : int (entite)
+  --
+  *montant : int
+}
+
+corps "1" <-- "0..*" corpsGrade
+grade "1" <-- "0..*" corpsGrade
+
+user "1" <-- "0..1" userMachine
+user "1" <-- "0..1" userInscription
+plateforme "1" <-- "0..*" userInscription
+entite "1" <-- "0..*" userInscription
+user "1" <-- "0..*" refreshToken
+user "1" <-- "0..1" userVerification
+categorie "1" <-- "0..*" entite
+instrument "0..*" <-- "1" plateformeHistorique
+instrument "0..*" --> "1" operation 
+ville "1" <-- "0..*" plateformeHistorique
+plateformeHistorique "1" <-- posteFutur
+user "0..*" --> "0..1" corps
+user "0..*" --> "0..1" grade
+user "0..*" --> "0..*" bap
+user "0..*" --> "0..*" cnu
+user "0..*" --> "0..*" sectionCnrs
+posteFutur "0..*" --> "1" corps
+posteFutur "0..*" --> "1" bap
+plateformeHistorique "0..*" --> "1" determinationTarif
+plateforme "1" <-- "1..*" plateformeHistorique
+
+plateformeHistorique "0..*" <-- "0..*" entite
+(plateformeHistorique, entite) . plateformeHistoriqueTutelle
+
+plateformeHistorique "0..*" <-- "0..*" user
+(plateformeHistorique, user) . plateformeHistoriquePersonnel
+
+plateformeHistorique "0..*" <-- "0..*" entite
+(plateformeHistorique, entite) . contributionTutelle
+
+plateformeHistorique "1" <-- "0..*" publication
+
+entite "0..*" <-- "0..*" instrument
+(entite, instrument) . financementInstrument
+@enduml
