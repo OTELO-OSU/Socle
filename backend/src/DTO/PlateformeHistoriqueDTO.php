@@ -4,97 +4,100 @@ namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
+/** Les arguments obligatoires sont :
+- nom_officiel
+ */
 class PlateformeHistoriqueDTO
 {
-    public int $id;
-    public int $plateforme_id;
+    public ?int $id = null;
+    public ?int $plateforme_id = null;
 
     # Présentation
     ## Principale
-    public string $pseudo_id;
+    public ?string $pseudo_id = null;
     public string $nom_officiel;
-    public string $forme_developpee_nom_officiel;
-    public string $site_web;
-    public int $ville_id;
-    public string $logo_url;
-    public string $autre_type_labellisation;
+    public ?string $forme_developpee_nom_officiel = null;
+    public ?string $site_web = null;
+    public ?int $ville_id = null;
+    public ?string $logo_url = null;
+    public ?string $autre_type_labellisation = null;
 
     ## Appartenance
-    public int $laboratoire_operateur_id;
-    public array $tutelle_principale;
-    public array $tutelle_secondaire;
-    public float $latitude;
-    public float $longitude;
-    public float $espace_bureau;
-    public float $espace_laboratoire;
+    public ?int $laboratoire_operateur_id = null;
+    public ?array $tutelle_principale = null;
+    public ?array $tutelle_secondaire = null;
+    public ?float $latitude = null;
+    public ?float $longitude = null;
+    public ?float $espace_bureau = null;
+    public ?float $espace_laboratoire = null;
 
     # Personnel
-    public array $responsable_scientifique;
-    public array $responsable_technique;
-    public array $personnel;
-    public array $postes_futurs;
+    public ?array $responsable_scientifique = null;
+    public ?array $responsable_technique = null;
+    public ?array $personnel = null;
+    public ?array $postes_futurs = null;
 
     # Equipements
-    public array $instrument_actuel;
-    public array $instrument_futur;
+    public ?array $instrument_actuel = null;
+    public ?array $instrument_futur = null;
 
     # Fonctionnement
     ## Cout
-    public float $materiel_consommable;
-    public float $contrat_entretien;
-    public float $etude_prestation;
-    public float $fluide_energie;
-    public float $mission_frais_generaux;
-    public int $determination_tarif_plateforme_id;
+    public ?float $materiel_consommable = null;
+    public ?float $contrat_entretien = null;
+    public ?float $etude_prestation = null;
+    public ?float $fluide_energie = null;
+    public ?float $mission_frais_generaux = null;
+    public ?int $determination_tarif_plateforme_id = null;
 
     ## Ressource
-    public int $contribution_tutelle_pourcentage;
-    public array $contribution_tutelle_detail;
-    public int $contribution_fond_public;
-    public int $contribution_fond_prive;
-    public int $contribution_credit;
-    public int $contribution_projet_recherche;
-    public int $contribution_structure_pia;
-    public int $dotation_instrument_national;
+    public ?int $contribution_tutelle_pourcentage = null;
+    public ?array $contribution_tutelle_detail = null;
+    public ?int $contribution_fond_public = null;
+    public ?int $contribution_fond_prive = null;
+    public ?int $contribution_credit = null;
+    public ?int $contribution_projet_recherche = null;
+    public ?int $contribution_structure_pia = null;
+    public ?int $dotation_instrument_national = null;
 
     # Activités
     ## Accesibilité
-    public bool $labellisation_qualite;
-    public string $nom_labelisation_qualite;
-    public bool $procedure_transparente_tous;
-    public bool $procedure_transparente_prestation_exterieure;
-    public int $pourcentage_accueil_international;
+    public ?bool $labellisation_qualite = null;
+    public ?string $nom_labelisation_qualite = null;
+    public ?bool $procedure_transparente_tous = null;
+    public ?bool $procedure_transparente_prestation_exterieure = null;
+    public ?int $pourcentage_accueil_international = null;
 
     ## Utilisation
-    public int $modele_77_2424;
-    public int $modele_77_1224;
-    public int $modele_57_2424;
-    public int $modele_57_1224;
-    public int $taux_utilisation_fonctionnement;
-    public int $taux_utilisation_maintenance;
-    public int $taux_utilisation_developemment;
-    public int $taux_utilisation_panne;
-    public int $taux_utilisation_temps_mort;
-    public int $taux_utilisation_equipe_operante;
-    public int $taux_utilisation_collaboration_interne;
-    public int $taux_utilisation_collaboration_externe;
-    public int $taux_utilisation_prestation_service;
+    public ?int $modele_77_2424 = null;
+    public ?int $modele_77_1224 = null;
+    public ?int $modele_57_2424 = null;
+    public ?int $modele_57_1224 = null;
+    public ?int $taux_utilisation_fonctionnement = null;
+    public ?int $taux_utilisation_maintenance = null;
+    public ?int $taux_utilisation_developemment = null;
+    public ?int $taux_utilisation_panne = null;
+    public ?int $taux_utilisation_temps_mort = null;
+    public ?int $taux_utilisation_equipe_operante = null;
+    public ?int $taux_utilisation_collaboration_interne = null;
+    public ?int $taux_utilisation_collaboration_externe = null;
+    public ?int $taux_utilisation_prestation_service = null;
 
     ## Empreinte Carbone
-    public bool $bges_realise;
-    public float $bges_domicile_travail;
-    public float $bges_mission;
-    public float $bges_mission_ext;
-    public float $bges_consommable;
-    public float $bges_equipement;
-    public float $bges_envoi_echantillon;
-    public float $bges_batiment;
-    public float $bges_dechet;
+    public ?bool $bges_realise = null;
+    public ?float $bges_domicile_travail = null;
+    public ?float $bges_mission = null;
+    public ?float $bges_mission_ext = null;
+    public ?float $bges_consommable = null;
+    public ?float $bges_equipement = null;
+    public ?float $bges_envoi_echantillon = null;
+    public ?float $bges_batiment = null;
+    public ?float $bges_dechet = null;
 
     # Publication
-    public int $publication_equipe_operante;
-    public int $publication_collaboration_interne;
-    public int $publication_collaboration_externe;
-    public int $publication_autre_type;
-    public int $publication_these;
+    public ?int $publication_equipe_operante = null;
+    public ?int $publication_collaboration_interne = null;
+    public ?int $publication_collaboration_externe = null;
+    public ?int $publication_autre_type = null;
+    public ?int $publication_these = null;
 }
