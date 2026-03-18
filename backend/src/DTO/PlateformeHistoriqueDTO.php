@@ -169,13 +169,13 @@ class PlateformeHistoriqueDTO
                 'cout' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
-                        new Assert\Type('integer'),
+                        new Assert\Type('float'),
                     ])
                 ],
                 'valeur_remplacement' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
-                        new Assert\Type('integer'),
+                        new Assert\Type('float'),
                     ])
                 ],
                 'duree_utilisation' => [
@@ -247,7 +247,7 @@ class PlateformeHistoriqueDTO
                                     "cout" => [
                                         new Assert\Required([
                                             new Assert\NotBlank(),
-                                            new Assert\Type('integer'),
+                                            new Assert\Type('float'),
                                         ])
                                     ]
                                 ]
@@ -306,7 +306,7 @@ class PlateformeHistoriqueDTO
                         new Assert\Optional(),
                     ])
                 ],
-                'date_achat_envisagee' => [
+                'annee_achat_envisagee' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
                         new Assert\Type('integer'),
@@ -315,7 +315,7 @@ class PlateformeHistoriqueDTO
                 'cout' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
-                        new Assert\Type('integer'),
+                        new Assert\Type('float'),
                     ])
                 ],
                 'source_financement' => [
@@ -392,7 +392,7 @@ class PlateformeHistoriqueDTO
     ## Ressource
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_tutelle_pourcentage = null;
+    public ?int $contribution_tutelle_taux = null;
 
     #[Assert\All([
         new Assert\Collection(
@@ -417,7 +417,7 @@ class PlateformeHistoriqueDTO
     #[Assert\Callback(groups: ['post_validation'])]
     public function contributionTutelleEgalCentPourcent(ExecutionContextInterface $context): void
     {
-        if ($this->contribution_tutelle_pourcentage !== null && $this->contribution_tutelle_pourcentage !== 0) {
+        if ($this->contribution_tutelle_taux !== null && $this->contribution_tutelle_taux !== 0) {
             $somme = 0;
 
             if ($this->contribution_tutelle_detail !== null) {
@@ -436,33 +436,33 @@ class PlateformeHistoriqueDTO
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_fond_public = null;
+    public ?int $contribution_fond_public_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_fond_prive = null;
+    public ?int $contribution_fond_prive_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_credit = null;
+    public ?int $contribution_credit_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_projet_recherche = null;
+    public ?int $contribution_projet_recherche_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $contribution_structure_pia = null;
+    public ?int $contribution_structure_pia_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function contributionsEgalCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
-        $somme += $this->contribution_fond_public;
-        $somme += $this->contribution_fond_prive;
-        $somme += $this->contribution_credit;
-        $somme += $this->contribution_projet_recherche;
-        $somme += $this->contribution_structure_pia;
+        $somme += $this->contribution_fond_public_taux;
+        $somme += $this->contribution_fond_prive_taux;
+        $somme += $this->contribution_credit_taux;
+        $somme += $this->contribution_projet_recherche_taux;
+        $somme += $this->contribution_structure_pia_taux;
 
         if ($somme !== 100) {
             $context->buildViolation('La somme des pourcentages de contribution doit être égale à 100%.')
@@ -488,33 +488,33 @@ class PlateformeHistoriqueDTO
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $pourcentage_accueil_international = null;
+    public ?int $accueil_international_taux = null;
 
     ## Utilisation
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $modele_77_2424 = null;
+    public ?int $modele_77_2424_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $modele_77_1224 = null;
+    public ?int $modele_77_1224_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $modele_57_2424 = null;
+    public ?int $modele_57_2424_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $modele_57_1224 = null;
+    public ?int $modele_57_1224_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function ModelesSommeCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
-        $somme += $this->modele_77_2424;
-        $somme += $this->modele_77_1224;
-        $somme += $this->modele_57_2424;
-        $somme += $this->modele_57_1224;
+        $somme += $this->modele_77_2424_taux;
+        $somme += $this->modele_77_1224_taux;
+        $somme += $this->modele_57_2424_taux;
+        $somme += $this->modele_57_1224_taux;
 
         if ($somme !== 100) {
             $context->buildViolation('La somme des pourcentages de modèles d\'utilisation doit être égale à 100%.')
@@ -525,70 +525,70 @@ class PlateformeHistoriqueDTO
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_fonctionnement = null;
+    public ?int $utilisation_fonctionnement_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_maintenance = null;
+    public ?int $utilisation_maintenance_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_developemment = null;
+    public ?int $utilisation_developemment_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_panne = null;
+    public ?int $utilisation_panne_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_temps_mort = null;
+    public ?int $utilisation_temps_mort_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function TauxUtilisationPlateformeSommeCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
-        $somme += $this->taux_utilisation_fonctionnement;
-        $somme += $this->taux_utilisation_maintenance;
-        $somme += $this->taux_utilisation_developemment;
-        $somme += $this->taux_utilisation_panne;
-        $somme += $this->taux_utilisation_temps_mort;
+        $somme += $this->utilisation_fonctionnement_taux;
+        $somme += $this->utilisation_maintenance_taux;
+        $somme += $this->utilisation_developemment_taux;
+        $somme += $this->utilisation_panne_taux;
+        $somme += $this->utilisation_temps_mort_taux;
 
         if ($somme !== 100) {
             $context->buildViolation('La somme des pourcentages de taux d\'utilisation doit être égale à 100%.')
-                ->atPath('taux_utilisation_temps_mort')
+                ->atPath('utilisation_temps_mort_taux')
                 ->addViolation();
         }
     }
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_equipe_operante = null;
+    public ?int $utilisation_equipe_operante_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_collaboration_interne = null;
+    public ?int $utilisation_collaboration_interne_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_collaboration_externe = null;
+    public ?int $utilisation_collaboration_externe_taux = null;
 
     #[Assert\NotBlank(groups: ['validation'])]
     #[Assert\Range(min: 0, max: 100)]
-    public ?int $taux_utilisation_prestation_service = null;
+    public ?int $utilisation_prestation_service_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function TauxUtilisationDetaillePlateformeSommeCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
-        $somme += $this->taux_utilisation_fonctionnement;
-        $somme += $this->taux_utilisation_maintenance;
-        $somme += $this->taux_utilisation_developemment;
-        $somme += $this->taux_utilisation_panne;
-        $somme += $this->taux_utilisation_temps_mort;
+        $somme += $this->utilisation_fonctionnement_taux;
+        $somme += $this->utilisation_maintenance_taux;
+        $somme += $this->utilisation_developemment_taux;
+        $somme += $this->utilisation_panne_taux;
+        $somme += $this->utilisation_temps_mort_taux;
 
         if ($somme !== 100) {
             $context->buildViolation('La somme des pourcentages de taux d\'utilisation doit être égale à 100%.')
-                ->atPath('taux_utilisation_prestation_service')
+                ->atPath('utilisation_prestation_service_taux')
                 ->addViolation();
         }
     }
