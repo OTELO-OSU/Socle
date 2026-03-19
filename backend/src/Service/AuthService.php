@@ -126,8 +126,12 @@ class AuthService
         $user = new Utilisateur();
 
         if ($inscriptionOAuth->getEmail()) $user->setEmail($inscriptionOAuth->getEmail());
-        else if ($dto->email) $user->setEmail($dto->email);
-        else throw new Exception("L'email est obligatoire pour valider l'inscription OAuth.", 400);
+        else if ($dto->email) {
+            // Vérifier si le mail n'est pas déjà utilisé
+            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+            if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+            $user->setEmail($dto->email);
+        } else throw new Exception("L'email est obligatoire pour valider l'inscription OAuth.", 400);
 
         if ($inscriptionOAuth->getPrenom()) $user->setPrenom($inscriptionOAuth->getPrenom());
         else if ($dto->prenom) $user->setPrenom($dto->prenom);
