@@ -53,6 +53,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private ?UtilisateurMachine $utilisateurMachine = null;
 
+    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
+    private ?UtilisateurInscription $utilisateurInscription = null;
+
     public function __construct()
     {
         $this->refreshTokens = new ArrayCollection();
@@ -234,6 +237,23 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->utilisateurMachine = $utilisateurMachine;
+
+        return $this;
+    }
+
+    public function getUtilisateurInscription(): ?UtilisateurInscription
+    {
+        return $this->utilisateurInscription;
+    }
+
+    public function setUtilisateurInscription(UtilisateurInscription $utilisateurInscription): static
+    {
+        // set the owning side of the relation if necessary
+        if ($utilisateurInscription->getUtilisateur() !== $this) {
+            $utilisateurInscription->setUtilisateur($this);
+        }
+
+        $this->utilisateurInscription = $utilisateurInscription;
 
         return $this;
     }
