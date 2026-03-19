@@ -2,13 +2,19 @@
 
 namespace App\Service;
 
+use App\DTO\UtilisateurInscriptionDTO;
+use App\Entity\Entite;
+use App\Entity\Plateforme;
 use App\Entity\RefreshToken;
 use App\Entity\Utilisateur;
+use App\Entity\UtilisateurInscription;
+use App\Entity\UtilisateurInscriptionOAuth;
 use App\Exception\auth\EmailOuMotDePasseIncorrectException;
 use App\Exception\auth\RefreshTokenInvalideOuExpireException;
 use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurMailNonValideException;
 use App\Exception\auth\UtilisateurNonAdmisException;
+use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Exception\auth\UtilisateurOrcidExistePasException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,7 +53,9 @@ class AuthService
     function connexionFede(string $email, string $prenom, string $nom)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-        if (!$user) throw new UtilisateurFedeExistePasException($email, $prenom, $nom);
+
+        if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
+
         if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
@@ -65,11 +73,84 @@ class AuthService
         $profile = $this->orcidService->getProfileOrcid($accessToken);
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["sub_orcid" => $profile["sub"]]);
 
-        if (!$user) throw new UtilisateurOrcidExistePasException();
+        if (!$user) $this->creationInscriptionOAuth($profile["email"] ?? null, $profile["given_name"] ?? null, $profile["family_name"] ?? null, $profile["sub"]);
+
         if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
+    }
+
+    /**
+     * Créer un record pour stocker les informations provenant des différents IDP et donne un token à l'utilisateur
+     * pour qu'il puisse réuiliser ces informations lors de son inscription.
+     * @throws UtilisateurOAuthExistePasException Lance cette erreur à chaque fois pour que les controlleurs puissent l'intercepter et récupérer le token et le payload dans l'erreur.
+     */
+    function creationInscriptionOAuth(?string $email, ?string $prenom, ?string $nom, ?string $subOrcid)
+    {
+        //* Vérifier si l'email n'est pas déjà dans une procédure de création de compte OAuth
+        $OAuthExistant = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(["email" => $email]);
+        if ($OAuthExistant) {
+            // On supprime le record
+            $this->em->remove($OAuthExistant);
+        }
+
+        // On créé un nouveau record avec les nouvelles données
+        $newOAuth = new UtilisateurInscriptionOAuth();
+        if ($email) $newOAuth->setEmail($email);
+        if ($prenom) $newOAuth->setPrenom($prenom);
+        if ($nom) $newOAuth->setNom($nom);
+        if ($subOrcid) $newOAuth->setSubOrcid($subOrcid);
+
+        $token = bin2hex(random_bytes(64));
+
+        $newOAuth->setToken($token);
+        $newOAuth->setExpiration(new DateTime('+1 hour'));
+        $this->em->persist($newOAuth);
+        $this->em->flush();
+
+        throw new UtilisateurOAuthExistePasException($token, $email, $prenom, $nom);
+    }
+
+    function validationInscriptionOAuth(UtilisateurInscriptionDTO $dto)
+    {
+        // Récupérer les infos de la table d'inscription OAuth
+        $inscriptionOAuth = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(["token" => $dto->token]);
+        if (!$inscriptionOAuth) throw new Exception("Token d'inscription OAuth invalide.", 400);
+        if ($inscriptionOAuth->getExpiration() < new DateTime()) {
+            $this->em->remove($inscriptionOAuth);
+            $this->em->flush();
+            throw new Exception("Token d'inscription OAuth expiré.", 400);
+        }
+
+        $user = new Utilisateur();
+
+        if ($inscriptionOAuth->getEmail()) $user->setEmail($inscriptionOAuth->getEmail());
+        else if ($dto->email) $user->setEmail($dto->email);
+        else throw new Exception("L'email est obligatoire pour valider l'inscription OAuth.", 400);
+
+        if ($inscriptionOAuth->getPrenom()) $user->setPrenom($inscriptionOAuth->getPrenom());
+        else if ($dto->prenom) $user->setPrenom($dto->prenom);
+        else throw new Exception("Le prénom est obligatoire pour valider l'inscription OAuth.", 400);
+
+        if ($inscriptionOAuth->getNom()) $user->setNom($inscriptionOAuth->getNom());
+        else if ($dto->nom) $user->setNom($dto->nom);
+        else throw new Exception("Le nom est obligatoire pour valider l'inscription OAuth.", 400);
+
+        if ($inscriptionOAuth->getSubOrcid()) $user->setSubOrcid($inscriptionOAuth->getSubOrcid());
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $userInscription = new UtilisateurInscription();
+        $userInscription->setUtilisateur($user);
+        $userInscription->setOsuDemande($dto->osu_demande);
+        $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
+        $userInscription->setUniteDemande($dto->unite_demande_id ? $this->em->getReference(Entite::class, $dto->unite_demande_id) : null);
+
+        $this->em->persist($userInscription);
+        $this->em->remove($inscriptionOAuth);
+        $this->em->flush();
     }
 
 

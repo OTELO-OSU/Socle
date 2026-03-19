@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\auth\UtilisateurFedeExistePasException;
+use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -50,10 +51,12 @@ final class AuthController extends AbstractController
             $response = new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=success");
             $response->headers->setCookie($token["cookie"]);
             return $response;
-        } catch (UtilisateurFedeExistePasException $e) {
+        } catch (UtilisateurOAuthExistePasException $e) {
             return new RedirectResponse($this->params->get('front_host') . "/inscription?" . http_build_query([
                 'ssmdp' => true,
+                'token' => $e->getToken(),
                 'payload' => $e->getPayload(),
+                'message' => $e->getMessageb64()
             ]));
         }
     }
@@ -61,10 +64,21 @@ final class AuthController extends AbstractController
     #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]
     public function connexionOrcid(string $code): Response
     {
-        $couple = $this->authService->connexionOrcid($code);
-        $response = $this->json(['token' => $couple['token']]);
-        $response->headers->setCookie($couple['cookie']);
-        return $response;
+        try {
+            $couple = $this->authService->connexionOrcid($code);
+            $response = $this->json(['token' => $couple['token']]);
+            $response->headers->setCookie($couple['cookie']);
+            return $response;
+        } catch (UtilisateurOAuthExistePasException $e) {
+            return $this->json([
+                'redirect' => $this->params->get('front_host') . "/inscription?" . http_build_query([
+                    'ssmdp' => true,
+                    'token' => $e->getToken(),
+                    'payload' => $e->getPayload(),
+                    'message' => $e->getMessageb64()
+                ]),
+            ], 200);
+        }
     }
 
 

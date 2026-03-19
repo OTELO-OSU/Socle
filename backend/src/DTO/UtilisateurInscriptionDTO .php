@@ -7,6 +7,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+/**
+ * Groupes :
+ * inscription: nom, prenom, email et token sont obligatoires
+ * affiliation: parmis unite_demande_id, plateforme_demande_id et osu_demande, un dois être renseigné.
+ * oauth: token est obligatoire
+ */
+
 class UtilisateurInscriptionDTO
 {
     #[NotBlank(groups: ['inscription'])]
@@ -26,6 +33,9 @@ class UtilisateurInscriptionDTO
     public ?int $plateforme_demande_id = null;
 
     public ?bool $osu_demande = null;
+
+    #[NotBlank(groups: ['oauth'])]
+    public ?string $token = null;
 
     #[Assert\Callback(groups: ['affiliation'])]
     public function validate(ExecutionContextInterface $context): void
