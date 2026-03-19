@@ -14,6 +14,9 @@ class UtilisateurVerification
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
+
     #[ORM\OneToOne(inversedBy: 'utilisateurVerification', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?utilisateur $utilisateur = null;
@@ -30,6 +33,18 @@ class UtilisateurVerification
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
     }
 
     public function getUtilisateur(): ?utilisateur

@@ -12,6 +12,7 @@ parameters:
     orcid_id: "%env(ORCID_ID)%"
     orcid_secret: "%env(ORCID_SECRET)%"
     orcid_redirect_uri: "%env(ORCID_REDIRECT_URI)%"
+    email_logo: "%env(EMAIL_LOGO)%"
 services:
     # Appel de notre listener d'exception pour formater les réponses d'erreur
     App\EventListener\ExceptionListener:

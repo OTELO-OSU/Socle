@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\UtilisateurInscriptionDTO;
 use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Service\AuthService;
@@ -11,10 +12,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class AuthController extends AbstractController
 {
-    public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params) {}
+    public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params, private readonly SerializerInterface $serializer, private readonly ValidatorInterface $validator) {}
 
     #[Route('/connexion', methods: ['POST'])]
     public function connexion(Request $request): Response
@@ -59,6 +62,26 @@ final class AuthController extends AbstractController
                 'message' => $e->getMessageb64()
             ]));
         }
+    }
+
+    #[Route('/inscription', methods: ['POST'])]
+    public function inscription(Request $request): Response
+    {
+        $dto = $this->serializer->deserialize($request->getContent(), UtilisateurInscriptionDTO::class, 'json');
+
+        $dtoValide = $this->validator->validate($dto, null, ['inscription', 'basic', 'affiliation']);
+
+        if (count($dtoValide) > 0) {
+            $messages = [];
+            foreach ($dtoValide as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+            return $this->json(['messageArray' => $messages], 400);
+        }
+
+        $this->authService->inscriptionBasic($dto);
+
+        return $this->json(['message' => 'Inscription réussie. Un email de validation a été envoyé.'], 200);
     }
 
     #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]

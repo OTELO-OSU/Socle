@@ -9,17 +9,17 @@ use App\Entity\RefreshToken;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurInscription;
 use App\Entity\UtilisateurInscriptionOAuth;
+use App\Entity\UtilisateurVerification;
 use App\Exception\auth\EmailOuMotDePasseIncorrectException;
 use App\Exception\auth\RefreshTokenInvalideOuExpireException;
-use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurMailNonValideException;
 use App\Exception\auth\UtilisateurNonAdmisException;
 use App\Exception\auth\UtilisateurOAuthExistePasException;
-use App\Exception\auth\UtilisateurOrcidExistePasException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -29,7 +29,9 @@ class AuthService
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $tokenManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly OrcidService $orcidService
+        private readonly OrcidService $orcidService,
+        private readonly MailerService $mailerService,
+        private readonly ParameterBagInterface $params
     ) {}
 
     function connexionBasic(string $email, string $password)
@@ -79,6 +81,32 @@ class AuthService
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
+    }
+
+    function inscriptionBasic(UtilisateurInscriptionDTO $dto)
+    {
+        // Vérification que l'email n'est pas déjà utilisé
+        $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+        if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+
+        $user = new Utilisateur();
+        $user->setEmail($dto->email);
+        $user->setPrenom($dto->prenom);
+        $user->setNom($dto->nom);
+        $user->setMdp($this->passwordHasher->hashPassword($user, $dto->mdp));
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $userInscription = new UtilisateurInscription();
+        $userInscription->setUtilisateur($user);
+        $userInscription->setOsuDemande($dto->osu_demande);
+        $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
+        $userInscription->setUniteDemande($dto->unite_demande_id ? $this->em->getReference(Entite::class, $dto->unite_demande_id) : null);
+        $this->em->persist($userInscription);
+        $this->em->flush();
+
+        $this->envoyerEmailVerification($user);
     }
 
     /**
@@ -155,8 +183,9 @@ class AuthService
         $this->em->persist($userInscription);
         $this->em->remove($inscriptionOAuth);
         $this->em->flush();
-    }
 
+        $this->envoyerEmailVerification($user);
+    }
 
     function checkRefreshToken(string $refreshToken)
     {
@@ -217,5 +246,27 @@ class AuthService
             "token" => $token,
             "cookie" => $cookie
         ];
+    }
+
+    private function envoyerEmailVerification(Utilisateur $user)
+    {
+        // Générer un token de vérification
+        $token = bin2hex(random_bytes(64));
+
+        // Enregistrer le token et son expiration en base de données
+        $verification = new UtilisateurVerification();
+        $verification->setUtilisateur($user);
+        $verification->setToken($token);
+        $verification->setExpiration(new DateTime('+1 hour'));
+        $verification->setType("email_validation");
+        $this->em->persist($verification);
+        $this->em->flush();
+
+        // Envoyer l'email de vérification avec le token
+        $verificationLink = $this->params->get('front_host') . "/verification-email?token=" . $token;
+        $sujet = "Vérification de votre adresse email";
+        $body = "Bonjour " . $user->getPrenom() . ",\n\nVeuillez cliquer sur le lien suivant pour vérifier votre adresse email : " . $verificationLink . "\n\nCe lien expirera dans 1 heure.";
+
+        $this->mailerService->sendEmailToUser($user->getEmail(), $sujet, $body);
     }
 }

@@ -26,6 +26,9 @@ class UtilisateurInscriptionDTO
     #[Assert\Email(groups: ['inscription'])]
     public ?string $email = null;
 
+    #[NotBlank(groups: ['basic'])]
+    public ?string $mdp = null;
+
     #[EntityExists(entity: 'App\Entity\Entite', groups: ['affiliation'])]
     public ?int $unite_demande_id = null;
 

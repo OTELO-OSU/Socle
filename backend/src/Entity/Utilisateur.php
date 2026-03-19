@@ -58,6 +58,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->email_valide = false;
+        $this->admis = false;
         $this->refreshTokens = new ArrayCollection();
     }
 
