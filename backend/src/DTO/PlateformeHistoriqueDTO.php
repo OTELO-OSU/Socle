@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Groupes :
  ** null : Seule le nom_officiel est obligatoire
+ ** instrument_national : Instrument national, qui va ajouter l'obligation de renseigner la dotation_instrument_national
  ** validation : Le groupe de validation sert à vérifier que toutes les infos minimum nécessaires sont là
  ** post_validation : Le groupe doit être executé pour la run de validation, après la run de validation classique, il sert à vérifier les règles de validation qui nécessitent que plusieurs champs soient présents (ex: somme des pourcentages égale à 100%)
  */
@@ -471,7 +472,8 @@ class PlateformeHistoriqueDTO
         }
     }
 
-    public ?int $dotation_instrument_national = null;
+    #[Assert\NotBlank(groups: ['instrument_national'])]
+    public ?float $dotation_instrument_national = null;
 
     # Activités
     ## Accesibilité
