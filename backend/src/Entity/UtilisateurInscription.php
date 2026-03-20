@@ -13,7 +13,7 @@ class UtilisateurInscription
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'utilisateurInscription', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'utilisateurInscription', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateur = null;
 

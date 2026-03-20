@@ -17,7 +17,7 @@ class UtilisateurVerification
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
-    #[ORM\OneToOne(inversedBy: 'utilisateurVerification', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'utilisateurVerification', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
