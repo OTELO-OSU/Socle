@@ -43,6 +43,7 @@ entity "utilisateur_inscription_oauth" as userInscriptionOauth << (U, PaleViolet
 entity "utilisateur_verification" as userVerification << (U, Violet) >> {
   #utilisateur_id : int
   --
+  *type: string
   *token: string
   *expiration: datetime
   email: string
@@ -139,6 +140,7 @@ entity "plateforme_historique_personnel" as plateformeHistoriquePersonnel {
     --
     *responsable_scientifique : boolean
     *responsable_technique : boolean
+    *quotite : int
 }
 
 entity "poste_futur" as posteFutur {
@@ -264,6 +266,30 @@ entity "contribution_tutelle" as contributionTutelle {
   *montant : int
 }
 
+entity "tag" as tag {
+  *id : int
+  --
+  *nom : string
+}
+
+entity "plateforme_tag" as plateformeTag {
+  *plateforme_id : int
+  *tag_id : int
+}
+
+entity "utilisateur_tag" as utilisateurTag {
+  *utilisateur_id : int
+  *tag_id : int
+}
+
+entity "harvester" as harvester {
+  *id : int
+  --
+  *client_id : string
+  *client_secret : string
+  *url : string
+}
+
 corps "1" <-- "0..*" corpsGrade
 grade "1" <-- "0..*" corpsGrade
 
@@ -286,19 +312,25 @@ user "0..*" --> "0..*" sectionCnrs
 posteFutur "0..*" --> "1" corps
 posteFutur "0..*" --> "1" bap
 plateformeHistorique "0..*" --> "1" determinationTarif
-plateforme "1" <-- "1..*" plateformeHistorique
+plateforme "1" <--> "1..*" plateformeHistorique
 
-plateformeHistorique "0..*" <-- "0..*" entite
+plateformeHistorique "0..*" <--> "0..*" entite
 (plateformeHistorique, entite) . plateformeHistoriqueTutelle
 
-plateformeHistorique "0..*" <-- "0..*" user
+plateformeHistorique "0..*" <--> "0..*" user
 (plateformeHistorique, user) . plateformeHistoriquePersonnel
 
-plateformeHistorique "0..*" <-- "0..*" entite
+plateformeHistorique "0..*" <--> "0..*" entite
 (plateformeHistorique, entite) . contributionTutelle
+
+plateforme "0..*" <--> "0..*" tag
+(plateforme, tag) . plateformeTag
+
+user "0..*" <--> "0..*" tag
+(user, tag) . utilisateurTag
 
 plateformeHistorique "1" <-- "0..*" publication
 
-entite "0..*" <-- "0..*" instrument
+entite "0..*" <--> "0..*" instrument
 (entite, instrument) . financementInstrument
 @enduml
