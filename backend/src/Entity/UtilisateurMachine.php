@@ -15,7 +15,7 @@ class UtilisateurMachine
 
     #[ORM\OneToOne(inversedBy: 'utilisateurMachine', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(length: 255)]
     private ?string $client_id = null;
@@ -28,12 +28,12 @@ class UtilisateurMachine
         return $this->id;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(utilisateur $utilisateur): static
+    public function setUtilisateur(Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
 

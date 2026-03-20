@@ -19,7 +19,7 @@ class UtilisateurVerification
 
     #[ORM\OneToOne(inversedBy: 'utilisateurVerification', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(length: 255)]
     private ?string $token = null;
@@ -47,12 +47,12 @@ class UtilisateurVerification
         return $this;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(utilisateur $utilisateur): static
+    public function setUtilisateur(Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
 
