@@ -15,10 +15,10 @@ class UtilisateurInscription
 
     #[ORM\OneToOne(inversedBy: 'utilisateurInscription', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
-    private ?plateforme $plateforme_demande = null;
+    private ?Plateforme $plateforme_demande = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
     private ?Entite $unite_demande = null;
@@ -31,24 +31,24 @@ class UtilisateurInscription
         return $this->id;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(utilisateur $utilisateur): static
+    public function setUtilisateur(Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
 
         return $this;
     }
 
-    public function getPlateformeDemande(): ?plateforme
+    public function getPlateformeDemande(): ?Plateforme
     {
         return $this->plateforme_demande;
     }
 
-    public function setPlateformeDemande(?plateforme $plateforme_demande): static
+    public function setPlateformeDemande(?Plateforme $plateforme_demande): static
     {
         $this->plateforme_demande = $plateforme_demande;
 
