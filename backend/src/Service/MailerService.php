@@ -78,7 +78,8 @@ class MailerService
 
             $this->mailer->send($email);
         } catch (\Exception $e) {
-            //! Mail part pas
+            // Log the error or handle it as needed
+            error_log("Failed to send email: " . $e->getMessage());
         }
     }
 }

@@ -15,8 +15,8 @@ services:
       dockerfile: ./docker/php-fpm/dockerfile
     environment:
       DATABASE_URL: postgresql://root:root@database:5432/poe?serverVersion=16&charset=utf8
-      MAILER_DSN: smtp://127.0.0.1:1025
-
+      MAILER_DSN: smtp://mailer:1025
+      NOREPLY_EMAIL: noreply@ul.fr
     volumes:
       - ./backend:/var/www/html:rw
     depends_on:

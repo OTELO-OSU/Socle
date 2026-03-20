@@ -46,7 +46,10 @@ class AuthService
         // Si le mot de passe n'est pas bon
         if (!$this->passwordHasher->isPasswordValid($user, $password)) throw new EmailOuMotDePasseIncorrectException();
 
-        if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
+        if (!$user->isEmailValide()) {
+            $this->envoyerEmailVerification($user);
+            throw new UtilisateurMailNonValideException();
+        }
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
@@ -58,7 +61,10 @@ class AuthService
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
 
-        if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
+        if (!$user->isEmailValide()) {
+            $this->envoyerEmailVerification($user);
+            throw new UtilisateurMailNonValideException();
+        }
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
@@ -77,7 +83,10 @@ class AuthService
 
         if (!$user) $this->creationInscriptionOAuth($profile["email"] ?? null, $profile["given_name"] ?? null, $profile["family_name"] ?? null, $profile["sub"]);
 
-        if (!$user->isEmailValide()) throw new UtilisateurMailNonValideException();
+        if (!$user->isEmailValide()) {
+            $this->envoyerEmailVerification($user);
+            throw new UtilisateurMailNonValideException();
+        }
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
@@ -250,16 +259,22 @@ class AuthService
 
     private function envoyerEmailVerification(Utilisateur $user)
     {
+        $verif = $this->em->getRepository(UtilisateurVerification::class)
+            ->findOneBy(['utilisateur' => $user]);
+
+        if (!$verif) {
+            $verif = new UtilisateurVerification();
+            $verif->setUtilisateur($user);
+        }
+
         // Générer un token de vérification
         $token = bin2hex(random_bytes(64));
 
-        // Enregistrer le token et son expiration en base de données
-        $verification = new UtilisateurVerification();
-        $verification->setUtilisateur($user);
-        $verification->setToken($token);
-        $verification->setExpiration(new DateTime('+1 hour'));
-        $verification->setType("email_validation");
-        $this->em->persist($verification);
+        // Update existing token or create it if missing.
+        $verif->setToken($token);
+        $verif->setExpiration(new DateTime('+1 hour'));
+        $verif->setType("email_validation");
+        $this->em->persist($verif);
         $this->em->flush();
 
         // Envoyer l'email de vérification avec le token
