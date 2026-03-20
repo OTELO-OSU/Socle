@@ -16,17 +16,17 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class UtilisateurInscriptionDTO
 {
-    #[NotBlank(groups: ['inscription'])]
+    #[NotBlank(groups: ['inscription'], message: 'Le nom est obligatoire')]
     public ?string $nom = null;
 
-    #[NotBlank(groups: ['inscription'])]
+    #[NotBlank(groups: ['inscription'], message: 'Le prénom est obligatoire')]
     public ?string $prenom = null;
 
-    #[NotBlank(groups: ['inscription'])]
+    #[NotBlank(groups: ['inscription'], message: 'L\'email est obligatoire')]
     #[Assert\Email(groups: ['inscription'])]
     public ?string $email = null;
 
-    #[NotBlank(groups: ['basic'])]
+    #[NotBlank(groups: ['basic'], message: 'Le mot de passe est obligatoire')]
     public ?string $mdp = null;
 
     #[EntityExists(entity: 'App\Entity\Entite', groups: ['affiliation'])]
