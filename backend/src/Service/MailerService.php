@@ -13,8 +13,15 @@ class MailerService
         private ParameterBagInterface $params
     ) {}
 
-    function generateMailBody($bodyMessage, $footerMessage = "")
+    function generateMailBody($bodyMessage, $bodyLink, $footerMessage = "")
     {
+        if ($bodyLink) {
+            $bodyButton = <<<EOF
+            <a href="$bodyLink" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #fff; text-decoration: none; border-radius: 5px;">Cliquez ici</a>
+            EOF;
+        } else {
+            $bodyButton = "";
+        }
         return <<<HTML
                <html>
     <head>
@@ -57,6 +64,7 @@ class MailerService
             <div class="card">
                 <img src="{$this->params->get('email_logo')}" alt="Logo" style="width: auto; max-height: 256px;">
                 <p>$bodyMessage</p>
+                $bodyButton
                 <div class="footer">$footerMessage</div>
             </div>
         </div>
@@ -65,7 +73,7 @@ class MailerService
     HTML;
     }
 
-    function sendEmailToUser($user_mail, $sujet, $bodyMessage, $footerMessage = "Ce mail a été envoyé automatiquement, merci de ne pas y répondre.")
+    function sendEmailToUser($user_mail, $sujet, $bodyMessage, $bodyLink, $footerMessage = "Ce mail a été envoyé automatiquement, merci de ne pas y répondre.")
     {
 
         try {
@@ -73,7 +81,7 @@ class MailerService
                 ->from($this->params->get('noreply'))
                 ->to($user_mail)
                 ->subject($sujet)
-                ->html($this->generateMailBody($bodyMessage, $footerMessage))
+                ->html($this->generateMailBody($bodyMessage, $bodyLink, $footerMessage))
                 ->text($bodyMessage);
 
             $this->mailer->send($email);

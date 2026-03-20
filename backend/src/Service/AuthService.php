@@ -280,8 +280,8 @@ class AuthService
         // Envoyer l'email de vérification avec le token
         $verificationLink = $this->params->get('front_host') . "/verification-email?token=" . $token;
         $sujet = "Vérification de votre adresse email";
-        $body = "Bonjour " . $user->getPrenom() . ",\n\nVeuillez cliquer sur le lien suivant pour vérifier votre adresse email : " . $verificationLink . "\n\nCe lien expirera dans 1 heure.";
+        $body = "Bonjour " . $user->getPrenom() . ",\n\nVeuillez cliquer sur le bouton pour vérifier votre adresse email.\n\nCe lien expirera dans 1 heure.";
 
-        $this->mailerService->sendEmailToUser($user->getEmail(), $sujet, $body);
+        $this->mailerService->sendEmailToUser($user->getEmail(), $sujet, $body, $verificationLink);
     }
 }
