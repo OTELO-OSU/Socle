@@ -1,0 +1,496 @@
+<?php
+
+namespace App\Tests\Controller;
+
+use App\Entity\Categorie;
+use App\Entity\Entite;
+use App\Entity\Plateforme;
+use App\Entity\Utilisateur;
+use App\Entity\UtilisateurInscriptionOAuth;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
+class AuthControllerTest extends WebTestCase
+{
+    private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
+    private EntityManagerInterface $em;
+
+    private function cleanupDatabase(): void
+    {
+        $conn = $this->em->getConnection();
+        $platform = $conn->getDatabasePlatform();
+        $conn->executeStatement($platform->getTruncateTableSQL('refresh_token', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_verification', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_machine', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_inscription', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur', true));
+    }
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+        $this->em = static::getContainer()->get(ManagerRegistry::class)->getManager();
+
+        // Nettoyer avant chaque test pour éviter les doublons
+        $this->cleanupDatabase();
+
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $user = new Utilisateur();
+        $user->setNom('Test');
+        $user->setPrenom('User');
+        $user->setEmail('test@example.com');
+        $user->setMdp($hasher->hashPassword($user, 'password'));
+        $user->setAdmis(true);
+        $user->setEmailValide(true);
+        $this->em->persist($user);
+
+        $categorie = new Categorie();
+        $categorie->setNom('Test Categorie');
+        $this->em->persist($categorie);
+
+        $entite = new Entite();
+        $entite->setNom('Test Entite');
+        $entite->setCategorie($categorie);
+        $entite->setEmployeur(true);
+        $entite->setLaboratoire(\false);
+        $this->em->persist($entite);
+
+        $plateforme = new Plateforme();
+        $plateforme->setPseudoId('Test Plateforme');
+        $this->em->persist($plateforme);
+
+        $this->em->flush();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->cleanupDatabase();
+
+        parent::tearDown();
+    }
+
+    public function testConnexionMailInconnu(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test667@example.com:password')]
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'email ou le mot de passe est incorrect.",
+            $data['message']
+        );
+    }
+
+    public function testConnexionMdpIncorrect(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password667')]
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'email ou le mot de passe est incorrect.",
+            $data['message']
+        );
+    }
+
+    public function testConnexionMailNonVerifie(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setEmailValide(false);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas validé votre adresse email. Un email de validation vous a été renvoyé.",
+            $data['message']
+        );
+    }
+
+    public function testConnexionNonAdmis(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Votre compte n'a pas encore été admis. Un email vous sera envoyé une fois votre compte activé.",
+            $data['message']
+        );
+    }
+
+    public function testConnexionSucces(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('token', $data);
+        $this->assertStringContainsString(
+            'refresh_token',
+            (string) $client->getResponse()->headers->get('Set-Cookie')
+        );
+    }
+
+    public function testDeconnexionSansCookie(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/deconnexion',
+            [],
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+    }
+
+    public function testDeconnexionAvecCookie(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $user->getRefreshTokens()->add(
+            (new \App\Entity\RefreshToken())
+                ->setToken('abcde')
+                ->setUtilisateur($user)
+                ->setExpiration((new \DateTime())->modify('1 hour'))
+        );
+        $this->em->flush();
+
+        $client->getCookieJar()->set(
+            new Cookie('refresh_token', 'abcde', time() + 3600, '/', "", false, true)
+        );
+
+        $client->request(
+            'POST',
+            '/api/deconnexion',
+            [],
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertStringContainsString(
+            'refresh_token',
+            (string) $client->getResponse()->headers->get('Set-Cookie')
+        );
+
+        $date = new \DateTime();
+        $expirationCookie = $client->getResponse()->headers->getCookies()[0]->getExpiresTime();
+        $this->assertLessThan($date->getTimestamp(), $expirationCookie);
+
+        $empty = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->getRefreshTokens()->isEmpty();
+        $this->assertTrue($empty);
+    }
+
+    public function testInscriptionSansNom(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'prenom' => 'User',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password',
+                'osu_demande' => \true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('messageArray', $data);
+        $this->assertContains('Le nom est obligatoire', $data['messageArray']);
+    }
+
+    public function testInscriptionSansPrenom(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password',
+                'osu_demande' => \true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('messageArray', $data);
+        $this->assertContains('Le prénom est obligatoire', $data['messageArray']);
+    }
+
+    public function testInscriptionSansMail(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'mdp' => 'password',
+                'osu_demande' => \true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('messageArray', $data);
+        $this->assertContains('L\'email est obligatoire', $data['messageArray']);
+    }
+
+    public function testInscriptionSansAffiliation(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password'
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('messageArray', $data);
+        $this->assertContains('Au moins une demande doit être faite (plateforme, unité ou OSU)', $data['messageArray']);
+    }
+
+    public function testInscriptionOsuDemande(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password',
+                'osu_demande' => \true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+    }
+
+    public function testRefreshTokenNonEnvoye(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/refresh',
+            [],
+            [],
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Aucun refresh token n\'a été envoyé.', $data['message']);
+    }
+
+    public function testMauvaisRefreshToken(): void
+    {
+        $client = $this->client;
+
+        $client->getCookieJar()->set(
+            new Cookie('refresh_token', 'mauvais_token', time() + 3600, '/', "", false, true)
+        );
+
+        $client->request(
+            'POST',
+            '/api/refresh',
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+    }
+
+    public function testRefreshTokenExpire(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $user->getRefreshTokens()->add(
+            (new \App\Entity\RefreshToken())
+                ->setToken('abcde')
+                ->setUtilisateur($user)
+                ->setExpiration((new \DateTime())->modify('-1 hour'))
+        );
+        $this->em->flush();
+
+        $client->getCookieJar()->set(
+            new Cookie('refresh_token', 'abcde', time() + 3600, '/', "", false, true)
+        );
+
+        $client->request(
+            'POST',
+            '/api/refresh',
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+    }
+
+    public function testRefreshTokenSuccess(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $user->getRefreshTokens()->add(
+            (new \App\Entity\RefreshToken())
+                ->setToken('abcde')
+                ->setUtilisateur($user)
+                ->setExpiration((new \DateTime())->modify('1 hour'))
+        );
+        $this->em->flush();
+
+        $client->getCookieJar()->set(
+            new Cookie('refresh_token', 'abcde', time() + 3600, '/', "", false, true)
+        );
+
+        $client->request(
+            'POST',
+            '/api/refresh',
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('token', $data);
+    }
+
+    public function testConnexionFedeUtilisateurInexistant(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'GET',
+            '/api/connexionFede',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json", "HTTP_MAIL" => "utilisateur.inexistant@example.com", "HTTP_GIVENNAME" => "Test", "HTTP_SN" => "User"],
+        );
+
+        $this->assertResponseStatusCodeSame(302);
+        $this->assertStringContainsString('/inscription', $client->getResponse()->headers->get('Location'));
+
+        $user = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(['email' => 'utilisateur.inexistant@example.com']);
+        $this->assertNotNull($user);
+        $this->assertEquals('Test', $user->getPrenom());
+        $this->assertEquals('User', $user->getNom());
+    }
+
+    public function testConnexionFedeSuccess(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'GET',
+            '/api/connexionFede',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json", "HTTP_MAIL" => "test@example.com", "HTTP_GIVENNAME" => "Test", "HTTP_SN" => "User"],
+        );
+
+        $this->assertResponseStatusCodeSame(302);
+        $this->assertStringContainsString('/callbackCas', $client->getResponse()->headers->get('Location'));
+        $this->assertStringContainsString(
+            'refresh_token',
+            (string) $client->getResponse()->headers->get('Set-Cookie')
+        );
+    }
+}
