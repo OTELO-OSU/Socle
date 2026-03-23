@@ -44,7 +44,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, RefreshToken>
      */
-    #[ORM\OneToMany(targetEntity: RefreshToken::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RefreshToken::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private Collection $refreshTokens;
 
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
