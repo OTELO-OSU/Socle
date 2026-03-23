@@ -350,6 +350,89 @@ class AuthControllerTest extends WebTestCase
             ])
         );
 
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isEmailValide());
+        $this->assertFalse($user->isAdmis());
+
+        $userInscription = $user->getUtilisateurInscription();
+        $this->assertNotNull($userInscription);
+        $this->assertTrue($userInscription->isOsuDemande());
+        $this->assertNull($userInscription->getUniteDemande());
+        $this->assertNull($userInscription->getPlateformeDemande());
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+    }
+
+    public function testInscriptionEntiteDemande(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password',
+                'unite_demande_id' => $this->em->getRepository(Entite::class)->findOneBy([])->getId()
+            ])
+        );
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isEmailValide());
+        $this->assertFalse($user->isAdmis());
+
+        $userInscription = $user->getUtilisateurInscription();
+        $this->assertNotNull($userInscription);
+        $this->assertFalse($userInscription->isOsuDemande());
+        $this->assertNotNull($userInscription->getUniteDemande());
+        $this->assertNull($userInscription->getPlateformeDemande());
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+    }
+
+    public function testInscriptionPlateformeDemande(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'testInscription@example.com',
+                'mdp' => 'password',
+                'plateforme_demande_id' => $this->em->getRepository(Plateforme::class)->findOneBy([])->getId()
+            ])
+        );
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isEmailValide());
+        $this->assertFalse($user->isAdmis());
+
+        $userInscription = $user->getUtilisateurInscription();
+        $this->assertNotNull($userInscription);
+        $this->assertFalse($userInscription->isOsuDemande());
+        $this->assertNull($userInscription->getUniteDemande());
+        $this->assertNotNull($userInscription->getPlateformeDemande());
+
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
