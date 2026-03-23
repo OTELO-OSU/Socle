@@ -46,7 +46,7 @@ class UtilisateurInscriptionDTO
         $demande = 0;
         if ($this->plateforme_demande_id !== null) $demande++;
         if ($this->unite_demande_id !== null) $demande++;
-        if ($this->osu_demande) $demande++;
+        if ($this->osu_demande === true) $demande++;
 
         if ($demande === 0) {
             $context->buildViolation('Au moins une demande doit être faite (plateforme, unité ou OSU)')
