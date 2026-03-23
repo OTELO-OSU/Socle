@@ -26,6 +26,7 @@ class AuthControllerTest extends WebTestCase
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_verification', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_machine', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_inscription', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_inscription_oauth', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur', true));
     }
 
@@ -555,6 +556,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
         $this->assertEquals('User', $user->getNom());
+        $this->assertNotNull($user->getToken());
     }
 
     public function testConnexionFedeSuccess(): void
@@ -575,5 +577,124 @@ class AuthControllerTest extends WebTestCase
             'refresh_token',
             (string) $client->getResponse()->headers->get('Set-Cookie')
         );
+    }
+
+    public function testInscriptionFedeSansToken(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription?ssmdp=true',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'inscriptionOauth@example.com',
+                'osu_demande' => \true,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('messageArray', $data);
+        $this->assertEquals('Le token est obligatoire', $data['messageArray'][0]);
+    }
+
+    public function testInscriptionFedeInvalide(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/inscription?ssmdp=true',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'inscriptionOauth@example.com',
+                'osu_demande' => \true,
+                'token' => 'token_invalide'
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token d\'inscription OAuth invalide.', $data['message']);
+    }
+
+    public function testInscriptionFedeTokenExpire(): void
+    {
+        $client = $this->client;
+
+        $utilisateurInscriptionOauth = new UtilisateurInscriptionOAuth();
+        $utilisateurInscriptionOauth->setEmail('inscriptionOauth@example.com');
+        $utilisateurInscriptionOauth->setNom('User');
+        $utilisateurInscriptionOauth->setPrenom('Test');
+        $utilisateurInscriptionOauth->setToken('token123');
+        $utilisateurInscriptionOauth->setExpiration((new \DateTime())->modify('-1 hour'));
+
+        $this->em->persist($utilisateurInscriptionOauth);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/inscription?ssmdp=true',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'inscriptionOauth@example.com',
+                'osu_demande' => \true,
+                'token' => 'token123'
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token d\'inscription OAuth expiré.', $data['message']);
+    }
+
+    public function testInscriptionFedeSuccess(): void
+    {
+        $client = $this->client;
+
+        $utilisateurInscriptionOauth = new UtilisateurInscriptionOAuth();
+        $utilisateurInscriptionOauth->setEmail('inscriptionOauth@example.com');
+        $utilisateurInscriptionOauth->setNom('User');
+        $utilisateurInscriptionOauth->setPrenom('Test');
+        $utilisateurInscriptionOauth->setToken('token123');
+        $utilisateurInscriptionOauth->setExpiration((new \DateTime())->modify('+1 hour'));
+
+        $this->em->persist($utilisateurInscriptionOauth);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/inscription?ssmdp=true',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode([
+                'nom' => 'Test',
+                'prenom' => 'User',
+                'email' => 'inscriptionOauth@example.com',
+                'osu_demande' => \true,
+                'token' => 'token123'
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
     }
 }
