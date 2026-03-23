@@ -37,7 +37,7 @@ class UtilisateurInscriptionDTO
 
     public ?bool $osu_demande = null;
 
-    #[NotBlank(groups: ['oauth'])]
+    #[NotBlank(groups: ['oauth'], message: 'Le token est obligatoire')]
     public ?string $token = null;
 
     #[Assert\Callback(groups: ['affiliation'])]
