@@ -16,7 +16,7 @@ class EntityExists extends Constraint
 
     public function __construct(string $entity, ?string $field = null, ?string $extraField = null, mixed $extraValue = true, ?string $message = null, ?array $groups = null, mixed $payload = null)
     {
-        parent::__construct([], $groups, $payload);
+        parent::__construct(groups: $groups, payload: $payload);
         $this->entity = $entity;
         if ($field) $this->field = $field;
         if ($extraField) $this->extraField = $extraField;
