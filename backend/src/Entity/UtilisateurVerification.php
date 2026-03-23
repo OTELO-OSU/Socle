@@ -24,7 +24,7 @@ class UtilisateurVerification
     #[ORM\Column(length: 255)]
     private ?string $token = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTime $expiration = null;
 
     #[ORM\Column(length: 255, nullable: true)]

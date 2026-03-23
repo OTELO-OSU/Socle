@@ -67,9 +67,15 @@ final class AuthController extends AbstractController
     #[Route('/inscription', methods: ['POST'])]
     public function inscription(Request $request): Response
     {
+        $ssmdp = $request->query->get('ssmdp', false);
         $dto = $this->serializer->deserialize($request->getContent(), UtilisateurInscriptionDTO::class, 'json');
 
-        $dtoValide = $this->validator->validate($dto, null, ['inscription', 'basic', 'affiliation']);
+        if ($ssmdp) {
+            $dtoValide = $this->validator->validate($dto, null, ['inscription', 'oauth', 'affiliation']);
+        } else {
+            $dtoValide = $this->validator->validate($dto, null, ['inscription', 'basic', 'affiliation']);
+        }
+
 
         if (count($dtoValide) > 0) {
             $messages = [];
@@ -79,7 +85,11 @@ final class AuthController extends AbstractController
             return $this->json(['messageArray' => $messages], 400);
         }
 
-        $this->authService->inscriptionBasic($dto);
+        if ($ssmdp) {
+            $this->authService->validationInscriptionOAuth($dto);
+        } else {
+            $this->authService->inscriptionBasic($dto);
+        }
 
         return $this->json(['message' => 'Inscription réussie. Un email de validation a été envoyé.'], 201);
     }
