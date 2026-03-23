@@ -81,7 +81,7 @@ final class AuthController extends AbstractController
 
         $this->authService->inscriptionBasic($dto);
 
-        return $this->json(['message' => 'Inscription réussie. Un email de validation a été envoyé.'], 200);
+        return $this->json(['message' => 'Inscription réussie. Un email de validation a été envoyé.'], 201);
     }
 
     #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]
