@@ -7,6 +7,7 @@ use App\Entity\Entite;
 use App\Entity\Plateforme;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurInscriptionOAuth;
+use App\Entity\UtilisateurVerification;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -714,5 +715,94 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
+    }
+
+    public function testVerificationMailSansToken(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/verifie-mail',
+            [],
+            [],
+            []
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Le token est requis.', $data['message']);
+    }
+
+    public function testVerificationMailFauxToken(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/verifie-mail',
+            [],
+            [],
+            [],
+            \json_encode(['token' => 'token_invalide'])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token de vérification invalide.', $data['message']);
+    }
+
+    public function testVerificationMailTokenExpire(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setEmailValide(false);
+        $utilisateurVerif = new UtilisateurVerification();
+        $utilisateurVerif->setUtilisateur($user)->setToken("token_expirée")->setExpiration((new \DateTime())->modify('-1 hour'))->setType('email_validation');
+        $user->setUtilisateurVerification($utilisateurVerif);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/verifie-mail',
+            [],
+            [],
+            [],
+            \json_encode(['token' => 'token_expirée'])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token de vérification expiré.', $data['message']);
+        $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token_expirée']));
+    }
+
+    public function testVerificationMailTokenSuccess(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setEmailValide(false);
+        $utilisateurVerif = new UtilisateurVerification();
+        $utilisateurVerif->setUtilisateur($user)->setToken("token")->setExpiration((new \DateTime())->modify('+1 hour'))->setType('email_validation');
+        $user->setUtilisateurVerification($utilisateurVerif);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/verifie-mail',
+            [],
+            [],
+            [],
+            \json_encode(['token' => 'token'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Email vérifié avec succès.', $data['message']);
+        $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token']));
     }
 }
