@@ -40,6 +40,9 @@ class Entite
     #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'unite_demande')]
     private Collection $utilisateurInscriptions;
 
+    #[ORM\ManyToOne(inversedBy: 'entites')]
+    private ?Utilisateur $directeur = null;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
@@ -148,6 +151,18 @@ class Entite
                 $utilisateurInscription->setUniteDemande(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDirecteur(): ?Utilisateur
+    {
+        return $this->directeur;
+    }
+
+    public function setDirecteur(?Utilisateur $directeur): static
+    {
+        $this->directeur = $directeur;
 
         return $this;
     }

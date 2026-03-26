@@ -56,11 +56,32 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private ?UtilisateurInscription $utilisateurInscription = null;
 
+    /**
+     * @var Collection<int, PlateformeHistoriquePersonnel>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'utilisateur_id')]
+    private Collection $plateformeHistoriquePersonnels;
+
+    /**
+     * @var Collection<int, PlateformeEditeur>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'utilisateur')]
+    private Collection $plateformeEditeurs;
+
+    /**
+     * @var Collection<int, Entite>
+     */
+    #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
+    private Collection $entites;
+
     public function __construct()
     {
         $this->email_valide = false;
         $this->admis = false;
         $this->refreshTokens = new ArrayCollection();
+        $this->plateformeHistoriquePersonnels = new ArrayCollection();
+        $this->plateformeEditeurs = new ArrayCollection();
+        $this->entites = new ArrayCollection();
     }
 
     public function getUserIdentifier(): string
@@ -256,6 +277,96 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->utilisateurInscription = $utilisateurInscription;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistoriquePersonnel>
+     */
+    public function getPlateformeHistoriquePersonnels(): Collection
+    {
+        return $this->plateformeHistoriquePersonnels;
+    }
+
+    public function addPlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    {
+        if (!$this->plateformeHistoriquePersonnels->contains($plateformeHistoriquePersonnel)) {
+            $this->plateformeHistoriquePersonnels->add($plateformeHistoriquePersonnel);
+            $plateformeHistoriquePersonnel->setUtilisateurId($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    {
+        if ($this->plateformeHistoriquePersonnels->removeElement($plateformeHistoriquePersonnel)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistoriquePersonnel->getUtilisateurId() === $this) {
+                $plateformeHistoriquePersonnel->setUtilisateurId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeEditeur>
+     */
+    public function getPlateformeEditeurs(): Collection
+    {
+        return $this->plateformeEditeurs;
+    }
+
+    public function addPlateformeEditeur(PlateformeEditeur $plateformeEditeur): static
+    {
+        if (!$this->plateformeEditeurs->contains($plateformeEditeur)) {
+            $this->plateformeEditeurs->add($plateformeEditeur);
+            $plateformeEditeur->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeEditeur(PlateformeEditeur $plateformeEditeur): static
+    {
+        if ($this->plateformeEditeurs->removeElement($plateformeEditeur)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeEditeur->getUtilisateur() === $this) {
+                $plateformeEditeur->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entite>
+     */
+    public function getEntites(): Collection
+    {
+        return $this->entites;
+    }
+
+    public function addEntite(Entite $entite): static
+    {
+        if (!$this->entites->contains($entite)) {
+            $this->entites->add($entite);
+            $entite->setDirecteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntite(Entite $entite): static
+    {
+        if ($this->entites->removeElement($entite)) {
+            // set the owning side to null (unless already changed)
+            if ($entite->getDirecteur() === $this) {
+                $entite->setDirecteur(null);
+            }
+        }
 
         return $this;
     }
