@@ -291,13 +291,13 @@ class AuthService
             ->findOneBy(['token' => $token, 'type' => 'email_validation']);
 
         if (!$verif) {
-            throw new \InvalidArgumentException("Token de vérification invalide.");
+            throw new \InvalidArgumentException("Token de vérification invalide.", 403);
         }
 
         if ($verif->getExpiration() < new DateTime()) {
             $this->em->remove($verif);
             $this->em->flush();
-            throw new \InvalidArgumentException("Token de vérification expiré.");
+            throw new \InvalidArgumentException("Token de vérification expiré.", 403);
         }
 
         $user = $verif->getUtilisateur();
