@@ -145,7 +145,7 @@ entity "plateforme_historique_personnel" as plateformeHistoriquePersonnel {
 }
 
 entity "plateforme_editeur" as plateformeEditeur {
-    *plateforme_historique_id : int
+    *plateforme_id : int
     *utilisateur_id : int
 }
 
