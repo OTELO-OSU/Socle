@@ -366,6 +366,9 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertNotNull($user->getUtilisateurVerification());
+        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
+        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
     }
 
     public function testInscriptionEntiteDemande(): void
@@ -402,6 +405,9 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertNotNull($user->getUtilisateurVerification());
+        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
+        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
     }
 
     public function testInscriptionPlateformeDemande(): void
@@ -438,6 +444,9 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertNotNull($user->getUtilisateurVerification());
+        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
+        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
     }
 
     public function testRefreshTokenNonEnvoye(): void
@@ -696,5 +705,14 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionOauth@example.com']);
+        $this->assertNotNull($user);
+        $this->assertEquals('Test', $user->getPrenom());
+        $this->assertEquals('User', $user->getNom());
+        $this->assertFalse($user->isEmailValide());
+        $this->assertFalse($user->isAdmis());
+        $this->assertNotNull($user->getUtilisateurVerification());
+        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
+        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
     }
 }
