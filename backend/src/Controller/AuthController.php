@@ -127,6 +127,17 @@ final class AuthController extends AbstractController
         return $response;
     }
 
+    #[Route('/verifie-mail', methods: ['POST'])]
+    public function verifieMail(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+        if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
+
+
+        $this->authService->verificationMailUtilisateur($json['token']);
+        return $this->json(['message' => 'Email vérifié avec succès.'], 200);
+    }
+
 
     #[Route('/deconnexion', methods: ['POST'])]
     public function deconnexion(Request $request): Response

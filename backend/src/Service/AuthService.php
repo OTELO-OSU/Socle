@@ -284,4 +284,26 @@ class AuthService
 
         $this->mailerService->sendEmailToUser($user->getEmail(), $sujet, $body, $verificationLink);
     }
+
+    public function verificationMailUtilisateur(string $token)
+    {
+        $verif = $this->em->getRepository(UtilisateurVerification::class)
+            ->findOneBy(['token' => $token, 'type' => 'email_validation']);
+
+        if (!$verif) {
+            throw new \InvalidArgumentException("Token de vérification invalide.");
+        }
+
+        if ($verif->getExpiration() < new DateTime()) {
+            $this->em->remove($verif);
+            $this->em->flush();
+            throw new \InvalidArgumentException("Token de vérification expiré.");
+        }
+
+        $user = $verif->getUtilisateur();
+        $user->setEmailValide(true);
+        $this->em->persist($user);
+        $this->em->remove($verif);
+        $this->em->flush();
+    }
 }
