@@ -19,7 +19,7 @@ class AdminService
     function admettreUtilisateur(string $email)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-        if (!$user) throw new Exception("Utilisateur non trouvé", 404);
+        if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
         if (!$this->security->isGranted('ADMETTRE', $user)) throw new Exception("Vous n'avez pas les droits pour admettre cet utilisateur", 403);
 
