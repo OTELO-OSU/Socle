@@ -144,6 +144,11 @@ entity "plateforme_historique_personnel" as plateformeHistoriquePersonnel {
     *quotite : int
 }
 
+entity "plateforme_editeur" as plateformeEditeur {
+    *plateforme_historique_id : int
+    *utilisateur_id : int
+}
+
 entity "type_contrat" as typeContrat {
     *id : int
     --
@@ -342,4 +347,7 @@ plateformeHistorique "1" <-- "0..*" publication
 
 entite "0..*" <--> "0..*" instrument
 (entite, instrument) . financementInstrument
+
+user "0..*" <--> "0..*" plateforme
+(user, plateforme) . plateformeEditeur
 @enduml
