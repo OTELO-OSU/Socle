@@ -5,7 +5,7 @@ security:
     providers:
         only_provider:
             entity:
-                class: App\Entity\User
+                class: App\Entity\Utilisateur
                 property: id
 
     firewalls:
