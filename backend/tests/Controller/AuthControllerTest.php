@@ -830,6 +830,23 @@ class AuthControllerTest extends WebTestCase
     {
         $client = $this->client;
 
+        // Création de 2 admin
+        $admin = new Utilisateur();
+        $admin->setEmail('admin@example.com');
+        $admin->setPrenom('Admin');
+        $admin->setNom('User');
+        $admin->setRoles(['ROLE_ADMIN']);
+        $this->em->persist($admin);
+
+        $admin2 = new Utilisateur();
+        $admin2->setEmail('admin2@example.com');
+        $admin2->setPrenom('Admin2');
+        $admin2->setNom('User2');
+        $admin2->setRoles(['ROLE_ADMIN']);
+        $this->em->persist($admin2);
+
+        $this->em->flush();
+
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setEmailValide(false);
         $utilisateurVerif = new UtilisateurVerification();
         $utilisateurVerif->setUtilisateur($user)->setToken("token")->setExpiration((new \DateTime())->modify('+1 hour'))->setType('email_validation');
@@ -850,5 +867,13 @@ class AuthControllerTest extends WebTestCase
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Email vérifié avec succès.', $data['message']);
         $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token']));
+
+        self::assertEmailCount(2);
+        $message = self::getMailerMessage(0);
+        $message2 = self::getMailerMessage(1);
+        $this->assertNotNull($message);
+        $this->assertNotNull($message2);
+        self::assertEmailAddressContains($message, 'to', 'admin@example.com');
+        self::assertEmailAddressContains($message2, 'to', 'admin2@example.com');
     }
 }
