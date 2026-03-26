@@ -305,5 +305,14 @@ class AuthService
         $this->em->persist($user);
         $this->em->remove($verif);
         $this->em->flush();
+
+        // Enovyer un email à tous les admins pour les prévenir de la validation de l'email et qu'ils doivent valider le compte
+        // on find les admins sur le fait que le json roles contient "ROLE_ADMIN"
+        $admins = $this->em->getRepository(Utilisateur::class)->findByRole("ROLE_ADMIN");
+        foreach ($admins as $admin) {
+            $sujet = "Nouvel utilisateur en attente d'approbation";
+            $body = "Bonjour " . $admin->getPrenom() . ",\n\nL'utilisateur " . $user->getEmail() . " a vérifié son adresse email. Veuillez vous connecter à votre espace admin pour valider ou refuser son compte.";
+            $this->mailerService->sendEmailToUser($admin->getEmail(), $sujet, $this->params->get('front_host') . '/administration', $body);
+        }
     }
 }

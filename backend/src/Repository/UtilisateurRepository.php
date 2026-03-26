@@ -16,6 +16,22 @@ class UtilisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, Utilisateur::class);
     }
 
+    public function findByRole(string $role): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $ids = $conn->executeQuery(
+            'SELECT id FROM utilisateur WHERE roles::jsonb @> :role',
+            ['role' => json_encode([$role])]
+        )->fetchFirstColumn();
+
+        if ($ids === []) {
+            return [];
+        }
+
+        return $this->findBy(['id' => $ids]);
+    }
+
     //    /**
     //     * @return Utilisateur[] Returns an array of Utilisateur objects
     //     */
