@@ -19,6 +19,18 @@ class AuthControllerTest extends WebTestCase
     private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
     private EntityManagerInterface $em;
 
+    private function assertVerificationEmailSentTo(string $recipient): void
+    {
+        self::assertEmailCount(1);
+
+        $message = self::getMailerMessage(0);
+        $this->assertNotNull($message);
+        self::assertEmailAddressContains($message, 'to', $recipient);
+        self::assertEmailSubjectContains($message, 'Vérification de votre adresse email');
+        self::assertEmailTextBodyContains($message, 'Veuillez cliquer sur le bouton pour vérifier votre adresse email.');
+        self::assertEmailHtmlBodyContains($message, 'verification-email?token=');
+    }
+
     private function cleanupDatabase(): void
     {
         $conn = $this->em->getConnection();
@@ -58,7 +70,7 @@ class AuthControllerTest extends WebTestCase
         $entite->setNom('Test Entite');
         $entite->setCategorie($categorie);
         $entite->setEmployeur(true);
-        $entite->setLaboratoire(\false);
+        $entite->setLaboratoire(false);
         $this->em->persist($entite);
 
         $plateforme = new Plateforme();
@@ -93,6 +105,8 @@ class AuthControllerTest extends WebTestCase
             "L'email ou le mot de passe est incorrect.",
             $data['message']
         );
+
+        self::assertEmailCount(0);
     }
 
     public function testConnexionMdpIncorrect(): void
@@ -113,6 +127,8 @@ class AuthControllerTest extends WebTestCase
             "L'email ou le mot de passe est incorrect.",
             $data['message']
         );
+
+        self::assertEmailCount(0);
     }
 
     public function testConnexionMailNonVerifie(): void
@@ -136,6 +152,8 @@ class AuthControllerTest extends WebTestCase
             "Vous n'avez pas validé votre adresse email. Un email de validation vous a été renvoyé.",
             $data['message']
         );
+
+        $this->assertVerificationEmailSentTo('test@example.com');
     }
 
     public function testConnexionNonAdmis(): void
@@ -159,6 +177,8 @@ class AuthControllerTest extends WebTestCase
             "Votre compte n'a pas encore été admis. Un email vous sera envoyé une fois votre compte activé.",
             $data['message']
         );
+
+        self::assertEmailCount(0);
     }
 
     public function testConnexionSucces(): void
@@ -180,6 +200,8 @@ class AuthControllerTest extends WebTestCase
             'refresh_token',
             (string) $client->getResponse()->headers->get('Set-Cookie')
         );
+
+        self::assertEmailCount(0);
     }
 
     public function testDeconnexionSansCookie(): void
@@ -195,6 +217,8 @@ class AuthControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(200);
+
+        self::assertEmailCount(0);
     }
 
     public function testDeconnexionAvecCookie(): void
@@ -235,6 +259,8 @@ class AuthControllerTest extends WebTestCase
 
         $empty = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->getRefreshTokens()->isEmpty();
         $this->assertTrue($empty);
+
+        self::assertEmailCount(0);
     }
 
     public function testInscriptionSansNom(): void
@@ -259,6 +285,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
         $this->assertContains('Le nom est obligatoire', $data['messageArray']);
+
+        self::assertEmailCount(0);
     }
 
     public function testInscriptionSansPrenom(): void
@@ -283,6 +311,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
         $this->assertContains('Le prénom est obligatoire', $data['messageArray']);
+
+        self::assertEmailCount(0);
     }
 
     public function testInscriptionSansMail(): void
@@ -307,6 +337,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
         $this->assertContains('L\'email est obligatoire', $data['messageArray']);
+
+        self::assertEmailCount(0);
     }
 
     public function testInscriptionSansAffiliation(): void
@@ -331,6 +363,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
         $this->assertContains('Au moins une demande doit être faite (plateforme, unité ou OSU)', $data['messageArray']);
+
+        self::assertEmailCount(0);
     }
 
     public function testInscriptionOsuDemande(): void
@@ -370,6 +404,8 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
+
+        $this->assertVerificationEmailSentTo('testInscription@example.com');
     }
 
     public function testInscriptionEntiteDemande(): void
@@ -409,6 +445,8 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
+
+        $this->assertVerificationEmailSentTo('testInscription@example.com');
     }
 
     public function testInscriptionPlateformeDemande(): void
@@ -448,6 +486,8 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
+
+        $this->assertVerificationEmailSentTo('testInscription@example.com');
     }
 
     public function testRefreshTokenNonEnvoye(): void
@@ -465,6 +505,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Aucun refresh token n\'a été envoyé.', $data['message']);
+
+        self::assertEmailCount(0);
     }
 
     public function testMauvaisRefreshToken(): void
@@ -486,6 +528,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+
+        self::assertEmailCount(0);
     }
 
     public function testRefreshTokenExpire(): void
@@ -516,6 +560,8 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+
+        self::assertEmailCount(0);
     }
 
     public function testRefreshTokenSuccess(): void
