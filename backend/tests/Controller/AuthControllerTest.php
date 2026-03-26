@@ -868,12 +868,15 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('Email vérifié avec succès.', $data['message']);
         $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token']));
 
-        self::assertEmailCount(2);
+        self::assertEmailCount(3);
         $message = self::getMailerMessage(0);
-        $message2 = self::getMailerMessage(1);
         $this->assertNotNull($message);
+        self::assertEmailAddressContains($message, 'to', 'test@example.com');
+        $message1 = self::getMailerMessage(1);
+        $message2 = self::getMailerMessage(2);
+        $this->assertNotNull($message1);
         $this->assertNotNull($message2);
-        self::assertEmailAddressContains($message, 'to', 'admin@example.com');
+        self::assertEmailAddressContains($message1, 'to', 'admin@example.com');
         self::assertEmailAddressContains($message2, 'to', 'admin2@example.com');
     }
 }

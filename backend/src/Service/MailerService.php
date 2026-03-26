@@ -73,7 +73,7 @@ class MailerService
     HTML;
     }
 
-    function sendEmailToUser($user_mail, $sujet, $bodyMessage, $bodyLink, $footerMessage = "Ce mail a été envoyé automatiquement, merci de ne pas y répondre.")
+    function sendEmailToUser($user_mail, $sujet, $bodyMessage, $bodyLink = null, $footerMessage = "Ce mail a été envoyé automatiquement, merci de ne pas y répondre.")
     {
 
         try {

@@ -306,6 +306,12 @@ class AuthService
         $this->em->remove($verif);
         $this->em->flush();
 
+        $this->mailerService->sendEmailToUser(
+            $user->getEmail(),
+            "Votre adresse email a été vérifiée",
+            "Bonjour " . $user->getPrenom() . ",\n\nVotre adresse email a été vérifiée avec succès. Un administrateur va maintenant devoir valider votre compte avant que vous puissiez vous connecter. Vous recevrez un email de confirmation une fois que ce sera fait.\n\nMerci de votre patience."
+        );
+
         // Enovyer un email à tous les admins pour les prévenir de la validation de l'email et qu'ils doivent valider le compte
         // on find les admins sur le fait que le json roles contient "ROLE_ADMIN"
         $admins = $this->em->getRepository(Utilisateur::class)->findByRole("ROLE_ADMIN");
