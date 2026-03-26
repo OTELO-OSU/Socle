@@ -140,7 +140,14 @@ entity "plateforme_historique_personnel" as plateformeHistoriquePersonnel {
     --
     *responsable_scientifique : boolean
     *responsable_technique : boolean
+    *type_contrat_id : int
     *quotite : int
+}
+
+entity "type_contrat" as typeContrat {
+    *id : int
+    --
+    *nom : string
 }
 
 entity "poste_futur" as posteFutur {
@@ -313,6 +320,8 @@ posteFutur "0..*" --> "1" corps
 posteFutur "0..*" --> "1" bap
 plateformeHistorique "0..*" --> "1" determinationTarif
 plateforme "1" <--> "1..*" plateformeHistorique
+
+typeContrat "1" <-- "0..*" plateformeHistoriquePersonnel
 
 plateformeHistorique "0..*" <--> "0..*" entite
 (plateformeHistorique, entite) . plateformeHistoriqueTutelle
