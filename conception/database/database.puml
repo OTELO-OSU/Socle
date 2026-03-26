@@ -205,6 +205,7 @@ entity "entite" as entite << (E, Gold) >> {
   statut_juridique : string
   employeur: boolean
   laboratoire: boolean
+  directeur_id : int (utilisateur)
   categorie_id : int
 }
 
