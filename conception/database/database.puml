@@ -93,7 +93,7 @@ entity "plateforme_historique" as plateformeHistorique << (H, Red) >> {
   contribution_structure_pia_taux : int
   dotation_instrument_national : float
   labellisation_qualite : boolean
-  nom_labelisation_qualite : string
+  nom_labellisation_qualite : string
   procedure_transparente_tous : bool
   procedure_transparente_prestation_exterieure : bool
   accueil_international_taux : int
