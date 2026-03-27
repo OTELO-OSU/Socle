@@ -43,9 +43,16 @@ class Entite
     #[ORM\ManyToOne(inversedBy: 'entites')]
     private ?Utilisateur $directeur = null;
 
+    /**
+     * @var Collection<int, PlateformeHistorique>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'laboratoire_operateur')]
+    private Collection $plateformeHistoriques;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
+        $this->plateformeHistoriques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,6 +170,36 @@ class Entite
     public function setDirecteur(?Utilisateur $directeur): static
     {
         $this->directeur = $directeur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistorique>
+     */
+    public function getPlateformeHistoriques(): Collection
+    {
+        return $this->plateformeHistoriques;
+    }
+
+    public function addPlateformeHistorique(PlateformeHistorique $plateformeHistorique): static
+    {
+        if (!$this->plateformeHistoriques->contains($plateformeHistorique)) {
+            $this->plateformeHistoriques->add($plateformeHistorique);
+            $plateformeHistorique->setLaboratoireOperateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistorique(PlateformeHistorique $plateformeHistorique): static
+    {
+        if ($this->plateformeHistoriques->removeElement($plateformeHistorique)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistorique->getLaboratoireOperateur() === $this) {
+                $plateformeHistorique->setLaboratoireOperateur(null);
+            }
+        }
 
         return $this;
     }

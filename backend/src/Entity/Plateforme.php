@@ -36,11 +36,18 @@ class Plateforme
     #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'plateforme_id')]
     private Collection $plateformeEditeurs;
 
+    /**
+     * @var Collection<int, PlateformeHistorique>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'plateforme')]
+    private Collection $plateformeHistoriques;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriquePersonnels = new ArrayCollection();
         $this->plateformeEditeurs = new ArrayCollection();
+        $this->plateformeHistoriques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -144,6 +151,36 @@ class Plateforme
             // set the owning side to null (unless already changed)
             if ($plateformeEditeur->getPlateformeId() === $this) {
                 $plateformeEditeur->setPlateformeId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistorique>
+     */
+    public function getPlateformeHistoriques(): Collection
+    {
+        return $this->plateformeHistoriques;
+    }
+
+    public function addPlateformeHistorique(PlateformeHistorique $plateformeHistorique): static
+    {
+        if (!$this->plateformeHistoriques->contains($plateformeHistorique)) {
+            $this->plateformeHistoriques->add($plateformeHistorique);
+            $plateformeHistorique->setPlateforme($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistorique(PlateformeHistorique $plateformeHistorique): static
+    {
+        if ($this->plateformeHistoriques->removeElement($plateformeHistorique)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistorique->getPlateforme() === $this) {
+                $plateformeHistorique->setPlateforme(null);
             }
         }
 
