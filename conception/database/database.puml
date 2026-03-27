@@ -103,7 +103,7 @@ entity "plateforme_historique" as plateformeHistorique << (H, Red) >> {
   modele_57_1224_taux : int
   utilisation_fonctionnement_taux : int
   utilisation_maintenance_taux : int
-  utilisation_developemment_taux : int
+  utilisation_developpement_taux : int
   utilisation_panne_taux : int
   utilisation_temps_mort_taux : int
   utilisation_equipe_operante_taux : int
