@@ -21,4 +21,14 @@ final class AdminController extends AbstractController
         $this->adminService->admettreUtilisateur($json['email']);
         return $this->json(['message' => 'Utilisateur admis avec succès.'], 200);
     }
+
+    #[Route('/plateforme/affilier', methods: ['POST'])]
+    public function affilierUtilisateurPlateforme(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+        if (!isset($json['email']) || !isset($json['plateformeId'])) return $this->json(['message' => 'L\'email et l\'ID de la plateforme sont requis.'], 400);
+
+        $this->adminService->affilierUtilisateurPlateforme($json['email'], $json['plateformeId']);
+        return $this->json(['message' => 'Utilisateur affilié à la plateforme avec succès.'], 201);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Plateforme;
 use App\Entity\PlateformeEditeur;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -52,6 +53,35 @@ class AdminService
             $user->getEmail(),
             "Votre compte a été admis !",
             "Votre compte a été admis par un administrateur, vous pouvez désormais vous connecter et profiter de toutes les fonctionnalités de Plaire !"
+        );
+    }
+
+    function affilierUtilisateurPlateforme(string $email, int $plateformeId)
+    {
+
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+        if (!$plateforme) throw new Exception("Plateforme non trouvée.", 404);
+
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
+        if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
+
+        if (!$this->security->isGranted('AFFILIER', Plateforme::class)) throw new Exception("Vous n'avez pas les droits pour affilier un utilisateur à une plateforme", 403);
+
+        if ($this->em->getRepository(PlateformeEditeur::class)->findOneBy(["utilisateur" => $user, "plateforme" => $plateforme])) {
+            throw new Exception("L'utilisateur est déjà affilié à cette plateforme.", 400);
+        }
+
+        $plateformeEditeur = new PlateformeEditeur();
+        $plateformeEditeur->setUtilisateur($user);
+        $plateformeEditeur->setPlateforme($plateforme);
+        $this->em->persist($plateformeEditeur);
+        $this->em->flush();
+
+        $this->mailerService->sendEmailToUser(
+            $user->getEmail(),
+            "Vous avez été affilié à une plateforme !",
+            "Vous avez été affilié à une plateforme par un administrateur, vous pouvez désormais accéder à cette plateforme et profiter de toutes les fonctionnalités qui y sont associées !"
         );
     }
 }

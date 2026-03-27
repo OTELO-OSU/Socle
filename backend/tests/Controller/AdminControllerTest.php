@@ -77,6 +77,21 @@ class AdminControllerTest extends WebTestCase
         $this->em->flush();
     }
 
+    private function getUserAccessToken()
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
+        );
+
+        return json_decode($client->getResponse()->getContent(), true)['token'];
+    }
+
     private function getAdminAccessToken()
     {
         $client = $this->client;
@@ -240,5 +255,160 @@ class AdminControllerTest extends WebTestCase
             $this->em->getRepository(PlateformeEditeur::class)->findOneBy([])->getUtilisateur()->getEmail(),
             "test@example.com"
         );
+    }
+
+    public function testAffiliationPlateformeEmailAbsent(): void
+    {
+        $client = $this->client;
+
+        // Récupérer l'ID de la plateforme créée dans le setUp
+        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['plateformeId' => $plateformeId])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'email et l'ID de la plateforme sont requis.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformeIdPlateformeAbsent(): void
+    {
+        $client = $this->client;
+
+        // Récupérer l'ID de la plateforme créée dans le setUp
+        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'email et l'ID de la plateforme sont requis.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformeEmailInexistant(): void
+    {
+        $client = $this->client;
+
+        // Récupérer l'ID de la plateforme créée dans le setUp
+        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['plateformeId' => $plateformeId, 'email' => 'nonexistent@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Utilisateur non trouvé.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformePlateformeIdInexistant(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['plateformeId' => -1, 'email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme non trouvée.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformeNonAdmin(): void
+    {
+        $client = $this->client;
+
+        // Récupérer l'ID de la plateforme créée dans le setUp
+        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['email' => 'test@example.com', 'plateformeId' => $plateformeId])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits pour affilier un utilisateur à une plateforme",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformeSuccess(): void
+    {
+        $client = $this->client;
+
+        // Récupérer l'ID de la plateforme créée dans le setUp
+        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+
+        $client->request(
+            'POST',
+            '/api/plateforme/affilier',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['email' => 'test@example.com', 'plateformeId' => $plateformeId])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Utilisateur affilié à la plateforme avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(1);
+        $message = self::getMailerMessage(0);
+        $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
     }
 }

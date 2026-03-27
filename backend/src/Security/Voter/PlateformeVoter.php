@@ -10,10 +10,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 final class PlateformeVoter extends Voter
 {
     public const CREER = 'CREER';
+    public const AFFILIER = 'AFFILIER';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $testA = in_array($attribute, [self::CREER])
+        $testA = in_array($attribute, [self::CREER, self::AFFILIER])
             && $subject === Plateforme::class;
         return $testA;
     }
@@ -28,6 +29,9 @@ final class PlateformeVoter extends Voter
 
         switch ($attribute) {
             case self::CREER:
+                return in_array('ROLE_ADMIN', $user->getRoles());
+                break;
+            case self::AFFILIER:
                 return in_array('ROLE_ADMIN', $user->getRoles());
                 break;
         }
