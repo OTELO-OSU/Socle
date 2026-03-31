@@ -12,6 +12,10 @@ entity "utilisateur" as user << (U, Orchid) >> {
   *email_valide : boolean
   *admis : boolean
   *role : jsonb
+  corps_id : int
+  grade_id : int
+  section_cnrs_id : int
+  cnu_id : int
 }
 
 entity "utilisateur_machine" as userMachine << (U, BlueViolet) >> {
@@ -160,11 +164,42 @@ entity "poste_futur" as posteFutur {
     *plateforme_historique_id : int
     *employeur_id : int (entite)
     *corps_id : int
-    *bap_id : int
-    *emploi_type_id : int
     *quotite : int
     *rang_numerateur : int
     *rang_denominateur : int
+}
+
+entity "utilisateur_bap" as UserBap {
+    *utilisateur_id : int
+    *bap_id : int
+}
+
+entity "utilisateur_emploi_type" as UserEmploiType {
+    *utilisateur_id : int
+    *emploi_type_id : int
+}
+
+entity "poste_futur_bap" as PosteFuturBap {
+    *poste_futur_id : int
+    *bap_id : int
+}
+
+entity "poste_futur_emploi_type" as PosteFuturEmploiType {
+    *poste_futur_id : int
+    *emploi_type_id : int
+}
+
+entity "emploi_type" as emploiType {
+    *id : int
+    --
+    *nom : string
+    *acronyme : string
+}
+
+entity "corps_bap_emploi_type" as corpsBapEmploiType {
+    *corps_id : int
+    *bap_id : int
+    *emploi_type_id : int
 }
 
 entity "instrument" as instrument {
@@ -180,6 +215,24 @@ entity "instrument" as instrument {
   duree_utilisation : int
   operation_id : int
   annee_achat_envisagee: int
+  *futur: boolean
+  contrat_maintenance_id : int
+  commentaire_nature_contrat : string
+  fournisseur_contrat : string
+  mutualise_autre_instrument : bool
+  mutualise_umr_osu : bool
+  mutualise_site : bool
+}
+
+entity "contrat_maintenance" as ContratMaintenance {
+  *id : int
+  --
+  *nom : string
+}
+
+entity "instrument_mutualisation" as InstrumentMutualisation {
+  *instrument_source_id : int
+  *instrument_cible_id : int
 }
 
 entity "financement_instrument" as financementInstrument {
@@ -319,12 +372,29 @@ plateformeHistorique "1" <-- posteFutur
 user "0..*" --> "0..1" corps
 user "0..*" --> "0..1" grade
 user "0..*" --> "0..*" bap
+(user, bap) . UserBap
 user "0..*" --> "0..*" cnu
 user "0..*" --> "0..*" sectionCnrs
+user "0..*" --> "0..*" emploiType
+(user, emploiType) . UserEmploiType
 posteFutur "0..*" --> "1" corps
-posteFutur "0..*" --> "1" bap
 plateformeHistorique "0..*" --> "1" determinationTarif
 plateforme "1" <--> "1..*" plateformeHistorique
+
+corpsBapEmploiType "0..*" --> "1" corps
+corpsBapEmploiType "0..*" --> "1" bap
+corpsBapEmploiType "0..*" --> "1" emploiType
+
+posteFutur "0..*" --> "1" entite
+
+bap "0..*" --> "0..*" posteFutur
+(bap, posteFutur) . PosteFuturBap
+
+emploiType "0..*" --> "0..*" posteFutur
+(emploiType, posteFutur) . PosteFuturEmploiType
+
+UserEmploiType "0..*" --> "1" user
+UserEmploiType "0..*" --> "1" emploiType
 
 typeContrat "1" <-- "0..*" plateformeHistoriquePersonnel
 
