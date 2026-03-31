@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PlateformeHistoriqueRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriqueRepository::class)]
@@ -49,6 +51,12 @@ class PlateformeHistorique
 
     #[ORM\Column(nullable: true)]
     private ?float $espace_bureau = null;
+
+    /**
+     * @var Collection<int, PlateformeHistoriquePersonnel>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique_id')]
+    private Collection $plateformeHistoriquePersonnels;
 
     #[ORM\Column(nullable: true)]
     private ?float $espace_laboratoire = null;
@@ -138,7 +146,7 @@ class PlateformeHistorique
     private ?int $utilisation_equipe_operante_taux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_collaboration_interne = null;
+    private ?int $utilisation_collaboration_interne_taux = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $utilisation_collaboration_externe_taux = null;
@@ -188,9 +196,51 @@ class PlateformeHistorique
     #[ORM\Column(nullable: true)]
     private ?int $publication_these = null;
 
+    /**
+     * @var Collection<int, PlateformeHistoriqueTutelle>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateforme_historique_id')]
+    private Collection $plateformeHistoriqueTutelles;
+
+    /**
+     * @var Collection<int, PosteFutur>
+     */
+    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateforme_historique')]
+    private Collection $posteFuturs;
+
+    /**
+     * @var Collection<int, ContributionTutelle>
+     */
+    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateforme_historique')]
+    private Collection $contributionTutelles;
+
+    /**
+     * @var Collection<int, Instrument>
+     */
+    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateforme_historique')]
+    private Collection $instruments;
+
+    #[ORM\Column]
+    private ?bool $brouillon = null;
+
+    public function __construct()
+    {
+        $this->plateformeHistoriqueTutelles = new ArrayCollection();
+        $this->plateformeHistoriquePersonnels = new ArrayCollection();
+        $this->posteFuturs = new ArrayCollection();
+        $this->contributionTutelles = new ArrayCollection();
+        $this->instruments = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(?int $id): ?PlateformeHistorique
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getPlateforme(): ?Plateforme
@@ -685,14 +735,14 @@ class PlateformeHistorique
         return $this;
     }
 
-    public function getUtilisationCollaborationInterne(): ?int
+    public function getUtilisationCollaborationInterneTaux(): ?int
     {
-        return $this->utilisation_collaboration_interne;
+        return $this->utilisation_collaboration_interne_taux;
     }
 
-    public function setUtilisationCollaborationInterne(?int $utilisation_collaboration_interne): static
+    public function setUtilisationCollaborationInterneTaux(?int $utilisation_collaboration_interne_taux): static
     {
-        $this->utilisation_collaboration_interne = $utilisation_collaboration_interne;
+        $this->utilisation_collaboration_interne_taux = $utilisation_collaboration_interne_taux;
 
         return $this;
     }
@@ -885,6 +935,168 @@ class PlateformeHistorique
     public function setPublicationThese(?int $publication_these): static
     {
         $this->publication_these = $publication_these;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistoriqueTutelle>
+     */
+    public function getPlateformeHistoriqueTutelles(): Collection
+    {
+        return $this->plateformeHistoriqueTutelles;
+    }
+
+    public function addPlateformeHistoriqueTutelle(PlateformeHistoriqueTutelle $plateformeHistoriqueTutelle): static
+    {
+        if (!$this->plateformeHistoriqueTutelles->contains($plateformeHistoriqueTutelle)) {
+            $this->plateformeHistoriqueTutelles->add($plateformeHistoriqueTutelle);
+            $plateformeHistoriqueTutelle->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistoriqueTutelle(PlateformeHistoriqueTutelle $plateformeHistoriqueTutelle): static
+    {
+        if ($this->plateformeHistoriqueTutelles->removeElement($plateformeHistoriqueTutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistoriqueTutelle->getPlateformeHistorique() === $this) {
+                $plateformeHistoriqueTutelle->setPlateformeHistorique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistoriquePersonnel>
+     */
+    public function getPlateformeHistoriquePersonnels(): Collection
+    {
+        return $this->plateformeHistoriquePersonnels;
+    }
+
+    public function addPlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    {
+        if (!$this->plateformeHistoriquePersonnels->contains($plateformeHistoriquePersonnel)) {
+            $this->plateformeHistoriquePersonnels->add($plateformeHistoriquePersonnel);
+            $plateformeHistoriquePersonnel->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    {
+        if ($this->plateformeHistoriquePersonnels->removeElement($plateformeHistoriquePersonnel)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistoriquePersonnel->getPlateformeHistorique() === $this) {
+                $plateformeHistoriquePersonnel->setPlateformeHistorique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PosteFutur>
+     */
+    public function getPosteFuturs(): Collection
+    {
+        return $this->posteFuturs;
+    }
+
+    public function addPosteFutur(PosteFutur $posteFutur): static
+    {
+        if (!$this->posteFuturs->contains($posteFutur)) {
+            $this->posteFuturs->add($posteFutur);
+            $posteFutur->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removePosteFutur(PosteFutur $posteFutur): static
+    {
+        if ($this->posteFuturs->removeElement($posteFutur)) {
+            // set the owning side to null (unless already changed)
+            if ($posteFutur->getPlateformeHistorique() === $this) {
+                $posteFutur->setPlateformeHistorique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ContributionTutelle>
+     */
+    public function getContributionTutelles(): Collection
+    {
+        return $this->contributionTutelles;
+    }
+
+    public function addContributionTutelle(ContributionTutelle $contributionTutelle): static
+    {
+        if (!$this->contributionTutelles->contains($contributionTutelle)) {
+            $this->contributionTutelles->add($contributionTutelle);
+            $contributionTutelle->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContributionTutelle(ContributionTutelle $contributionTutelle): static
+    {
+        if ($this->contributionTutelles->removeElement($contributionTutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($contributionTutelle->getPlateformeHistorique() === $this) {
+                $contributionTutelle->setPlateformeHistorique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Instrument>
+     */
+    public function getInstruments(): Collection
+    {
+        return $this->instruments;
+    }
+
+    public function addInstrument(Instrument $instrument): static
+    {
+        if (!$this->instruments->contains($instrument)) {
+            $this->instruments->add($instrument);
+            $instrument->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInstrument(Instrument $instrument): static
+    {
+        if ($this->instruments->removeElement($instrument)) {
+            // set the owning side to null (unless already changed)
+            if ($instrument->getPlateformeHistorique() === $this) {
+                $instrument->setPlateformeHistorique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isBrouillon(): ?bool
+    {
+        return $this->brouillon;
+    }
+
+    public function setBrouillon(bool $brouillon): static
+    {
+        $this->brouillon = $brouillon;
 
         return $this;
     }

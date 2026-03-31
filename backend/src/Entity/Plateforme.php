@@ -25,12 +25,6 @@ class Plateforme
     private Collection $utilisateurInscriptions;
 
     /**
-     * @var Collection<int, PlateformeHistoriquePersonnel>
-     */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique_id')]
-    private Collection $plateformeHistoriquePersonnels;
-
-    /**
      * @var Collection<int, PlateformeEditeur>
      */
     #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'plateforme_id')]
@@ -45,7 +39,6 @@ class Plateforme
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
-        $this->plateformeHistoriquePersonnels = new ArrayCollection();
         $this->plateformeEditeurs = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
     }
@@ -98,36 +91,6 @@ class Plateforme
     }
 
     /**
-     * @return Collection<int, PlateformeHistoriquePersonnel>
-     */
-    public function getPlateformeHistoriquePersonnels(): Collection
-    {
-        return $this->plateformeHistoriquePersonnels;
-    }
-
-    public function addPlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
-    {
-        if (!$this->plateformeHistoriquePersonnels->contains($plateformeHistoriquePersonnel)) {
-            $this->plateformeHistoriquePersonnels->add($plateformeHistoriquePersonnel);
-            $plateformeHistoriquePersonnel->setPlateformeHistoriqueId($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
-    {
-        if ($this->plateformeHistoriquePersonnels->removeElement($plateformeHistoriquePersonnel)) {
-            // set the owning side to null (unless already changed)
-            if ($plateformeHistoriquePersonnel->getPlateformeHistoriqueId() === $this) {
-                $plateformeHistoriquePersonnel->setPlateformeHistoriqueId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, PlateformeEditeur>
      */
     public function getPlateformeEditeurs(): Collection
@@ -139,7 +102,7 @@ class Plateforme
     {
         if (!$this->plateformeEditeurs->contains($plateformeEditeur)) {
             $this->plateformeEditeurs->add($plateformeEditeur);
-            $plateformeEditeur->setPlateformeId($this);
+            $plateformeEditeur->setPlateforme($this);
         }
 
         return $this;
@@ -149,8 +112,8 @@ class Plateforme
     {
         if ($this->plateformeEditeurs->removeElement($plateformeEditeur)) {
             // set the owning side to null (unless already changed)
-            if ($plateformeEditeur->getPlateformeId() === $this) {
-                $plateformeEditeur->setPlateformeId(null);
+            if ($plateformeEditeur->getPlateforme() === $this) {
+                $plateformeEditeur->setPlateforme(null);
             }
         }
 

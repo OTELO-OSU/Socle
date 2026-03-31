@@ -15,7 +15,7 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Plateforme $plateforme_historique_id = null;
+    private ?PlateformeHistorique $plateforme_historique = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[ORM\JoinColumn(nullable: false)]
@@ -39,14 +39,14 @@ class PlateformeHistoriquePersonnel
         return $this->id;
     }
 
-    public function getPlateformeHistoriqueId(): ?Plateforme
+    public function getPlateformeHistorique(): ?PlateformeHistorique
     {
-        return $this->plateforme_historique_id;
+        return $this->plateforme_historique;
     }
 
-    public function setPlateformeHistoriqueId(?Plateforme $plateforme_historique_id): static
+    public function setPlateformeHistorique(?PlateformeHistorique $plateforme_historique_id): static
     {
-        $this->plateforme_historique_id = $plateforme_historique_id;
+        $this->plateforme_historique = $plateforme_historique_id;
 
         return $this;
     }

@@ -49,10 +49,38 @@ class Entite
     #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'laboratoire_operateur')]
     private Collection $plateformeHistoriques;
 
+    /**
+     * @var Collection<int, PlateformeHistoriqueTutelle>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'tutelle_id')]
+    private Collection $plateformeHistoriqueTutelles;
+
+    /**
+     * @var Collection<int, PosteFutur>
+     */
+    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'employeur')]
+    private Collection $posteFuturs;
+
+    /**
+     * @var Collection<int, ContributionTutelle>
+     */
+    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'financeur')]
+    private Collection $contributionTutelles;
+
+    /**
+     * @var Collection<int, FinancementInstrument>
+     */
+    #[ORM\OneToMany(targetEntity: FinancementInstrument::class, mappedBy: 'financeur')]
+    private Collection $financementInstruments;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
+        $this->plateformeHistoriqueTutelles = new ArrayCollection();
+        $this->posteFuturs = new ArrayCollection();
+        $this->contributionTutelles = new ArrayCollection();
+        $this->financementInstruments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,6 +226,126 @@ class Entite
             // set the owning side to null (unless already changed)
             if ($plateformeHistorique->getLaboratoireOperateur() === $this) {
                 $plateformeHistorique->setLaboratoireOperateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeHistoriqueTutelle>
+     */
+    public function getPlateformeHistoriqueTutelles(): Collection
+    {
+        return $this->plateformeHistoriqueTutelles;
+    }
+
+    public function addPlateformeHistoriqueTutelle(PlateformeHistoriqueTutelle $plateformeHistoriqueTutelle): static
+    {
+        if (!$this->plateformeHistoriqueTutelles->contains($plateformeHistoriqueTutelle)) {
+            $this->plateformeHistoriqueTutelles->add($plateformeHistoriqueTutelle);
+            $plateformeHistoriqueTutelle->setTutelleId($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeHistoriqueTutelle(PlateformeHistoriqueTutelle $plateformeHistoriqueTutelle): static
+    {
+        if ($this->plateformeHistoriqueTutelles->removeElement($plateformeHistoriqueTutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($plateformeHistoriqueTutelle->getTutelleId() === $this) {
+                $plateformeHistoriqueTutelle->setTutelleId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PosteFutur>
+     */
+    public function getPosteFuturs(): Collection
+    {
+        return $this->posteFuturs;
+    }
+
+    public function addPosteFutur(PosteFutur $posteFutur): static
+    {
+        if (!$this->posteFuturs->contains($posteFutur)) {
+            $this->posteFuturs->add($posteFutur);
+            $posteFutur->setEmployeur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePosteFutur(PosteFutur $posteFutur): static
+    {
+        if ($this->posteFuturs->removeElement($posteFutur)) {
+            // set the owning side to null (unless already changed)
+            if ($posteFutur->getEmployeur() === $this) {
+                $posteFutur->setEmployeur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ContributionTutelle>
+     */
+    public function getContributionTutelles(): Collection
+    {
+        return $this->contributionTutelles;
+    }
+
+    public function addContributionTutelle(ContributionTutelle $contributionTutelle): static
+    {
+        if (!$this->contributionTutelles->contains($contributionTutelle)) {
+            $this->contributionTutelles->add($contributionTutelle);
+            $contributionTutelle->setFinanceur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContributionTutelle(ContributionTutelle $contributionTutelle): static
+    {
+        if ($this->contributionTutelles->removeElement($contributionTutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($contributionTutelle->getFinanceur() === $this) {
+                $contributionTutelle->setFinanceur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FinancementInstrument>
+     */
+    public function getFinancementInstruments(): Collection
+    {
+        return $this->financementInstruments;
+    }
+
+    public function addFinancementInstrument(FinancementInstrument $financementInstrument): static
+    {
+        if (!$this->financementInstruments->contains($financementInstrument)) {
+            $this->financementInstruments->add($financementInstrument);
+            $financementInstrument->setFinanceur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFinancementInstrument(FinancementInstrument $financementInstrument): static
+    {
+        if ($this->financementInstruments->removeElement($financementInstrument)) {
+            // set the owning side to null (unless already changed)
+            if ($financementInstrument->getFinanceur() === $this) {
+                $financementInstrument->setFinanceur(null);
             }
         }
 

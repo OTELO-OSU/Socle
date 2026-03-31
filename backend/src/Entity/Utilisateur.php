@@ -74,6 +74,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
     private Collection $entites;
 
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    private ?Corps $corps = null;
+
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    private ?Grade $grade = null;
+
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    private ?SectionCnrs $section_cnrs = null;
+
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    private ?Cnu $cnu = null;
+
+    /**
+     * @var Collection<int, UtilisateurBap>
+     */
+    #[ORM\OneToMany(targetEntity: UtilisateurBap::class, mappedBy: 'utilisateur')]
+    private Collection $utilisateurBaps;
+
+    /**
+     * @var Collection<int, UtilisateurEmploiType>
+     */
+    #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'utilisateur')]
+    private Collection $utilisateurEmploiTypes;
+
     public function __construct()
     {
         $this->email_valide = false;
@@ -82,6 +106,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->plateformeHistoriquePersonnels = new ArrayCollection();
         $this->plateformeEditeurs = new ArrayCollection();
         $this->entites = new ArrayCollection();
+        $this->utilisateurBaps = new ArrayCollection();
+        $this->utilisateurEmploiTypes = new ArrayCollection();
     }
 
     public function getUserIdentifier(): string
@@ -365,6 +391,114 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($entite->getDirecteur() === $this) {
                 $entite->setDirecteur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCorps(): ?Corps
+    {
+        return $this->corps;
+    }
+
+    public function setCorps(?Corps $corps): static
+    {
+        $this->corps = $corps;
+
+        return $this;
+    }
+
+    public function getGrade(): ?Grade
+    {
+        return $this->grade;
+    }
+
+    public function setGrade(?Grade $grade): static
+    {
+        $this->grade = $grade;
+
+        return $this;
+    }
+
+    public function getSectionCnrs(): ?SectionCnrs
+    {
+        return $this->section_cnrs;
+    }
+
+    public function setSectionCnrs(?SectionCnrs $section_cnrs): static
+    {
+        $this->section_cnrs = $section_cnrs;
+
+        return $this;
+    }
+
+    public function getCnu(): ?Cnu
+    {
+        return $this->cnu;
+    }
+
+    public function setCnu(?Cnu $cnu): static
+    {
+        $this->cnu = $cnu;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UtilisateurBap>
+     */
+    public function getUtilisateurBaps(): Collection
+    {
+        return $this->utilisateurBaps;
+    }
+
+    public function addUtilisateurBap(UtilisateurBap $utilisateurBap): static
+    {
+        if (!$this->utilisateurBaps->contains($utilisateurBap)) {
+            $this->utilisateurBaps->add($utilisateurBap);
+            $utilisateurBap->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisateurBap(UtilisateurBap $utilisateurBap): static
+    {
+        if ($this->utilisateurBaps->removeElement($utilisateurBap)) {
+            // set the owning side to null (unless already changed)
+            if ($utilisateurBap->getUtilisateur() === $this) {
+                $utilisateurBap->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UtilisateurEmploiType>
+     */
+    public function getUtilisateurEmploiTypes(): Collection
+    {
+        return $this->utilisateurEmploiTypes;
+    }
+
+    public function addUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
+    {
+        if (!$this->utilisateurEmploiTypes->contains($utilisateurEmploiType)) {
+            $this->utilisateurEmploiTypes->add($utilisateurEmploiType);
+            $utilisateurEmploiType->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
+    {
+        if ($this->utilisateurEmploiTypes->removeElement($utilisateurEmploiType)) {
+            // set the owning side to null (unless already changed)
+            if ($utilisateurEmploiType->getUtilisateur() === $this) {
+                $utilisateurEmploiType->setUtilisateur(null);
             }
         }
 

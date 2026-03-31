@@ -68,20 +68,41 @@ class PlateformeHistoriqueDTO
 
     # Personnel
     #[Assert\All([
-        new Assert\NotBlank(groups: ['validation']),
-        new Assert\Type('integer'),
-    ])]
-    public ?array $responsable_scientifique = null;
-
-    #[Assert\All([
-        new Assert\NotBlank(groups: ['validation']),
-        new Assert\Type('integer'),
-    ])]
-    public ?array $responsable_technique = null;
-
-    #[Assert\All([
-        new Assert\NotBlank(groups: ['validation']),
-        new Assert\Type('integer'),
+        new Assert\Collection(
+            fields: [
+                'utilisateur_id' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('integer'),
+                    ])
+                ],
+                'responsable_scientifique' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('boolean'),
+                    ])
+                ],
+                'responsable_technique' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('boolean'),
+                    ])
+                ],
+                'type_contrat_id' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('integer'),
+                    ])
+                ],
+                'quotite' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('integer'),
+                        new Assert\Range(min: 0, max: 100),
+                    ])
+                ]
+            ]
+        )
     ])]
     public ?array $personnel = null;
 
@@ -100,7 +121,7 @@ class PlateformeHistoriqueDTO
                         new Assert\Type('integer'),
                     ])
                 ],
-                'bap_id' => [
+                'bap' => [
                     new Assert\Required([
                         new Assert\All([
                             new Assert\NotBlank(),
@@ -108,7 +129,7 @@ class PlateformeHistoriqueDTO
                         ])
                     ])
                 ],
-                'emploi_type_id' => [
+                'emploi_type' => [
                     new Assert\Required([
                         new Assert\All([
                             new Assert\NotBlank(),
@@ -143,7 +164,7 @@ class PlateformeHistoriqueDTO
     #[Assert\All([
         new Assert\Collection(
             fields: [
-                'nom_officiel' => [
+                'nom' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
                         new Assert\Type('string'),
@@ -196,7 +217,7 @@ class PlateformeHistoriqueDTO
                                             new Assert\Type('integer'),
                                         ])
                                     ],
-                                    "pourcentage" => [
+                                    "taux" => [
                                         new Assert\Required([
                                             new Assert\NotBlank(),
                                             new Assert\Type('integer'),
@@ -207,54 +228,59 @@ class PlateformeHistoriqueDTO
                         ])
                     ])
                 ],
-                'maintenance' => [
+
+                "type_contrat_id" => [
                     new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Optional(),
+                        new Assert\Type('integer'),
+                    ])
+                ],
+                "commentaire_nature_contrat" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
+                        new Assert\Type('string'),
+                    ])
+                ],
+                "fournisseur_contrat" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
+                        new Assert\Type('string'),
+                    ])
+                ],
+                "mutualisation_autre_instrument" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
+                        new Assert\Type('boolean'),
+                    ])
+                ],
+                "mutualisation_site" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
+                        new Assert\Type('boolean'),
+                    ])
+                ],
+                "mutualisation_umr_osu" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
+                        new Assert\Type('boolean'),
+                    ])
+                ],
+                "mutualisation_autre_instrument_detaille" => [
+                    new Assert\Required([
+                        new Assert\Optional(),
                         new Assert\All([
-                            new Assert\Collection(
-                                fields: [
-                                    "type_contrat_id" => [
-                                        new Assert\Required([
-                                            new Assert\NotBlank(),
-                                            new Assert\Type('integer'),
-                                        ])
-                                    ],
-                                    "commentaire_nature_contrat" => [
-                                        new Assert\Required([
-                                            new Assert\Optional(),
-                                            new Assert\Type('string'),
-                                        ])
-                                    ],
-                                    "fournisseur" => [
-                                        new Assert\Required([
-                                            new Assert\Optional(),
-                                            new Assert\Type('string'),
-                                        ])
-                                    ],
-                                    "mutualisation_id" => [
-                                        new Assert\Required([
-                                            new Assert\Optional(),
-                                            new Assert\Type('int'),
-                                        ])
-                                    ],
-                                    "mutualisation_autre_instrument_detaille" => [
-                                        new Assert\Required([
-                                            new Assert\Optional(),
-                                            new Assert\All([
-                                                new Assert\NotBlank(),
-                                                new Assert\Type('integer'),
-                                            ])
-                                        ])
-                                    ],
-                                    "cout" => [
-                                        new Assert\Required([
-                                            new Assert\NotBlank(),
-                                            new Assert\Type('float'),
-                                        ])
-                                    ]
-                                ]
-                            )
+                            new Assert\NotBlank(),
+                            new Assert\Type('integer'),
                         ])
                     ])
+                ],
+                "cout" => [
+                    new Assert\Required([
+                        new Assert\NotBlank(),
+                        new Assert\Type('float'),
+                    ])
+
                 ]
             ]
         )
@@ -283,7 +309,7 @@ class PlateformeHistoriqueDTO
     #[Assert\All([
         new Assert\Collection(
             fields: [
-                'nom_officiel' => [
+                'nom' => [
                     new Assert\Required([
                         new Assert\NotBlank(),
                         new Assert\Type('string'),
