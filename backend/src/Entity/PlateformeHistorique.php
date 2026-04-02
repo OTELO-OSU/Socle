@@ -55,7 +55,7 @@ class PlateformeHistorique
     /**
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique_id')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique')]
     private Collection $plateformeHistoriquePersonnels;
 
     #[ORM\Column(nullable: true)]
@@ -199,7 +199,7 @@ class PlateformeHistorique
     /**
      * @var Collection<int, PlateformeHistoriqueTutelle>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateforme_historique_id')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateforme_historique')]
     private Collection $plateformeHistoriqueTutelles;
 
     /**

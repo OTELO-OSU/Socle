@@ -13,7 +13,7 @@ class FinancementInstrument
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'financementInstruments')]
+    #[ORM\ManyToOne(inversedBy: 'financementInstruments', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Instrument $instrument = null;
 

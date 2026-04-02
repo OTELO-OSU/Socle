@@ -18,22 +18,29 @@ class Plateforme
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pseudo_id = null;
 
+    function getLastHistorique(): ?PlateformeHistorique
+    {
+        $historiques = $this->getPlateformeHistoriques()->toArray();
+        usort($historiques, fn(PlateformeHistorique $a, PlateformeHistorique $b) => $b->getAnnee() <=> $a->getAnnee());
+        return $historiques[0] ?? null;
+    }
+
     /**
      * @var Collection<int, UtilisateurInscription>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'plateforme_demande')]
+    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'plateforme_demande', cascade: ['remove'], orphanRemoval: true)]
     private Collection $utilisateurInscriptions;
 
     /**
      * @var Collection<int, PlateformeEditeur>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'plateforme_id')]
+    #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'plateforme', cascade: ['remove'], orphanRemoval: true)]
     private Collection $plateformeEditeurs;
 
     /**
      * @var Collection<int, PlateformeHistorique>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'plateforme')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'plateforme', cascade: ['remove'], orphanRemoval: true)]
     private Collection $plateformeHistoriques;
 
     public function __construct()

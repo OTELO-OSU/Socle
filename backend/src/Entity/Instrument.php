@@ -32,7 +32,7 @@ class Instrument
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $annee_acquisition = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $cout = null;
 
     #[ORM\Column(nullable: true)]
@@ -44,7 +44,7 @@ class Instrument
     #[ORM\ManyToOne(inversedBy: 'instruments')]
     private ?Operation $operation = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $annee_achat_envisagee = null;
 
     #[ORM\Column]
@@ -77,8 +77,11 @@ class Instrument
     /**
      * @var Collection<int, FinancementInstrument>
      */
-    #[ORM\OneToMany(targetEntity: FinancementInstrument::class, mappedBy: 'instrument')]
+    #[ORM\OneToMany(targetEntity: FinancementInstrument::class, mappedBy: 'instrument', cascade: ['remove'], orphanRemoval: true)]
     private Collection $financementInstruments;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $cout_maintenance = null;
 
     public function __construct()
     {
@@ -156,7 +159,7 @@ class Instrument
         return $this->cout;
     }
 
-    public function setCout(float $cout): static
+    public function setCout(?float $cout): static
     {
         $this->cout = $cout;
 
@@ -204,7 +207,7 @@ class Instrument
         return $this->annee_achat_envisagee;
     }
 
-    public function setAnneeAchatEnvisagee(int $annee_achat_envisagee): static
+    public function setAnneeAchatEnvisagee(?int $annee_achat_envisagee): static
     {
         $this->annee_achat_envisagee = $annee_achat_envisagee;
 
@@ -216,7 +219,7 @@ class Instrument
         return $this->futur;
     }
 
-    public function setFutur(bool $futur): static
+    public function setFutur(?bool $futur): static
     {
         $this->futur = $futur;
 
@@ -351,6 +354,18 @@ class Instrument
                 $financementInstrument->setInstrument(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCoutMaintenance(): ?float
+    {
+        return $this->cout_maintenance;
+    }
+
+    public function setCoutMaintenance(?float $cout_maintenance): static
+    {
+        $this->cout_maintenance = $cout_maintenance;
 
         return $this;
     }

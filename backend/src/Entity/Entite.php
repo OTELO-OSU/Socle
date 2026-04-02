@@ -52,7 +52,7 @@ class Entite
     /**
      * @var Collection<int, PlateformeHistoriqueTutelle>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'tutelle_id')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'tutelle')]
     private Collection $plateformeHistoriqueTutelles;
 
     /**
@@ -86,6 +86,13 @@ class Entite
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getNom(): ?string
@@ -244,7 +251,7 @@ class Entite
     {
         if (!$this->plateformeHistoriqueTutelles->contains($plateformeHistoriqueTutelle)) {
             $this->plateformeHistoriqueTutelles->add($plateformeHistoriqueTutelle);
-            $plateformeHistoriqueTutelle->setTutelleId($this);
+            $plateformeHistoriqueTutelle->setTutelle($this);
         }
 
         return $this;
@@ -254,8 +261,8 @@ class Entite
     {
         if ($this->plateformeHistoriqueTutelles->removeElement($plateformeHistoriqueTutelle)) {
             // set the owning side to null (unless already changed)
-            if ($plateformeHistoriqueTutelle->getTutelleId() === $this) {
-                $plateformeHistoriqueTutelle->setTutelleId(null);
+            if ($plateformeHistoriqueTutelle->getTutelle() === $this) {
+                $plateformeHistoriqueTutelle->setTutelle(null);
             }
         }
 

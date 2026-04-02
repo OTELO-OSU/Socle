@@ -10,6 +10,7 @@ use App\Entity\Corps;
 use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
+use App\Entity\FinancementInstrument;
 use App\Entity\Operation;
 use App\Entity\Parametre;
 use App\Entity\Plateforme;
@@ -61,7 +62,7 @@ class PlateformeService
 
         $plateforme = new Plateforme();
         $plateformeHistorique = new PlateformeHistorique();
-        $plateformeHistorique->setPlateforme($plateforme);
+        $plateforme->addPlateformeHistorique($plateformeHistorique);
         $plateformeHistorique->setNomOfficiel($nom);
         $plateformeHistorique->setAnnee($this->getAnneeDeSaisieEnCours());
         $plateformeHistorique->setBrouillon(true);
@@ -114,8 +115,14 @@ class PlateformeService
                     $plateformeHisto->setSiteWeb($value);
                     break;
                 case 'ville_id':
-                    $plateformeHisto->setVille($this->em->getReference(Ville::class, $value));
-                    break;
+                    if ($value === null) {
+                        $plateformeHisto->setVille(null);
+                        break;
+                    } else {
+                        $plateformeHisto->setVille($this->em->getReference(Ville::class, $value));
+                        break;
+                    }
+
                 case 'logo_url':
                     $plateformeHisto->setLogoUrl($value);
                     break;
@@ -123,8 +130,13 @@ class PlateformeService
                     $plateformeHisto->setAutreTypeLabellisation($value);
                     break;
                 case 'laboratoire_operateur_id':
-                    $plateformeHisto->setLaboratoireOperateur($this->em->getReference(Entite::class, $value));
-                    break;
+                    if ($value === null) {
+                        $plateformeHisto->setLaboratoireOperateur(null);
+                        break;
+                    } else {
+                        $plateformeHisto->setLaboratoireOperateur($this->em->getReference(Entite::class, $value));
+                        break;
+                    }
                 case 'tutelle_principale':
                     $tutellePrincipaleActuelle = $plateformeHisto->getPlateformeHistoriqueTutelles();
                     foreach ($tutellePrincipaleActuelle as $record) {
@@ -151,6 +163,7 @@ class PlateformeService
                             $newRecord->setTutelle($tutellePrincipale);
                             $newRecord->setPrincipale(true);
                             $plateformeHisto->addPlateformeHistoriqueTutelle($newRecord);
+                            $this->em->persist($newRecord);
                         }
                     }
                     break;
@@ -180,6 +193,7 @@ class PlateformeService
                             $newRecord->setTutelle($tutellePrincipale);
                             $newRecord->setPrincipale(false);
                             $plateformeHisto->addPlateformeHistoriqueTutelle($newRecord);
+                            $this->em->persist($newRecord);
                         }
                     }
                     break;
@@ -323,17 +337,26 @@ class PlateformeService
                 case "instrument_actuel":
                     $instrumentsActuels = $plateformeHisto->getInstruments();
                     foreach ($instrumentsActuels as $instrumentExistant) {
+                        // Ne traiter ici que les instruments actuels.
+                        if ($instrumentExistant->isFutur()) {
+                            continue;
+                        }
+
                         $instrumentId = $instrumentExistant->getId();
                         $existeDeja = false;
                         foreach ($value as $instrument) {
-                            if ($instrument["id"] === null) continue;
+                            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
                             if ($instrument["id"] == $instrumentId) {
                                 $existeDeja = true;
                                 // Overrider les champs de l'instrument
                                 $instrumentExistant->setNom($instrument["nom"]);
                                 $instrumentExistant->setMarque($instrument["marque"]);
                                 $instrumentExistant->setModele($instrument["modele"]);
-                                $instrumentExistant->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                                if ($instrument["annee_acquisition"] !== null) {
+                                    $instrumentExistant->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                                } else {
+                                    $instrumentExistant->setAnneeAcquisition(null);
+                                }
                                 $instrumentExistant->setCout($instrument["cout"]);
                                 $instrumentExistant->setValeurRemplacement($instrument["valeur_remplacement"]);
                                 $instrumentExistant->setDureeUtilisation($instrument["duree_utilisation"]);
@@ -345,6 +368,7 @@ class PlateformeService
                                 $instrumentExistant->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"]);
                                 $instrumentExistant->setMutualiseSite($instrument["mutualisation_site"]);
                                 $instrumentExistant->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"]);
+                                $instrumentExistant->setCoutMaintenance($instrument["cout_maintenance"]);
 
                                 $mutualisationAutreInstrumentDetailleActuelle = $instrumentExistant->getInstrumentMutualisations();
                                 foreach ($mutualisationAutreInstrumentDetailleActuelle as $record) {
@@ -391,11 +415,11 @@ class PlateformeService
                                             $financementExiste = true;
 
                                             // Overrider les champs du financement
-                                            $financement->setTaux($financeur["taux"]);
+                                            $financement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
                                             break;
                                         }
                                     }
-                                    if ($financementExiste) {
+                                    if (!$financementExiste) {
                                         $this->em->remove($financement);
                                     }
                                 }
@@ -414,7 +438,7 @@ class PlateformeService
                                         $newFinancement = new \App\Entity\FinancementInstrument();
                                         $newFinancement->setFinanceur($newFinanceur);
                                         $newFinancement->setInstrument($instrumentExistant);
-                                        $newFinancement->setTaux($financeur["taux"]);
+                                        $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
                                         $this->em->persist($newFinancement);
                                     }
                                 }
@@ -429,43 +453,51 @@ class PlateformeService
 
                     // Ajouter les nouveaux instruments
                     foreach ($value as $instrument) {
-                        if ($instrument["id"] === null) {
+                        if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
                             $newInstrument = new \App\Entity\Instrument();
                             $newInstrument->setPlateformeHistorique($plateformeHisto);
                             $newInstrument->setNom($instrument["nom"]);
                             $newInstrument->setMarque($instrument["marque"]);
                             $newInstrument->setModele($instrument["modele"]);
-                            $newInstrument->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                            if ($instrument["annee_acquisition"] !== null) {
+                                $newInstrument->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                            } else {
+                                $newInstrument->setAnneeAcquisition(null);
+                            }
                             $newInstrument->setCout($instrument["cout"]);
                             $newInstrument->setValeurRemplacement($instrument["valeur_remplacement"]);
                             $newInstrument->setDureeUtilisation($instrument["duree_utilisation"]);
                             $newInstrument->setFutur(false);
 
-                            $newInstrument->setContratMaintenance($this->em->getReference(ContratMaintenance::class, $instrument["type_contrat_id"]));
+                            $newInstrument->setContratMaintenance($this->em->getReference(ContratMaintenance::class, $instrument["contrat_maintenance_id"]));
                             $newInstrument->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"]);
                             $newInstrument->setFournisseurContrat($instrument["fournisseur_contrat"]);
                             $newInstrument->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"]);
                             $newInstrument->setMutualiseSite($instrument["mutualisation_site"]);
                             $newInstrument->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"]);
+                            $newInstrument->setCoutMaintenance($instrument["cout_maintenance"]);
 
-                            foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
-                                $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
-                                $newRecord = new \App\Entity\InstrumentMutualisation();
-                                $newRecord->setInstrumentSource($newInstrument);
-                                $newRecord->setInstrumentCible($instrumentCible);
-                                $this->em->persist($newRecord);
+                            $plateformeHisto->addInstrument($newInstrument);
+                            $this->em->persist($newInstrument);
+
+                            if (array_key_exists("mutualisation_autre_instrument_detaille", $instrument)) {
+                                foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
+                                    $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
+                                    $newRecord = new \App\Entity\InstrumentMutualisation();
+                                    $newRecord->setInstrumentSource($newInstrument);
+                                    $newRecord->setInstrumentCible($instrumentCible);
+                                    $this->em->persist($newRecord);
+                                }
                             }
 
                             foreach ($instrument["source_financement"] as $financeur) {
                                 $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                $newFinancement = new \App\Entity\FinancementInstrument();
+                                $newFinancement = new FinancementInstrument();
                                 $newFinancement->setFinanceur($financeurEntite);
                                 $newFinancement->setInstrument($newInstrument);
                                 $newFinancement->setTaux($financeur["taux"]);
                                 $this->em->persist($newFinancement);
                             }
-                            $plateformeHisto->addInstrument($newInstrument);
-                            $this->em->persist($newInstrument);
                         }
                     }
 
@@ -473,10 +505,15 @@ class PlateformeService
                 case "instrument_futur":
                     $instrumentsActuels = $plateformeHisto->getInstruments();
                     foreach ($instrumentsActuels as $instrumentExistant) {
+                        // Ne traiter ici que les instruments futurs.
+                        if (!$instrumentExistant->isFutur()) {
+                            continue;
+                        }
+
                         $instrumentId = $instrumentExistant->getId();
                         $existeDeja = false;
                         foreach ($value as $instrument) {
-                            if ($instrument["id"] === null) continue;
+                            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
                             if ($instrument["id"] == $instrumentId) {
                                 $existeDeja = true;
                                 // Overrider les champs de l'instrument
@@ -517,7 +554,7 @@ class PlateformeService
                                     }
                                     if (!$financeurExiste) {
                                         $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                        $newFinancement = new \App\Entity\FinancementInstrument();
+                                        $newFinancement = new FinancementInstrument();
                                         $newFinancement->setFinanceur($newFinanceur);
                                         $newFinancement->setInstrument($instrumentExistant);
                                         $newFinancement->setTaux($financeur["taux"]);
@@ -535,7 +572,7 @@ class PlateformeService
 
                     // Ajouter les nouveaux instruments
                     foreach ($value as $instrument) {
-                        if ($instrument["id"] === null) {
+                        if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
                             $newInstrument = new \App\Entity\Instrument();
                             $newInstrument->setPlateformeHistorique($plateformeHisto);
                             $newInstrument->setNom($instrument["nom"]);
@@ -546,6 +583,9 @@ class PlateformeService
                             $newInstrument->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
                             $newInstrument->setFutur(true);
 
+                            $plateformeHisto->addInstrument($newInstrument);
+                            $this->em->persist($newInstrument);
+
                             foreach ($instrument["source_financement"] as $financeur) {
                                 $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
                                 $newFinancement = new \App\Entity\FinancementInstrument();
@@ -554,8 +594,6 @@ class PlateformeService
                                 $newFinancement->setTaux($financeur["taux"]);
                                 $this->em->persist($newFinancement);
                             }
-                            $plateformeHisto->addInstrument($newInstrument);
-                            $this->em->persist($newInstrument);
                         }
                     }
                     break;
@@ -575,7 +613,7 @@ class PlateformeService
                     $plateformeHisto->setMissionFraisGeneraux($value);
                     break;
                 case "determination_tarif_plateforme_id":
-                    $plateformeHisto->setDeterminationTarifPlateforme($this->em->getReference(DeterminationTarifMethode::class, $value));
+                    $plateformeHisto->setDeterminationTarifPlateforme($value !== null ? $this->em->getReference(DeterminationTarifMethode::class, $value) : null);
                     break;
                 case "contribution_tutelle_taux":
                     $plateformeHisto->setContributionTutelleTaux($value);
@@ -589,7 +627,7 @@ class PlateformeService
                             if ($detail["tutelle_id"] == $entiteId) {
                                 $existeDeja = true;
                                 // Overrider les champs du detail
-                                $record->setTaux($detail["pourcentage"]);
+                                $record->setTaux($detail["taux"]);
                                 break;
                             }
                         }
@@ -615,7 +653,7 @@ class PlateformeService
                             $newRecord->setPlateformeHistorique($plateformeHisto);
                             $financeur = $this->em->getReference(Entite::class, $entiteId);
                             $newRecord->setFinanceur($financeur);
-                            $newRecord->setTaux($detail["pourcentage"]);
+                            $newRecord->setTaux($detail["taux"]);
                             $plateformeHisto->addContributionTutelle($newRecord);
                             $this->em->persist($newRecord);
                         }

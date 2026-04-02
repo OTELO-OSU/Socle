@@ -39,13 +39,13 @@ class PosteFutur
     /**
      * @var Collection<int, PosteFuturBap>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'poste_futur')]
+    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'poste_futur', cascade: ['remove'], orphanRemoval: true)]
     private Collection $posteFuturBaps;
 
     /**
      * @var Collection<int, PosteFuturEmploiType>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'poste_futur')]
+    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'poste_futur', cascade: ['remove'], orphanRemoval: true)]
     private Collection $posteFuturEmploiTypes;
 
     public function __construct()

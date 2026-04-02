@@ -21,8 +21,8 @@ final class PlateformeController extends AbstractController
         $json = json_decode($request->getContent(), true);
         if (!isset($json['nom'])) return $this->json(['message' => 'Le nom officiel de la plateforme est requis.'], 400);
 
-        $this->plateformeService->creerPlateforme($json['nom']);
-        return $this->json(['message' => 'Plateforme créée avec succès.'], 201);
+        $plt = $this->plateformeService->creerPlateforme($json['nom']);
+        return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getLastHistorique()->getId()], 201);
     }
 
     #[Route('/plateforme/sauvegarder', methods: ['POST'])]
@@ -30,16 +30,20 @@ final class PlateformeController extends AbstractController
     {
         $json = json_decode($request->getContent(), true);
         $brouillon = $json['brouillon'] ?? null;
-        if (!$brouillon) return $this->json(['message' => 'Le statut de l\'enregistrement doit être spécifié'], 400);
+        if ($brouillon === null) return $this->json(['message' => 'Le statut de l\'enregistrement doit être spécifié'], 400);
 
         $dto = $this->serializer->deserialize($request->getContent(), PlateformeHistoriqueDTO::class, 'json');
 
         if ($brouillon) {
             // Plateforme enregistrée en tant que brouillon, on ne fait rien de plus
-            $errors = $this->validator->validate($dto, null);
+            $errors = $this->validator->validate($dto, null, ['Default', 'brouillon']);
         } else {
             // Plateforme enregistrée pour validation. Vérification du groupe validation
-            $errors = $this->validator->validate($dto, null, ['validation']);
+            $errors = $this->validator->validate($dto, null, ['Default', 'validation']);
+
+            if (count($errors) === 0) {
+                $errors = $this->validator->validate($dto, null, ['post_validation']);
+            }
         }
 
         $errorMessages = [];
