@@ -411,7 +411,7 @@ class PlateformeControllerTest extends WebTestCase
             "fluide_energie" => 10.5,
             "mission_frais_generaux" => 10.6,
             "determination_tarif_plateforme_id" => $this->em->getRepository(DeterminationTarifMethode::class)->findOneBy([])->getId(),
-            "contribution_tutelle_taux" => 50,
+            "contribution_tutelle_taux" => 25,
             "contribution_tutelle_detail" => [
                 [
                     "tutelle_id" => $entiteIds[0],
@@ -422,7 +422,7 @@ class PlateformeControllerTest extends WebTestCase
                     "taux" => 50,
                 ]
             ],
-            "contribution_fond_public_taux" => 50,
+            "contribution_fond_public_taux" => 25,
             "contribution_fond_prive_taux" => 10,
             "contribution_credit_taux" => 20,
             "contribution_projet_recherche_taux" => 4,
@@ -439,7 +439,7 @@ class PlateformeControllerTest extends WebTestCase
             "modele_57_1224_taux" => 15,
             "utilisation_fonctionnement_taux" => 50,
             "utilisation_maintenance_taux" => 10,
-            "utilisation_developemment_taux" => 20,
+            "utilisation_developpement_taux" => 20,
             "utilisation_panne_taux" => 15,
             "utilisation_temps_mort_taux" => 5,
             "utilisation_equipe_operante_taux" => 50,
@@ -3640,6 +3640,1808 @@ class PlateformeControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             'La somme des pourcentages de contribution doit être égale à 100%.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeDetailContributionTutelleManquanteSansContribution(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["contribution_tutelle_taux"] = 0;
+        $plateformeData["contribution_tutelle_detail"] = null;
+        $plateformeData["contribution_fond_public_taux"] = 50;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeDetailContributionTutelleManquanteAvecContribution(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["contribution_tutelle_detail"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution des tutelles est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution des tutelles est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeDetailContributionTutelleTutelleNonPrecise(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["contribution_tutelle_detail"][0]["tutelle_id"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'La tutelle est requise.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'La tutelle est requise.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeDetailContributionTutelleTauxNonPrecise(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["contribution_tutelle_detail"][0]["taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution de la tutelle est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution de la tutelle est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeDetailContributionTutelleTauxHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["contribution_tutelle_detail"][0]["taux"] = 110;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution de la tutelle doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de contribution de la tutelle doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansLabellisationQualiteBool(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["labellisation_qualite"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le statut de labellisation qualité de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansProcedureTransparenteTous(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["procedure_transparente_tous"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le statut de procédure transparente de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansProcedureTransparentePrestaExterieur(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["procedure_transparente_prestation_exterieure"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le statut de procédure transparente pour les prestations extérieures de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansTauxAccueilInternational(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["accueil_international_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'accueil international de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeHorsBornesTauxAccueilInternational(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["accueil_international_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'accueil international de la plateforme doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'accueil international de la plateforme doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele772424Null(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_77_2424_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 24 heures sur 24 est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele772424HorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_77_2424_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele771224Null(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_77_1224_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 12 heures sur 24 est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele771224HorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_77_1224_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele572424Null(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_57_2424_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 24 heures sur 24 est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele572424HorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_57_2424_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele571224Null(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_57_1224_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 12 heures sur 24 est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModele571224HorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_57_1224_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeModeleTotalHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["modele_57_1224_taux"] = 100;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'La somme des pourcentages de modèles d\'utilisation doit être égale à 100%.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationFonctionnementNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_fonctionnement_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en fonctionnement est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationFonctionnementHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_fonctionnement_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en fonctionnement doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en fonctionnement doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationMaintenanceNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_maintenance_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en maintenance est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationMaintenanceHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_maintenance_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en maintenance doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en maintenance doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationDevelopementNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_developpement_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en développement est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationDeveloppementHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_developpement_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en développement doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en développement doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationPanneNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_panne_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en panne est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationPanneHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_panne_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en panne doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en panne doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationTempsMortNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_temps_mort_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en temps mort est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationTempsMortHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_temps_mort_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en temps mort doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme en temps mort doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTotalTauxUtilisationHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_temps_mort_taux"] = 100;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'La somme des pourcentages de taux d\'utilisation doit être égale à 100%.',
             $data['messageArray'][0]
         );
 

@@ -381,18 +381,27 @@ class PlateformeHistoriqueDTO
     #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de contribution des tutelle doit être compris entre 0 et 100.')]
     public ?int $contribution_tutelle_taux = null;
 
+    #[Assert\When(
+        expression: 'this.contribution_tutelle_taux !== null && this.contribution_tutelle_taux !== 0',
+        constraints: [
+            new Assert\NotBlank(
+                message: 'Le taux de contribution des tutelles est requis.'
+            )
+        ]
+    )]
     #[Assert\All([
         new Assert\Collection(
             fields: [
                 'tutelle_id' => [
                     new Assert\Required([
-                        new Assert\NotBlank(message: 'L\'ID de la tutelle est requis.'),
+                        new Assert\NotBlank(message: 'La tutelle est requise.'),
                         new Assert\Type('integer'),
                     ])
                 ],
                 'taux' => [
                     new Assert\Required([
-                        new Assert\NotBlank(message: 'Le taux de contribution est requis.'),
+                        new Assert\NotBlank(message: 'Le taux de contribution de la tutelle est requis.'),
+                        new Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de contribution de la tutelle doit être compris entre 0 et 100.'),
                         new Assert\Type('integer'),
                     ])
                 ],
@@ -445,6 +454,7 @@ class PlateformeHistoriqueDTO
     public function contributionsEgalCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
+        $somme += $this->contribution_tutelle_taux;
         $somme += $this->contribution_fond_public_taux;
         $somme += $this->contribution_fond_prive_taux;
         $somme += $this->contribution_credit_taux;
@@ -458,41 +468,40 @@ class PlateformeHistoriqueDTO
         }
     }
 
-    #[Assert\NotBlank(groups: ['instrument_national'])]
     public ?float $dotation_instrument_national = null;
 
     # Activités
     ## Accesibilité
-    #[Assert\NotNull(groups: ['validation'])]
+    #[Assert\NotNull(groups: ['validation'], message: 'Le statut de labellisation qualité de la plateforme est requis.')]
     public ?bool $labellisation_qualite = null;
 
     public ?string $nom_labelisation_qualite = null;
 
-    #[Assert\NotNull(groups: ['validation'])]
+    #[Assert\NotNull(groups: ['validation'], message: 'Le statut de procédure transparente de la plateforme est requis.')]
     public ?bool $procedure_transparente_tous = null;
 
-    #[Assert\NotNull(groups: ['validation'])]
+    #[Assert\NotNull(groups: ['validation'], message: 'Le statut de procédure transparente pour les prestations extérieures de la plateforme est requis.')]
     public ?bool $procedure_transparente_prestation_exterieure = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'accueil international de la plateforme est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'accueil international de la plateforme doit être compris entre 0 et 100.')]
     public ?int $accueil_international_taux = null;
 
     ## Utilisation
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 24 heures sur 24 est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.')]
     public ?int $modele_77_2424_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 12 heures sur 24 est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de fonctionnement de la plateforme sur le modèle 7 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.')]
     public ?int $modele_77_1224_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 24 heures sur 24 est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 24 heures sur 24 doit être compris entre 0 et 100.')]
     public ?int $modele_57_2424_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 12 heures sur 24 est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux de fonctionnement de la plateforme sur le modèle 5 jours sur 7, 12 heures sur 24 doit être compris entre 0 et 100.')]
     public ?int $modele_57_1224_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
@@ -511,24 +520,24 @@ class PlateformeHistoriqueDTO
         }
     }
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme en fonctionnement est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme en fonctionnement doit être compris entre 0 et 100.')]
     public ?int $utilisation_fonctionnement_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme en maintenance est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme en maintenance doit être compris entre 0 et 100.')]
     public ?int $utilisation_maintenance_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
-    public ?int $utilisation_developemment_taux = null;
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme en développement est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme en développement doit être compris entre 0 et 100.')]
+    public ?int $utilisation_developpement_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme en panne est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme en panne doit être compris entre 0 et 100.')]
     public ?int $utilisation_panne_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme en temps mort est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme en temps mort doit être compris entre 0 et 100.')]
     public ?int $utilisation_temps_mort_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
@@ -537,7 +546,7 @@ class PlateformeHistoriqueDTO
         $somme = 0;
         $somme += $this->utilisation_fonctionnement_taux;
         $somme += $this->utilisation_maintenance_taux;
-        $somme += $this->utilisation_developemment_taux;
+        $somme += $this->utilisation_developpement_taux;
         $somme += $this->utilisation_panne_taux;
         $somme += $this->utilisation_temps_mort_taux;
 
@@ -570,7 +579,7 @@ class PlateformeHistoriqueDTO
         $somme = 0;
         $somme += $this->utilisation_fonctionnement_taux;
         $somme += $this->utilisation_maintenance_taux;
-        $somme += $this->utilisation_developemment_taux;
+        $somme += $this->utilisation_developpement_taux;
         $somme += $this->utilisation_panne_taux;
         $somme += $this->utilisation_temps_mort_taux;
 

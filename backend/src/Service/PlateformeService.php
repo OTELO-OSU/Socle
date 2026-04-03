@@ -637,25 +637,27 @@ class PlateformeService
                             $this->em->remove($record);
                         }
                     }
-                    foreach ($value as $detail) {
-                        $entiteId = $detail["tutelle_id"];
-                        $existeDeja = false;
-                        foreach ($detailActuel as $record) {
-                            if ($record->getFinanceur()->getId() == $entiteId) {
-                                // Le detail existe déjà, pas besoin de le recréer
-                                $existeDeja = true;
-                                break;
+                    if (is_array($value)) {
+                        foreach ($value as $detail) {
+                            $entiteId = $detail["tutelle_id"];
+                            $existeDeja = false;
+                            foreach ($detailActuel as $record) {
+                                if ($record->getFinanceur()->getId() == $entiteId) {
+                                    // Le detail existe déjà, pas besoin de le recréer
+                                    $existeDeja = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!$existeDeja) {
-                            // Le detail n'existe pas encore, il doit être créé
-                            $newRecord = new ContributionTutelle();
-                            $newRecord->setPlateformeHistorique($plateformeHisto);
-                            $financeur = $this->em->getReference(Entite::class, $entiteId);
-                            $newRecord->setFinanceur($financeur);
-                            $newRecord->setTaux($detail["taux"]);
-                            $plateformeHisto->addContributionTutelle($newRecord);
-                            $this->em->persist($newRecord);
+                            if (!$existeDeja) {
+                                // Le detail n'existe pas encore, il doit être créé
+                                $newRecord = new ContributionTutelle();
+                                $newRecord->setPlateformeHistorique($plateformeHisto);
+                                $financeur = $this->em->getReference(Entite::class, $entiteId);
+                                $newRecord->setFinanceur($financeur);
+                                $newRecord->setTaux($detail["taux"]);
+                                $plateformeHisto->addContributionTutelle($newRecord);
+                                $this->em->persist($newRecord);
+                            }
                         }
                     }
                     break;
