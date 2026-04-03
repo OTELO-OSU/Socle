@@ -557,31 +557,30 @@ class PlateformeHistoriqueDTO
         }
     }
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme par l\'équipe opérante est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme par l\'équipe opérante doit être compris entre 0 et 100.')]
     public ?int $utilisation_equipe_operante_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme par la collaboration interne est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme par la collaboration interne doit être compris entre 0 et 100.')]
     public ?int $utilisation_collaboration_interne_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme par la collaboration externe est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme par la collaboration externe doit être compris entre 0 et 100.')]
     public ?int $utilisation_collaboration_externe_taux = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\Range(min: 0, max: 100)]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le taux d\'utilisation de la plateforme par la prestation de service est requis.')]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'Le taux d\'utilisation de la plateforme par la prestation de service doit être compris entre 0 et 100.')]
     public ?int $utilisation_prestation_service_taux = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function TauxUtilisationDetaillePlateformeSommeCentPourcent(ExecutionContextInterface $context): void
     {
         $somme = 0;
-        $somme += $this->utilisation_fonctionnement_taux;
-        $somme += $this->utilisation_maintenance_taux;
-        $somme += $this->utilisation_developpement_taux;
-        $somme += $this->utilisation_panne_taux;
-        $somme += $this->utilisation_temps_mort_taux;
+        $somme += $this->utilisation_equipe_operante_taux;
+        $somme += $this->utilisation_collaboration_interne_taux;
+        $somme += $this->utilisation_collaboration_externe_taux;
+        $somme += $this->utilisation_prestation_service_taux;
 
         if ($somme !== 100) {
             $context->buildViolation('La somme des pourcentages de taux d\'utilisation doit être égale à 100%.')
@@ -591,59 +590,107 @@ class PlateformeHistoriqueDTO
     }
 
     ## Empreinte Carbone
-    #[Assert\NotNull(groups: ['validation'])]
+    #[Assert\NotNull(groups: ['validation'], message: 'Le statut de réalisation du bilan carbone global de la plateforme est requis.')]
     public ?bool $bges_realise = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone domicile-travail de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone domicile-travail de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_domicile_travail = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone mission de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone mission de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_mission = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone mission externe de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone mission externe de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_mission_ext = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone consommable de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone consommable de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_consommable = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone équipement de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone équipement de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_equipement = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone envoi d\'échantillon de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone envoi d\'échantillon de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_envoi_echantillon = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone bâtiment de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone bâtiment de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_batiment = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\When(
+        expression: 'this.bges_realise === true',
+        constraints: [
+            new Assert\NotBlank(message: 'Le bilan carbone déchet de la plateforme est requis si le bilan carbone global a été réalisé.')
+        ],
+        groups: ['validation']
+    )]
+    #[Assert\PositiveOrZero(message: 'Le bilan carbone déchet de la plateforme doit être supérieur ou égal à 0.')]
     public ?float $bges_dechet = null;
 
     # Publication
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre de publications de l\'équipe opérante de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre de publications de l\'équipe opérante de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_equipe_operante = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre de publications de collaboration interne de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre de publications de collaboration interne de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_collaboration_interne = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre de publications de collaboration externe de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre de publications de collaboration externe de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_collaboration_externe = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre d\'autre type de publication de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre d\'autre type de publication de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_autre_type = null;
 
-    #[Assert\NotBlank(groups: ['validation'])]
-    #[Assert\PositiveOrZero()]
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre de publications de thèse de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre de publications de thèse de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_these = null;
 }

@@ -5447,4 +5447,2232 @@ class PlateformeControllerTest extends WebTestCase
 
         self::assertEmailCount(0);
     }
+
+    public function testSauvegarderPlateformeTauxUtilisationEquipeOperanteNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_equipe_operante_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par l\'équipe opérante est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationEquipeOperanteHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_equipe_operante_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par l\'équipe opérante doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par l\'équipe opérante doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationCollabInterneNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_collaboration_interne_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration interne est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationCollabInterneHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_collaboration_interne_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration interne doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration interne doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationCollabExterneNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_collaboration_externe_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration externe est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationCollabExterneHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_collaboration_externe_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration externe doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la collaboration externe doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationPrestationServiceNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_prestation_service_taux"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la prestation de service est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationPrestationServiceHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_prestation_service_taux"] = 101;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la prestation de service doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le taux d\'utilisation de la plateforme par la prestation de service doit être compris entre 0 et 100.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeTauxUtilisationParQuiTotalHorsBornes(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["utilisation_prestation_service_taux"] = 100;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'La somme des pourcentages de taux d\'utilisation doit être égale à 100%.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesRealiseNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_realise"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le statut de réalisation du bilan carbone global de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesRealiseFalseToutANull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_realise"] = false;
+        $plateformeData["bges_domicile_travail"] = null;
+        $plateformeData["bges_mission"] = null;
+        $plateformeData["bges_mission_ext"] = null;
+        $plateformeData["bges_consommable"] = null;
+        $plateformeData["bges_equipement"] = null;
+        $plateformeData["bges_envoi_echantillon"] = null;
+        $plateformeData["bges_batiment"] = null;
+        $plateformeData["bges_dechet"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesDomicileTravailNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_domicile_travail"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone domicile-travail de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesDomicileTravailNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_domicile_travail"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone domicile-travail de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone domicile-travail de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesMissionNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_mission"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesMissionNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_mission"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesMissionExtNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_mission_ext"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission externe de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesMissionExtNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_mission_ext"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission externe de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone mission externe de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesConsommableNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_consommable"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone consommable de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesConsommableNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_consommable"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone consommable de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone consommable de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesEquipementNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_equipement"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone équipement de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesEquipementNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_equipement"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone équipement de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone équipement de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesEnvoyeEchantillonNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_envoi_echantillon"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone envoi d\'échantillon de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesEnvoyeEchantillonNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_envoi_echantillon"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone envoi d\'échantillon de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone envoi d\'échantillon de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesBatimentNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_batiment"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone bâtiment de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesBatimentNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_batiment"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone bâtiment de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone bâtiment de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesDechetNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_dechet"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone déchet de la plateforme est requis si le bilan carbone global a été réalisé.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeBgesDechetNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["bges_dechet"] = -2;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone déchet de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le bilan carbone déchet de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationEquipeOperanteNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_equipe_operante"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de l\'équipe opérante de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationEquipeOperanteNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_equipe_operante"] = -1;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de l\'équipe opérante de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de l\'équipe opérante de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationCollaborationInterneNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_collaboration_interne"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration interne de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationCollaborationInterneNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_collaboration_interne"] = -1;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration interne de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration interne de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationCollaborationExterneNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_collaboration_externe"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration externe de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationCollaborationExterneNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_collaboration_externe"] = -1;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration externe de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de collaboration externe de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationAutreTypeNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_autre_type"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre d\'autre type de publication de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationAutreTypeNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_autre_type"] = -1;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre d\'autre type de publication de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre d\'autre type de publication de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationTheseNull(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_these"] = null;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Plateforme sauvegardée avec succès.',
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de thèse de la plateforme est requis.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePublicationTheseNegatif(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/creer',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["publication_these"] = -1;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de thèse de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'POST',
+            '/api/plateforme/sauvegarder',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            'Le nombre de publications de thèse de la plateforme doit être supérieur ou égal à 0.',
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
 }
