@@ -19,7 +19,10 @@ export default function HeaderAppBar() {
         <Box>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>POE</Typography>
+                    <Typography variant="h6" component={RouterLink} to="/" sx={{ flexGrow: 1 }} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        POE
+                    </Typography>
+
                     {authContext?.estAdmin &&
                         <Button color='inherit' startIcon={<AdminIcon />}>
                             Admin
