@@ -23,7 +23,7 @@ class UtilisateurInscriptionDTO
     public ?string $prenom = null;
 
     #[NotBlank(groups: ['inscription'], message: 'L\'email est obligatoire')]
-    #[Assert\Email(groups: ['inscription'])]
+    #[Assert\Email(groups: ['inscription'], message: 'L\'email doit être valide')]
     public ?string $email = null;
 
     #[NotBlank(groups: ['basic'], message: 'Le mot de passe est obligatoire')]
