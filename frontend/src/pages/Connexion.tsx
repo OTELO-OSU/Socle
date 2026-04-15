@@ -7,6 +7,7 @@ import { AuthContext } from "../context/authContext";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Connexion() {
     const [emailError, setEmailError] = useState(false);
@@ -16,6 +17,7 @@ export default function Connexion() {
     const [open, setOpen] = useState(false);
     const authContext = useContext(AuthContext);
     const snackbarContext = useContext(SnackbarContext);
+    const naviagate = useNavigate();
 
     function handleClickOpen() {
         setOpen(true);
@@ -57,6 +59,11 @@ export default function Connexion() {
 
         try {
             await authContext?.connexion(email, password);
+            snackbarContext?.trigger({
+                message: 'Connexion réussie',
+                couleur: 'success',
+            });
+            naviagate('/');
         } catch (e) {
             const error = e as AxiosError<ApiError>;
             if (error.response?.status === 401) {
