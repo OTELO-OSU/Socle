@@ -3,14 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
 import './index.css'
 import App from './App'
-import { TokenProvider } from './provider/TokenProvider'
+import { AuthProvider } from './provider/AuthProvider'
+import { SnackbarProvider } from './provider/SnackbarProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <TokenProvider>
-        <App />
-      </TokenProvider>
+      <AuthProvider>
+        <SnackbarProvider>
+          <App />
+        </SnackbarProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

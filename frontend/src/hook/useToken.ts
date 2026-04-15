@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { TokenContext } from '../context/tokenContext'
+import { TokenContext } from '../context/authContext'
 
 export function useToken() {
   const context = useContext(TokenContext)
