@@ -226,7 +226,13 @@ class AuthService
      */
     private function genererTokenCookieAvecRefreshToken(Utilisateur $user)
     {
-        $token = $this->tokenManager->create($user);
+        $token = $this->tokenManager->createFromPayload($user, [
+            "id" => $user->getId(),
+            "email" => $user->getEmail(),
+            "prenom" => $user->getPrenom(),
+            "nom" => $user->getNom(),
+            "roles" => $user->getRoles()
+        ]);
 
         // Création d'un token
         $refreshToken = bin2hex(random_bytes(64));
