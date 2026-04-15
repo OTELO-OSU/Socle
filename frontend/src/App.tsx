@@ -5,6 +5,9 @@ import Connexion from './pages/Connexion'
 import { Alert, Box, Snackbar } from '@mui/material'
 import { useContext } from 'react'
 import { SnackbarContext } from './context/snackbarContext'
+import OrcidCallback from './pages/OrcidCallback'
+import Inscription from './pages/Inscription'
+import VerificationMailCallback from './pages/VerificationMailCallback'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -28,6 +31,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/connexion" element={<Connexion />} />
+          <Route path="/inscription" element={<Inscription />} />
+          <Route path="/orcid" element={<OrcidCallback />} />
+          <Route path="/verification-email" element={<VerificationMailCallback />} />
         </Routes>
       </Box >
     </>

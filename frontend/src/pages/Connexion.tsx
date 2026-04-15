@@ -8,6 +8,7 @@ import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
 import { useNavigate } from "react-router-dom";
+import { ORCID_URL } from "../utils/constante";
 
 export default function Connexion() {
     const [emailError, setEmailError] = useState(false);
@@ -97,7 +98,6 @@ export default function Connexion() {
                             name="email"
                             placeholder="alice.dubois@gmail.com"
                             autoComplete="email"
-                            autoFocus
                             required
                             fullWidth
                             variant="outlined"
@@ -114,7 +114,6 @@ export default function Connexion() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                            autoFocus
                             required
                             fullWidth
                             variant="outlined"
@@ -144,7 +143,7 @@ export default function Connexion() {
                     <Button
                         fullWidth
                         variant="outlined"
-                        onClick={() => alert('Sign in with ORCID')}
+                        onClick={() => window.location.href = `${ORCID_URL}`}
                         startIcon={<OrcidIcon />}
                     >
                         Se connecter avec ORCID

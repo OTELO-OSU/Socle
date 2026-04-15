@@ -54,4 +54,5 @@ symfony.interceptors.response.use(
 
 export type ApiError = {
   message: string;
+  messageArray: string[];
 };

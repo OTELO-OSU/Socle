@@ -4,6 +4,7 @@ export type TokenContextType = {
   token: string | null
   connexion: (email: string, mdp: string) => Promise<void>
   deconnexion: () => Promise<void>
+  connexionViaOrcid: (code: string) => Promise<void>
   setToken: (value: string | null) => void
   clearToken: () => void
   estConnecte: boolean

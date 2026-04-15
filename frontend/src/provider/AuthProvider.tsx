@@ -32,6 +32,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(data.token);
     }, [setToken]);
 
+    const connexionViaOrcid = useCallback(async (code: string) => {
+        const { data } = await authService.connexionViaOrcid(code);
+        setToken(data.token);
+    }, [setToken]);
+
     const deconnexion = useCallback(async () => {
         if (!token) return;
         await authService.deconnexion(token);
@@ -45,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             clearToken,
             connexion,
             deconnexion,
+            connexionViaOrcid,
             estConnecte: Boolean(token),
             estAdmin: decodedToken?.roles?.includes('ROLE_ADMIN') || false,
             id: decodedToken?.id || null,
@@ -52,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             prenom: decodedToken?.prenom || null,
             nom: decodedToken?.nom || null,
         }),
-        [clearToken, setToken, connexion, deconnexion, token, decodedToken],
+        [clearToken, setToken, connexion, deconnexion, connexionViaOrcid, token, decodedToken],
     )
 
     useEffect(() => {
