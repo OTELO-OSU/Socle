@@ -16,7 +16,7 @@ function App() {
         <Snackbar
           open={snackbarContext!.open}
           autoHideDuration={3000}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           onClose={snackbarContext!.close}
         >
           <Alert severity={snackbarContext!.couleur}
