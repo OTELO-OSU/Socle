@@ -5,7 +5,7 @@ import ConnexionIcon from '@mui/icons-material/Login';
 import InscriptionIcon from '@mui/icons-material/PersonAdd';
 import DeconnexionIcon from '@mui/icons-material/Logout';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { SnackbarContext } from '../context/snackbarContext';
 export default function HeaderAppBar() {
 
@@ -24,14 +24,14 @@ export default function HeaderAppBar() {
 
     return (
         <Box>
-            <AppBar position="static">
+            <AppBar position="fixed">
                 <Toolbar>
                     <Typography variant="h6" component={RouterLink} to="/" sx={{ flexGrow: 1 }} style={{ textDecoration: 'none', color: 'inherit' }}>
                         POE
                     </Typography>
 
                     {authContext?.estAdmin &&
-                        <Button color='inherit' startIcon={<AdminIcon />}>
+                        <Button component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
                             Admin
                         </Button>
                     }

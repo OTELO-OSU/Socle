@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 
 export default function Home() {
     return (
-        <MapContainer className="h-screen w-screen" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
+        <MapContainer className="h-full w-screen" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
         [85, 180],
         ]} scrollWheelZoom={true} maxBoundsViscosity={1.0}
             worldCopyJump={true}
