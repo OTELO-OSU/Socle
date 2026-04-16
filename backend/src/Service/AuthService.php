@@ -324,7 +324,7 @@ class AuthService
         foreach ($admins as $admin) {
             $sujet = "Nouvel utilisateur en attente d'approbation";
             $body = "Bonjour " . $admin->getPrenom() . ",\n\nL'utilisateur " . $user->getEmail() . " a vérifié son adresse email. Veuillez vous connecter à votre espace admin pour valider ou refuser son compte.";
-            $this->mailerService->sendEmailToUser($admin->getEmail(), $sujet, $this->params->get('front_host') . '/administration', $body);
+            $this->mailerService->sendEmailToUser($admin->getEmail(), $sujet, $body, $this->params->get('front_host') . '/administration');
         }
     }
 }
