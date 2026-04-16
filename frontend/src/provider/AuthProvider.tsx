@@ -1,26 +1,44 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { STORAGE_KEY, AuthContext } from '../context/authContext'
-import { registerTokenClearer, registerTokenSetter } from '../bridge/tokenBridge'
+import { AuthContext } from '../context/authContext'
+import { registerTokenClearer, registerTokenSetter, syncTokenOutside } from '../bridge/tokenBridge'
 import { decodeToken } from '../utils/jwt'
 import * as authService from '../services/authService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setTokenState] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY))
+    const [token, setTokenState] = useState<string | null>(null)
+    const [isAuthLoading, setIsAuthLoading] = useState(true)
 
     const setToken = useCallback((value: string | null) => {
+        syncTokenOutside(value)
         setTokenState(value)
-
-        if (value) {
-            localStorage.setItem(STORAGE_KEY, value)
-            return
-        }
-
-        localStorage.removeItem(STORAGE_KEY)
     }, [])
 
     const clearToken = useCallback(() => {
         setToken(null)
     }, [setToken])
+
+    useEffect(() => {
+        let isMounted = true;
+
+        (async () => {
+            try {
+                const { data } = await authService.refreshSession();
+                if (typeof data?.token === 'string' && data.token.length > 0) {
+                    setToken(data.token);
+                }
+            } catch {
+                clearToken();
+            } finally {
+                if (isMounted) {
+                    setIsAuthLoading(false);
+                }
+            }
+        })();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [clearToken, setToken])
 
     const decodedToken = useMemo(() => {
         if (!token) return null
@@ -49,8 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setToken,
             clearToken,
             connexion,
-            deconnexion,
             connexionViaOrcid,
+            deconnexion,
+            isAuthLoading,
             estConnecte: Boolean(token),
             estAdmin: decodedToken?.roles?.includes('ROLE_ADMIN') || false,
             id: decodedToken?.id || null,
@@ -58,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             prenom: decodedToken?.prenom || null,
             nom: decodedToken?.nom || null,
         }),
-        [clearToken, setToken, connexion, deconnexion, connexionViaOrcid, token, decodedToken],
+        [clearToken, setToken, connexion, connexionViaOrcid, deconnexion, isAuthLoading, token, decodedToken],
     )
 
     useEffect(() => {

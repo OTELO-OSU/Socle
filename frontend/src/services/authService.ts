@@ -17,6 +17,12 @@ export async function connexionViaOrcid(code: string) {
     return { data, status };
 }
 
+export async function refreshSession() {
+    const {data, status} = await symfony.post('/refresh', {}, { withCredentials: true });
+
+    return { data, status };
+}
+
 export async function inscription(prenom: string, nom: string, email: string, mdp: string, role: string) {
     let rolesValue;
     if (role === '3') {

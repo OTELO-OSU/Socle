@@ -2,17 +2,34 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import HeaderAppBar from './components/HeaderAppBar'
 import Connexion from './pages/Connexion'
-import { Alert, Box, Snackbar, Toolbar } from '@mui/material'
-import { useContext } from 'react'
+import { Alert, Box, CircularProgress, Snackbar, Toolbar } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import { SnackbarContext } from './context/snackbarContext'
 import OrcidCallback from './pages/OrcidCallback'
 import Inscription from './pages/Inscription'
 import VerificationMailCallback from './pages/VerificationMailCallback'
 import AdminLayout from './layout/AdminLayout'
-import { Dashboard } from '@mui/icons-material'
+import PlateformeAdmin from './pages/PlateformeAdmin'
+import AdhesionAdmin from './pages/AdhesionAdmin'
+import { AuthContext } from './context/authContext'
+import { useNavigate } from 'react-router-dom'
+import { registerNavigator } from './bridge/navigationBridge'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
+  const authContext = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    registerNavigator((path: string) => {
+      navigate(path);
+    });
+
+    return () => {
+      registerNavigator(null);
+    };
+  }, [navigate]);
+
   return (
 
     <>
@@ -26,18 +43,26 @@ function App() {
       >
         <Toolbar />
         <Box component="main" sx={{ flex: 1, minHeight: 0 }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/connexion" element={<Connexion />} />
-            <Route path="/inscription" element={<Inscription />} />
-            <Route path="/orcid" element={<OrcidCallback />} />
-            <Route path="/verification-email" element={<VerificationMailCallback />} />
-            <Route path="/admin" element={<AdminLayout />} >
-              <Route path="dashboard" element={<Dashboard />} />
-              {/* <Route path="users" element={<Users />} />
-              <Route path="settings" element={<Settings />} /> */}
-            </Route>
-          </Routes>
+          {authContext?.isAuthLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/connexion" element={<Connexion />} />
+              <Route path="/inscription" element={<Inscription />} />
+              <Route path="/orcid" element={<OrcidCallback />} />
+              <Route path="/verification-email" element={<VerificationMailCallback />} />
+              <Route path="/admin" element={<AdminLayout />}
+                children={[
+                  <Route index element={<PlateformeAdmin />} />,
+                  <Route path="adhesion" element={<AdhesionAdmin />} />,
+                  <Route path="settings" element={<div>Admin Settings</div>} />,
+                ]}
+              />
+            </Routes>
+          )}
         </Box>
         <Snackbar
           open={snackbarContext!.open}

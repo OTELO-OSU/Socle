@@ -1,7 +1,14 @@
 import axios, { AxiosError } from "axios";
 import { API_URL } from "./constante";
 import { showSnackbar } from "../bridge/snackbarBridge";
-import { clearTokenOutside } from "../bridge/tokenBridge";
+import { clearTokenOutside, getTokenOutside, setTokenOutside } from "../bridge/tokenBridge";
+import { navigateOutside } from "../bridge/navigationBridge";
+
+type RetriableRequestConfig = {
+    _retry?: boolean;
+    url?: string;
+    headers?: Record<string, string>;
+};
 
 export const symfony = axios.create({
     baseURL: API_URL,
@@ -11,29 +18,68 @@ export const symfony = axios.create({
     },
 })
 
+let refreshPromise: Promise<string | null> | null = null;
+
+const refreshAccessToken = async () => {
+    if (!refreshPromise) {
+        refreshPromise = axios
+            .post(`${API_URL}/refresh`, {}, { withCredentials: true })
+            .then((response) => {
+                const refreshedToken = response.data?.token;
+
+                if (typeof refreshedToken === "string" && refreshedToken.length > 0) {
+                    setTokenOutside(refreshedToken);
+                    return refreshedToken;
+                }
+
+                return null;
+            })
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+
+    return refreshPromise;
+};
+
+const forceLogout = () => {
+    clearTokenOutside();
+    showSnackbar({
+        message: "Votre session a expire, veuillez vous reconnecter.",
+        couleur: "error",
+    });
+    navigateOutside("/connexion");
+};
+
 // Intercepteur pour refresh le token si une requete retourne une erreur 401 avec le message "Token expiré"
 symfony.interceptors.response.use(
     response => response,
     async error => {
-        if (error.response && error.response.status === 401 && error.response.data?.message === "Expired JWT Token") {
+        const status = error.response?.status;
+        const originalRequest = error.config as RetriableRequestConfig | undefined;
+        const isRefreshRequest = originalRequest?.url?.includes('/refresh');
+
+        if (status === 401 && originalRequest && !originalRequest._retry && !isRefreshRequest) {
+            originalRequest._retry = true;
+
             try {
-                await axios.post(`${API_URL}/refresh`, {}, { withCredentials: true });
-                // Refaire la requete originale
-                return symfony.request(error.config);
+                const refreshedToken = await refreshAccessToken();
+
+                if (typeof refreshedToken === "string" && refreshedToken.length > 0) {
+                    originalRequest.headers = originalRequest.headers || {};
+                    originalRequest.headers.Authorization = `Bearer ${refreshedToken}`;
+                    return symfony.request(originalRequest);
+                }
+
+                forceLogout();
             } catch (refreshError) {
                 const refreshErrorResponse = refreshError as AxiosError<ApiError>;
-                // Si le refresh échoue, rediriger vers la page de connexion
-                if (refreshErrorResponse.response?.status === 403 && refreshErrorResponse.response.data?.message === "Le refresh token est invalide ou expiré.") {
-                    clearTokenOutside();
-                    showSnackbar({
-                        message: "Votre session a expiré, veuillez vous reconnecter.",
-                        couleur: "error",
-                    });
-                window.location.href = "/connexion";
+                if (refreshErrorResponse.response?.status === 401 || refreshErrorResponse.response?.status === 403) {
+                    forceLogout();
                 }
-                return Promise.reject(refreshError);
             }
         }
+
         return Promise.reject(error);
     }
 )
@@ -52,7 +98,21 @@ symfony.interceptors.response.use(
     }
 )
 
+// Interceptor pour mettre le bearer token dans les headers de chaque requete
+symfony.interceptors.request.use(
+    config => {
+        const token = getTokenOutside();
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        return config;
+    },
+    error => Promise.reject(error),
+)
+
 export type ApiError = {
-  message: string;
-  messageArray: string[];
+    message: string;
+    messageArray: string[];
 };

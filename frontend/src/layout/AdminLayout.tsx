@@ -1,5 +1,6 @@
-import { Box, List, ListItem, ListItemText, Divider, ListItemButton } from '@mui/material';
+import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIcon } from '@mui/material';
 import { NavLink, Outlet } from 'react-router-dom';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const drawerWidth = 240;
 
@@ -15,14 +16,18 @@ export default function AdminLayout() {
             >
                 <List>
                     <ListItem disablePadding>
+
                         <ListItemButton sx={{
                             '&.active': {
                                 bgcolor: 'action.selected',
                                 borderLeft: '3px solid',
                                 borderColor: 'primary.main',
                             },
-                        }} component={NavLink} to="/admin">
-                            <ListItemText primary="Plateforme" />
+                        }} component={NavLink} to="/admin/adhesion">
+                            <ListItemIcon>
+                                <HowToRegIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Demande d'adhesion" />
                         </ListItemButton>
                     </ListItem>
 
@@ -33,8 +38,8 @@ export default function AdminLayout() {
                                 borderLeft: '3px solid',
                                 borderColor: 'primary.main',
                             },
-                        }} component={NavLink} to="/admin/users">
-                            <ListItemText primary="Users" />
+                        }} component={NavLink} to="/admin" end>
+                            <ListItemText primary="Plateforme" />
                         </ListItemButton>
                     </ListItem>
 
@@ -56,7 +61,6 @@ export default function AdminLayout() {
 
             {/* Main content */}
             <Box
-                component="main"
                 sx={{
                     flexGrow: 1,
                     p: 3,
