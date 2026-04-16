@@ -120,7 +120,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/admettre',
+            '/api/utilisateurs/approuver',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('admin@example.com:password')]
@@ -142,7 +142,30 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/admettre',
+            '/api/utilisateurs/approuver',
+            [],
+            [],
+            [],
+            \json_encode(['email' => 'invalid-email'])
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Utilisateur non trouvé.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testRefusFauxMail(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/utilisateurs/refuser',
             [],
             [],
             [],
@@ -168,7 +191,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/admettre',
+            '/api/utilisateurs/approuver',
             [],
             [],
             [],
@@ -178,7 +201,33 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour admettre cet utilisateur",
+            "Vous n'avez pas les droits pour approuver cet utilisateur",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testRefusNonAdmin(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/utilisateurs/refuser',
+            [],
+            [],
+            [],
+            \json_encode(['email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits pour refuser cet utilisateur",
             $data['message']
         );
 
@@ -197,7 +246,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/admettre',
+            '/api/utilisateurs/approuver',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
@@ -207,7 +256,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur admis avec succès.",
+            "Utilisateur approuvé avec succès.",
             $data['message']
         );
 
@@ -233,7 +282,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/admettre',
+            '/api/utilisateurs/approuver',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
@@ -243,7 +292,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur admis avec succès.",
+            "Utilisateur approuvé avec succès.",
             $data['message']
         );
 
@@ -254,6 +303,41 @@ class AdminControllerTest extends WebTestCase
         $this->assertEquals(
             $this->em->getRepository(PlateformeEditeur::class)->findOneBy([])->getUtilisateur()->getEmail(),
             "test@example.com"
+        );
+    }
+
+    public function testRefusUtilisateurSuccess(): void
+    {
+        $client = $this->client;
+
+        $userInscription = new UtilisateurInscription();
+        $userInscription->setPlateformeDemande($this->em->getRepository(Plateforme::class)->findOneBy([]));
+        $userInscription->setOsuDemande(false);
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/utilisateurs/refuser',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Utilisateur refusé avec succès.",
+            $data['message']
+        );
+
+        $this->assertNull($this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']));
+        self::assertEmailCount(1);
+        $message = self::getMailerMessage(0);
+        $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
+        $this->assertNull(
+            $this->em->getRepository(PlateformeEditeur::class)->findOneBy([])
         );
     }
 

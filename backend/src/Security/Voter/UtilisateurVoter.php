@@ -10,11 +10,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 final class UtilisateurVoter extends Voter
 {
     public const GetEnAttenteDeValidation = 'GetEnAttenteDeValidation';
-    public const ADMETTRE = 'ADMETTRE';
+    public const APPROUVER = 'APPROUVER';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $a = in_array($attribute, [self::ADMETTRE])
+        $a = in_array($attribute, [self::APPROUVER])
             && $subject instanceof \App\Entity\Utilisateur;
 
         $b = in_array($attribute, [self::GetEnAttenteDeValidation])
@@ -32,7 +32,7 @@ final class UtilisateurVoter extends Voter
         }
 
         switch ($attribute) {
-            case self::ADMETTRE:
+            case self::APPROUVER:
                 return in_array('ROLE_ADMIN', $user->getRoles());
                 break;
             case self::GetEnAttenteDeValidation:

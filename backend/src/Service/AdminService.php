@@ -34,12 +34,12 @@ class AdminService
         }, $users);
     }
 
-    function admettreUtilisateur(string $email)
+    function approuverUtilisateur(string $email)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false]);
         if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
-        if (!$this->security->isGranted('ADMETTRE', $user)) throw new Exception("Vous n'avez pas les droits pour admettre cet utilisateur", 403);
+        if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour approuver cet utilisateur", 403);
 
         $user->setAdmis(true);
 
@@ -68,9 +68,26 @@ class AdminService
 
         $this->mailerService->sendEmailToUser(
             $user->getEmail(),
-            "Votre compte a été admis !",
-            "Votre compte a été admis par un administrateur, vous pouvez désormais vous connecter et profiter de toutes les fonctionnalités de Plaire !"
+            "Votre compte a été approuvé !",
+            "Votre compte a été approuvé par un administrateur, vous pouvez désormais vous connecter et profiter de toutes les fonctionnalités de Plaire !"
         );
+    }
+
+    function refuserUtilisateur(string $email)
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false]);
+        if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
+
+        if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour refuser cet utilisateur", 403);
+
+        $this->mailerService->sendEmailToUser(
+            $user->getEmail(),
+            "Votre compte a été refusé !",
+            "Votre compte a été refusé par un administrateur."
+        );
+
+        $this->em->remove($user);
+        $this->em->flush();
     }
 
     function affilierUtilisateurPlateforme(string $email, int $plateformeId)
