@@ -411,4 +411,72 @@ class AdminControllerTest extends WebTestCase
         $message = self::getMailerMessage(0);
         $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
     }
+
+    public function testGetUtilisateurEnAttenteDeValidationError(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'GET',
+            '/api/en-attente-de-validation',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits pour voir les utilisateurs en attente de validation",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testGetUtilisateurEnAttenteDeValidationSuccess(): void
+    {
+        $client = $this->client;
+
+        $us = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $us->setAdmis(false);
+        $ui = new UtilisateurInscription();
+        $ui->setOsuDemande(true);
+        $us->setUtilisateurInscription($ui);
+        $this->em->flush();
+
+        $client->request(
+            'GET',
+            '/api/en-attente-de-validation',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "test@example.com",
+            $data['0']['email']
+        );
+        $this->assertEquals(
+            "Test",
+            $data['0']['nom']
+        );
+        $this->assertEquals(
+            "User",
+            $data['0']['prenom']
+        );
+        $this->assertNull(
+            $data['0']['plateformeDemande']
+        );
+        $this->assertNull(
+            $data['0']['uniteDemande']
+        );
+        $this->assertTrue(
+            $data['0']['osuDemande']
+        );
+
+        self::assertEmailCount(0);
+    }
 }

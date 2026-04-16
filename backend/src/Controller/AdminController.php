@@ -22,6 +22,13 @@ final class AdminController extends AbstractController
         return $this->json(['message' => 'Utilisateur admis avec succès.'], 200);
     }
 
+    #[Route('/en-attente-de-validation', methods: ['GET'])]
+    public function getUtilisateurEnAttenteDeValidation(): Response
+    {
+        $users = $this->adminService->getUtilisateurEnAttenteDeValidation();
+        return $this->json($users);
+    }
+
     #[Route('/plateforme/affilier', methods: ['POST'])]
     public function affilierUtilisateurPlateforme(Request $request): Response
     {

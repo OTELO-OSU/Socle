@@ -17,6 +17,23 @@ class AdminService
         private readonly Security $security
     ) {}
 
+    function getUtilisateurEnAttenteDeValidation(): array
+    {
+        if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour voir les utilisateurs en attente de validation", 403);
+
+        $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false]);
+        return array_map(function (Utilisateur $user) {
+            return [
+                "email" => $user->getEmail(),
+                "nom" => $user->getNom(),
+                "prenom" => $user->getPrenom(),
+                "plateformeDemande" => $user->getUtilisateurInscription()->getPlateformeDemande() ? $user->getUtilisateurInscription()->getPlateformeDemande()->getLastHistorique()->getNomOfficiel() : null,
+                "uniteDemande" => $user->getUtilisateurInscription()->getUniteDemande() ? $user->getUtilisateurInscription()->getUniteDemande()->getNom() : null,
+                "osuDemande" => $user->getUtilisateurInscription()->isOsuDemande(),
+            ];
+        }, $users);
+    }
+
     function admettreUtilisateur(string $email)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false]);
