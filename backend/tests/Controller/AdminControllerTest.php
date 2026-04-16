@@ -418,7 +418,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'GET',
-            '/api/en-attente-de-validation',
+            '/api/utilisateurs/attente-de-validation',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
@@ -447,7 +447,7 @@ class AdminControllerTest extends WebTestCase
 
         $client->request(
             'GET',
-            '/api/en-attente-de-validation',
+            '/api/utilisateurs/attente-de-validation',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
