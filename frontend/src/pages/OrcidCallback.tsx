@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { AxiosError } from "axios";
 import type { ApiError } from "../utils/axios";
+import { connexionViaOrcid } from "../services/authService";
 
 export default function OrcidCallback() {
 
@@ -28,7 +29,13 @@ export default function OrcidCallback() {
 
         (async () => {
             try {
-                await authContext?.connexionViaOrcid(code!);
+                const { data } = await connexionViaOrcid(code);
+                if (data.redirect !== undefined) {
+                    const url = new URL(data.redirect);
+                    const redirect = url.pathname + url.search;
+                    navigate(redirect);
+                    return;
+                }
                 navigate('/');
             } catch (error) {
                 const errorAxios = error as AxiosError<ApiError>;

@@ -35,6 +35,24 @@ export async function inscription(prenom: string, nom: string, email: string, md
     return { data, status };
 }
 
+export async function inscriptionSsMdp(prenom: string, nom: string, email: string, role: string, token: string | null) {
+    let rolesValue;
+    if (role === '3') {
+        rolesValue = {
+            osu_demande: true
+        };
+    }
+    const {data, status} = await symfony.post('/inscription?ssmdp=true', {
+        prenom,
+        nom,
+        email,
+        token,
+        ...rolesValue
+    });
+
+    return { data, status };
+}
+
 export async function deconnexion(token: string) {
     const {status} = await symfony.post('/deconnexion', {}, {
         headers: {

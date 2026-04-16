@@ -1,10 +1,10 @@
 import { Box, Button, Card, FormControl, FormHelperText, FormLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { inscription } from "../services/authService";
+import { useNavigate, Link as RouterLink, useSearchParams } from "react-router-dom";
+import { inscription, inscriptionSsMdp } from "../services/authService";
 
 export default function Inscription() {
     const [prenomError, setPrenomError] = useState(false);
@@ -21,7 +21,38 @@ export default function Inscription() {
     const [confirmMdpError, setConfirmMdpError] = useState(false);
     const [confirmMdpErrorMessage, setConfirmMdpErrorMessage] = useState('');
     const snackbarContext = useContext(SnackbarContext);
-    const naviagate = useNavigate();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const effetLance = useRef(false);
+    const trigger = snackbarContext?.trigger;
+    const token = searchParams.get("token");
+    const ssMdp = searchParams.get("ssmdp");
+
+    const prefill = useMemo(() => {
+        const payload = searchParams.get("payload");
+        if (!payload) return null;
+
+        try {
+            return JSON.parse(atob(payload)) as { prenom?: string; nom?: string; email?: string };
+        } catch {
+            return null;
+        }
+    }, [searchParams]);
+
+    useEffect(() => {
+        if (effetLance.current) return;
+        effetLance.current = true;
+
+        const message = atob(searchParams.get("message") || "");
+        if (message) {
+            trigger?.({
+                message: message,
+                couleur: "success",
+            });
+        }
+
+    }, [searchParams, trigger]);
 
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -34,6 +65,8 @@ export default function Inscription() {
         const selectedRole = data.get('role') as string;
 
         let hasError = false;
+
+        const ssMdpBool = token && searchParams.get("ssmdp") === "1";
 
         if (!prenom) {
             setPrenomError(true);
@@ -71,32 +104,34 @@ export default function Inscription() {
             setRoleErrorMessage('');
         }
 
-        if (!mdp) {
-            setMdpError(true);
-            setMdpErrorMessage('Mot de passe requis');
-            hasError = true;
-        } else {
-            setMdpError(false);
-            setMdpErrorMessage('');
-        }
+        if (!ssMdpBool) {
+            if (!mdp) {
+                setMdpError(true);
+                setMdpErrorMessage('Mot de passe requis');
+                hasError = true;
+            } else {
+                setMdpError(false);
+                setMdpErrorMessage('');
+            }
 
-        if (!confirmMdp) {
-            setConfirmMdpError(true);
-            setConfirmMdpErrorMessage('Confirmation du mot de passe requise');
-            hasError = true;
-        } else {
-            setConfirmMdpError(false);
-            setConfirmMdpErrorMessage('');
-        }
+            if (!confirmMdp) {
+                setConfirmMdpError(true);
+                setConfirmMdpErrorMessage('Confirmation du mot de passe requise');
+                hasError = true;
+            } else {
+                setConfirmMdpError(false);
+                setConfirmMdpErrorMessage('');
+            }
 
 
-        if (mdp && confirmMdp && mdp !== confirmMdp) {
-            setConfirmMdpError(true);
-            setConfirmMdpErrorMessage('Les mots de passe ne correspondent pas');
-            hasError = true;
-        } else if (mdp && confirmMdp) {
-            setConfirmMdpError(false);
-            setConfirmMdpErrorMessage('');
+            if (mdp && confirmMdp && mdp !== confirmMdp) {
+                setConfirmMdpError(true);
+                setConfirmMdpErrorMessage('Les mots de passe ne correspondent pas');
+                hasError = true;
+            } else if (mdp && confirmMdp) {
+                setConfirmMdpError(false);
+                setConfirmMdpErrorMessage('');
+            }
         }
 
         if (hasError) {
@@ -104,12 +139,20 @@ export default function Inscription() {
         }
 
         try {
-            const { data } = await inscription(prenom, nom, email, mdp, selectedRole);
-            snackbarContext?.trigger({
-                message: data.message,
-                couleur: 'success',
-            });
-            naviagate('/');
+            if (!ssMdpBool) {
+                const { data } = await inscription(prenom, nom, email, mdp, selectedRole);
+                snackbarContext?.trigger({
+                    message: data.message,
+                    couleur: 'success',
+                });
+            } else {
+                const { data } = await inscriptionSsMdp(prenom, nom, email, selectedRole, token);
+                snackbarContext?.trigger({
+                    message: data.message,
+                    couleur: 'success',
+                });
+            }
+            navigate('/');
         } catch (e) {
             const error = e as AxiosError<ApiError>;
             if (error.response?.status === 400) {
@@ -142,6 +185,7 @@ export default function Inscription() {
                                 id="prenom"
                                 type="text"
                                 name="prenom"
+                                defaultValue={prefill?.prenom ?? ''}
                                 placeholder="Alice"
                                 autoComplete="given-name"
                                 required
@@ -158,6 +202,7 @@ export default function Inscription() {
                                 id="nom"
                                 type="text"
                                 name="nom"
+                                defaultValue={prefill?.nom ?? ''}
                                 placeholder="Dubois"
                                 autoComplete="family-name"
                                 required
@@ -175,6 +220,7 @@ export default function Inscription() {
                             id="email"
                             type="email"
                             name="email"
+                            defaultValue={prefill?.email ?? ''}
                             placeholder="alice.dubois@gmail.com"
                             autoComplete="email"
                             required
@@ -190,45 +236,55 @@ export default function Inscription() {
                         </Select>
                         <FormHelperText>{roleErrorMessage}</FormHelperText>
                     </FormControl>
-                    <FormControl>
-                        <FormLabel htmlFor="mdp">Mot de passe</FormLabel>
-                        <TextField
-                            error={mdpError}
-                            helperText={mdpErrorMessage}
-                            name="mdp"
-                            placeholder="••••••"
-                            type="password"
-                            id="mdp"
-                            autoComplete="new-password"
-                            required
+                    {(ssMdp !== '1' || !token) &&
+                        <>
+                            <FormControl>
+                                <FormLabel htmlFor="mdp">Mot de passe</FormLabel>
+                                <TextField
+                                    error={mdpError}
+                                    helperText={mdpErrorMessage}
+                                    name="mdp"
+                                    placeholder="••••••"
+                                    type="password"
+                                    id="mdp"
+                                    autoComplete="new-password"
+                                    required
+                                    fullWidth
+                                    variant="outlined"
+                                    color={mdpError ? 'error' : 'primary'}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormLabel htmlFor="confirmMdp">Confirmer le mot de passe</FormLabel>
+                                <TextField
+                                    error={confirmMdpError}
+                                    helperText={confirmMdpErrorMessage}
+                                    name="confirmMdp"
+                                    placeholder="••••••"
+                                    type="password"
+                                    id="confirmMdp"
+                                    autoComplete="new-password"
+                                    required
+                                    fullWidth
+                                    variant="outlined"
+                                    color={confirmMdpError ? 'error' : 'primary'}
+                                />
+                            </FormControl></>}
+                    {
+                        (ssMdp === '1' && token) ? <Button
+                            type="submit"
                             fullWidth
-                            variant="outlined"
-                            color={mdpError ? 'error' : 'primary'}
-                        />
-                    </FormControl>
-                    <FormControl>
-                        <FormLabel htmlFor="confirmMdp">Confirmer le mot de passe</FormLabel>
-                        <TextField
-                            error={confirmMdpError}
-                            helperText={confirmMdpErrorMessage}
-                            name="confirmMdp"
-                            placeholder="••••••"
-                            type="password"
-                            id="confirmMdp"
-                            autoComplete="new-password"
-                            required
+                            variant="contained"
+                        >
+                            S'inscrire sans mot de passe
+                        </Button> : <Button
+                            type="submit"
                             fullWidth
-                            variant="outlined"
-                            color={confirmMdpError ? 'error' : 'primary'}
-                        />
-                    </FormControl>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                    >
-                        S'inscrire
-                    </Button>
+                            variant="contained"
+                        >
+                            S'inscrire
+                        </Button>
+                    }
                     <Link
                         component={RouterLink}
                         to="/connexion"

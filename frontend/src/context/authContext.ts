@@ -1,10 +1,9 @@
 import { createContext } from 'react'
 
-export type TokenContextType = {
+export type AuthContextType = {
   token: string | null
   connexion: (email: string, mdp: string) => Promise<void>
   deconnexion: () => Promise<void>
-  connexionViaOrcid: (code: string) => Promise<void>
   setToken: (value: string | null) => void
   clearToken: () => void
   estConnecte: boolean
@@ -17,4 +16,4 @@ export type TokenContextType = {
 
 export const STORAGE_KEY = 'auth_token'
 
-export const AuthContext = createContext<TokenContextType | undefined>(undefined)
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
