@@ -14,7 +14,6 @@ use App\Entity\FinancementInstrument;
 use App\Entity\Operation;
 use App\Entity\Parametre;
 use App\Entity\Plateforme;
-use App\Entity\PlateformeEditeur;
 use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\PlateformeHistoriqueTutelle;
