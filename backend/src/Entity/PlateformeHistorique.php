@@ -6,6 +6,7 @@ use App\Repository\PlateformeHistoriqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriqueRepository::class)]
 class PlateformeHistorique
@@ -13,6 +14,7 @@ class PlateformeHistorique
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
@@ -20,12 +22,15 @@ class PlateformeHistorique
     private ?Plateforme $plateforme = null;
 
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?int $annee = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['plateforme:list'])]
     private ?string $nom_officiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['plateforme:list'])]
     private ?string $forme_developpee_nom_officiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -56,6 +61,7 @@ class PlateformeHistorique
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
     #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique')]
+    #[Groups(['plateforme:list'])]
     private Collection $plateformeHistoriquePersonnels;
 
     #[ORM\Column(nullable: true)]
@@ -221,6 +227,7 @@ class PlateformeHistorique
     private Collection $instruments;
 
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?bool $brouillon = null;
 
     public function __construct()

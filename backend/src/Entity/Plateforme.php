@@ -6,6 +6,7 @@ use App\Repository\PlateformeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PlateformeRepository::class)]
 class Plateforme
@@ -13,11 +14,14 @@ class Plateforme
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['plateforme:list'])]
     private ?string $pseudo_id = null;
 
+    #[Groups(['plateforme:list'])]
     function getLastHistorique(): ?PlateformeHistorique
     {
         $historiques = $this->getPlateformeHistoriques()->toArray();

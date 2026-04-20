@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PlateformeHistoriquePersonnelRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriquePersonnelRepository::class)]
 class PlateformeHistoriquePersonnel
@@ -11,6 +12,7 @@ class PlateformeHistoriquePersonnel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
@@ -19,12 +21,15 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['plateforme:list'])]
     private ?Utilisateur $utilisateur_id = null;
 
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?bool $responsable_scientifique = null;
 
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?bool $responsable_technique = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
@@ -32,6 +37,7 @@ class PlateformeHistoriquePersonnel
     private ?TypeContrat $type_contrat = null;
 
     #[ORM\Column]
+    #[Groups(['plateforme:list'])]
     private ?int $quotite = null;
 
     public function getId(): ?int

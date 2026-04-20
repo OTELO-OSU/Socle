@@ -15,7 +15,16 @@ final class PlateformeController extends AbstractController
 {
     public function __construct(private readonly PlateformeService $plateformeService, private readonly SerializerInterface $serializer, private readonly ValidatorInterface $validator) {}
 
-    #[Route('/plateforme/creer', methods: ['POST'])]
+    #[Route('/plateforme', methods: ['GET'])]
+    public function getPlateforme(Request $request): Response
+    {
+        $page = max(1, (int)$request->query->get('page', 1));
+        $search = $request->query->get('search', null);
+        $plateformes = $this->plateformeService->getPlateformeParPage($page, $search);
+        return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
+    }
+
+    #[Route('/plateforme', methods: ['POST'])]
     public function creerPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
@@ -25,7 +34,7 @@ final class PlateformeController extends AbstractController
         return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getLastHistorique()->getId()], 201);
     }
 
-    #[Route('/plateforme/sauvegarder', methods: ['POST'])]
+    #[Route('/plateforme', methods: ['UPDATE'])]
     public function sauvegarderPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);

@@ -28,6 +28,9 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class PlateformeService
 {
+
+    private const PLATEFORME_PAR_PAGE = 20;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly Security $security
@@ -98,6 +101,74 @@ class PlateformeService
         $plateformeHisto->setBrouillon($brouillon);
         $this->em->persist($plateformeHisto);
         $this->em->flush();
+    }
+
+    function getPlateformeParPage(int $page, ?string $search): array
+    {
+        if ($this->security->getUser() === null) throw new Exception("Vous devez être authentifié.", 401);
+        $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
+
+        // Est-ce que le user est admin ou dir OSU
+        $estAdmin = $this->security->isGranted('ROLE_ADMIN');
+        $estDirOSU = $this->security->isGranted('ROLE_DIR_OSU');
+
+        $permSuperUser = $estAdmin || $estDirOSU;
+
+        $qb = $this->em->getRepository(Plateforme::class)->createQueryBuilder('p')
+            ->join('p.plateformeHistoriques', 'ph')
+            ->leftJoin('ph.plateformeHistoriquePersonnels', 'pp', 'WITH', 'pp.responsable_scientifique = true OR pp.responsable_technique = true')
+            ->leftJoin('pp.utilisateur_id', 'u')
+            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM App\Entity\PlateformeHistorique ph2 WHERE ph2.plateforme = p.id)');
+
+
+        if ($search) {
+            // Normaliser la recherche pour éviter les problèmes d'accents et de casse
+            $search = mb_strtolower($search, 'UTF-8');
+            $qb->andWhere('ph.nom_officiel LIKE unaccent(LOWER(:search))')
+                ->orWhere('ph.forme_developpee_nom_officiel LIKE unaccent(LOWER(:search))')
+                ->orWhere($qb->expr()->andX(
+                    $qb->expr()->orX(
+                        $qb->expr()->like('u.prenom', 'unaccent(LOWER(:search))'),
+                        $qb->expr()->like('u.nom', 'unaccent(LOWER(:search))'),
+                        $qb->expr()->like('u.email', 'unaccent(LOWER(:search))')
+                    ),
+                    $qb->expr()->orX(
+                        $qb->expr()->eq('pp.responsable_scientifique', 'true'),
+                        $qb->expr()->eq('pp.responsable_technique', 'true')
+                    )
+                ))
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        if (!$permSuperUser) {
+            $idSender = $this->security->getUser()->getUserIdentifier();
+            $qb->andWhere(
+                $qb->expr()->andX(
+                    $qb->expr()->eq('u.id', ':idSender'),
+                    $qb->expr()->orX(
+                        $qb->expr()->eq('pp.responsable_scientifique', 'true'),
+                        $qb->expr()->eq('pp.responsable_technique', 'true')
+                    )
+                )
+            )
+                ->setParameter('idSender', $idSender);
+        }
+
+        $qb->orderBy('ph.nom_officiel', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults(self::PLATEFORME_PAR_PAGE);
+
+        $countQb = clone $qb;
+
+        $countQb->resetDQLPart('orderBy')
+            ->setFirstResult(null)
+            ->setMaxResults(null)
+            ->select('COUNT(DISTINCT p.id)');
+
+        $total = (int) $countQb->getQuery()->getSingleScalarResult();
+        $plateformes = $qb->getQuery()->getResult();
+
+        return ['plateformes' => $plateformes, 'total' => $total];
     }
 
     function ecraserChampsPlateforme(PlateformeHistorique $plateformeHisto, PlateformeHistoriqueDTO $dto): PlateformeHistorique

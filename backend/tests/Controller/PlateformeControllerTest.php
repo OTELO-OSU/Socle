@@ -199,7 +199,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
@@ -222,7 +222,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -248,7 +248,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -271,7 +271,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -471,7 +471,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -487,8 +487,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["nom_officiel"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -507,8 +507,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -531,7 +531,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -547,8 +547,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["site_web"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -567,8 +567,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -591,7 +591,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -607,8 +607,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["ville_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -627,8 +627,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -651,7 +651,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -667,8 +667,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["laboratoire_operateur_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -687,8 +687,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -711,7 +711,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -727,8 +727,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["tutelle_principale"] = [];
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -747,8 +747,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -771,7 +771,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -787,8 +787,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["latitude"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -807,8 +807,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -831,7 +831,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -847,8 +847,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["longitude"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -867,8 +867,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -891,7 +891,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -907,8 +907,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["espace_bureau"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -927,8 +927,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -951,7 +951,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -967,8 +967,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["espace_laboratoire"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -987,8 +987,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1011,7 +1011,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1027,8 +1027,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["personnel"][0]["type_contrat_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1048,8 +1048,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1072,7 +1072,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1088,8 +1088,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["personnel"][0]["quotite"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1108,8 +1108,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1132,7 +1132,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1148,8 +1148,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["employeur_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1168,8 +1168,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1192,7 +1192,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1208,8 +1208,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["corps_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1228,8 +1228,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1252,7 +1252,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1268,8 +1268,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["bap"] = [];
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1288,8 +1288,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1312,7 +1312,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1328,8 +1328,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["emploi_type"] = [];
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1348,8 +1348,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1372,7 +1372,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1388,8 +1388,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["quotite"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1408,8 +1408,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1432,7 +1432,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1448,8 +1448,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["rang_numerateur"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1468,8 +1468,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1492,7 +1492,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1508,8 +1508,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["rang_denominateur"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1528,8 +1528,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1552,7 +1552,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1568,8 +1568,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["nom"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1588,8 +1588,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1612,7 +1612,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1628,8 +1628,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["annee_acquisition"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1648,8 +1648,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1672,7 +1672,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1688,8 +1688,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["cout"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1708,8 +1708,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1732,7 +1732,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1748,8 +1748,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["valeur_remplacement"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1768,8 +1768,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1792,7 +1792,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1808,8 +1808,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["duree_utilisation"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1828,8 +1828,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1852,7 +1852,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1868,8 +1868,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["source_financement"] = [];
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1888,8 +1888,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1912,7 +1912,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1928,8 +1928,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["source_financement"][0]["taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1948,8 +1948,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1972,7 +1972,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -1988,8 +1988,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2008,8 +2008,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2032,7 +2032,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2048,8 +2048,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_actuel"][0]["source_financement"][0]["taux"] = 75;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2068,8 +2068,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2092,7 +2092,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2108,8 +2108,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["nom"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2128,8 +2128,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2152,7 +2152,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2168,8 +2168,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["annee_achat_envisagee"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2188,8 +2188,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2212,7 +2212,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2228,8 +2228,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["cout"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2248,8 +2248,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2272,7 +2272,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2288,8 +2288,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["source_financement"] = [];
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2308,8 +2308,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2332,7 +2332,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2348,8 +2348,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["source_financement"][0]["taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2368,8 +2368,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2392,7 +2392,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2408,8 +2408,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2428,8 +2428,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2452,7 +2452,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2468,8 +2468,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["instrument_futur"][0]["source_financement"][0]["taux"] = 75;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2488,8 +2488,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2512,7 +2512,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2528,8 +2528,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["materiel_consommable"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2548,8 +2548,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2572,7 +2572,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2588,8 +2588,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contrat_entretien"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2608,8 +2608,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2632,7 +2632,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2648,8 +2648,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["etude_prestation"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2668,8 +2668,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2692,7 +2692,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2708,8 +2708,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["fluide_energie"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2728,8 +2728,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2752,7 +2752,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2768,8 +2768,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["mission_frais_generaux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2788,8 +2788,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2812,7 +2812,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2828,8 +2828,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["determination_tarif_plateforme_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2848,8 +2848,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2872,7 +2872,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2888,8 +2888,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2908,8 +2908,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2932,7 +2932,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2948,8 +2948,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2968,8 +2968,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -2992,7 +2992,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3008,8 +3008,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3028,8 +3028,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3052,7 +3052,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3068,8 +3068,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3088,8 +3088,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3112,7 +3112,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3128,8 +3128,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_prive_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3148,8 +3148,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3172,7 +3172,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3188,8 +3188,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_prive_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3208,8 +3208,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3232,7 +3232,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3248,8 +3248,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_credit_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3268,8 +3268,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3292,7 +3292,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3308,8 +3308,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_credit_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3328,8 +3328,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3352,7 +3352,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3368,8 +3368,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_projet_recherche_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3388,8 +3388,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3412,7 +3412,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3428,8 +3428,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_projet_recherche_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3448,8 +3448,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3472,7 +3472,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3488,8 +3488,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3508,8 +3508,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3532,7 +3532,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3548,8 +3548,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3568,8 +3568,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3592,7 +3592,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3608,8 +3608,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = 100;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3628,8 +3628,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3652,7 +3652,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3670,8 +3670,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = 50;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3690,8 +3690,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3714,7 +3714,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3730,8 +3730,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3750,8 +3750,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3774,7 +3774,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3790,8 +3790,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"][0]["tutelle_id"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3810,8 +3810,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3834,7 +3834,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3850,8 +3850,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"][0]["taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3870,8 +3870,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3894,7 +3894,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3910,8 +3910,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"][0]["taux"] = 110;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3930,8 +3930,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3954,7 +3954,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3970,8 +3970,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["labellisation_qualite"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -3990,8 +3990,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4014,7 +4014,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4030,8 +4030,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["procedure_transparente_tous"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4050,8 +4050,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4074,7 +4074,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4090,8 +4090,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["procedure_transparente_prestation_exterieure"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4110,8 +4110,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4134,7 +4134,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4150,8 +4150,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["accueil_international_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4170,8 +4170,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4194,7 +4194,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4210,8 +4210,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["accueil_international_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4230,8 +4230,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4254,7 +4254,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4270,8 +4270,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_2424_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4290,8 +4290,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4314,7 +4314,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4330,8 +4330,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_2424_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4350,8 +4350,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4374,7 +4374,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4390,8 +4390,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_1224_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4410,8 +4410,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4434,7 +4434,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4450,8 +4450,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_1224_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4470,8 +4470,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4494,7 +4494,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4510,8 +4510,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_2424_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4530,8 +4530,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4554,7 +4554,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4570,8 +4570,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_2424_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4590,8 +4590,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4614,7 +4614,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4630,8 +4630,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4650,8 +4650,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4674,7 +4674,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4690,8 +4690,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4710,8 +4710,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4734,7 +4734,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4750,8 +4750,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = 100;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4770,8 +4770,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4794,7 +4794,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4810,8 +4810,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_fonctionnement_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4830,8 +4830,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4854,7 +4854,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4870,8 +4870,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_fonctionnement_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4890,8 +4890,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4914,7 +4914,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4930,8 +4930,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_maintenance_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4950,8 +4950,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4974,7 +4974,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -4990,8 +4990,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_maintenance_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5010,8 +5010,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5034,7 +5034,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5050,8 +5050,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_developpement_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5070,8 +5070,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5094,7 +5094,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5110,8 +5110,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_developpement_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5130,8 +5130,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5154,7 +5154,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5170,8 +5170,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_panne_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5190,8 +5190,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5214,7 +5214,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5230,8 +5230,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_panne_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5250,8 +5250,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5274,7 +5274,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5290,8 +5290,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5310,8 +5310,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5334,7 +5334,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5350,8 +5350,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5370,8 +5370,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5394,7 +5394,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5410,8 +5410,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = 100;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5430,8 +5430,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5454,7 +5454,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5470,8 +5470,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_equipe_operante_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5490,8 +5490,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5514,7 +5514,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5530,8 +5530,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_equipe_operante_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5550,8 +5550,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5574,7 +5574,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5590,8 +5590,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_interne_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5610,8 +5610,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5634,7 +5634,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5650,8 +5650,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_interne_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5670,8 +5670,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5694,7 +5694,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5710,8 +5710,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_externe_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5730,8 +5730,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5754,7 +5754,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5770,8 +5770,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_externe_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5790,8 +5790,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5814,7 +5814,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5830,8 +5830,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5850,8 +5850,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5874,7 +5874,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5890,8 +5890,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = 101;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5910,8 +5910,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5934,7 +5934,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5950,8 +5950,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = 100;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5970,8 +5970,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -5994,7 +5994,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6010,8 +6010,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_realise"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6030,8 +6030,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6054,7 +6054,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6078,8 +6078,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6098,8 +6098,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6122,7 +6122,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6138,8 +6138,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_domicile_travail"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6158,8 +6158,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6182,7 +6182,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6198,8 +6198,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_domicile_travail"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6218,8 +6218,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6242,7 +6242,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6258,8 +6258,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6278,8 +6278,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6302,7 +6302,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6318,8 +6318,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6338,8 +6338,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6362,7 +6362,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6378,8 +6378,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission_ext"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6398,8 +6398,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6422,7 +6422,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6438,8 +6438,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission_ext"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6458,8 +6458,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6482,7 +6482,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6498,8 +6498,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_consommable"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6518,8 +6518,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6542,7 +6542,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6558,8 +6558,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_consommable"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6578,8 +6578,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6602,7 +6602,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6618,8 +6618,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_equipement"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6638,8 +6638,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6662,7 +6662,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6678,8 +6678,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_equipement"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6698,8 +6698,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6722,7 +6722,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6738,8 +6738,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_envoi_echantillon"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6758,8 +6758,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6782,7 +6782,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6798,8 +6798,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_envoi_echantillon"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6818,8 +6818,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6842,7 +6842,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6858,8 +6858,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_batiment"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6878,8 +6878,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6902,7 +6902,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6918,8 +6918,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_batiment"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6938,8 +6938,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6962,7 +6962,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6978,8 +6978,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -6998,8 +6998,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7022,7 +7022,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7038,8 +7038,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = -2;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7058,8 +7058,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7082,7 +7082,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7098,8 +7098,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_equipe_operante"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7118,8 +7118,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7142,7 +7142,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7158,8 +7158,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_equipe_operante"] = -1;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7178,8 +7178,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7202,7 +7202,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7218,8 +7218,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_interne"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7238,8 +7238,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7262,7 +7262,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7278,8 +7278,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_interne"] = -1;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7298,8 +7298,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7322,7 +7322,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7338,8 +7338,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_externe"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7358,8 +7358,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7382,7 +7382,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7398,8 +7398,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_externe"] = -1;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7418,8 +7418,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7442,7 +7442,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7458,8 +7458,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_autre_type"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7478,8 +7478,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7502,7 +7502,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7518,8 +7518,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_autre_type"] = -1;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7538,8 +7538,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7562,7 +7562,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7578,8 +7578,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_these"] = null;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7598,8 +7598,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7622,7 +7622,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/plateforme/creer',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7638,8 +7638,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_these"] = -1;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
@@ -7658,8 +7658,8 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'POST',
-            '/api/plateforme/sauvegarder',
+            'UPDATE',
+            '/api/plateforme',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
