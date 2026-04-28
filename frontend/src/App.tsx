@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import HeaderAppBar from './components/HeaderAppBar'
 import Connexion from './pages/Connexion'
@@ -54,13 +54,12 @@ function App() {
               <Route path="/inscription" element={<Inscription />} />
               <Route path="/orcid" element={<OrcidCallback />} />
               <Route path="/verification-email" element={<VerificationMailCallback />} />
-              <Route path="/admin" element={<AdminLayout />}
-                children={[
-                  <Route index element={<PlateformeAdmin />} />,
-                  <Route path="adhesion" element={<AdhesionAdmin />} />,
-                  <Route path="settings" element={<div>Admin Settings</div>} />,
-                ]}
-              />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<Navigate to="adhesion" replace />} />
+                <Route path="adhesion" element={<AdhesionAdmin />} />
+                <Route path="plateforme" element={<PlateformeAdmin />} />
+                <Route path="settings" element={<div>Admin Settings</div>} />
+              </Route>
             </Routes>
           )}
         </Box>

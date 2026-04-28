@@ -4,6 +4,7 @@ import { AuthContext } from '../context/authContext'
 import ConnexionIcon from '@mui/icons-material/Login';
 import InscriptionIcon from '@mui/icons-material/PersonAdd';
 import DeconnexionIcon from '@mui/icons-material/Logout';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { SnackbarContext } from '../context/snackbarContext';
@@ -30,6 +31,11 @@ export default function HeaderAppBar() {
                         POE
                     </Typography>
 
+                    {authContext?.estConnecte &&
+                        <Button component={Link} to="/plateformes" color='inherit' startIcon={<HomeWorkIcon />}>
+                            Plateformes
+                        </Button>
+                    }
                     {authContext?.estAdmin &&
                         <Button component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
                             Admin

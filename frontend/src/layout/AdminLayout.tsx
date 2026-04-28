@@ -1,6 +1,7 @@
 import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIcon } from '@mui/material';
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import HomeWork from '@mui/icons-material/HomeWork';
 
 const drawerWidth = 240;
 
@@ -38,7 +39,10 @@ export default function AdminLayout() {
                                 borderLeft: '3px solid',
                                 borderColor: 'primary.main',
                             },
-                        }} component={NavLink} to="/admin" end>
+                        }} component={NavLink} to="/admin/plateforme" end>
+                            <ListItemIcon>
+                                <HomeWork />
+                            </ListItemIcon>
                             <ListItemText primary="Plateforme" />
                         </ListItemButton>
                     </ListItem>
