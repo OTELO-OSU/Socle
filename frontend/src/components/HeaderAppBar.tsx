@@ -32,7 +32,7 @@ export default function HeaderAppBar() {
                     </Typography>
 
                     {authContext?.estConnecte &&
-                        <Button component={Link} to="/plateformes" color='inherit' startIcon={<HomeWorkIcon />}>
+                        <Button component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>
                             Plateformes
                         </Button>
                     }

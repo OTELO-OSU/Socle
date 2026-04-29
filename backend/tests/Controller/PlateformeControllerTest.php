@@ -7675,4 +7675,45 @@ class PlateformeControllerTest extends WebTestCase
 
         self::assertEmailCount(0);
     }
+
+    public function testRecherchePlateforme(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['nom_officiel'] = 'ADCEF TéST';
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'UPDATE',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['nom' => 'ADCEF'])
+        );
+
+        self::assertEmailCount(0);
+    }
 }

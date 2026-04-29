@@ -14,6 +14,7 @@ import AdhesionAdmin from './pages/AdhesionAdmin'
 import { AuthContext } from './context/authContext'
 import { useNavigate } from 'react-router-dom'
 import { registerNavigator } from './bridge/navigationBridge'
+import ModificationPlateforme from './pages/ModificationPlateforme'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -58,7 +59,9 @@ function App() {
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
                 <Route path="plateforme" element={<PlateformeAdmin />} />
-                <Route path="settings" element={<div>Admin Settings</div>} />
+              </Route>
+              <Route path="/plateforme">
+                <Route path="edition" element={<ModificationPlateforme />} />
               </Route>
             </Routes>
           )}

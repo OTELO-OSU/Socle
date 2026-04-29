@@ -105,70 +105,158 @@ class PlateformeService
 
     function getPlateformeParPage(int $page, ?string $search): array
     {
-        if ($this->security->getUser() === null) throw new Exception("Vous devez être authentifié.", 401);
-        $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
-
-        // Est-ce que le user est admin ou dir OSU
-        $estAdmin = $this->security->isGranted('ROLE_ADMIN');
-        $estDirOSU = $this->security->isGranted('ROLE_DIR_OSU');
-
-        $permSuperUser = $estAdmin || $estDirOSU;
-
-        $qb = $this->em->getRepository(Plateforme::class)->createQueryBuilder('p')
-            ->join('p.plateformeHistoriques', 'ph')
-            ->leftJoin('ph.plateformeHistoriquePersonnels', 'pp', 'WITH', 'pp.responsable_scientifique = true OR pp.responsable_technique = true')
-            ->leftJoin('pp.utilisateur_id', 'u')
-            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM App\Entity\PlateformeHistorique ph2 WHERE ph2.plateforme = p.id)');
-
-
-        if ($search) {
-            // Normaliser la recherche pour éviter les problèmes d'accents et de casse
-            $search = mb_strtolower($search, 'UTF-8');
-            $qb->andWhere('ph.nom_officiel LIKE unaccent(LOWER(:search))')
-                ->orWhere('ph.forme_developpee_nom_officiel LIKE unaccent(LOWER(:search))')
-                ->orWhere($qb->expr()->andX(
-                    $qb->expr()->orX(
-                        $qb->expr()->like('u.prenom', 'unaccent(LOWER(:search))'),
-                        $qb->expr()->like('u.nom', 'unaccent(LOWER(:search))'),
-                        $qb->expr()->like('u.email', 'unaccent(LOWER(:search))')
-                    ),
-                    $qb->expr()->orX(
-                        $qb->expr()->eq('pp.responsable_scientifique', 'true'),
-                        $qb->expr()->eq('pp.responsable_technique', 'true')
-                    )
-                ))
-                ->setParameter('search', '%' . $search . '%');
+        if ($this->security->getUser() === null) {
+            throw new Exception("Vous devez être authentifié.", 401);
         }
 
-        if (!$permSuperUser) {
-            $idSender = $this->security->getUser()->getUserIdentifier();
-            $qb->andWhere(
-                $qb->expr()->andX(
-                    $qb->expr()->eq('u.id', ':idSender'),
-                    $qb->expr()->orX(
-                        $qb->expr()->eq('pp.responsable_scientifique', 'true'),
-                        $qb->expr()->eq('pp.responsable_technique', 'true')
+        $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
+
+        $estAdmin = $this->security->isGranted('ROLE_ADMIN');
+        $estDirOSU = $this->security->isGranted('ROLE_DIR_OSU');
+        $permSuperUser = $estAdmin || $estDirOSU;
+
+        $userId = $this->security->getUser()->getUserIdentifier();
+
+        $sql = "
+        SELECT DISTINCT p.*
+        FROM plateforme p
+        JOIN plateforme_historique ph ON ph.plateforme_id = p.id
+
+        LEFT JOIN plateforme_historique_personnel pp
+            ON pp.plateforme_historique_id = ph.id
+
+        LEFT JOIN utilisateur u
+            ON u.id = pp.utilisateur_id_id
+
+        WHERE ph.annee = (
+            SELECT MAX(ph2.annee)
+            FROM plateforme_historique ph2
+            WHERE ph2.plateforme_id = p.id
+        )
+    ";
+
+        // 🔍 SEARCH
+        if ($search) {
+            $sql .= "
+            AND (
+                ph.nom_officiel ILIKE :search
+                OR ph.forme_developpee_nom_officiel ILIKE :search
+                OR (
+                    (
+                        u.prenom ILIKE :search
+                        OR u.nom ILIKE :search
+                        OR u.email ILIKE :search
+                    )
+                    AND (
+                        pp.responsable_scientifique = true
+                        OR pp.responsable_technique = true
                     )
                 )
             )
-                ->setParameter('idSender', $idSender);
+        ";
         }
 
-        $qb->orderBy('ph.nom_officiel', 'ASC')
-            ->setFirstResult($offset)
-            ->setMaxResults(self::PLATEFORME_PAR_PAGE);
+        // 🔐 PERMISSIONS
+        if (!$permSuperUser) {
+            $sql .= "
+            AND u.id = :userId
+            AND (
+                pp.responsable_scientifique = true
+                OR pp.responsable_technique = true
+            )
+        ";
+        }
 
-        $countQb = clone $qb;
+        // 📊 ORDER + PAGINATION
+        $sql .= "
+        ORDER BY ph.nom_officiel ASC
+        LIMIT :limit OFFSET :offset
+    ";
 
-        $countQb->resetDQLPart('orderBy')
-            ->setFirstResult(null)
-            ->setMaxResults(null)
-            ->select('COUNT(DISTINCT p.id)');
+        $conn = $this->em->getConnection();
+        $stmt = $conn->prepare($sql);
 
-        $total = (int) $countQb->getQuery()->getSingleScalarResult();
-        $plateformes = $qb->getQuery()->getResult();
+        $params = [
+            'limit' => self::PLATEFORME_PAR_PAGE,
+            'offset' => $offset,
+        ];
 
-        return ['plateformes' => $plateformes, 'total' => $total];
+        if ($search) {
+            $params['search'] = '%' . $search . '%';
+        }
+
+        if (!$permSuperUser) {
+            $params['userId'] = $userId;
+        }
+
+        $result = $stmt->executeQuery($params);
+
+        $plateformes = $result->fetchAllAssociative();
+
+        // 🔢 COUNT QUERY
+        $countSql = "
+        SELECT COUNT(DISTINCT p.id)
+        FROM plateforme p
+        JOIN plateforme_historique ph ON ph.plateforme_id = p.id
+        LEFT JOIN plateforme_historique_personnel pp
+            ON pp.plateforme_historique_id = ph.id
+        LEFT JOIN utilisateur u
+            ON u.id = pp.utilisateur_id_id
+        WHERE ph.annee = (
+            SELECT MAX(ph2.annee)
+            FROM plateforme_historique ph2
+            WHERE ph2.plateforme_id = p.id
+        )
+    ";
+
+        if ($search) {
+            $countSql .= "
+            AND (
+                ph.nom_officiel ILIKE :search
+                OR ph.forme_developpee_nom_officiel ILIKE :search
+                OR (
+                    (
+                        u.prenom ILIKE :search
+                        OR u.nom ILIKE :search
+                        OR u.email ILIKE :search
+                    )
+                    AND (
+                        pp.responsable_scientifique = true
+                        OR pp.responsable_technique = true
+                    )
+                )
+            )
+        ";
+        }
+
+        if (!$permSuperUser) {
+            $countSql .= "
+            AND u.id = :userId
+            AND (
+                pp.responsable_scientifique = true
+                OR pp.responsable_technique = true
+            )
+        ";
+        }
+
+        $countStmt = $conn->prepare($countSql);
+
+        $countParams = [];
+
+        if ($search) {
+            $countParams['search'] = '%' . $search . '%';
+        }
+
+        if (!$permSuperUser) {
+            $countParams['userId'] = $userId;
+        }
+
+        $total = (int) $countStmt->executeQuery($countParams)->fetchOne();
+
+        return [
+            'plateformes' => $plateformes,
+            'total' => $total
+        ];
     }
 
     function ecraserChampsPlateforme(PlateformeHistorique $plateformeHisto, PlateformeHistoriqueDTO $dto): PlateformeHistorique
