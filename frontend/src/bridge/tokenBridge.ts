@@ -1,27 +1,13 @@
-let tokenExternal: string | null = null;
-let setTokenExternal: ((token: string | null) => void) | null = null;
-let clearTokenExternal: (() => void) | null = null;
-
-export const registerTokenSetter = (fn: (token: string | null) => void) => {
-  setTokenExternal = fn;
+type AuthBridge = {
+  getToken?: () => string | null;
+  setToken?: (token: string | null) => void;
+  clearToken?: () => void;
 };
 
-export const registerTokenClearer = (fn: () => void) => {
-  clearTokenExternal = fn;
+const bridge: AuthBridge = {};
+
+export const registerAuthBridge = (b: AuthBridge) => {
+  Object.assign(bridge, b);
 };
 
-export const syncTokenOutside = (token: string | null) => {
-  tokenExternal = token;
-};
-
-export const getTokenOutside = () => tokenExternal;
-
-export const setTokenOutside = (token: string) => {
-  tokenExternal = token;
-  setTokenExternal?.(token);
-};
-
-export const clearTokenOutside = () => {
-  tokenExternal = null;
-  clearTokenExternal?.();
-};
+export const getAuthBridge = () => bridge;

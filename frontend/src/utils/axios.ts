@@ -1,8 +1,8 @@
 import axios, { AxiosError } from "axios";
 import { API_URL } from "./constante";
 import { showSnackbar } from "../bridge/snackbarBridge";
-import { clearTokenOutside, getTokenOutside, setTokenOutside } from "../bridge/tokenBridge";
 import { navigateOutside } from "../bridge/navigationBridge";
+import { getAuthBridge } from "../bridge/tokenBridge";
 
 type RetriableRequestConfig = {
     _retry?: boolean;
@@ -28,7 +28,7 @@ const refreshAccessToken = async () => {
                 const refreshedToken = response.data?.token;
 
                 if (typeof refreshedToken === "string" && refreshedToken.length > 0) {
-                    setTokenOutside(refreshedToken);
+                    getAuthBridge()!.setToken!(refreshedToken);
                     return refreshedToken;
                 }
 
@@ -43,7 +43,7 @@ const refreshAccessToken = async () => {
 };
 
 const forceLogout = () => {
-    clearTokenOutside();
+    getAuthBridge()!.clearToken!();
     showSnackbar({
         message: "Votre session a expire, veuillez vous reconnecter.",
         couleur: "error",
@@ -101,7 +101,7 @@ symfony.interceptors.response.use(
 // Interceptor pour mettre le bearer token dans les headers de chaque requete
 symfony.interceptors.request.use(
     config => {
-        const token = getTokenOutside();
+        const token = getAuthBridge()!.getToken?.();
         if (token) {
             config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${token}`;

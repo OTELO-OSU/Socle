@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AuthContext } from '../context/authContext'
-import { registerTokenClearer, registerTokenSetter, syncTokenOutside } from '../bridge/tokenBridge'
 import { decodeToken } from '../utils/jwt'
 import * as authService from '../services/authService';
+import { registerAuthBridge } from '../bridge/tokenBridge';
+import { loadToken, saveToken } from '../utils/sessionStorageToken';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setTokenState] = useState<string | null>(null)
+    const [token, setTokenState] = useState<string | null>(() => loadToken());
     const [isAuthLoading, setIsAuthLoading] = useState(true)
 
     const setToken = useCallback((value: string | null) => {
-        syncTokenOutside(value)
         setTokenState(value)
     }, [])
 
@@ -19,6 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         let isMounted = true;
+
+        if (token) {
+            setIsAuthLoading(false);
+            return;
+        }
 
         (async () => {
             try {
@@ -38,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => {
             isMounted = false;
         };
-    }, [clearToken, setToken])
+    }, [token, clearToken, setToken])
 
     const decodedToken = useMemo(() => {
         if (!token) return null
@@ -81,12 +86,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     useEffect(() => {
-        registerTokenSetter(setToken);
-    }, [setToken]);
+        saveToken(token);
+    }, [token]);
 
     useEffect(() => {
-        registerTokenClearer(clearToken);
-    }, [clearToken]);
+        registerAuthBridge({
+            getToken: () => token,
+            setToken,
+            clearToken,
+        });
+    }, [token, setToken, clearToken]);
 
     return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 }
