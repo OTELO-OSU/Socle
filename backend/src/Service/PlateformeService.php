@@ -117,101 +117,20 @@ class PlateformeService
 
         $userId = $this->security->getUser()->getUserIdentifier();
 
-        $sql = "
-        SELECT DISTINCT p.*
-        FROM plateforme p
-        JOIN plateforme_historique ph ON ph.plateforme_id = p.id
-
-        LEFT JOIN plateforme_historique_personnel pp
-            ON pp.plateforme_historique_id = ph.id
-
-        LEFT JOIN utilisateur u
-            ON u.id = pp.utilisateur_id_id
-
-        WHERE ph.annee = (
-            SELECT MAX(ph2.annee)
-            FROM plateforme_historique ph2
-            WHERE ph2.plateforme_id = p.id
-        )
-    ";
-
-        // 🔍 SEARCH
-        if ($search) {
-            $sql .= "
-            AND (
-                ph.nom_officiel ILIKE :search
-                OR ph.forme_developpee_nom_officiel ILIKE :search
-                OR (
-                    (
-                        u.prenom ILIKE :search
-                        OR u.nom ILIKE :search
-                        OR u.email ILIKE :search
-                    )
-                    AND (
-                        pp.responsable_scientifique = true
-                        OR pp.responsable_technique = true
-                    )
-                )
-            )
-        ";
-        }
-
-        // 🔐 PERMISSIONS
-        if (!$permSuperUser) {
-            $sql .= "
-            AND u.id = :userId
-            AND (
-                pp.responsable_scientifique = true
-                OR pp.responsable_technique = true
-            )
-        ";
-        }
-
-        // 📊 ORDER + PAGINATION
-        $sql .= "
-        ORDER BY ph.nom_officiel ASC
-        LIMIT :limit OFFSET :offset
-    ";
-
         $conn = $this->em->getConnection();
-        $stmt = $conn->prepare($sql);
 
-        $params = [
-            'limit' => self::PLATEFORME_PAR_PAGE,
-            'offset' => $offset,
-        ];
-
-        if ($search) {
-            $params['search'] = '%' . $search . '%';
-        }
-
-        if (!$permSuperUser) {
-            $params['userId'] = $userId;
-        }
-
-        $result = $stmt->executeQuery($params);
-
-        $plateformes = $result->fetchAllAssociative();
-
-        // 🔢 COUNT QUERY
-        $countSql = "
-        SELECT COUNT(DISTINCT p.id)
-        FROM plateforme p
-        JOIN plateforme_historique ph ON ph.plateforme_id = p.id
-        LEFT JOIN plateforme_historique_personnel pp
-            ON pp.plateforme_historique_id = ph.id
-        LEFT JOIN utilisateur u
-            ON u.id = pp.utilisateur_id_id
-        WHERE ph.annee = (
-            SELECT MAX(ph2.annee)
-            FROM plateforme_historique ph2
-            WHERE ph2.plateforme_id = p.id
-        )
-    ";
+        // 1) Paginer sur des IDs uniques, triés par nom officiel.
+        $idsQb = $conn->createQueryBuilder();
+        $idsQb
+            ->select('p.id AS plateforme_id', 'ph.nom_officiel AS tri_nom_officiel')
+            ->from('plateforme', 'p')
+            ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
+            ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
+            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id_id')
+            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
 
         if ($search) {
-            $countSql .= "
-            AND (
+            $idsQb->andWhere('(
                 ph.nom_officiel ILIKE :search
                 OR ph.forme_developpee_nom_officiel ILIKE :search
                 OR (
@@ -225,33 +144,74 @@ class PlateformeService
                         OR pp.responsable_technique = true
                     )
                 )
-            )
-        ";
+            )');
+            $idsQb->setParameter('search', '%' . $search . '%');
         }
 
         if (!$permSuperUser) {
-            $countSql .= "
-            AND u.id = :userId
-            AND (
-                pp.responsable_scientifique = true
-                OR pp.responsable_technique = true
-            )
-        ";
+            $idsQb->andWhere('u.id = :userId')
+                ->andWhere('(pp.responsable_scientifique = true OR pp.responsable_technique = true)')
+                ->setParameter('userId', $userId);
         }
 
-        $countStmt = $conn->prepare($countSql);
+        $idsQb
+            ->groupBy('p.id, ph.nom_officiel')
+            ->orderBy('ph.nom_officiel', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults(self::PLATEFORME_PAR_PAGE);
 
-        $countParams = [];
+        $idRows = $idsQb->executeQuery()->fetchAllAssociative();
+        $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
+
+        $plateformes = [];
+        if ($plateformeIds !== []) {
+            // 2) Charger les entités pour que les groupes de sérialisation s'appliquent.
+            $plateformes = $this->em->getRepository(Plateforme::class)->findBy(['id' => $plateformeIds]);
+
+            // Conserver l'ordre de pagination défini par la requête IDs.
+            $ordreParId = array_flip($plateformeIds);
+            usort(
+                $plateformes,
+                static fn(Plateforme $a, Plateforme $b): int => ($ordreParId[$a->getId()] ?? PHP_INT_MAX) <=> ($ordreParId[$b->getId()] ?? PHP_INT_MAX)
+            );
+        }
+
+        // 3) Total pour la pagination.
+        $countQb = $conn->createQueryBuilder();
+        $countQb
+            ->select('COUNT(DISTINCT p.id)')
+            ->from('plateforme', 'p')
+            ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
+            ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
+            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id_id')
+            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
 
         if ($search) {
-            $countParams['search'] = '%' . $search . '%';
+            $countQb->andWhere('(
+                ph.nom_officiel ILIKE :search
+                OR ph.forme_developpee_nom_officiel ILIKE :search
+                OR (
+                    (
+                        u.prenom ILIKE :search
+                        OR u.nom ILIKE :search
+                        OR u.email ILIKE :search
+                    )
+                    AND (
+                        pp.responsable_scientifique = true
+                        OR pp.responsable_technique = true
+                    )
+                )
+            )');
+            $countQb->setParameter('search', '%' . $search . '%');
         }
 
         if (!$permSuperUser) {
-            $countParams['userId'] = $userId;
+            $countQb->andWhere('u.id = :userId')
+                ->andWhere('(pp.responsable_scientifique = true OR pp.responsable_technique = true)')
+                ->setParameter('userId', $userId);
         }
 
-        $total = (int) $countStmt->executeQuery($countParams)->fetchOne();
+        $total = (int) $countQb->executeQuery()->fetchOne();
 
         return [
             'plateformes' => $plateformes,
