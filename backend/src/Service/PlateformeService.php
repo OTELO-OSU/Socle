@@ -255,6 +255,8 @@ class PlateformeService
 
         return [
             'plateformes' => $plateformes,
+            'page' => $page,
+            'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
             'total' => $total
         ];
     }
