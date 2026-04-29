@@ -1,5 +1,12 @@
 import { symfony } from "../utils/axios";
 
+export type RetourFetchPlateformeParPage = {
+    plateformes: PlateformeLight[];
+    page: number;
+    pages_total: number;
+    total: number;
+}
+
 export type PlateformeLight = {
     id: number;
     pseudo_id: string;
@@ -34,7 +41,7 @@ export type PlateformeCree = {
 }
 
 export async function fetchPlateformeListeParPage(page: number, recherche: string) {
-    const {data} = await symfony.get<PlateformeLight[]>('/plateforme', {
+    const {data} = await symfony.get<RetourFetchPlateformeParPage>('/plateforme', {
         params: {
             page: page,
             search: recherche,
