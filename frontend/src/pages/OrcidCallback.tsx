@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SnackbarContext } from "../context/snackbarContext";
@@ -14,8 +14,6 @@ export default function OrcidCallback() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const effectLance = useRef(false);
-
     useEffect(() => {
         const code = searchParams.get("code");
 
@@ -23,9 +21,6 @@ export default function OrcidCallback() {
             navigate('/')
             return;
         }
-
-        if (effectLance.current) return;
-        effectLance.current = true;
 
         (async () => {
             try {

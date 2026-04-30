@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { AxiosError } from "axios";
@@ -12,8 +12,6 @@ export default function VerificationMailCallback() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const effectLance = useRef(false);
-
     useEffect(() => {
         const token = searchParams.get("token");
 
@@ -21,9 +19,6 @@ export default function VerificationMailCallback() {
             navigate('/')
             return;
         }
-
-        if (effectLance.current) return;
-        effectLance.current = true;
 
         (async () => {
             try {

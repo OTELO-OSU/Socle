@@ -1,5 +1,5 @@
 import { Box, Button, Card, FormControl, FormHelperText, FormLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
@@ -24,7 +24,6 @@ export default function Inscription() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const effetLance = useRef(false);
     const trigger = snackbarContext?.trigger;
     const token = searchParams.get("token");
     const ssMdp = searchParams.get("ssmdp");
@@ -41,9 +40,6 @@ export default function Inscription() {
     }, [searchParams]);
 
     useEffect(() => {
-        if (effetLance.current) return;
-        effetLance.current = true;
-
         const message = atob(searchParams.get("message") || "");
         if (message) {
             trigger?.({
