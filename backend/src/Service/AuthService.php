@@ -68,11 +68,6 @@ class AuthService
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
-
-        return [
-            "token" => $token,
-            "cookie" => $cookie
-        ];
     }
 
     function connexionOrcid(string $code)

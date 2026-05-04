@@ -3,8 +3,10 @@
 namespace App\Service;
 
 use App\Entity\Plateforme;
-use App\Entity\PlateformeEditeur;
+use App\Entity\PlateformeHistorique;
+use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\Utilisateur;
+use App\Security\Voter\PlateformeVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -46,10 +48,11 @@ class AdminService
         $userInscription = $user->getUtilisateurInscription();
 
         if ($userInscription->getPlateformeDemande()) {
-            $plateformeEditeur = new PlateformeEditeur();
-            $plateformeEditeur->setUtilisateur($user);
-            $plateformeEditeur->setPlateforme($userInscription->getPlateformeDemande());
-            $this->em->persist($plateformeEditeur);
+            $personnelResponsablePlateforme = new PlateformeHistoriquePersonnel();
+            $personnelResponsablePlateforme->setUtilisateurId($user);
+            $personnelResponsablePlateforme->setPlateformeHistorique($userInscription->getPlateformeDemande()->getLastHistorique());
+            $personnelResponsablePlateforme->setResponsablePlateforme(true);
+            $this->em->persist($personnelResponsablePlateforme);
         }
 
         if ($userInscription->getUniteDemande()) {
@@ -59,7 +62,7 @@ class AdminService
         }
 
         if ($userInscription->isOsuDemande()) {
-            // Todo: voir l'ensemble si directeur d'osu ne se résumerait pas à un admin
+            $user->setRoles(array_merge($user->getRoles(), ['ROLE_DIR_OSU']));
         }
 
 
@@ -90,32 +93,110 @@ class AdminService
         $this->em->flush();
     }
 
-    function affilierUtilisateurPlateforme(string $email, int $plateformeId)
+    function changeResponsable(int $plateformeId, ?array $responsableScientifiquesIds, ?array $responsableTechniquesIds, ?array $responsablePlateformesIds)
     {
+        // Vérification des permissions de l'utilisateur
+        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, Plateforme::class)) throw new Exception("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.", 403);
 
-        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
-        if (!$plateforme) throw new Exception("Plateforme non trouvée.", 404);
-
-
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-        if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
-
-        if (!$this->security->isGranted('AFFILIER', Plateforme::class)) throw new Exception("Vous n'avez pas les droits pour affilier un utilisateur à une plateforme", 403);
-
-        if ($this->em->getRepository(PlateformeEditeur::class)->findOneBy(["utilisateur" => $user, "plateforme" => $plateforme])) {
-            throw new Exception("L'utilisateur est déjà affilié à cette plateforme.", 400);
+        // Est-ce que la plateforme existe ?
+        /** @var PlateformeHistorique $plateforme */
+        $plateforme = $this->em->getRepository(PlateformeHistorique::class)->find($plateformeId);
+        if (!$plateforme) {
+            throw new Exception("La plateforme n'existe pas.", 404);
         }
 
-        $plateformeEditeur = new PlateformeEditeur();
-        $plateformeEditeur->setUtilisateur($user);
-        $plateformeEditeur->setPlateforme($plateforme);
-        $this->em->persist($plateformeEditeur);
-        $this->em->flush();
+        // Récupération des utilisateurs à affilier
+        $responsablesScientifiques = $responsableScientifiquesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsableScientifiquesIds]) : [];
+        $responsablesTechniques = $responsableTechniquesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsableTechniquesIds]) : [];
+        $responsablesPlateformes = $responsablePlateformesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsablePlateformesIds]) : [];
 
-        $this->mailerService->sendEmailToUser(
-            $user->getEmail(),
-            "Vous avez été affilié à une plateforme !",
-            "Vous avez été affilié à une plateforme par un administrateur, vous pouvez désormais accéder à cette plateforme et profiter de toutes les fonctionnalités qui y sont associées !"
-        );
+        $personnels = $plateforme->getPlateformeHistoriquePersonnels();
+        foreach ($personnels as $personnel) {
+            if ($personnel->isResponsableScientifique() && !in_array($personnel->getUtilisateurId(), $responsablesScientifiques)) {
+                $personnel->setResponsableScientifique(false);
+                $this->em->persist($personnel);
+                $this->mailerService->sendEmailToUser(
+                    $personnel->getUtilisateurId()->getEmail(),
+                    "Changement de rôle",
+                    "Vous avez été retiré des responsables scientifiques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+                );
+            }
+
+            if ($personnel->isResponsableTechnique() && !in_array($personnel->getUtilisateurId(), $responsablesTechniques)) {
+                $personnel->setResponsableTechnique(false);
+                $this->em->persist($personnel);
+                $this->mailerService->sendEmailToUser(
+                    $personnel->getUtilisateurId()->getEmail(),
+                    "Changement de rôle",
+                    "Vous avez été retiré des responsables techniques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+                );
+            }
+
+            if ($personnel->isResponsablePlateforme() && !in_array($personnel->getUtilisateurId(), $responsablesPlateformes)) {
+                $personnel->setResponsablePlateforme(false);
+                $this->em->persist($personnel);
+                $this->mailerService->sendEmailToUser(
+                    $personnel->getUtilisateurId()->getEmail(),
+                    "Changement de rôle",
+                    "Vous avez été retiré des responsables de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+                );
+            }
+        }
+
+        foreach ($responsablesScientifiques as $responsableScientifique) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableScientifique) {
+                return $personnel->getUtilisateurId()?->getId() === $responsableScientifique->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsableScientifique);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsableScientifique(true);
+            $this->em->persist($personnel);
+            $this->mailerService->sendEmailToUser(
+                $personnel->getUtilisateurId()->getEmail(),
+                "Changement de rôle",
+                "Vous avez été promu responsables scientifiques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+            );
+        }
+
+        foreach ($responsablesTechniques as $responsableTechnique) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableTechnique) {
+                return $personnel->getUtilisateurId()?->getId() === $responsableTechnique->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsableTechnique);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsableTechnique(true);
+            $this->em->persist($personnel);
+            $this->mailerService->sendEmailToUser(
+                $personnel->getUtilisateurId()->getEmail(),
+                "Changement de rôle",
+                "Vous avez été promu responsables techniques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+            );
+        }
+
+        foreach ($responsablesPlateformes as $responsablePlateforme) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsablePlateforme) {
+                return $personnel->getUtilisateurId()?->getId() === $responsablePlateforme->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsablePlateforme);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsablePlateforme(true);
+            $this->em->persist($personnel);
+            $this->mailerService->sendEmailToUser(
+                $personnel->getUtilisateurId()->getEmail(),
+                "Changement de rôle",
+                "Vous avez été promu responsables plateformes de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
+            );
+        }
+
+        $this->em->flush();
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Security\Voter;
 
 use App\Entity\Plateforme;
-use App\Entity\PlateformeEditeur;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -37,22 +36,26 @@ final class PlateformeVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                return false;
                 break;
             case self::AFFILIER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                return false;
                 break;
             case self::SAUVEGARDER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
                 /** @var Plateforme $subject */
-                return $subject->getPlateformeEditeurs()->contains(function (PlateformeEditeur $plateformeEditeur) use ($user) {
-                    return $plateformeEditeur->getUtilisateur() == $user;
-                });
+                $historiquePersonnel = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
+                foreach ($historiquePersonnel as $personnel) {
+                    if ($personnel->getUtilisateurId() === $user) {
+                        if ($personnel->isResponsablePlateforme() || $personnel->isResponsableScientifique() || $personnel->isResponsableTechnique()) {
+                            return true;
+                        }
+                    }
+                }
                 break;
         }
 

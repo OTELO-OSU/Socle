@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\AdminService;
+use App\Service\PlateformeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,13 +40,22 @@ final class AdminController extends AbstractController
         return $this->json($users);
     }
 
-    #[Route('/plateforme/affilier', methods: ['POST'])]
-    public function affilierUtilisateurPlateforme(Request $request): Response
+    #[Route('/plateforme/responsables', methods: ['PATCH'])]
+    public function patchResponsablePlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['email']) || !isset($json['plateformeId'])) return $this->json(['message' => 'L\'email et l\'ID de la plateforme sont requis.'], 400);
 
-        $this->adminService->affilierUtilisateurPlateforme($json['email'], $json['plateformeId']);
-        return $this->json(['message' => 'Utilisateur affilié à la plateforme avec succès.'], 201);
+        $plateformeId = $json['plateformeId'] ?? null;
+
+        if ($plateformeId === null) {
+            return $this->json(['message' => 'L\'ID de la plateforme est requis.'], 400);
+        }
+
+        $responsablesScientifiquesIds = $json['responsableScientifiquesIds'] ?? null;
+        $responsablesTechniquesIds = $json['responsableTechniquesIds'] ?? null;
+        $responsablesPlateformesIds = $json['responsablePlateformeIds'] ?? null;
+
+        $this->adminService->changeResponsable($plateformeId, $responsablesScientifiquesIds, $responsablesTechniquesIds, $responsablesPlateformesIds);
+        return $this->json(['message' => 'Responsables de la plateforme mis à jour avec succès.'], 200);
     }
 }

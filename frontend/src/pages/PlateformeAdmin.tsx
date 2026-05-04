@@ -93,8 +93,14 @@ export default function PlateformeAdmin() {
                 .filter((personnel) => personnel.responsable_technique)
                 .map((personnel) => personnel.utilisateur_id)
         );
+        setResponsablesPlateforme(
+            selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
+                .filter((personnel) => personnel.responsable_plateforme)
+                .map((personnel) => personnel.utilisateur_id)
+        );
         setScientifiquesRecherche('');
         setTechniquesRecherche('');
+        setPlateformeRecherche('');
         setEditDialogOpen(true);
         handleCloseMenu();
     }

@@ -41,7 +41,8 @@ class PlateformeHistoriquePersonnel
     private ?int $quotite = 0;
 
     #[ORM\Column]
-    private ?bool $responsablePlateforme = false;
+    #[Groups(['plateforme:list'])]
+    private ?bool $responsable_plateforme = false;
 
     public function getId(): ?int
     {
@@ -122,12 +123,12 @@ class PlateformeHistoriquePersonnel
 
     public function isResponsablePlateforme(): ?bool
     {
-        return $this->responsablePlateforme;
+        return $this->responsable_plateforme;
     }
 
-    public function setResponsablePlateforme(bool $responsablePlateforme): static
+    public function setResponsablePlateforme(bool $responsable_plateforme): static
     {
-        $this->responsablePlateforme = $responsablePlateforme;
+        $this->responsable_plateforme = $responsable_plateforme;
 
         return $this;
     }

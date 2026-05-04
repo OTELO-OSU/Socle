@@ -68,12 +68,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $plateformeHistoriquePersonnels;
 
     /**
-     * @var Collection<int, PlateformeEditeur>
-     */
-    #[ORM\OneToMany(targetEntity: PlateformeEditeur::class, mappedBy: 'utilisateur')]
-    private Collection $plateformeEditeurs;
-
-    /**
      * @var Collection<int, Entite>
      */
     #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
@@ -109,7 +103,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->admis = false;
         $this->refreshTokens = new ArrayCollection();
         $this->plateformeHistoriquePersonnels = new ArrayCollection();
-        $this->plateformeEditeurs = new ArrayCollection();
         $this->entites = new ArrayCollection();
         $this->utilisateurBaps = new ArrayCollection();
         $this->utilisateurEmploiTypes = new ArrayCollection();
@@ -336,36 +329,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($plateformeHistoriquePersonnel->getUtilisateurId() === $this) {
                 $plateformeHistoriquePersonnel->setUtilisateurId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, PlateformeEditeur>
-     */
-    public function getPlateformeEditeurs(): Collection
-    {
-        return $this->plateformeEditeurs;
-    }
-
-    public function addPlateformeEditeur(PlateformeEditeur $plateformeEditeur): static
-    {
-        if (!$this->plateformeEditeurs->contains($plateformeEditeur)) {
-            $this->plateformeEditeurs->add($plateformeEditeur);
-            $plateformeEditeur->setUtilisateur($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlateformeEditeur(PlateformeEditeur $plateformeEditeur): static
-    {
-        if ($this->plateformeEditeurs->removeElement($plateformeEditeur)) {
-            // set the owning side to null (unless already changed)
-            if ($plateformeEditeur->getUtilisateur() === $this) {
-                $plateformeEditeur->setUtilisateur(null);
             }
         }
 
