@@ -319,9 +319,42 @@ class AdminControllerTest extends WebTestCase
         // Recharger la plateforme depuis la base avec son historique et ses personnels
         $refreshedPlateforme = $this->em->getRepository(Plateforme::class)->find($this->testPlateforme->getId());
         $this->assertEquals(
-            $refreshedPlateforme->getLastHistorique()->getPlateformeHistoriquePersonnels()[0]->getUtilisateurId()->getEmail(),
+            $refreshedPlateforme->getLastHistorique()->getPlateformeHistoriquePersonnels()[0]->getUtilisateur()->getEmail(),
             "test@example.com"
         );
+    }
+
+    public function testAdmissionOsuDemande(): void
+    {
+        $client = $this->client;
+
+        $userInscription = new UtilisateurInscription();
+        $userInscription->setOsuDemande(true);
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/utilisateurs/approuver',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Utilisateur approuvé avec succès.",
+            $data['message']
+        );
+
+        $admisUser = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $this->assertTrue($admisUser->isAdmis());
+        $this->assertContains('ROLE_DIR_OSU', $admisUser->getRoles());
+        self::assertEmailCount(1);
+        $message = self::getMailerMessage(0);
+        $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
     }
 
     public function testRefusUtilisateurSuccess(): void

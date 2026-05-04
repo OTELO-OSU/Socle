@@ -49,7 +49,7 @@ class AdminService
 
         if ($userInscription->getPlateformeDemande()) {
             $personnelResponsablePlateforme = new PlateformeHistoriquePersonnel();
-            $personnelResponsablePlateforme->setUtilisateurId($user);
+            $personnelResponsablePlateforme->setUtilisateur($user);
             $personnelResponsablePlateforme->setPlateformeHistorique($userInscription->getPlateformeDemande()->getLastHistorique());
             $personnelResponsablePlateforme->setResponsablePlateforme(true);
             $this->em->persist($personnelResponsablePlateforme);
@@ -112,31 +112,31 @@ class AdminService
 
         $personnels = $plateforme->getPlateformeHistoriquePersonnels();
         foreach ($personnels as $personnel) {
-            if ($personnel->isResponsableScientifique() && !in_array($personnel->getUtilisateurId(), $responsablesScientifiques)) {
+            if ($personnel->isResponsableScientifique() && !in_array($personnel->getUtilisateur(), $responsablesScientifiques)) {
                 $personnel->setResponsableScientifique(false);
                 $this->em->persist($personnel);
                 $this->mailerService->sendEmailToUser(
-                    $personnel->getUtilisateurId()->getEmail(),
+                    $personnel->getUtilisateur()->getEmail(),
                     "Changement de rôle",
                     "Vous avez été retiré des responsables scientifiques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
                 );
             }
 
-            if ($personnel->isResponsableTechnique() && !in_array($personnel->getUtilisateurId(), $responsablesTechniques)) {
+            if ($personnel->isResponsableTechnique() && !in_array($personnel->getUtilisateur(), $responsablesTechniques)) {
                 $personnel->setResponsableTechnique(false);
                 $this->em->persist($personnel);
                 $this->mailerService->sendEmailToUser(
-                    $personnel->getUtilisateurId()->getEmail(),
+                    $personnel->getUtilisateur()->getEmail(),
                     "Changement de rôle",
                     "Vous avez été retiré des responsables techniques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
                 );
             }
 
-            if ($personnel->isResponsablePlateforme() && !in_array($personnel->getUtilisateurId(), $responsablesPlateformes)) {
+            if ($personnel->isResponsablePlateforme() && !in_array($personnel->getUtilisateur(), $responsablesPlateformes)) {
                 $personnel->setResponsablePlateforme(false);
                 $this->em->persist($personnel);
                 $this->mailerService->sendEmailToUser(
-                    $personnel->getUtilisateurId()->getEmail(),
+                    $personnel->getUtilisateur()->getEmail(),
                     "Changement de rôle",
                     "Vous avez été retiré des responsables de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
                 );
@@ -145,17 +145,17 @@ class AdminService
 
         foreach ($responsablesScientifiques as $responsableScientifique) {
             $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableScientifique) {
-                return $personnel->getUtilisateurId()?->getId() === $responsableScientifique->getId();
+                return $personnel->getUtilisateur()?->getId() === $responsableScientifique->getId();
             })->first();
             if (!$personnel) {
                 $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateurId($responsableScientifique);
+                $personnel->setUtilisateur($responsableScientifique);
                 $personnel->setPlateformeHistorique($plateforme);
             }
             $personnel->setResponsableScientifique(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
-                $personnel->getUtilisateurId()->getEmail(),
+                $personnel->getUtilisateur()->getEmail(),
                 "Changement de rôle",
                 "Vous avez été promu responsables scientifiques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
             );
@@ -163,17 +163,17 @@ class AdminService
 
         foreach ($responsablesTechniques as $responsableTechnique) {
             $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableTechnique) {
-                return $personnel->getUtilisateurId()?->getId() === $responsableTechnique->getId();
+                return $personnel->getUtilisateur()?->getId() === $responsableTechnique->getId();
             })->first();
             if (!$personnel) {
                 $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateurId($responsableTechnique);
+                $personnel->setUtilisateur($responsableTechnique);
                 $personnel->setPlateformeHistorique($plateforme);
             }
             $personnel->setResponsableTechnique(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
-                $personnel->getUtilisateurId()->getEmail(),
+                $personnel->getUtilisateur()->getEmail(),
                 "Changement de rôle",
                 "Vous avez été promu responsables techniques de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
             );
@@ -181,17 +181,17 @@ class AdminService
 
         foreach ($responsablesPlateformes as $responsablePlateforme) {
             $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsablePlateforme) {
-                return $personnel->getUtilisateurId()?->getId() === $responsablePlateforme->getId();
+                return $personnel->getUtilisateur()?->getId() === $responsablePlateforme->getId();
             })->first();
             if (!$personnel) {
                 $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateurId($responsablePlateforme);
+                $personnel->setUtilisateur($responsablePlateforme);
                 $personnel->setPlateformeHistorique($plateforme);
             }
             $personnel->setResponsablePlateforme(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
-                $personnel->getUtilisateurId()->getEmail(),
+                $personnel->getUtilisateur()->getEmail(),
                 "Changement de rôle",
                 "Vous avez été promu responsables plateformes de la plateforme \"" . $plateforme->getNomOfficiel() . "\" par un administrateur."
             );

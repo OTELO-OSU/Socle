@@ -50,7 +50,7 @@ final class PlateformeVoter extends Voter
                 /** @var Plateforme $subject */
                 $historiquePersonnel = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
                 foreach ($historiquePersonnel as $personnel) {
-                    if ($personnel->getUtilisateurId() === $user) {
+                    if ($personnel->getUtilisateur() === $user) {
                         if ($personnel->isResponsablePlateforme() || $personnel->isResponsableScientifique() || $personnel->isResponsableTechnique()) {
                             return true;
                         }

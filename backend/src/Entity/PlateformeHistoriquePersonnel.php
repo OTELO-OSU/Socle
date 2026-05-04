@@ -76,20 +76,6 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
-    #[Ignore]
-    public function getUtilisateurId(): ?Utilisateur
-    {
-        return $this->utilisateur;
-    }
-
-    #[Ignore]
-    public function setUtilisateurId(?Utilisateur $utilisateur): static
-    {
-        $this->utilisateur = $utilisateur;
-
-        return $this;
-    }
-
     #[Groups(['plateforme:list'])]
     public function isResponsableScientifique(): ?bool
     {

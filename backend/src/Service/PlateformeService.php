@@ -378,7 +378,7 @@ class PlateformeService
                         $nouveauItilisateurId = $perso["utilisateur_id"];
                         $existeDeja = false;
                         foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
-                            if ($personnelExistant->getUtilisateurId()->getId() == $nouveauItilisateurId) {
+                            if ($personnelExistant->getUtilisateur()->getId() == $nouveauItilisateurId) {
                                 $existeDeja = true;
                                 break;
                             }
@@ -387,7 +387,7 @@ class PlateformeService
                             $newRecord = new PlateformeHistoriquePersonnel();
                             $newRecord->setPlateformeHistorique($plateformeHisto);
                             $utilisateur = $this->em->getReference(Utilisateur::class, $nouveauItilisateurId);
-                            $newRecord->setUtilisateurId($utilisateur);
+                            $newRecord->setUtilisateur($utilisateur);
                             $newRecord->setResponsableScientifique($perso["responsable_scientifique"]);
                             $newRecord->setResponsableTechnique($perso["responsable_technique"]);
                             $typeContrat = $this->em->getReference(TypeContrat::class, $perso["type_contrat_id"]);

@@ -330,7 +330,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->plateformeHistoriquePersonnels->contains($plateformeHistoriquePersonnel)) {
             $this->plateformeHistoriquePersonnels->add($plateformeHistoriquePersonnel);
-            $plateformeHistoriquePersonnel->setUtilisateurId($this);
+            $plateformeHistoriquePersonnel->setUtilisateur($this);
         }
 
         return $this;
@@ -340,8 +340,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->plateformeHistoriquePersonnels->removeElement($plateformeHistoriquePersonnel)) {
             // set the owning side to null (unless already changed)
-            if ($plateformeHistoriquePersonnel->getUtilisateurId() === $this) {
-                $plateformeHistoriquePersonnel->setUtilisateurId(null);
+            if ($plateformeHistoriquePersonnel->getUtilisateur() === $this) {
+                $plateformeHistoriquePersonnel->setUtilisateur(null);
             }
         }
 
