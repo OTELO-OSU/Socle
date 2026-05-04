@@ -5,7 +5,7 @@ namespace App\Tests\Controller;
 use App\Entity\Categorie;
 use App\Entity\Entite;
 use App\Entity\Plateforme;
-use App\Entity\PlateformeEditeur;
+use App\Entity\PlateformeHistorique;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurInscription;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,11 +17,17 @@ class AdminControllerTest extends WebTestCase
 {
     private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
     private EntityManagerInterface $em;
+    private ?Plateforme $testPlateforme = null;
+    private ?PlateformeHistorique $plateformeHisto = null;
+    private ?Utilisateur $user = null;
 
     private function cleanupDatabase(): void
     {
         $conn = $this->em->getConnection();
         $platform = $conn->getDatabasePlatform();
+        $conn->executeStatement($platform->getTruncateTableSQL('plateforme_historique_personnel', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('plateforme_historique', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('plateforme', true));
         $conn->executeStatement($platform->getTruncateTableSQL('refresh_token', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_verification', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_machine', true));
@@ -49,6 +55,8 @@ class AdminControllerTest extends WebTestCase
         $user->setEmailValide(true);
         $this->em->persist($user);
 
+        $this->user = $user;
+
         $admin = new Utilisateur();
         $admin->setNom('Admin');
         $admin->setPrenom('User');
@@ -70,9 +78,16 @@ class AdminControllerTest extends WebTestCase
         $entite->setLaboratoire(false);
         $this->em->persist($entite);
 
-        $plateforme = new Plateforme();
-        $plateforme->setPseudoId('Test Plateforme');
-        $this->em->persist($plateforme);
+        $this->testPlateforme = new Plateforme();
+        $this->testPlateforme->setPseudoId('Test Plateforme');
+        $this->em->persist($this->testPlateforme);
+
+        $this->plateformeHisto = new PlateformeHistorique();
+        $this->plateformeHisto->setNomOfficiel('Test Plateforme');
+        $this->plateformeHisto->setPlateforme($this->testPlateforme);
+        $this->plateformeHisto->setBrouillon(false);
+        $this->plateformeHisto->setAnnee(2024);
+        $this->em->persist($this->plateformeHisto);
 
         $this->em->flush();
     }
@@ -275,7 +290,7 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         $userInscription = new UtilisateurInscription();
-        $userInscription->setPlateformeDemande($this->em->getRepository(Plateforme::class)->findOneBy([]));
+        $userInscription->setPlateformeDemande($this->testPlateforme);
         $userInscription->setOsuDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
@@ -300,8 +315,11 @@ class AdminControllerTest extends WebTestCase
         self::assertEmailCount(1);
         $message = self::getMailerMessage(0);
         $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
+
+        // Recharger la plateforme depuis la base avec son historique et ses personnels
+        $refreshedPlateforme = $this->em->getRepository(Plateforme::class)->find($this->testPlateforme->getId());
         $this->assertEquals(
-            $this->em->getRepository(PlateformeEditeur::class)->findOneBy([])->getUtilisateur()->getEmail(),
+            $refreshedPlateforme->getLastHistorique()->getPlateformeHistoriquePersonnels()[0]->getUtilisateurId()->getEmail(),
             "test@example.com"
         );
     }
@@ -311,7 +329,7 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         $userInscription = new UtilisateurInscription();
-        $userInscription->setPlateformeDemande($this->em->getRepository(Plateforme::class)->findOneBy([]));
+        $userInscription->setPlateformeDemande($this->testPlateforme);
         $userInscription->setOsuDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
@@ -336,35 +354,6 @@ class AdminControllerTest extends WebTestCase
         self::assertEmailCount(1);
         $message = self::getMailerMessage(0);
         $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
-        $this->assertNull(
-            $this->em->getRepository(PlateformeEditeur::class)->findOneBy([])
-        );
-    }
-
-    public function testAffiliationPlateformeEmailAbsent(): void
-    {
-        $client = $this->client;
-
-        // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
-
-        $client->request(
-            'POST',
-            '/api/plateforme/affilier',
-            [],
-            [],
-            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
-            \json_encode(['plateformeId' => $plateformeId])
-        );
-
-        $this->assertResponseStatusCodeSame(400);
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(
-            "L'email et l'ID de la plateforme sont requis.",
-            $data['message']
-        );
-
-        self::assertEmailCount(0);
     }
 
     public function testAffiliationPlateformeIdPlateformeAbsent(): void
@@ -372,47 +361,21 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+        $plateformeId = $this->testPlateforme->getId();
 
         $client->request(
-            'POST',
-            '/api/plateforme/affilier',
+            'PATCH',
+            '/api/plateforme/responsables',
             [],
             [],
-            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
             \json_encode(['email' => 'test@example.com'])
         );
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'email et l'ID de la plateforme sont requis.",
-            $data['message']
-        );
-
-        self::assertEmailCount(0);
-    }
-
-    public function testAffiliationPlateformeEmailInexistant(): void
-    {
-        $client = $this->client;
-
-        // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
-
-        $client->request(
-            'POST',
-            '/api/plateforme/affilier',
-            [],
-            [],
-            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
-            \json_encode(['plateformeId' => $plateformeId, 'email' => 'nonexistent@example.com'])
-        );
-
-        $this->assertResponseStatusCodeSame(404);
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(
-            "Utilisateur non trouvé.",
+            "L'ID de la plateforme est requis.",
             $data['message']
         );
 
@@ -424,18 +387,18 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         $client->request(
-            'POST',
-            '/api/plateforme/affilier',
+            'PATCH',
+            '/api/plateforme/responsables',
             [],
             [],
-            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
             \json_encode(['plateformeId' => -1, 'email' => 'test@example.com'])
         );
 
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Plateforme non trouvée.",
+            "La plateforme n'existe pas.",
             $data['message']
         );
 
@@ -447,11 +410,11 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+        $plateformeId = $this->testPlateforme->getId();
 
         $client->request(
-            'POST',
-            '/api/plateforme/affilier',
+            'PATCH',
+            '/api/plateforme/responsables',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
@@ -461,7 +424,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour affilier un utilisateur à une plateforme",
+            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
             $data['message']
         );
 
@@ -473,21 +436,21 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->em->getRepository(Plateforme::class)->findOneBy([])->getId();
+        $plateformeId = $this->plateformeHisto->getId();
 
         $client->request(
-            'POST',
-            '/api/plateforme/affilier',
+            'PATCH',
+            '/api/plateforme/responsables',
             [],
             [],
             ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
-            \json_encode(['email' => 'test@example.com', 'plateformeId' => $plateformeId])
+            \json_encode(['responsableScientifiquesIds' => [$this->user->getId()], 'plateformeId' => $plateformeId])
         );
 
-        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur affilié à la plateforme avec succès.",
+            "Responsables de la plateforme mis à jour avec succès.",
             $data['message']
         );
 
