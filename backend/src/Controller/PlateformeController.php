@@ -68,4 +68,23 @@ final class PlateformeController extends AbstractController
         $this->plateformeService->sauvegarderPlateforme($dto, $brouillon);
         return $this->json(['message' => 'Plateforme sauvegardée avec succès.'], 200);
     }
+
+    #[Route('/plateforme/responsables', methods: ['PATCH'])]
+    public function patchResponsablePlateforme(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+
+        $plateformeId = $json['plateformeId'] ?? null;
+
+        if ($plateformeId === null) {
+            return $this->json(['message' => 'L\'ID de la plateforme est requis.'], 400);
+        }
+
+        $responsablesScientifiquesIds = $json['responsableScientifiquesIds'] ?? null;
+        $responsablesTechniquesIds = $json['responsableTechniquesIds'] ?? null;
+        $responsablesPlateformesIds = $json['responsablePlateformesIds'] ?? null;
+
+        $this->plateformeService->changeResponsable($plateformeId, $responsablesScientifiquesIds, $responsablesTechniquesIds, $responsablesPlateformesIds);
+        return $this->json(['message' => 'Responsables de la plateforme mis à jour avec succès.'], 200);
+    }
 }

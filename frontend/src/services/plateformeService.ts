@@ -58,3 +58,12 @@ export async function creerPlateforme(nom: string) {
 
     return { message: data.message, plateforme_id: data.plateforme_id };
 }
+
+export async function patchResponsablePlateforme(plateformeId: number, responsableScientifiquesIds: number[], responsableTechniquesIds: number[], responsablePlateformeIds: number[]) {
+    await symfony.patch(`/plateforme/responsables`, {
+        plateformeId: plateformeId,
+        responsableScientifiquesIds: responsableScientifiquesIds,
+        responsableTechniquesIds: responsableTechniquesIds,
+        responsablePlateformeIds: responsablePlateformeIds,
+    });
+}

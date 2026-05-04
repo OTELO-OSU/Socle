@@ -26,19 +26,22 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
-    private ?bool $responsable_scientifique = null;
+    private ?bool $responsable_scientifique = false;
 
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
-    private ?bool $responsable_technique = null;
+    private ?bool $responsable_technique = false;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?TypeContrat $type_contrat = null;
 
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
-    private ?int $quotite = null;
+    private ?int $quotite = 0;
+
+    #[ORM\Column]
+    private ?bool $responsablePlateforme = false;
 
     public function getId(): ?int
     {
@@ -113,6 +116,18 @@ class PlateformeHistoriquePersonnel
     public function setQuotite(int $quotite): static
     {
         $this->quotite = $quotite;
+
+        return $this;
+    }
+
+    public function isResponsablePlateforme(): ?bool
+    {
+        return $this->responsablePlateforme;
+    }
+
+    public function setResponsablePlateforme(bool $responsablePlateforme): static
+    {
+        $this->responsablePlateforme = $responsablePlateforme;
 
         return $this;
     }

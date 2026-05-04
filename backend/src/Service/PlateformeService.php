@@ -22,6 +22,7 @@ use App\Entity\PosteFuturEmploiType;
 use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
 use App\Entity\Ville;
+use App\Security\Voter\PlateformeVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -896,5 +897,82 @@ class PlateformeService
         }
 
         return $plateformeHisto;
+    }
+
+    function changeResponsable(int $plateformeId, ?array $responsableScientifiquesIds, ?array $responsableTechniquesIds, ?array $responsablePlateformesIds)
+    {
+        // Vérification des permissions de l'utilisateur
+        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, Plateforme::class)) throw new Exception("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.", 403);
+
+        // Est-ce que la plateforme existe ?
+        /** @var PlateformeHistorique $plateforme */
+        $plateforme = $this->em->getRepository(PlateformeHistorique::class)->find($plateformeId);
+        if (!$plateforme) {
+            throw new Exception("La plateforme n'existe pas.", 404);
+        }
+
+        // Récupération des utilisateurs à affilier
+        $responsablesScientifiques = $responsableScientifiquesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsableScientifiquesIds]) : [];
+        $responsablesTechniques = $responsableTechniquesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsableTechniquesIds]) : [];
+        $responsablesPlateformes = $responsablePlateformesIds ? $this->em->getRepository(Utilisateur::class)->findBy(['id' => $responsablePlateformesIds]) : [];
+
+        $personnels = $plateforme->getPlateformeHistoriquePersonnels();
+        foreach ($personnels as $personnel) {
+            if ($personnel->isResponsableScientifique() && !in_array($personnel->getUtilisateurId(), $responsablesScientifiques)) {
+                $personnel->setResponsableScientifique(false);
+                $this->em->persist($personnel);
+            }
+
+            if ($personnel->isResponsableTechnique() && !in_array($personnel->getUtilisateurId(), $responsablesTechniques)) {
+                $personnel->setResponsableTechnique(false);
+                $this->em->persist($personnel);
+            }
+
+            if ($personnel->isResponsablePlateforme() && !in_array($personnel->getUtilisateurId(), $responsablesPlateformes)) {
+                $personnel->setResponsablePlateforme(false);
+                $this->em->persist($personnel);
+            }
+        }
+
+        foreach ($responsablesScientifiques as $responsableScientifique) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableScientifique) {
+                return $personnel->getUtilisateurId()?->getId() === $responsableScientifique->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsableScientifique);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsableScientifique(true);
+            $this->em->persist($personnel);
+        }
+
+        foreach ($responsablesTechniques as $responsableTechnique) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableTechnique) {
+                return $personnel->getUtilisateurId()?->getId() === $responsableTechnique->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsableTechnique);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsableTechnique(true);
+            $this->em->persist($personnel);
+        }
+
+        foreach ($responsablesPlateformes as $responsablePlateforme) {
+            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsablePlateforme) {
+                return $personnel->getUtilisateurId()?->getId() === $responsablePlateforme->getId();
+            })->first();
+            if (!$personnel) {
+                $personnel = new PlateformeHistoriquePersonnel();
+                $personnel->setUtilisateurId($responsablePlateforme);
+                $personnel->setPlateformeHistorique($plateforme);
+            }
+            $personnel->setResponsablePlateforme(true);
+            $this->em->persist($personnel);
+        }
+
+        $this->em->flush();
     }
 }
