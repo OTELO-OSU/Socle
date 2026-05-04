@@ -345,31 +345,38 @@ export default function PlateformeAdmin() {
                     {plateformes.map((plateforme) => (
                         <Card key={plateforme.id}>
                             <CardContent>
-                                <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Année : {plateforme.lastHistorique.annee}
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+                                    <Box>
+                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            Année : {plateforme.lastHistorique.annee}
+                                        </Typography>
+                                    </Box>
+                                    <Button
+                                        color="inherit"
+                                        aria-label="plus"
+                                        aria-controls={menu ? 'menu' : undefined}
+                                        aria-haspopup="true"
+                                        onClick={(event) => handleClick(event, plateforme)}
+                                    >
+                                        <MoreVert />
+                                    </Button>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={menu}
+                                        onClose={handleCloseMenu}
+                                    >
+                                        <MenuItem onClick={handleModifyPlateforme}>Modifier</MenuItem>
+                                        <MenuItem onClick={handleCloseMenu}>Supprimer</MenuItem>
+                                    </Menu>
+                                </Box>
                             </CardContent>
                             <CardActions>
                                 <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.lastHistorique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
                                     Voir les détails
                                 </Link>
-                                <Button
-                                    aria-label="plus"
-                                    aria-controls={menu ? 'menu' : undefined}
-                                    aria-haspopup="true"
-                                    onClick={(event) => handleClick(event, plateforme)}
-                                >
-                                    <MoreVert />
-                                </Button>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={menu}
-                                    onClose={handleCloseMenu}
-                                >
-                                    <MenuItem onClick={handleModifyPlateforme}>Modifier</MenuItem>
-                                    <MenuItem onClick={handleCloseMenu}>Supprimer</MenuItem>
-                                </Menu>
+
+
                             </CardActions>
                         </Card>
                     ))}
