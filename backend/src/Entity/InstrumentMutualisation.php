@@ -15,11 +15,11 @@ class InstrumentMutualisation
 
     #[ORM\ManyToOne(inversedBy: 'instrumentMutualisations')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Instrument $instrument_source = null;
+    private ?Instrument $instrumentSource = null;
 
     #[ORM\ManyToOne(inversedBy: 'instrumentMutualisations')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Instrument $instrument_cible = null;
+    private ?Instrument $instrumentCible = null;
 
     public function getId(): ?int
     {
@@ -31,9 +31,9 @@ class InstrumentMutualisation
         return $this->instrument_source;
     }
 
-    public function setInstrumentSource(?Instrument $instrument_source): static
+    public function setInstrumentSource(?Instrument $instrumentSource): static
     {
-        $this->instrument_source = $instrument_source;
+        $this->instrument_source = $instrumentSource;
 
         return $this;
     }
@@ -43,9 +43,9 @@ class InstrumentMutualisation
         return $this->instrument_cible;
     }
 
-    public function setInstrumentCible(?Instrument $instrument_cible): static
+    public function setInstrumentCible(?Instrument $instrumentCible): static
     {
-        $this->instrument_cible = $instrument_cible;
+        $this->instrument_cible = $instrumentCible;
 
         return $this;
     }

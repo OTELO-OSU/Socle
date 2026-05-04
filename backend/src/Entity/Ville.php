@@ -19,7 +19,7 @@ class Ville
     private ?string $nom = null;
 
     #[ORM\Column]
-    private ?int $numero_departement = null;
+    private ?int $numeroDepartement = null;
 
     #[ORM\Column(length: 255)]
     private ?string $departement = null;
@@ -54,12 +54,12 @@ class Ville
 
     public function getNumeroDepartement(): ?int
     {
-        return $this->numero_departement;
+        return $this->numeroDepartement;
     }
 
-    public function setNumeroDepartement(int $numero_departement): static
+    public function setNumeroDepartement(int $numeroDepartement): static
     {
-        $this->numero_departement = $numero_departement;
+        $this->numeroDepartement = $numeroDepartement;
 
         return $this;
     }

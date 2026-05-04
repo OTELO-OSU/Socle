@@ -16,8 +16,8 @@ class PosteFutur
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturs')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?PlateformeHistorique $plateforme_historique = null;
+    #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
+    private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturs')]
     #[ORM\JoinColumn(nullable: false)]
@@ -31,21 +31,21 @@ class PosteFutur
     private ?int $quotite = null;
 
     #[ORM\Column]
-    private ?int $rang_numerateur = null;
+    private ?int $rangNumerateur = null;
 
     #[ORM\Column]
-    private ?int $rang_denominateur = null;
+    private ?int $rangDenominateur = null;
 
     /**
      * @var Collection<int, PosteFuturBap>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'poste_futur', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'posteFutur', cascade: ['remove'], orphanRemoval: true)]
     private Collection $posteFuturBaps;
 
     /**
      * @var Collection<int, PosteFuturEmploiType>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'poste_futur', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'posteFutur', cascade: ['remove'], orphanRemoval: true)]
     private Collection $posteFuturEmploiTypes;
 
     public function __construct()
@@ -61,12 +61,12 @@ class PosteFutur
 
     public function getPlateformeHistorique(): ?PlateformeHistorique
     {
-        return $this->plateforme_historique;
+        return $this->plateformeHistorique;
     }
 
-    public function setPlateformeHistorique(?PlateformeHistorique $plateforme_historique): static
+    public function setPlateformeHistorique(?PlateformeHistorique $plateformeHistorique): static
     {
-        $this->plateforme_historique = $plateforme_historique;
+        $this->plateformeHistorique = $plateformeHistorique;
 
         return $this;
     }
@@ -109,24 +109,24 @@ class PosteFutur
 
     public function getRangNumerateur(): ?int
     {
-        return $this->rang_numerateur;
+        return $this->rangNumerateur;
     }
 
-    public function setRangNumerateur(int $rang_numerateur): static
+    public function setRangNumerateur(int $rangNumerateur): static
     {
-        $this->rang_numerateur = $rang_numerateur;
+        $this->rangNumerateur = $rangNumerateur;
 
         return $this;
     }
 
     public function getRangDenominateur(): ?int
     {
-        return $this->rang_denominateur;
+        return $this->rangDenominateur;
     }
 
-    public function setRangDenominateur(int $rang_denominateur): static
+    public function setRangDenominateur(int $rangDenominateur): static
     {
-        $this->rang_denominateur = $rang_denominateur;
+        $this->rangDenominateur = $rangDenominateur;
 
         return $this;
     }

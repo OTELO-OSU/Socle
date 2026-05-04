@@ -6,6 +6,7 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -31,40 +32,50 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['plateforme:list'])]
     private ?string $email = null;
 
+    #[Ignore]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $mdp = null;
 
+    #[Ignore]
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $sub_orcid = null;
+    private ?string $subOrcid = null;
 
+    #[Ignore]
     #[ORM\Column]
-    private ?bool $email_valide = null;
+    private ?bool $emailValide = null;
 
+    #[Ignore]
     #[ORM\Column]
     private ?bool $admis = null;
 
+    #[Ignore]
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     /**
      * @var Collection<int, RefreshToken>
      */
+    #[Ignore]
     #[ORM\OneToMany(targetEntity: RefreshToken::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private Collection $refreshTokens;
 
+    #[Ignore]
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private ?UtilisateurVerification $utilisateurVerification = null;
 
+    #[Ignore]
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private ?UtilisateurMachine $utilisateurMachine = null;
 
+    #[Ignore]
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private ?UtilisateurInscription $utilisateurInscription = null;
 
     /**
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'utilisateur_id')]
+    #[Ignore]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'utilisateur')]
     private Collection $plateformeHistoriquePersonnels;
 
     /**
@@ -80,7 +91,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Grade $grade = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
-    private ?SectionCnrs $section_cnrs = null;
+    private ?SectionCnrs $sectionCnrs = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Cnu $cnu = null;
@@ -99,7 +110,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->email_valide = false;
+        $this->emailValide = false;
         $this->admis = false;
         $this->refreshTokens = new ArrayCollection();
         $this->plateformeHistoriquePersonnels = new ArrayCollection();
@@ -154,6 +165,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Ignore]
     public function getMdp(): ?string
     {
         return $this->mdp;
@@ -168,24 +180,24 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getSubOrcid(): ?string
     {
-        return $this->sub_orcid;
+        return $this->subOrcid;
     }
 
-    public function setSubOrcid(?string $sub_orcid): static
+    public function setSubOrcid(?string $subOrcid): static
     {
-        $this->sub_orcid = $sub_orcid;
+        $this->subOrcid = $subOrcid;
 
         return $this;
     }
 
     public function isEmailValide(): ?bool
     {
-        return $this->email_valide;
+        return $this->emailValide;
     }
 
-    public function setEmailValide(bool $email_valide): static
+    public function setEmailValide(bool $emailValide): static
     {
-        $this->email_valide = $email_valide;
+        $this->emailValide = $emailValide;
 
         return $this;
     }
@@ -219,6 +231,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         // Sur une base de JWT pas besoin
     }
 
+    #[Ignore]
     public function getPassword(): ?string
     {
         return $this->mdp;
@@ -391,12 +404,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getSectionCnrs(): ?SectionCnrs
     {
-        return $this->section_cnrs;
+        return $this->sectionCnrs;
     }
 
-    public function setSectionCnrs(?SectionCnrs $section_cnrs): static
+    public function setSectionCnrs(?SectionCnrs $sectionCnrs): static
     {
-        $this->section_cnrs = $section_cnrs;
+        $this->sectionCnrs = $sectionCnrs;
 
         return $this;
     }

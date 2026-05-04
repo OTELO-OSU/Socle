@@ -222,6 +222,37 @@ class PlateformeService
         ];
     }
 
+    function getPlateformeAvecDernierHistorique(int $plateformeId): array
+    {
+        if ($this->security->getUser() === null) {
+            throw new Exception("Vous devez être authentifié.", 401);
+        }
+
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+        if (!$plateforme) {
+            throw new Exception("Plateforme non trouvée.", 404);
+        }
+
+        if (!$this->security->isGranted(PlateformeVoter::SAUVEGARDER, $plateforme)) {
+            throw new Exception("Vous n'avez pas les droits pour consulter cette plateforme", 403);
+        }
+
+        $dernierHistorique = $this->em->getRepository(PlateformeHistorique::class)->findOneBy(
+            ['plateforme' => $plateforme],
+            ['annee' => 'DESC']
+        );
+
+        if (!$dernierHistorique) {
+            throw new Exception("Aucun historique trouvé pour cette plateforme.", 404);
+        }
+
+        return [
+            'id' => $plateforme->getId(),
+            'pseudo_id' => $plateforme->getPseudoId(),
+            'dernier_historique' => $dernierHistorique,
+        ];
+    }
+
     function ecraserChampsPlateforme(PlateformeHistorique $plateformeHisto, PlateformeHistoriqueDTO $dto): PlateformeHistorique
     {
         foreach ($dto as $key => $value) {

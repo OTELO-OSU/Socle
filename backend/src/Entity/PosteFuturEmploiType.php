@@ -15,11 +15,11 @@ class PosteFuturEmploiType
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturEmploiTypes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?PosteFutur $poste_futur = null;
+    private ?PosteFutur $posteFutur = null;
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturEmploiTypes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?EmploiType $emploi_type = null;
+    private ?EmploiType $emploiType = null;
 
     public function getId(): ?int
     {
@@ -28,24 +28,24 @@ class PosteFuturEmploiType
 
     public function getPosteFutur(): ?PosteFutur
     {
-        return $this->poste_futur;
+        return $this->posteFutur;
     }
 
-    public function setPosteFutur(?PosteFutur $poste_futur): static
+    public function setPosteFutur(?PosteFutur $posteFutur): static
     {
-        $this->poste_futur = $poste_futur;
+        $this->posteFutur = $posteFutur;
 
         return $this;
     }
 
     public function getEmploiType(): ?EmploiType
     {
-        return $this->emploi_type;
+        return $this->emploiType;
     }
 
-    public function setEmploiType(?EmploiType $emploi_type): static
+    public function setEmploiType(?EmploiType $emploiType): static
     {
-        $this->emploi_type = $emploi_type;
+        $this->emploiType = $emploiType;
 
         return $this;
     }

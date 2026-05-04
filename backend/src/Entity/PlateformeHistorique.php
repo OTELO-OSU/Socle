@@ -27,26 +27,26 @@ class PlateformeHistorique
 
     #[ORM\Column(length: 255)]
     #[Groups(['plateforme:list'])]
-    private ?string $nom_officiel = null;
+    private ?string $nomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['plateforme:list'])]
-    private ?string $forme_developpee_nom_officiel = null;
+    private ?string $formeDeveloppeeNomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $site_web = null;
+    private ?string $siteWeb = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Ville $ville = null;
 
     #[ORM\Column(length: 500, nullable: true)]
-    private ?string $logo_url = null;
+    private ?string $logoUrl = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $autre_type_labellisation = null;
+    private ?string $autreTypeLabellisation = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
-    private ?Entite $laboratoire_operateur = null;
+    private ?Entite $laboratoireOperateur = null;
 
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
@@ -55,175 +55,175 @@ class PlateformeHistorique
     private ?float $longitude = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $espace_bureau = null;
+    private ?float $espaceBureau = null;
 
     /**
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateforme_historique')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateformeHistorique')]
     #[Groups(['plateforme:list'])]
     private Collection $plateformeHistoriquePersonnels;
 
     #[ORM\Column(nullable: true)]
-    private ?float $espace_laboratoire = null;
+    private ?float $espaceLaboratoire = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $materiel_consommable = null;
+    private ?float $materielConsommable = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $contrat_entretien = null;
+    private ?float $contratEntretien = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $etude_prestation = null;
+    private ?float $etudePrestation = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $fluide_energie = null;
+    private ?float $fluideEnergie = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $mission_frais_generaux = null;
+    private ?float $missionFraisGeneraux = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
-    private ?DeterminationTarifMethode $determination_tarif_plateforme = null;
+    private ?DeterminationTarifMethode $determinationTarifPlateforme = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_tutelle_taux = null;
+    private ?int $contributionTutelleTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_fond_public_taux = null;
+    private ?int $contributionFondPublicTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_fond_prive_taux = null;
+    private ?int $contributionFondPriveTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_credit_taux = null;
+    private ?int $contributionCreditTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_projet_recherche_taux = null;
+    private ?int $contributionProjetRechercheTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $contribution_structure_pia_taux = null;
+    private ?int $contributionStructurePiaTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $dotation_instrument_national = null;
+    private ?float $dotationInstrumentNational = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $labellisation_qualite = null;
+    private ?bool $labellisationQualite = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nom_labellisation_qualite = null;
+    private ?string $nomLabellisationQualite = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $procedure_transparente_tous = null;
+    private ?bool $procedureTransparenteTous = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $procedure_transparente_prestation_exterieure = null;
+    private ?bool $procedureTransparentePrestationExterieure = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $accueil_international_taux = null;
+    private ?int $accueilInternationalTaux = null;
+
+    #[ORM\Column(name: 'modele_77_2424_taux', nullable: true)]
+    private ?int $modele772424Taux = null;
+
+    #[ORM\Column(name: 'modele_77_1224_taux', nullable: true)]
+    private ?int $modele771224Taux = null;
+
+    #[ORM\Column(name: 'modele_57_2424_taux', nullable: true)]
+    private ?int $modele572424Taux = null;
+
+    #[ORM\Column(name: 'modele_57_1224_taux', nullable: true)]
+    private ?int $modele571224Taux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $modele_77_2424_taux = null;
+    private ?int $utilisationFonctionnementTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $modele_77_1224_taux = null;
+    private ?int $utilisationMaintenanceTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $modele_57_2424_taux = null;
+    private ?int $utilisationDeveloppementTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $modele_57_1224_taux = null;
+    private ?int $utilisationPanneTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_fonctionnement_taux = null;
+    private ?int $utilisationTempsMortTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_maintenance_taux = null;
+    private ?int $utilisationEquipeOperanteTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_developpement_taux = null;
+    private ?int $utilisationCollaborationInterneTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_panne_taux = null;
+    private ?int $utilisationCollaborationExterneTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_temps_mort_taux = null;
+    private ?int $utilisationPrestationServiceTaux = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_equipe_operante_taux = null;
+    private ?bool $bgesRealise = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_collaboration_interne_taux = null;
+    private ?float $bgesDomicileTravail = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_collaboration_externe_taux = null;
+    private ?float $bgesMission = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $utilisation_prestation_service_taux = null;
+    private ?float $bgesMissionExt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $bges_realise = null;
+    private ?float $bgesConsommable = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_domicile_travail = null;
+    private ?float $bgesEquipement = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_mission = null;
+    private ?float $bgesEnvoiEchantillon = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_mission_ext = null;
+    private ?float $bgesBatiment = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_consommable = null;
+    private ?float $bgesDechet = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_equipement = null;
+    private ?int $publicationEquipeOperante = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_envoi_echantillon = null;
+    private ?int $publicationCollaborationInterne = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_batiment = null;
+    private ?int $publicationCollaborationExterne = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $bges_dechet = null;
+    private ?int $publicationAutreType = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $publication_equipe_operante = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $publication_collaboration_interne = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $publication_collaboration_externe = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $publication_autre_type = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $publication_these = null;
+    private ?int $publicationThese = null;
 
     /**
      * @var Collection<int, PlateformeHistoriqueTutelle>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateforme_historique')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateformeHistorique')]
     private Collection $plateformeHistoriqueTutelles;
 
     /**
      * @var Collection<int, PosteFutur>
      */
-    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateforme_historique')]
+    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateformeHistorique')]
     private Collection $posteFuturs;
 
     /**
      * @var Collection<int, ContributionTutelle>
      */
-    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateforme_historique')]
+    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateformeHistorique')]
     private Collection $contributionTutelles;
 
     /**
      * @var Collection<int, Instrument>
      */
-    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateforme_historique')]
+    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateformeHistorique')]
     private Collection $instruments;
 
     #[ORM\Column]
@@ -276,36 +276,36 @@ class PlateformeHistorique
 
     public function getNomOfficiel(): ?string
     {
-        return $this->nom_officiel;
+        return $this->nomOfficiel;
     }
 
-    public function setNomOfficiel(string $nom_officiel): static
+    public function setNomOfficiel(string $nomOfficiel): static
     {
-        $this->nom_officiel = $nom_officiel;
+        $this->nomOfficiel = $nomOfficiel;
 
         return $this;
     }
 
     public function getFormeDeveloppeeNomOfficiel(): ?string
     {
-        return $this->forme_developpee_nom_officiel;
+        return $this->formeDeveloppeeNomOfficiel;
     }
 
-    public function setFormeDeveloppeeNomOfficiel(?string $forme_developpee_nom_officiel): static
+    public function setFormeDeveloppeeNomOfficiel(?string $formeDeveloppeeNomOfficiel): static
     {
-        $this->forme_developpee_nom_officiel = $forme_developpee_nom_officiel;
+        $this->formeDeveloppeeNomOfficiel = $formeDeveloppeeNomOfficiel;
 
         return $this;
     }
 
     public function getSiteWeb(): ?string
     {
-        return $this->site_web;
+        return $this->siteWeb;
     }
 
-    public function setSiteWeb(?string $site_web): static
+    public function setSiteWeb(?string $siteWeb): static
     {
-        $this->site_web = $site_web;
+        $this->siteWeb = $siteWeb;
 
         return $this;
     }
@@ -324,36 +324,36 @@ class PlateformeHistorique
 
     public function getLogoUrl(): ?string
     {
-        return $this->logo_url;
+        return $this->logoUrl;
     }
 
-    public function setLogoUrl(?string $logo_url): static
+    public function setLogoUrl(?string $logoUrl): static
     {
-        $this->logo_url = $logo_url;
+        $this->logoUrl = $logoUrl;
 
         return $this;
     }
 
     public function getAutreTypeLabellisation(): ?string
     {
-        return $this->autre_type_labellisation;
+        return $this->autreTypeLabellisation;
     }
 
-    public function setAutreTypeLabellisation(?string $autre_type_labellisation): static
+    public function setAutreTypeLabellisation(?string $autreTypeLabellisation): static
     {
-        $this->autre_type_labellisation = $autre_type_labellisation;
+        $this->autreTypeLabellisation = $autreTypeLabellisation;
 
         return $this;
     }
 
     public function getLaboratoireOperateur(): ?Entite
     {
-        return $this->laboratoire_operateur;
+        return $this->laboratoireOperateur;
     }
 
-    public function setLaboratoireOperateur(?Entite $laboratoire_operateur): static
+    public function setLaboratoireOperateur(?Entite $laboratoireOperateur): static
     {
-        $this->laboratoire_operateur = $laboratoire_operateur;
+        $this->laboratoireOperateur = $laboratoireOperateur;
 
         return $this;
     }
@@ -384,564 +384,564 @@ class PlateformeHistorique
 
     public function getEspaceBureau(): ?float
     {
-        return $this->espace_bureau;
+        return $this->espaceBureau;
     }
 
-    public function setEspaceBureau(?float $espace_bureau): static
+    public function setEspaceBureau(?float $espaceBureau): static
     {
-        $this->espace_bureau = $espace_bureau;
+        $this->espaceBureau = $espaceBureau;
 
         return $this;
     }
 
     public function getEspaceLaboratoire(): ?float
     {
-        return $this->espace_laboratoire;
+        return $this->espaceLaboratoire;
     }
 
-    public function setEspaceLaboratoire(?float $espace_laboratoire): static
+    public function setEspaceLaboratoire(?float $espaceLaboratoire): static
     {
-        $this->espace_laboratoire = $espace_laboratoire;
+        $this->espaceLaboratoire = $espaceLaboratoire;
 
         return $this;
     }
 
     public function getMaterielConsommable(): ?float
     {
-        return $this->materiel_consommable;
+        return $this->materielConsommable;
     }
 
-    public function setMaterielConsommable(?float $materiel_consommable): static
+    public function setMaterielConsommable(?float $materielConsommable): static
     {
-        $this->materiel_consommable = $materiel_consommable;
+        $this->materielConsommable = $materielConsommable;
 
         return $this;
     }
 
     public function getContratEntretien(): ?float
     {
-        return $this->contrat_entretien;
+        return $this->contratEntretien;
     }
 
-    public function setContratEntretien(?float $contrat_entretien): static
+    public function setContratEntretien(?float $contratEntretien): static
     {
-        $this->contrat_entretien = $contrat_entretien;
+        $this->contratEntretien = $contratEntretien;
 
         return $this;
     }
 
     public function getEtudePrestation(): ?float
     {
-        return $this->etude_prestation;
+        return $this->etudePrestation;
     }
 
-    public function setEtudePrestation(?float $etude_prestation): static
+    public function setEtudePrestation(?float $etudePrestation): static
     {
-        $this->etude_prestation = $etude_prestation;
+        $this->etudePrestation = $etudePrestation;
 
         return $this;
     }
 
     public function getFluideEnergie(): ?float
     {
-        return $this->fluide_energie;
+        return $this->fluideEnergie;
     }
 
-    public function setFluideEnergie(?float $fluide_energie): static
+    public function setFluideEnergie(?float $fluideEnergie): static
     {
-        $this->fluide_energie = $fluide_energie;
+        $this->fluideEnergie = $fluideEnergie;
 
         return $this;
     }
 
     public function getMissionFraisGeneraux(): ?float
     {
-        return $this->mission_frais_generaux;
+        return $this->missionFraisGeneraux;
     }
 
-    public function setMissionFraisGeneraux(?float $mission_frais_generaux): static
+    public function setMissionFraisGeneraux(?float $missionFraisGeneraux): static
     {
-        $this->mission_frais_generaux = $mission_frais_generaux;
+        $this->missionFraisGeneraux = $missionFraisGeneraux;
 
         return $this;
     }
 
     public function getDeterminationTarifPlateforme(): ?DeterminationTarifMethode
     {
-        return $this->determination_tarif_plateforme;
+        return $this->determinationTarifPlateforme;
     }
 
-    public function setDeterminationTarifPlateforme(?DeterminationTarifMethode $determination_tarif_plateforme): static
+    public function setDeterminationTarifPlateforme(?DeterminationTarifMethode $determinationTarifPlateforme): static
     {
-        $this->determination_tarif_plateforme = $determination_tarif_plateforme;
+        $this->determinationTarifPlateforme = $determinationTarifPlateforme;
 
         return $this;
     }
 
     public function getContributionTutelleTaux(): ?int
     {
-        return $this->contribution_tutelle_taux;
+        return $this->contributionTutelleTaux;
     }
 
-    public function setContributionTutelleTaux(?int $contribution_tutelle_taux): static
+    public function setContributionTutelleTaux(?int $contributionTutelleTaux): static
     {
-        $this->contribution_tutelle_taux = $contribution_tutelle_taux;
+        $this->contributionTutelleTaux = $contributionTutelleTaux;
 
         return $this;
     }
 
     public function getContributionFondPublicTaux(): ?int
     {
-        return $this->contribution_fond_public_taux;
+        return $this->contributionFondPublicTaux;
     }
 
-    public function setContributionFondPublicTaux(?int $contribution_fond_public_taux): static
+    public function setContributionFondPublicTaux(?int $contributionFondPublicTaux): static
     {
-        $this->contribution_fond_public_taux = $contribution_fond_public_taux;
+        $this->contributionFondPublicTaux = $contributionFondPublicTaux;
 
         return $this;
     }
 
     public function getContributionFondPriveTaux(): ?int
     {
-        return $this->contribution_fond_prive_taux;
+        return $this->contributionFondPriveTaux;
     }
 
-    public function setContributionFondPriveTaux(?int $contribution_fond_prive_taux): static
+    public function setContributionFondPriveTaux(?int $contributionFondPriveTaux): static
     {
-        $this->contribution_fond_prive_taux = $contribution_fond_prive_taux;
+        $this->contributionFondPriveTaux = $contributionFondPriveTaux;
 
         return $this;
     }
 
     public function getContributionCreditTaux(): ?int
     {
-        return $this->contribution_credit_taux;
+        return $this->contributionCreditTaux;
     }
 
-    public function setContributionCreditTaux(?int $contribution_credit_taux): static
+    public function setContributionCreditTaux(?int $contributionCreditTaux): static
     {
-        $this->contribution_credit_taux = $contribution_credit_taux;
+        $this->contributionCreditTaux = $contributionCreditTaux;
 
         return $this;
     }
 
     public function getContributionProjetRechercheTaux(): ?int
     {
-        return $this->contribution_projet_recherche_taux;
+        return $this->contributionProjetRechercheTaux;
     }
 
-    public function setContributionProjetRechercheTaux(?int $contribution_projet_recherche_taux): static
+    public function setContributionProjetRechercheTaux(?int $contributionProjetRechercheTaux): static
     {
-        $this->contribution_projet_recherche_taux = $contribution_projet_recherche_taux;
+        $this->contributionProjetRechercheTaux = $contributionProjetRechercheTaux;
 
         return $this;
     }
 
     public function getContributionStructurePiaTaux(): ?int
     {
-        return $this->contribution_structure_pia_taux;
+        return $this->contributionStructurePiaTaux;
     }
 
-    public function setContributionStructurePiaTaux(?int $contribution_structure_pia_taux): static
+    public function setContributionStructurePiaTaux(?int $contributionStructurePiaTaux): static
     {
-        $this->contribution_structure_pia_taux = $contribution_structure_pia_taux;
+        $this->contributionStructurePiaTaux = $contributionStructurePiaTaux;
 
         return $this;
     }
 
     public function getDotationInstrumentNational(): ?float
     {
-        return $this->dotation_instrument_national;
+        return $this->dotationInstrumentNational;
     }
 
-    public function setDotationInstrumentNational(?float $dotation_instrument_national): static
+    public function setDotationInstrumentNational(?float $dotationInstrumentNational): static
     {
-        $this->dotation_instrument_national = $dotation_instrument_national;
+        $this->dotationInstrumentNational = $dotationInstrumentNational;
 
         return $this;
     }
 
     public function isLabellisationQualite(): ?bool
     {
-        return $this->labellisation_qualite;
+        return $this->labellisationQualite;
     }
 
-    public function setLabellisationQualite(?bool $labellisation_qualite): static
+    public function setLabellisationQualite(?bool $labellisationQualite): static
     {
-        $this->labellisation_qualite = $labellisation_qualite;
+        $this->labellisationQualite = $labellisationQualite;
 
         return $this;
     }
 
     public function getNomLabellisationQualite(): ?string
     {
-        return $this->nom_labellisation_qualite;
+        return $this->nomLabellisationQualite;
     }
 
-    public function setNomLabellisationQualite(?string $nom_labellisation_qualite): static
+    public function setNomLabellisationQualite(?string $nomLabellisationQualite): static
     {
-        $this->nom_labellisation_qualite = $nom_labellisation_qualite;
+        $this->nomLabellisationQualite = $nomLabellisationQualite;
 
         return $this;
     }
 
     public function isProcedureTransparenteTous(): ?bool
     {
-        return $this->procedure_transparente_tous;
+        return $this->procedureTransparenteTous;
     }
 
-    public function setProcedureTransparenteTous(?bool $procedure_transparente_tous): static
+    public function setProcedureTransparenteTous(?bool $procedureTransparenteTous): static
     {
-        $this->procedure_transparente_tous = $procedure_transparente_tous;
+        $this->procedureTransparenteTous = $procedureTransparenteTous;
 
         return $this;
     }
 
     public function isProcedureTransparentePrestationExterieure(): ?bool
     {
-        return $this->procedure_transparente_prestation_exterieure;
+        return $this->procedureTransparentePrestationExterieure;
     }
 
-    public function setProcedureTransparentePrestationExterieure(?bool $procedure_transparente_prestation_exterieure): static
+    public function setProcedureTransparentePrestationExterieure(?bool $procedureTransparentePrestationExterieure): static
     {
-        $this->procedure_transparente_prestation_exterieure = $procedure_transparente_prestation_exterieure;
+        $this->procedureTransparentePrestationExterieure = $procedureTransparentePrestationExterieure;
 
         return $this;
     }
 
     public function getAccueilInternationalTaux(): ?int
     {
-        return $this->accueil_international_taux;
+        return $this->accueilInternationalTaux;
     }
 
-    public function setAccueilInternationalTaux(?int $accueil_international_taux): static
+    public function setAccueilInternationalTaux(?int $accueilInternationalTaux): static
     {
-        $this->accueil_international_taux = $accueil_international_taux;
+        $this->accueilInternationalTaux = $accueilInternationalTaux;
 
         return $this;
     }
 
     public function getModele772424Taux(): ?int
     {
-        return $this->modele_77_2424_taux;
+        return $this->modele772424Taux;
     }
 
-    public function setModele772424Taux(?int $modele_77_2424_taux): static
+    public function setModele772424Taux(?int $modele772424Taux): static
     {
-        $this->modele_77_2424_taux = $modele_77_2424_taux;
+        $this->modele772424Taux = $modele772424Taux;
 
         return $this;
     }
 
     public function getModele771224Taux(): ?int
     {
-        return $this->modele_77_1224_taux;
+        return $this->modele771224Taux;
     }
 
-    public function setModele771224Taux(?int $modele_77_1224_taux): static
+    public function setModele771224Taux(?int $modele771224Taux): static
     {
-        $this->modele_77_1224_taux = $modele_77_1224_taux;
+        $this->modele771224Taux = $modele771224Taux;
 
         return $this;
     }
 
     public function getModele572424Taux(): ?int
     {
-        return $this->modele_57_2424_taux;
+        return $this->modele572424Taux;
     }
 
-    public function setModele572424Taux(?int $modele_57_2424_taux): static
+    public function setModele572424Taux(?int $modele572424Taux): static
     {
-        $this->modele_57_2424_taux = $modele_57_2424_taux;
+        $this->modele572424Taux = $modele572424Taux;
 
         return $this;
     }
 
     public function getModele571224Taux(): ?int
     {
-        return $this->modele_57_1224_taux;
+        return $this->modele571224Taux;
     }
 
-    public function setModele571224Taux(?int $modele_57_1224_taux): static
+    public function setModele571224Taux(?int $modele571224Taux): static
     {
-        $this->modele_57_1224_taux = $modele_57_1224_taux;
+        $this->modele571224Taux = $modele571224Taux;
 
         return $this;
     }
 
     public function getUtilisationFonctionnementTaux(): ?int
     {
-        return $this->utilisation_fonctionnement_taux;
+        return $this->utilisationFonctionnementTaux;
     }
 
-    public function setUtilisationFonctionnementTaux(?int $utilisation_fonctionnement_taux): static
+    public function setUtilisationFonctionnementTaux(?int $utilisationFonctionnementTaux): static
     {
-        $this->utilisation_fonctionnement_taux = $utilisation_fonctionnement_taux;
+        $this->utilisationFonctionnementTaux = $utilisationFonctionnementTaux;
 
         return $this;
     }
 
     public function getUtilisationMaintenanceTaux(): ?int
     {
-        return $this->utilisation_maintenance_taux;
+        return $this->utilisationMaintenanceTaux;
     }
 
-    public function setUtilisationMaintenanceTaux(?int $utilisation_maintenance_taux): static
+    public function setUtilisationMaintenanceTaux(?int $utilisationMaintenanceTaux): static
     {
-        $this->utilisation_maintenance_taux = $utilisation_maintenance_taux;
+        $this->utilisationMaintenanceTaux = $utilisationMaintenanceTaux;
 
         return $this;
     }
 
     public function getUtilisationDeveloppementTaux(): ?int
     {
-        return $this->utilisation_developpement_taux;
+        return $this->utilisationDeveloppementTaux;
     }
 
-    public function setUtilisationDeveloppementTaux(?int $utilisation_developpement_taux): static
+    public function setUtilisationDeveloppementTaux(?int $utilisationDeveloppementTaux): static
     {
-        $this->utilisation_developpement_taux = $utilisation_developpement_taux;
+        $this->utilisationDeveloppementTaux = $utilisationDeveloppementTaux;
 
         return $this;
     }
 
     public function getUtilisationPanneTaux(): ?int
     {
-        return $this->utilisation_panne_taux;
+        return $this->utilisationPanneTaux;
     }
 
-    public function setUtilisationPanneTaux(?int $utilisation_panne_taux): static
+    public function setUtilisationPanneTaux(?int $utilisationPanneTaux): static
     {
-        $this->utilisation_panne_taux = $utilisation_panne_taux;
+        $this->utilisationPanneTaux = $utilisationPanneTaux;
 
         return $this;
     }
 
     public function getUtilisationTempsMortTaux(): ?int
     {
-        return $this->utilisation_temps_mort_taux;
+        return $this->utilisationTempsMortTaux;
     }
 
-    public function setUtilisationTempsMortTaux(?int $utilisation_temps_mort_taux): static
+    public function setUtilisationTempsMortTaux(?int $utilisationTempsMortTaux): static
     {
-        $this->utilisation_temps_mort_taux = $utilisation_temps_mort_taux;
+        $this->utilisationTempsMortTaux = $utilisationTempsMortTaux;
 
         return $this;
     }
 
     public function getUtilisationEquipeOperanteTaux(): ?int
     {
-        return $this->utilisation_equipe_operante_taux;
+        return $this->utilisationEquipeOperanteTaux;
     }
 
-    public function setUtilisationEquipeOperanteTaux(?int $utilisation_equipe_operante_taux): static
+    public function setUtilisationEquipeOperanteTaux(?int $utilisationEquipeOperanteTaux): static
     {
-        $this->utilisation_equipe_operante_taux = $utilisation_equipe_operante_taux;
+        $this->utilisationEquipeOperanteTaux = $utilisationEquipeOperanteTaux;
 
         return $this;
     }
 
     public function getUtilisationCollaborationInterneTaux(): ?int
     {
-        return $this->utilisation_collaboration_interne_taux;
+        return $this->utilisationCollaborationInterneTaux;
     }
 
-    public function setUtilisationCollaborationInterneTaux(?int $utilisation_collaboration_interne_taux): static
+    public function setUtilisationCollaborationInterneTaux(?int $utilisationCollaborationInterneTaux): static
     {
-        $this->utilisation_collaboration_interne_taux = $utilisation_collaboration_interne_taux;
+        $this->utilisationCollaborationInterneTaux = $utilisationCollaborationInterneTaux;
 
         return $this;
     }
 
     public function getUtilisationCollaborationExterneTaux(): ?int
     {
-        return $this->utilisation_collaboration_externe_taux;
+        return $this->utilisationCollaborationExterneTaux;
     }
 
-    public function setUtilisationCollaborationExterneTaux(?int $utilisation_collaboration_externe_taux): static
+    public function setUtilisationCollaborationExterneTaux(?int $utilisationCollaborationExterneTaux): static
     {
-        $this->utilisation_collaboration_externe_taux = $utilisation_collaboration_externe_taux;
+        $this->utilisationCollaborationExterneTaux = $utilisationCollaborationExterneTaux;
 
         return $this;
     }
 
     public function getUtilisationPrestationServiceTaux(): ?int
     {
-        return $this->utilisation_prestation_service_taux;
+        return $this->utilisationPrestationServiceTaux;
     }
 
-    public function setUtilisationPrestationServiceTaux(?int $utilisation_prestation_service_taux): static
+    public function setUtilisationPrestationServiceTaux(?int $utilisationPrestationServiceTaux): static
     {
-        $this->utilisation_prestation_service_taux = $utilisation_prestation_service_taux;
+        $this->utilisationPrestationServiceTaux = $utilisationPrestationServiceTaux;
 
         return $this;
     }
 
     public function isBgesRealise(): ?bool
     {
-        return $this->bges_realise;
+        return $this->bgesRealise;
     }
 
-    public function setBgesRealise(?bool $bges_realise): static
+    public function setBgesRealise(?bool $bgesRealise): static
     {
-        $this->bges_realise = $bges_realise;
+        $this->bgesRealise = $bgesRealise;
 
         return $this;
     }
 
     public function getBgesDomicileTravail(): ?float
     {
-        return $this->bges_domicile_travail;
+        return $this->bgesDomicileTravail;
     }
 
-    public function setBgesDomicileTravail(?float $bges_domicile_travail): static
+    public function setBgesDomicileTravail(?float $bgesDomicileTravail): static
     {
-        $this->bges_domicile_travail = $bges_domicile_travail;
+        $this->bgesDomicileTravail = $bgesDomicileTravail;
 
         return $this;
     }
 
     public function getBgesMission(): ?float
     {
-        return $this->bges_mission;
+        return $this->bgesMission;
     }
 
-    public function setBgesMission(?float $bges_mission): static
+    public function setBgesMission(?float $bgesMission): static
     {
-        $this->bges_mission = $bges_mission;
+        $this->bgesMission = $bgesMission;
 
         return $this;
     }
 
     public function getBgesMissionExt(): ?float
     {
-        return $this->bges_mission_ext;
+        return $this->bgesMissionExt;
     }
 
-    public function setBgesMissionExt(?float $bges_mission_ext): static
+    public function setBgesMissionExt(?float $bgesMissionExt): static
     {
-        $this->bges_mission_ext = $bges_mission_ext;
+        $this->bgesMissionExt = $bgesMissionExt;
 
         return $this;
     }
 
     public function getBgesConsommable(): ?float
     {
-        return $this->bges_consommable;
+        return $this->bgesConsommable;
     }
 
-    public function setBgesConsommable(?float $bges_consommable): static
+    public function setBgesConsommable(?float $bgesConsommable): static
     {
-        $this->bges_consommable = $bges_consommable;
+        $this->bgesConsommable = $bgesConsommable;
 
         return $this;
     }
 
     public function getBgesEquipement(): ?float
     {
-        return $this->bges_equipement;
+        return $this->bgesEquipement;
     }
 
-    public function setBgesEquipement(?float $bges_equipement): static
+    public function setBgesEquipement(?float $bgesEquipement): static
     {
-        $this->bges_equipement = $bges_equipement;
+        $this->bgesEquipement = $bgesEquipement;
 
         return $this;
     }
 
     public function getBgesEnvoiEchantillon(): ?float
     {
-        return $this->bges_envoi_echantillon;
+        return $this->bgesEnvoiEchantillon;
     }
 
-    public function setBgesEnvoiEchantillon(?float $bges_envoi_echantillon): static
+    public function setBgesEnvoiEchantillon(?float $bgesEnvoiEchantillon): static
     {
-        $this->bges_envoi_echantillon = $bges_envoi_echantillon;
+        $this->bgesEnvoiEchantillon = $bgesEnvoiEchantillon;
 
         return $this;
     }
 
     public function getBgesBatiment(): ?float
     {
-        return $this->bges_batiment;
+        return $this->bgesBatiment;
     }
 
-    public function setBgesBatiment(?float $bges_batiment): static
+    public function setBgesBatiment(?float $bgesBatiment): static
     {
-        $this->bges_batiment = $bges_batiment;
+        $this->bgesBatiment = $bgesBatiment;
 
         return $this;
     }
 
     public function getBgesDechet(): ?float
     {
-        return $this->bges_dechet;
+        return $this->bgesDechet;
     }
 
-    public function setBgesDechet(?float $bges_dechet): static
+    public function setBgesDechet(?float $bgesDechet): static
     {
-        $this->bges_dechet = $bges_dechet;
+        $this->bgesDechet = $bgesDechet;
 
         return $this;
     }
 
     public function getPublicationEquipeOperante(): ?int
     {
-        return $this->publication_equipe_operante;
+        return $this->publicationEquipeOperante;
     }
 
-    public function setPublicationEquipeOperante(?int $publication_equipe_operante): static
+    public function setPublicationEquipeOperante(?int $publicationEquipeOperante): static
     {
-        $this->publication_equipe_operante = $publication_equipe_operante;
+        $this->publicationEquipeOperante = $publicationEquipeOperante;
 
         return $this;
     }
 
     public function getPublicationCollaborationInterne(): ?int
     {
-        return $this->publication_collaboration_interne;
+        return $this->publicationCollaborationInterne;
     }
 
-    public function setPublicationCollaborationInterne(?int $publication_collaboration_interne): static
+    public function setPublicationCollaborationInterne(?int $publicationCollaborationInterne): static
     {
-        $this->publication_collaboration_interne = $publication_collaboration_interne;
+        $this->publicationCollaborationInterne = $publicationCollaborationInterne;
 
         return $this;
     }
 
     public function getPublicationCollaborationExterne(): ?int
     {
-        return $this->publication_collaboration_externe;
+        return $this->publicationCollaborationExterne;
     }
 
-    public function setPublicationCollaborationExterne(?int $publication_collaboration_externe): static
+    public function setPublicationCollaborationExterne(?int $publicationCollaborationExterne): static
     {
-        $this->publication_collaboration_externe = $publication_collaboration_externe;
+        $this->publicationCollaborationExterne = $publicationCollaborationExterne;
 
         return $this;
     }
 
     public function getPublicationAutreType(): ?int
     {
-        return $this->publication_autre_type;
+        return $this->publicationAutreType;
     }
 
-    public function setPublicationAutreType(?int $publication_autre_type): static
+    public function setPublicationAutreType(?int $publicationAutreType): static
     {
-        $this->publication_autre_type = $publication_autre_type;
+        $this->publicationAutreType = $publicationAutreType;
 
         return $this;
     }
 
     public function getPublicationThese(): ?int
     {
-        return $this->publication_these;
+        return $this->publicationThese;
     }
 
-    public function setPublicationThese(?int $publication_these): static
+    public function setPublicationThese(?int $publicationThese): static
     {
-        $this->publication_these = $publication_these;
+        $this->publicationThese = $publicationThese;
 
         return $this;
     }

@@ -24,7 +24,7 @@ class SectionCnrs
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'section_cnrs')]
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'sectionCnrs')]
     private Collection $utilisateurs;
 
     public function __construct()

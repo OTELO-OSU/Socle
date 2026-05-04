@@ -17,8 +17,8 @@ class Instrument
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'instruments')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?PlateformeHistorique $plateforme_historique = null;
+    #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
+    private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
@@ -30,22 +30,22 @@ class Instrument
     private ?string $modele = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $annee_acquisition = null;
+    private ?\DateTime $anneeAcquisition = null;
 
     #[ORM\Column(nullable: true)]
     private ?float $cout = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $valeur_remplacement = null;
+    private ?float $valeurRemplacement = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $duree_utilisation = null;
+    private ?int $dureeUtilisation = null;
 
     #[ORM\ManyToOne(inversedBy: 'instruments')]
     private ?Operation $operation = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $annee_achat_envisagee = null;
+    private ?int $anneeAchatEnvisagee = null;
 
     #[ORM\Column]
     private ?bool $futur = null;
@@ -53,26 +53,26 @@ class Instrument
     /**
      * @var Collection<int, InstrumentMutualisation>
      */
-    #[ORM\OneToMany(targetEntity: InstrumentMutualisation::class, mappedBy: 'instrument_source')]
+    #[ORM\OneToMany(targetEntity: InstrumentMutualisation::class, mappedBy: 'instrumentSource')]
     private Collection $instrumentMutualisations;
 
     #[ORM\ManyToOne(inversedBy: 'instruments')]
-    private ?ContratMaintenance $contrat_maintenance = null;
+    private ?ContratMaintenance $contratMaintenance = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $commentaire_nature_contrat = null;
+    private ?string $commentaireNatureContrat = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $fournisseur_contrat = null;
+    private ?string $fournisseurContrat = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $mutualise_autre_instrument = null;
+    private ?bool $mutualiseAutreInstrument = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $mutualise_umr_osu = null;
+    private ?bool $mutualiseUmrOsu = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $mutualise_site = null;
+    private ?bool $mutualiseSite = null;
 
     /**
      * @var Collection<int, FinancementInstrument>
@@ -81,7 +81,7 @@ class Instrument
     private Collection $financementInstruments;
 
     #[ORM\Column(nullable: true)]
-    private ?float $cout_maintenance = null;
+    private ?float $coutMaintenance = null;
 
     public function __construct()
     {
@@ -96,12 +96,12 @@ class Instrument
 
     public function getPlateformeHistorique(): ?PlateformeHistorique
     {
-        return $this->plateforme_historique;
+        return $this->plateformeHistorique;
     }
 
-    public function setPlateformeHistorique(?PlateformeHistorique $plateforme_historique): static
+    public function setPlateformeHistorique(?PlateformeHistorique $plateformeHistorique): static
     {
-        $this->plateforme_historique = $plateforme_historique;
+        $this->plateformeHistorique = $plateformeHistorique;
 
         return $this;
     }
@@ -144,12 +144,12 @@ class Instrument
 
     public function getAnneeAcquisition(): ?\DateTime
     {
-        return $this->annee_acquisition;
+        return $this->anneeAcquisition;
     }
 
-    public function setAnneeAcquisition(?\DateTime $annee_acquisition): static
+    public function setAnneeAcquisition(?\DateTime $anneeAcquisition): static
     {
-        $this->annee_acquisition = $annee_acquisition;
+        $this->anneeAcquisition = $anneeAcquisition;
 
         return $this;
     }
@@ -168,24 +168,24 @@ class Instrument
 
     public function getValeurRemplacement(): ?float
     {
-        return $this->valeur_remplacement;
+        return $this->valeurRemplacement;
     }
 
-    public function setValeurRemplacement(?float $valeur_remplacement): static
+    public function setValeurRemplacement(?float $valeurRemplacement): static
     {
-        $this->valeur_remplacement = $valeur_remplacement;
+        $this->valeurRemplacement = $valeurRemplacement;
 
         return $this;
     }
 
     public function getDureeUtilisation(): ?int
     {
-        return $this->duree_utilisation;
+        return $this->dureeUtilisation;
     }
 
-    public function setDureeUtilisation(?int $duree_utilisation): static
+    public function setDureeUtilisation(?int $dureeUtilisation): static
     {
-        $this->duree_utilisation = $duree_utilisation;
+        $this->dureeUtilisation = $dureeUtilisation;
 
         return $this;
     }
@@ -204,12 +204,12 @@ class Instrument
 
     public function getAnneeAchatEnvisagee(): ?int
     {
-        return $this->annee_achat_envisagee;
+        return $this->anneeAchatEnvisagee;
     }
 
-    public function setAnneeAchatEnvisagee(?int $annee_achat_envisagee): static
+    public function setAnneeAchatEnvisagee(?int $anneeAchatEnvisagee): static
     {
-        $this->annee_achat_envisagee = $annee_achat_envisagee;
+        $this->anneeAchatEnvisagee = $anneeAchatEnvisagee;
 
         return $this;
     }
@@ -258,72 +258,72 @@ class Instrument
 
     public function getContratMaintenance(): ?ContratMaintenance
     {
-        return $this->contrat_maintenance;
+        return $this->contratMaintenance;
     }
 
-    public function setContratMaintenance(?ContratMaintenance $contrat_maintenance): static
+    public function setContratMaintenance(?ContratMaintenance $contratMaintenance): static
     {
-        $this->contrat_maintenance = $contrat_maintenance;
+        $this->contratMaintenance = $contratMaintenance;
 
         return $this;
     }
 
     public function getCommentaireNatureContrat(): ?string
     {
-        return $this->commentaire_nature_contrat;
+        return $this->commentaireNatureContrat;
     }
 
-    public function setCommentaireNatureContrat(?string $commentaire_nature_contrat): static
+    public function setCommentaireNatureContrat(?string $commentaireNatureContrat): static
     {
-        $this->commentaire_nature_contrat = $commentaire_nature_contrat;
+        $this->commentaireNatureContrat = $commentaireNatureContrat;
 
         return $this;
     }
 
     public function getFournisseurContrat(): ?string
     {
-        return $this->fournisseur_contrat;
+        return $this->fournisseurContrat;
     }
 
-    public function setFournisseurContrat(?string $fournisseur_contrat): static
+    public function setFournisseurContrat(?string $fournisseurContrat): static
     {
-        $this->fournisseur_contrat = $fournisseur_contrat;
+        $this->fournisseurContrat = $fournisseurContrat;
 
         return $this;
     }
 
     public function isMutualiseAutreInstrument(): ?bool
     {
-        return $this->mutualise_autre_instrument;
+        return $this->mutualiseAutreInstrument;
     }
 
-    public function setMutualiseAutreInstrument(?bool $mutualise_autre_instrument): static
+    public function setMutualiseAutreInstrument(?bool $mutualiseAutreInstrument): static
     {
-        $this->mutualise_autre_instrument = $mutualise_autre_instrument;
+        $this->mutualiseAutreInstrument = $mutualiseAutreInstrument;
 
         return $this;
     }
 
     public function isMutualiseUmrOsu(): ?bool
     {
-        return $this->mutualise_umr_osu;
+        return $this->mutualiseUmrOsu;
     }
 
-    public function setMutualiseUmrOsu(?bool $mutualise_umr_osu): static
+    public function setMutualiseUmrOsu(?bool $mutualiseUmrOsu): static
     {
-        $this->mutualise_umr_osu = $mutualise_umr_osu;
+        $this->mutualiseUmrOsu = $mutualiseUmrOsu;
 
         return $this;
     }
 
     public function isMutualiseSite(): ?bool
     {
-        return $this->mutualise_site;
+        return $this->mutualiseSite;
     }
 
-    public function setMutualiseSite(?bool $mutualise_site): static
+    public function setMutualiseSite(?bool $mutualiseSite): static
     {
-        $this->mutualise_site = $mutualise_site;
+        $this->mutualiseSite = $mutualiseSite;
 
         return $this;
     }
@@ -360,12 +360,12 @@ class Instrument
 
     public function getCoutMaintenance(): ?float
     {
-        return $this->cout_maintenance;
+        return $this->coutMaintenance;
     }
 
-    public function setCoutMaintenance(?float $cout_maintenance): static
+    public function setCoutMaintenance(?float $coutMaintenance): static
     {
-        $this->cout_maintenance = $cout_maintenance;
+        $this->coutMaintenance = $coutMaintenance;
 
         return $this;
     }

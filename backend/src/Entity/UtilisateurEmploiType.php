@@ -19,7 +19,7 @@ class UtilisateurEmploiType
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurEmploiTypes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?EmploiType $emploi_type = null;
+    private ?EmploiType $emploiType = null;
 
     public function getId(): ?int
     {
@@ -40,12 +40,12 @@ class UtilisateurEmploiType
 
     public function getEmploiType(): ?EmploiType
     {
-        return $this->emploi_type;
+        return $this->emploiType;
     }
 
-    public function setEmploiType(?EmploiType $emploi_type): static
+    public function setEmploiType(?EmploiType $emploiType): static
     {
-        $this->emploi_type = $emploi_type;
+        $this->emploiType = $emploiType;
 
         return $this;
     }

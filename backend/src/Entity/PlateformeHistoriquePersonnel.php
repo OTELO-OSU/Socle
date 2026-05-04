@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PlateformeHistoriquePersonnelRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriquePersonnelRepository::class)]
 class PlateformeHistoriquePersonnel
@@ -16,33 +17,34 @@ class PlateformeHistoriquePersonnel
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?PlateformeHistorique $plateforme_historique = null;
+    #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
+    #[Ignore]
+    private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['plateforme:list'])]
-    private ?Utilisateur $utilisateur_id = null;
+    #[ORM\JoinColumn(name: 'utilisateur_id_id', referencedColumnName: 'id', nullable: false)]
+    #[Ignore]
+    private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column]
-    #[Groups(['plateforme:list'])]
-    private ?bool $responsable_scientifique = false;
+    #[ORM\Column(name: 'responsable_scientifique')]
+    #[Ignore]
+    private ?bool $responsableScientifique = false;
 
-    #[ORM\Column]
-    #[Groups(['plateforme:list'])]
-    private ?bool $responsable_technique = false;
+    #[ORM\Column(name: 'responsable_technique')]
+    #[Ignore]
+    private ?bool $responsableTechnique = false;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?TypeContrat $type_contrat = null;
+    #[ORM\JoinColumn(name: 'type_contrat_id', referencedColumnName: 'id', nullable: true)]
+    private ?TypeContrat $typeContrat = null;
 
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
     private ?int $quotite = 0;
 
-    #[ORM\Column]
-    #[Groups(['plateforme:list'])]
-    private ?bool $responsable_plateforme = false;
+    #[ORM\Column(name: 'responsable_plateforme')]
+    #[Ignore]
+    private ?bool $responsablePlateforme = false;
 
     public function getId(): ?int
     {
@@ -51,60 +53,77 @@ class PlateformeHistoriquePersonnel
 
     public function getPlateformeHistorique(): ?PlateformeHistorique
     {
-        return $this->plateforme_historique;
+        return $this->plateformeHistorique;
     }
 
-    public function setPlateformeHistorique(?PlateformeHistorique $plateforme_historique_id): static
+    public function setPlateformeHistorique(?PlateformeHistorique $plateformeHistorique): static
     {
-        $this->plateforme_historique = $plateforme_historique_id;
+        $this->plateformeHistorique = $plateformeHistorique;
 
         return $this;
     }
 
+    #[Groups(['plateforme:list'])]
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    #[Ignore]
     public function getUtilisateurId(): ?Utilisateur
     {
-        return $this->utilisateur_id;
+        return $this->utilisateur;
     }
 
-    public function setUtilisateurId(?Utilisateur $utilisateur_id): static
+    #[Ignore]
+    public function setUtilisateurId(?Utilisateur $utilisateur): static
     {
-        $this->utilisateur_id = $utilisateur_id;
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }
 
+    #[Groups(['plateforme:list'])]
     public function isResponsableScientifique(): ?bool
     {
-        return $this->responsable_scientifique;
+        return $this->responsableScientifique;
     }
 
-    public function setResponsableScientifique(bool $responsable_scientifique): static
+    public function setResponsableScientifique(bool $responsableScientifique): static
     {
-        $this->responsable_scientifique = $responsable_scientifique;
+        $this->responsableScientifique = $responsableScientifique;
 
         return $this;
     }
 
+    #[Groups(['plateforme:list'])]
     public function isResponsableTechnique(): ?bool
     {
-        return $this->responsable_technique;
+        return $this->responsableTechnique;
     }
 
-    public function setResponsableTechnique(bool $responsable_technique): static
+    public function setResponsableTechnique(bool $responsableTechnique): static
     {
-        $this->responsable_technique = $responsable_technique;
+        $this->responsableTechnique = $responsableTechnique;
 
         return $this;
     }
 
     public function getTypeContrat(): ?TypeContrat
     {
-        return $this->type_contrat;
+        return $this->typeContrat;
     }
 
-    public function setTypeContrat(?TypeContrat $type_contrat): static
+    public function setTypeContrat(?TypeContrat $typeContrat): static
     {
-        $this->type_contrat = $type_contrat;
+        $this->typeContrat = $typeContrat;
 
         return $this;
     }
@@ -121,14 +140,15 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
+    #[Groups(['plateforme:list'])]
     public function isResponsablePlateforme(): ?bool
     {
-        return $this->responsable_plateforme;
+        return $this->responsablePlateforme;
     }
 
-    public function setResponsablePlateforme(bool $responsable_plateforme): static
+    public function setResponsablePlateforme(bool $responsablePlateforme): static
     {
-        $this->responsable_plateforme = $responsable_plateforme;
+        $this->responsablePlateforme = $responsablePlateforme;
 
         return $this;
     }

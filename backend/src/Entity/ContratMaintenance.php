@@ -21,7 +21,7 @@ class ContratMaintenance
     /**
      * @var Collection<int, Instrument>
      */
-    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'contrat_maintenance')]
+    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'contratMaintenance')]
     private Collection $instruments;
 
     public function __construct()

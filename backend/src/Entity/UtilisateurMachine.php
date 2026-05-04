@@ -18,10 +18,10 @@ class UtilisateurMachine
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $client_id = null;
+    private ?string $clientId = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $client_secret = null;
+    private ?string $clientSecret = null;
 
     public function getId(): ?int
     {
@@ -45,9 +45,9 @@ class UtilisateurMachine
         return $this->client_id;
     }
 
-    public function setClientId(string $client_id): static
+    public function setClientId(string $clientId): static
     {
-        $this->client_id = $client_id;
+        $this->client_id = $clientId;
 
         return $this;
     }
@@ -57,9 +57,9 @@ class UtilisateurMachine
         return $this->client_secret;
     }
 
-    public function setClientSecret(string $client_secret): static
+    public function setClientSecret(string $clientSecret): static
     {
-        $this->client_secret = $client_secret;
+        $this->client_secret = $clientSecret;
 
         return $this;
     }

@@ -14,8 +14,8 @@ class ContributionTutelle
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'contributionTutelles')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?PlateformeHistorique $plateforme_historique = null;
+    #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
+    private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\ManyToOne(inversedBy: 'contributionTutelles')]
     #[ORM\JoinColumn(nullable: false)]
@@ -31,12 +31,12 @@ class ContributionTutelle
 
     public function getPlateformeHistorique(): ?PlateformeHistorique
     {
-        return $this->plateforme_historique;
+        return $this->plateformeHistorique;
     }
 
-    public function setPlateformeHistorique(?PlateformeHistorique $plateforme_historique): static
+    public function setPlateformeHistorique(?PlateformeHistorique $plateformeHistorique): static
     {
-        $this->plateforme_historique = $plateforme_historique;
+        $this->plateformeHistorique = $plateformeHistorique;
 
         return $this;
     }

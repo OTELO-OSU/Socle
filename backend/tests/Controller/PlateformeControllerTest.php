@@ -313,7 +313,7 @@ class PlateformeControllerTest extends WebTestCase
         $emploiType = $this->em->createQueryBuilder()
             ->select('e.id')
             ->from(CorpsBapEmploiType::class, 'c')
-            ->innerJoin('c.emploi_type', 'e')
+            ->innerJoin('c.emploiType', 'e')
             ->where('c.corps = :corps')
             ->setParameter('corps', $corps)
             ->setMaxResults(2)

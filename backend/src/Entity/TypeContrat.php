@@ -22,7 +22,7 @@ class TypeContrat
     /**
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'type_contrat')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'typeContrat')]
     private Collection $plateformeHistoriquePersonnels;
 
     public function __construct()

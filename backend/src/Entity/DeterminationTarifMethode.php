@@ -21,7 +21,7 @@ class DeterminationTarifMethode
     /**
      * @var Collection<int, PlateformeHistorique>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'determination_tarif_plateforme')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'determinationTarifPlateforme')]
     private Collection $plateformeHistoriques;
 
     public function __construct()

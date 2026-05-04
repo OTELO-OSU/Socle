@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -22,6 +23,24 @@ final class PlateformeController extends AbstractController
         $search = $request->query->get('search', null);
         $plateformes = $this->plateformeService->getPlateformeParPage($page, $search);
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
+    }
+
+    #[Route('/plateforme/{id}', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    public function getPlateformeDetail(int $id): Response
+    {
+        $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($id);
+
+        return $this->json(
+            $plateforme,
+            200,
+            [],
+            [
+                AbstractNormalizer::IGNORED_ATTRIBUTES => ['plateforme'],
+                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => static function (object $object): mixed {
+                    return method_exists($object, 'getId') ? $object->getId() : spl_object_id($object);
+                }
+            ]
+        );
     }
 
     #[Route('/plateforme', methods: ['POST'])]

@@ -22,7 +22,7 @@ class Entite
     private ?string $acronyme = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $statut_juridique = null;
+    private ?string $statutJuridique = null;
 
     #[ORM\Column]
     private ?bool $employeur = null;
@@ -37,7 +37,7 @@ class Entite
     /**
      * @var Collection<int, UtilisateurInscription>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'unite_demande')]
+    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'uniteDemande')]
     private Collection $utilisateurInscriptions;
 
     #[ORM\ManyToOne(inversedBy: 'entites')]
@@ -46,7 +46,7 @@ class Entite
     /**
      * @var Collection<int, PlateformeHistorique>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'laboratoire_operateur')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'laboratoireOperateur')]
     private Collection $plateformeHistoriques;
 
     /**
@@ -121,12 +121,12 @@ class Entite
 
     public function getStatutJuridique(): ?string
     {
-        return $this->statut_juridique;
+        return $this->statutJuridique;
     }
 
-    public function setStatutJuridique(?string $statut_juridique): static
+    public function setStatutJuridique(?string $statutJuridique): static
     {
-        $this->statut_juridique = $statut_juridique;
+        $this->statutJuridique = $statutJuridique;
 
         return $this;
     }

@@ -18,13 +18,13 @@ class UtilisateurInscription
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
-    private ?Plateforme $plateforme_demande = null;
+    private ?Plateforme $plateformeDemande = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
-    private ?Entite $unite_demande = null;
+    private ?Entite $uniteDemande = null;
 
     #[ORM\Column]
-    private ?bool $osu_demande = null;
+    private ?bool $osuDemande = null;
 
     public function getId(): ?int
     {
@@ -45,36 +45,36 @@ class UtilisateurInscription
 
     public function getPlateformeDemande(): ?Plateforme
     {
-        return $this->plateforme_demande;
+        return $this->plateformeDemande;
     }
 
-    public function setPlateformeDemande(?Plateforme $plateforme_demande): static
+    public function setPlateformeDemande(?Plateforme $plateformeDemande): static
     {
-        $this->plateforme_demande = $plateforme_demande;
+        $this->plateformeDemande = $plateformeDemande;
 
         return $this;
     }
 
     public function getUniteDemande(): ?Entite
     {
-        return $this->unite_demande;
+        return $this->uniteDemande;
     }
 
-    public function setUniteDemande(?Entite $unite_demande): static
+    public function setUniteDemande(?Entite $uniteDemande): static
     {
-        $this->unite_demande = $unite_demande;
+        $this->uniteDemande = $uniteDemande;
 
         return $this;
     }
 
     public function isOsuDemande(): ?bool
     {
-        return $this->osu_demande;
+        return $this->osuDemande;
     }
 
-    public function setOsuDemande(bool $osu_demande): static
+    public function setOsuDemande(bool $osuDemande): static
     {
-        $this->osu_demande = $osu_demande;
+        $this->osuDemande = $osuDemande;
 
         return $this;
     }

@@ -24,19 +24,19 @@ class EmploiType
     /**
      * @var Collection<int, CorpsBapEmploiType>
      */
-    #[ORM\OneToMany(targetEntity: CorpsBapEmploiType::class, mappedBy: 'emploi_type')]
+    #[ORM\OneToMany(targetEntity: CorpsBapEmploiType::class, mappedBy: 'emploiType')]
     private Collection $corpsBapEmploiTypes;
 
     /**
      * @var Collection<int, UtilisateurEmploiType>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'emploi_type')]
+    #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'emploiType')]
     private Collection $utilisateurEmploiTypes;
 
     /**
      * @var Collection<int, PosteFuturEmploiType>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'emploi_type')]
+    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'emploiType')]
     private Collection $posteFuturEmploiTypes;
 
     public function __construct()

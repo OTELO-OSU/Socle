@@ -19,7 +19,7 @@ class Plateforme
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['plateforme:list'])]
-    private ?string $pseudo_id = null;
+    private ?string $pseudoId = null;
 
     #[Groups(['plateforme:list'])]
     function getLastHistorique(): ?PlateformeHistorique
@@ -32,7 +32,7 @@ class Plateforme
     /**
      * @var Collection<int, UtilisateurInscription>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'plateforme_demande', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'plateformeDemande', cascade: ['remove'], orphanRemoval: true)]
     private Collection $utilisateurInscriptions;
 
     /**
@@ -54,12 +54,12 @@ class Plateforme
 
     public function getPseudoId(): ?string
     {
-        return $this->pseudo_id;
+        return $this->pseudoId;
     }
 
-    public function setPseudoId(?string $pseudo_id): static
+    public function setPseudoId(?string $pseudoId): static
     {
-        $this->pseudo_id = $pseudo_id;
+        $this->pseudoId = $pseudoId;
 
         return $this;
     }

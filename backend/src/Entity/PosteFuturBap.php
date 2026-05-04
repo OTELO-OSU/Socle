@@ -15,7 +15,7 @@ class PosteFuturBap
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturBaps')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?PosteFutur $poste_futur = null;
+    private ?PosteFutur $posteFutur = null;
 
     #[ORM\ManyToOne(inversedBy: 'posteFuturBaps')]
     #[ORM\JoinColumn(nullable: false)]
@@ -31,9 +31,9 @@ class PosteFuturBap
         return $this->poste_futur;
     }
 
-    public function setPosteFutur(?PosteFutur $poste_futur): static
+    public function setPosteFutur(?PosteFutur $posteFutur): static
     {
-        $this->poste_futur = $poste_futur;
+        $this->poste_futur = $posteFutur;
 
         return $this;
     }
