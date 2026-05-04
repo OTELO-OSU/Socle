@@ -33,10 +33,16 @@ final class UtilisateurVoter extends Voter
 
         switch ($attribute) {
             case self::APPROUVER:
-                return in_array('ROLE_ADMIN', $user->getRoles());
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                return false;
                 break;
             case self::GetEnAttenteDeValidation:
-                return in_array('ROLE_ADMIN', $user->getRoles());
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                return false;
                 break;
         }
 
