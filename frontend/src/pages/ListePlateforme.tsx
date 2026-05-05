@@ -41,7 +41,7 @@ export function ListePlateforme() {
                 <Pagination
                     count={totalPages}
                     page={page}
-                    onChange={(e, newPage) => setPage(newPage)}
+                    onChange={(_, newPage) => setPage(newPage)}
                 />
             </Stack>
 
@@ -52,7 +52,7 @@ export function ListePlateforme() {
                     {plateformes.map((plateforme) => (
                         <Card key={plateforme.id}>
                             <CardContent>
-                                <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                <Typography variant="h6">{plateforme.lastHistorique.nomOfficiel}</Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Année : {plateforme.lastHistorique.annee}
                                 </Typography>

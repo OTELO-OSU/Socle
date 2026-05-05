@@ -1,12 +1,13 @@
-import { Autocomplete, Box, Button, Card, CardActions, CardContent, Container, Dialog, Divider, FormControl, FormLabel, Link, Menu, MenuItem, Pagination, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Container, Dialog, Divider, FormControl, FormLabel, Link, Menu, MenuItem, Pagination, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { creerPlateforme, fetchPlateformeListeParPage, patchResponsablePlateforme, type PlateformeLight } from "../services/plateformeService";
 import { SnackbarContext } from "../context/snackbarContext";
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import { MoreVert } from "@mui/icons-material";
-import { getAgentByPage, type Agent } from "../services/agentService";
+import type { Agent } from "../services/agentService";
 import type { AxiosError } from "axios";
 import type { ApiError } from "../utils/axios";
+import { AgentAutocompleteField } from "../components/AgentAutocompleteField.tsx";
 
 export default function PlateformeAdmin() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
@@ -56,18 +57,6 @@ export default function PlateformeAdmin() {
     const [responsablesScientifiques, setResponsablesScientifiques] = useState<Agent[]>([]);
     const [responsablesTechniques, setResponsablesTechniques] = useState<Agent[]>([]);
     const [responsablesPlateforme, setResponsablesPlateforme] = useState<Agent[]>([]);
-    const [agentsOptionsScientifiques, setAgentsOptionsScientifiques] = useState<Agent[]>([]);
-    const [agentsOptionsTechniques, setAgentsOptionsTechniques] = useState<Agent[]>([]);
-    const [agentsOptionsPlateforme, setAgentsOptionsPlateforme] = useState<Agent[]>([]);
-    const [scientifiquesRecherche, setScientifiquesRecherche] = useState('');
-    const [techniquesRecherche, setTechniquesRecherche] = useState('');
-    const [plateformeRecherche, setPlateformeRecherche] = useState('');
-    const [debouncedScientifiquesRecherche, setDebouncedScientifiquesRecherche] = useState('');
-    const [debouncedTechniquesRecherche, setDebouncedTechniquesRecherche] = useState('');
-    const [debouncedPlateformeRecherche, setDebouncedPlateformeRecherche] = useState('');
-    const [isLoadingAgentsScientifiques, setIsLoadingAgentsScientifiques] = useState(false);
-    const [isLoadingAgentsTechniques, setIsLoadingAgentsTechniques] = useState(false);
-    const [isLoadingAgentsPlateforme, setIsLoadingAgentsPlateforme] = useState(false);
     const menu = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>, plateforme: PlateformeLight) => {
         setAnchorEl(event.currentTarget);
@@ -85,22 +74,19 @@ export default function PlateformeAdmin() {
 
         setResponsablesScientifiques(
             selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsable_scientifique)
-                .map((personnel) => personnel.utilisateur_id)
+                .filter((personnel) => personnel.responsableScientifique)
+                .map((personnel) => personnel.utilisateur)
         );
         setResponsablesTechniques(
             selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsable_technique)
-                .map((personnel) => personnel.utilisateur_id)
+                .filter((personnel) => personnel.responsableTechnique)
+                .map((personnel) => personnel.utilisateur)
         );
         setResponsablesPlateforme(
             selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsable_plateforme)
-                .map((personnel) => personnel.utilisateur_id)
+                .filter((personnel) => personnel.responsablePlateforme)
+                .map((personnel) => personnel.utilisateur)
         );
-        setScientifiquesRecherche('');
-        setTechniquesRecherche('');
-        setPlateformeRecherche('');
         setEditDialogOpen(true);
         handleCloseMenu();
     }
@@ -111,12 +97,6 @@ export default function PlateformeAdmin() {
         setResponsablesScientifiques([]);
         setResponsablesTechniques([]);
         setResponsablesPlateforme([]);
-        setAgentsOptionsScientifiques([]);
-        setAgentsOptionsTechniques([]);
-        setAgentsOptionsPlateforme([]);
-        setScientifiquesRecherche('');
-        setTechniquesRecherche('');
-        setPlateformeRecherche('');
     }
 
     async function handleSaveEditDialog() {
@@ -144,94 +124,6 @@ export default function PlateformeAdmin() {
         handleCloseEditDialog();
     }
 
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedScientifiquesRecherche(scientifiquesRecherche), 500);
-        return () => clearTimeout(timer);
-    }, [scientifiquesRecherche]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedTechniquesRecherche(techniquesRecherche), 500);
-        return () => clearTimeout(timer);
-    }, [techniquesRecherche]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedPlateformeRecherche(plateformeRecherche), 500);
-        return () => clearTimeout(timer);
-    }, [plateformeRecherche]);
-
-    const fetchAgentsScientifiques = useCallback(async (search: string, selected: Agent[]) => {
-        setIsLoadingAgentsScientifiques(true);
-        try {
-            const { agents } = await getAgentByPage(search);
-            const map = new Map<number, Agent>();
-            for (const a of selected) map.set(a.id, a);
-            for (const a of agents) map.set(a.id, a);
-            setAgentsOptionsScientifiques(Array.from(map.values()));
-        } catch (error) {
-            console.error("Erreur lors du chargement des agents scientifiques :", error);
-        } finally {
-            setIsLoadingAgentsScientifiques(false);
-        }
-    }, []);
-
-    const fetchAgentsTechniques = useCallback(async (search: string, selected: Agent[]) => {
-        setIsLoadingAgentsTechniques(true);
-        try {
-            const { agents } = await getAgentByPage(search);
-            const map = new Map<number, Agent>();
-            for (const a of selected) map.set(a.id, a);
-            for (const a of agents) map.set(a.id, a);
-            setAgentsOptionsTechniques(Array.from(map.values()));
-        } catch (error) {
-            console.error("Erreur lors du chargement des agents techniques :", error);
-        } finally {
-            setIsLoadingAgentsTechniques(false);
-        }
-    }, []);
-
-    const fetchAgentsPlateforme = useCallback(async (search: string, selected: Agent[]) => {
-        setIsLoadingAgentsPlateforme(true);
-        try {
-            const { agents } = await getAgentByPage(search);
-            const map = new Map<number, Agent>();
-            for (const a of selected) map.set(a.id, a);
-            for (const a of agents) map.set(a.id, a);
-            setAgentsOptionsPlateforme(Array.from(map.values()));
-        } catch (error) {
-            console.error("Erreur lors du chargement des agents plateforme :", error);
-        } finally {
-            setIsLoadingAgentsPlateforme(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!editDialogOpen) {
-            return;
-        }
-
-        fetchAgentsScientifiques(debouncedScientifiquesRecherche, responsablesScientifiques);
-    }, [editDialogOpen, fetchAgentsScientifiques, debouncedScientifiquesRecherche, responsablesScientifiques]);
-
-    useEffect(() => {
-        if (!editDialogOpen) {
-            return;
-        }
-
-        fetchAgentsTechniques(debouncedTechniquesRecherche, responsablesTechniques);
-    }, [editDialogOpen, fetchAgentsTechniques, debouncedTechniquesRecherche, responsablesTechniques]);
-
-    useEffect(() => {
-        if (!editDialogOpen) {
-            return;
-        }
-
-        fetchAgentsPlateforme(debouncedPlateformeRecherche, responsablesPlateforme);
-    }, [editDialogOpen, fetchAgentsPlateforme, debouncedPlateformeRecherche, responsablesPlateforme]);
-
-    function getAgentLabel(agent: Agent) {
-        return `${agent.nom} ${agent.prenom}`;
-    }
-
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
@@ -251,67 +143,25 @@ export default function PlateformeAdmin() {
                 <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography variant="h4" component="h2">Modifier les responsables</Typography>
                     <Typography variant="body1">
-                        Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nom_officiel ?? "N/A"}
+                        Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nomOfficiel ?? "N/A"}
                     </Typography>
-                    <Autocomplete
-                        multiple
-                        noOptionsText="Aucun agent trouvé"
-                        options={agentsOptionsScientifiques}
+                    <AgentAutocompleteField
+                        label="Responsables scientifiques"
                         value={responsablesScientifiques}
-                        loading={isLoadingAgentsScientifiques}
-                        inputValue={scientifiquesRecherche}
-                        onInputChange={(_, value) => setScientifiquesRecherche(value)}
-                        onChange={(_, value) => setResponsablesScientifiques(value)}
-                        getOptionLabel={getAgentLabel}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        filterOptions={(options) => options}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Responsables scientifiques"
-                                placeholder="Rechercher un agent"
-                            />
-                        )}
+                        onChange={setResponsablesScientifiques}
+                        enabled={editDialogOpen}
                     />
-                    <Autocomplete
-                        multiple
-                        noOptionsText="Aucun agent trouvé"
-                        options={agentsOptionsTechniques}
+                    <AgentAutocompleteField
+                        label="Responsables techniques"
                         value={responsablesTechniques}
-                        loading={isLoadingAgentsTechniques}
-                        inputValue={techniquesRecherche}
-                        onInputChange={(_, value) => setTechniquesRecherche(value)}
-                        onChange={(_, value) => setResponsablesTechniques(value)}
-                        getOptionLabel={getAgentLabel}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        filterOptions={(options) => options}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Responsables techniques"
-                                placeholder="Rechercher un agent"
-                            />
-                        )}
+                        onChange={setResponsablesTechniques}
+                        enabled={editDialogOpen}
                     />
-                    <Autocomplete
-                        multiple
-                        noOptionsText="Aucun agent trouvé"
-                        options={agentsOptionsPlateforme}
+                    <AgentAutocompleteField
+                        label="Responsables de la plateforme"
                         value={responsablesPlateforme}
-                        loading={isLoadingAgentsPlateforme}
-                        inputValue={plateformeRecherche}
-                        onInputChange={(_, value) => setPlateformeRecherche(value)}
-                        onChange={(_, value) => setResponsablesPlateforme(value)}
-                        getOptionLabel={getAgentLabel}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        filterOptions={(options) => options}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Responsables de la plateforme"
-                                placeholder="Rechercher un agent"
-                            />
-                        )}
+                        onChange={setResponsablesPlateforme}
+                        enabled={editDialogOpen}
                     />
                     <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                         <Button color="inherit" onClick={handleCloseEditDialog}>Annuler</Button>
@@ -347,7 +197,7 @@ export default function PlateformeAdmin() {
                             <CardContent>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
                                     <Box>
-                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                        <Typography variant="h6">{plateforme.lastHistorique.nomOfficiel}</Typography>
                                         <Typography variant="body2" color="textSecondary">
                                             Année : {plateforme.lastHistorique.annee}
                                         </Typography>

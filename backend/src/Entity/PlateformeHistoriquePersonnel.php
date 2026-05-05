@@ -23,15 +23,12 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[ORM\JoinColumn(name: 'utilisateur_id_id', referencedColumnName: 'id', nullable: false)]
-    #[Ignore]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(name: 'responsable_scientifique')]
-    #[Ignore]
     private ?bool $responsableScientifique = false;
 
     #[ORM\Column(name: 'responsable_technique')]
-    #[Ignore]
     private ?bool $responsableTechnique = false;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
@@ -43,7 +40,6 @@ class PlateformeHistoriquePersonnel
     private ?int $quotite = 0;
 
     #[ORM\Column(name: 'responsable_plateforme')]
-    #[Ignore]
     private ?bool $responsablePlateforme = false;
 
     public function getId(): ?int

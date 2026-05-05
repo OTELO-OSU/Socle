@@ -13,19 +13,19 @@ export type PlateformeLight = {
     lastHistorique: {
         id: number;
         annee: number;
-        nom_officiel: string;
-        forme_developpee_nom_officiel: string | null;
+        nomOfficiel: string;
+        formeDeveloppeeNomOfficiel: string | null;
         plateformeHistoriquePersonnels: {
             id: number;
-            utilisateur_id: {
+            utilisateur: {
                 id: number;
                 nom: string;
                 prenom: string;
                 email: string;
             },
-            responsable_scientifique: boolean,
-            responsable_technique: boolean,
-            responsable_plateforme: boolean,
+            responsableScientifique: boolean,
+            responsableTechnique: boolean,
+            responsablePlateforme: boolean,
             quotite: number;
         }[];
         brouillon: boolean;
