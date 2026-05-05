@@ -25,6 +25,7 @@ export type PlateformeLight = {
             },
             responsable_scientifique: boolean,
             responsable_technique: boolean,
+            responsable_plateforme: boolean,
             quotite: number;
         }[];
         brouillon: boolean;
