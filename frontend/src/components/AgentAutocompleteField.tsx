@@ -1,13 +1,25 @@
 import { Autocomplete, TextField } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getAgentByPage, type Agent } from "../services/agentService";
 
-type AgentAutocompleteFieldProps = {
+type AgentAutocompleteBaseProps = {
     label: string;
-    value: Agent[];
-    onChange: (value: Agent[]) => void;
     enabled?: boolean;
 };
+
+type AgentAutocompleteFieldMultipleProps = AgentAutocompleteBaseProps & {
+    multiple?: true;
+    value: Agent[];
+    onChange: (value: Agent[]) => void;
+};
+
+type AgentAutocompleteFieldSingleProps = AgentAutocompleteBaseProps & {
+    multiple?: false;
+    value: Agent | null;
+    onChange: (value: Agent | null) => void;
+};
+
+type AgentAutocompleteFieldProps = AgentAutocompleteFieldMultipleProps | AgentAutocompleteFieldSingleProps;
 
 function getAgentLabel(agent: Agent) {
     return `${agent.nom} ${agent.prenom}`;
@@ -15,11 +27,16 @@ function getAgentLabel(agent: Agent) {
 
 export function AgentAutocompleteField({
     label,
-    value,
-    onChange,
+    value: rawValue,
+    onChange: rawOnChange,
+    multiple = false,
     enabled = true,
 }: AgentAutocompleteFieldProps) {
-    const [options, setOptions] = useState<Agent[]>(value);
+    const selectedAgents = useMemo(
+        () => (Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : [])),
+        [rawValue],
+    );
+    const [options, setOptions] = useState<Agent[]>(selectedAgents);
     const [inputValue, setInputValue] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [loading, setLoading] = useState(false);
@@ -40,8 +57,8 @@ export function AgentAutocompleteField({
     }, [inputValue]);
 
     useEffect(() => {
-        setOptions((previousOptions) => mergeAgents(previousOptions, value));
-    }, [mergeAgents, value]);
+        setOptions((previousOptions) => mergeAgents(previousOptions, selectedAgents));
+    }, [mergeAgents, selectedAgents]);
 
     useEffect(() => {
         if (!enabled) {
@@ -56,7 +73,7 @@ export function AgentAutocompleteField({
                 const { agents } = await getAgentByPage(debouncedSearch);
 
                 if (isMounted) {
-                    setOptions(mergeAgents(agents, value));
+                    setOptions(mergeAgents(agents, selectedAgents));
                 }
             } catch (error) {
                 console.error("Erreur lors du chargement des agents :", error);
@@ -72,18 +89,25 @@ export function AgentAutocompleteField({
         return () => {
             isMounted = false;
         };
-    }, [debouncedSearch, enabled, mergeAgents, value]);
+    }, [debouncedSearch, enabled, mergeAgents, selectedAgents]);
 
     return (
         <Autocomplete
-            multiple
+            multiple={multiple}
             noOptionsText="Aucun agent trouvé"
             options={options}
-            value={value}
+            value={rawValue as Agent[] | Agent | null}
             loading={loading}
             inputValue={inputValue}
             onInputChange={(_, newValue) => setInputValue(newValue)}
-            onChange={(_, newValue) => onChange(newValue)}
+            onChange={(_, newValue) => {
+                if (multiple) {
+                    (rawOnChange as (next: Agent[]) => void)(newValue as Agent[]);
+                    return;
+                }
+
+                (rawOnChange as (next: Agent | null) => void)(newValue as Agent | null);
+            }}
             getOptionLabel={getAgentLabel}
             isOptionEqualToValue={(option, selectedValue) => option.id === selectedValue.id}
             filterOptions={(items) => items}

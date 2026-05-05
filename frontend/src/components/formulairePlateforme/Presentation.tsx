@@ -1,8 +1,9 @@
 import { Divider, Grid, Stack, Typography } from "@mui/material";
-import { RHFSelect, RHFTextField } from "../../pages/ModificationPlateforme";
 import { useFormContext } from "react-hook-form";
 import { useContext } from "react";
 import { DictionnaireContext } from "../../context/dictionnaireContext";
+import { RHFTextField } from "../RHFTextField";
+import { RHFSelect } from "../RHFTextSelect";
 
 export function Presentation() {
     const { control } = useFormContext();
@@ -34,19 +35,22 @@ export function Presentation() {
                         />
                     </Stack>
                     <RHFTextField
+                        sx={{ mt: 2 }}
                         name="siteweb"
                         control={control}
                         label="Site web"
                         placeholder="<https://sarm.cnrs.fr/>"
                     />
-                    <RHFSelect name="ville" control={control} id="ville" label="Ville" items={ville} />
+                    <RHFSelect name="ville" control={control} id="ville" label="Ville" items={ville} sx={{ mt: 2 }} />
                     <RHFTextField
+                        sx={{ mt: 2 }}
                         name="urlLogo"
                         control={control}
                         label="URL du logo de la plateforme"
                         placeholder="<https://sarm.cnrs.fr/images/logo.png>"
                     />
                     <RHFTextField
+                        sx={{ mt: 2 }}
                         name="autreTypeLabellisation"
                         control={control}
                         label="Autre type de labellisation"
@@ -77,7 +81,7 @@ export function Presentation() {
                 </Grid>
                 <Grid size="grow">
                     <RHFTextField name="latitude" control={control} label="Latitude" placeholder="48.65609" />
-                    <RHFTextField name="longitude" control={control} label="Longitude" placeholder="6.15496" />
+                    <RHFTextField name="longitude" control={control} label="Longitude" placeholder="6.15496" sx={{ mt: 2 }} />
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
@@ -89,7 +93,7 @@ export function Presentation() {
                 </Grid>
                 <Grid size="grow">
                     <RHFTextField name="espaceBureau" control={control} label="Espace bureau en m²" placeholder="90" />
-                    <RHFTextField name="espaceLaboratoire" control={control} label="Espace laboratoire en m²" placeholder="210" />
+                    <RHFTextField name="espaceLaboratoire" control={control} label="Espace laboratoire en m²" placeholder="210" sx={{ mt: 2 }} />
                 </Grid>
             </Grid>
         </>

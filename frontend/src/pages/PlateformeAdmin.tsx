@@ -146,18 +146,21 @@ export default function PlateformeAdmin() {
                         Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nomOfficiel ?? "N/A"}
                     </Typography>
                     <AgentAutocompleteField
+                        multiple={true}
                         label="Responsables scientifiques"
                         value={responsablesScientifiques}
                         onChange={setResponsablesScientifiques}
                         enabled={editDialogOpen}
                     />
                     <AgentAutocompleteField
+                        multiple={true}
                         label="Responsables techniques"
                         value={responsablesTechniques}
                         onChange={setResponsablesTechniques}
                         enabled={editDialogOpen}
                     />
                     <AgentAutocompleteField
+                        multiple={true}
                         label="Responsables de la plateforme"
                         value={responsablesPlateforme}
                         onChange={setResponsablesPlateforme}
