@@ -6,6 +6,7 @@ use App\Repository\EntiteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: EntiteRepository::class)]
 class Entite
@@ -13,11 +14,15 @@ class Entite
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+
+    #[Groups(['unite:list'])]
     private ?int $id = null;
 
+    #[Groups(['unite:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[Groups(['unite:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
@@ -72,6 +77,10 @@ class Entite
      */
     #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'unite')]
     private Collection $utilisateurs;
+
+    #[Groups(['unite:list'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $codeUnite = null;
 
     public function __construct()
     {
@@ -355,6 +364,18 @@ class Entite
                 $utilisateur->setUnite(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCodeUnite(): ?string
+    {
+        return $this->codeUnite;
+    }
+
+    public function setCodeUnite(?string $codeUnite): static
+    {
+        $this->codeUnite = $codeUnite;
 
         return $this;
     }
