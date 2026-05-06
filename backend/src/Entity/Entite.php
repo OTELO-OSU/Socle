@@ -82,6 +82,12 @@ class Entite
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codeUnite = null;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'employeur')]
+    private Collection $employe;
+
     public function __construct()
     {
         $this->plateformeHistoriques = new ArrayCollection();
@@ -90,6 +96,7 @@ class Entite
         $this->contributionTutelles = new ArrayCollection();
         $this->financementInstruments = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
+        $this->employe = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -376,6 +383,36 @@ class Entite
     public function setCodeUnite(?string $codeUnite): static
     {
         $this->codeUnite = $codeUnite;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getEmploye(): Collection
+    {
+        return $this->employe;
+    }
+
+    public function addEmploye(Utilisateur $employe): static
+    {
+        if (!$this->employe->contains($employe)) {
+            $this->employe->add($employe);
+            $employe->setEmployeur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmploye(Utilisateur $employe): static
+    {
+        if ($this->employe->removeElement($employe)) {
+            // set the owning side to null (unless already changed)
+            if ($employe->getEmployeur() === $this) {
+                $employe->setEmployeur(null);
+            }
+        }
 
         return $this;
     }

@@ -115,6 +115,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?Entite $unite = null;
 
+    #[ORM\ManyToOne(inversedBy: 'employe')]
+    private ?Entite $employeur = null;
+
     public function __construct()
     {
         $this->emailValide = false;
@@ -513,6 +516,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUnite(?Entite $unite): static
     {
         $this->unite = $unite;
+
+        return $this;
+    }
+
+    public function getEmployeur(): ?Entite
+    {
+        return $this->employeur;
+    }
+
+    public function setEmployeur(?Entite $employeur): static
+    {
+        $this->employeur = $employeur;
 
         return $this;
     }
