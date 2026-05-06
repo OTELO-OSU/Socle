@@ -73,6 +73,13 @@ export default function Connexion() {
                     couleur: 'error',
                 });
             }
+
+            if (error.response?.status === 403) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'Votre compte est en attente de validation par un administrateur',
+                    couleur: 'warning',
+                });
+            }
         }
     }
     return (
