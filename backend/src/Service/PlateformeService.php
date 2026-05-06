@@ -361,6 +361,9 @@ class PlateformeService
                 case 'espace_laboratoire':
                     $plateformeHisto->setEspaceLaboratoire($value);
                     break;
+                case 'espace_laboratoire':
+                    $plateformeHisto->setEspaceLaboratoire($value);
+                    break;
                 case 'personnel':
                     // Supprimer parmis les actuelles ceux qui n'existe plus
                     foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
