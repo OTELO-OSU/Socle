@@ -347,4 +347,415 @@ class AgentControllerTest extends WebTestCase
         $message = self::getMailerMessage(0);
         $this->assertEmailHeaderSame($message, 'To', 'admin@example.com');
     }
+
+    public function testAccepterRefuserSoumissionMauvaisPayloadUtulisateurID(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'approbation' => true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Champs requis manquants",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAccepterRefuserSoumissionMauvaisPayloadApprobation(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Champs requis manquants",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAccepterRefuserSoumissionMauvaisPayloadApprobationEnString(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => "refref"
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le champ approbation doit être un booléen.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAccepterSoumissionPasLesPerms(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits nécessaires.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAccepterSoumissionPasLesPermsPourLesAutresUnites(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+
+        $this->user->setUnite($this->unite2);
+        $this->em->persist($utilisateur);
+        $this->em->persist($this->user);
+        $this->unite->setDirecteur($this->user);
+        $this->em->persist($this->unite);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAccepterSoumissionSucces(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+
+        $this->user->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->persist($this->user);
+        $this->unite->setDirecteur($this->user);
+        $this->em->persist($this->unite);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => true
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'utilisateur à bien été approuvé",
+            $data['message']
+        );
+
+        $utilisateur = $this->em->find(Utilisateur::class, $utilisateur->getId());
+        $this->assertFalse($utilisateur->isAttenteApprobationDU());
+        $this->assertTrue($utilisateur->isAdmis());
+
+        self::assertEmailCount(1);
+        $message = self::getMailerMessage(0);
+        $this->assertEmailHeaderSame($message, 'To', 'soumis@example.com');
+    }
+
+    public function testRefuserSoumissionPasLesPerms(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => false
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits nécessaires.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testARefuserSoumissionPasLesPermsPourLesAutresUnites(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+
+        $this->user->setUnite($this->unite2);
+        $this->em->persist($utilisateur);
+        $this->em->persist($this->user);
+        $this->unite->setDirecteur($this->user);
+        $this->em->persist($this->unite);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => false
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testRefuserSoumissionSucces(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+
+        $this->user->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->persist($this->user);
+        $this->unite->setDirecteur($this->user);
+        $this->em->persist($this->unite);
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/agent',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode([
+                'utilisateurId' => $utilisateur->getId(),
+                'approbation' => false
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "L'utilisateur à bien été refusé",
+            $data['message']
+        );
+
+        $utilisateur = $this->em->find(Utilisateur::class, $utilisateur->getId());
+        $this->assertNull($utilisateur);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testGetEnAttenteDeSoumission(): void
+    {
+        $client = $this->client;
+
+        //* Injecter un user en attente directement dans la base
+        $utilisateur = new Utilisateur();
+        $utilisateur->setNom('Soumis');
+        $utilisateur->setPrenom('DU');
+        $utilisateur->setEmail('soumis@example.com');
+        $utilisateur->setAttenteApprobationDU(true);
+        $utilisateur->setUnite($this->unite);
+
+        $utilisateurUAR = new Utilisateur();
+        $utilisateurUAR->setNom('Soumis');
+        $utilisateurUAR->setPrenom('UAR');
+        $utilisateurUAR->setEmail('soumis@uar.com');
+        $utilisateurUAR->setAttenteApprobationDU(true);
+        $utilisateurUAR->setUnite($this->uar);
+
+        $this->user->setUnite($this->unite);
+        $this->em->persist($utilisateur);
+        $this->em->persist($utilisateurUAR);
+        $this->em->persist($this->user);
+        $this->unite->setDirecteur($this->user);
+        $this->em->persist($this->unite);
+        $this->em->flush();
+
+        $client->request(
+            'GET',
+            '/api/agent/en-attente-du-du',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getUserAccessToken()],
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "soumis@example.com",
+            $data[0]['email']
+        );
+
+        $client->request(
+            'GET',
+            '/api/agent/en-attente-du-du',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            2,
+            count($data)
+        );
+
+        self::assertEmailCount(0);
+    }
 }

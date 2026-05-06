@@ -147,4 +147,85 @@ class AgentService
 
         return $user;
     }
+
+    function getUtilisateurEnAttenteDeValidationDuDu(): array
+    {
+        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        $agents = [];
+
+        if ($this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
+            $agents = $this->em->getRepository(Utilisateur::class)->findBy(['attenteApprobationDU' => true]);
+        } else {
+            /** @var Utilisateur $user */
+            $user = $this->security->getUser();
+            $unite = $user->getUnite();
+            $agents = $this->em->getRepository(Utilisateur::class)->findBy(['attenteApprobationDU' => true, 'unite' => $unite]);
+        }
+
+        return $agents;
+    }
+
+    function approuveUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
+    {
+        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        /** @var Utilisateur $agent */
+        $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
+        if (!$agent || !$agent->isAttenteApprobationDU()) {
+            throw new Exception("L'utilisateur spécifié est invalide ou n'est pas en attente d'approbation DU.", 400);
+        }
+
+        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
+            $agentUnite = $agent->getUnite();
+            /** @var Utilisateur $user */
+            $user = $this->security->getUser();
+            $userUnite = $user->getUnite();
+            if ($agentUnite != $userUnite) {
+                throw new Exception("Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.", 403);
+            }
+        }
+
+        $agent->setAttenteApprobationDU(false);
+        $agent->setAdmis(true);
+
+        $this->em->persist($agent);
+        $this->em->flush();
+
+        $this->mailerService->sendEmailToUser(
+            $agent->getEmail(),
+            "Votre compte a été créé et approuvé",
+            "La création de votre compte a été demandé par un responsable d'une plateforme et a été approuvé par le directeur de l'unité. Vous pouvez désormais vous connecter à l'application avec votre adresse email pour accéder à votre compte."
+        );
+    }
+
+    function refusUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
+    {
+        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        /** @var Utilisateur $agent */
+        $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
+        if (!$agent || !$agent->isAttenteApprobationDU()) {
+            throw new Exception("L'utilisateur spécifié est invalide ou n'est pas en attente d'approbation DU.", 400);
+        }
+
+        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
+            $agentUnite = $agent->getUnite();
+            /** @var Utilisateur $user */
+            $user = $this->security->getUser();
+            $userUnite = $user->getUnite();
+            if ($agentUnite != $userUnite) {
+                throw new Exception("Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.", 403);
+            }
+        }
+
+        $this->em->remove($agent);
+        $this->em->flush();
+    }
 }

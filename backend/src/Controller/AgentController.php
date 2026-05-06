@@ -21,6 +21,13 @@ final class AgentController extends AbstractController
         return $this->json($utilisateurs, 200, []);
     }
 
+    #[Route('/agent/en-attente-du-du', methods: ['GET'])]
+    public function getUtilisateursEnAttenteDeValidationDuDu(): Response
+    {
+        $utilisateurs = $this->utilisateurService->getUtilisateurEnAttenteDeValidationDuDu();
+        return $this->json($utilisateurs, 200, [], ['groups' => 'utilisateur:list']);
+    }
+
     #[Route('/agent', methods: ['POST'])]
     public function creationUtilisateurParResponsable(Request $request): Response
     {
@@ -38,5 +45,28 @@ final class AgentController extends AbstractController
             $data['grade']
         );
         return $this->json(['message' => 'Soumission envoyée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
+    }
+
+    #[Route('/agent', methods: ['PATCH'])]
+    public function gererResponseDU(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['utilisateurId']) || !isset($data['approbation'])) {
+            return $this->json(['message' => 'Champs requis manquants'], 400);
+        }
+
+        if (!is_bool($data['approbation'])) {
+            return $this->json(['message' => 'Le champ approbation doit être un booléen.'], 400);
+        }
+
+        $approbation = $data['approbation'];
+
+        if ($approbation) {
+            $this->utilisateurService->approuveUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
+            return $this->json(['message' => 'L\'utilisateur à bien été approuvé',], 200);
+        } else {
+            $this->utilisateurService->refusUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
+            return $this->json(['message' => 'L\'utilisateur à bien été refusé',], 200);
+        }
     }
 }
