@@ -1,20 +1,4 @@
 import { createContext } from 'react'
+import type { DictionnaireType } from '../provider/DictionnaireProvider'
 
-export type DictionnaireOption = {
-	value: string;
-	label: string;
-}
-
-export type DictionnaireType = {
-	ville: DictionnaireOption[];
-	laboratoire: DictionnaireOption[];
-	tutelle: DictionnaireOption[];
-}
-
-export const defaultDictionnaire: DictionnaireType = {
-	ville: [],
-	laboratoire: [],
-	tutelle: [],
-}
-
-export const DictionnaireContext = createContext<DictionnaireType>(defaultDictionnaire)
+export const DictionnaireContext = createContext<DictionnaireType>(undefined as unknown as DictionnaireType);
