@@ -20,6 +20,7 @@ class AdminControllerTest extends WebTestCase
     private ?Plateforme $testPlateforme = null;
     private ?PlateformeHistorique $plateformeHisto = null;
     private ?Utilisateur $user = null;
+    private ?Entite $unite = null;
 
     private function cleanupDatabase(): void
     {
@@ -34,6 +35,8 @@ class AdminControllerTest extends WebTestCase
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_inscription', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_inscription_oauth', true));
         $conn->executeStatement($platform->getTruncateTableSQL('utilisateur', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('entite', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('categorie', true));
     }
 
     protected function setUp(): void
@@ -46,6 +49,17 @@ class AdminControllerTest extends WebTestCase
 
         $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
+        $categorie = new Categorie();
+        $categorie->setNom('Test Categorie');
+        $this->em->persist($categorie);
+
+        $unite = new Entite();
+        $unite->setNom('Test Unite');
+        $unite->setCategorie($categorie);
+        $unite->setEmployeur(false);
+        $unite->setLaboratoire(true);
+        $this->em->persist($unite);
+
         $user = new Utilisateur();
         $user->setNom('Test');
         $user->setPrenom('User');
@@ -53,9 +67,8 @@ class AdminControllerTest extends WebTestCase
         $user->setMdp($hasher->hashPassword($user, 'password'));
         $user->setAdmis(true);
         $user->setEmailValide(true);
+        $user->setUnite($unite);
         $this->em->persist($user);
-
-        $this->user = $user;
 
         $admin = new Utilisateur();
         $admin->setNom('Admin');
@@ -64,19 +77,9 @@ class AdminControllerTest extends WebTestCase
         $admin->setMdp($hasher->hashPassword($admin, 'password'));
         $admin->setAdmis(true);
         $admin->setEmailValide(true);
+        $admin->setUnite($unite);
         $admin->setRoles(['ROLE_ADMIN']);
         $this->em->persist($admin);
-
-        $categorie = new Categorie();
-        $categorie->setNom('Test Categorie');
-        $this->em->persist($categorie);
-
-        $entite = new Entite();
-        $entite->setNom('Test Entite');
-        $entite->setCategorie($categorie);
-        $entite->setEmployeur(true);
-        $entite->setLaboratoire(false);
-        $this->em->persist($entite);
 
         $this->testPlateforme = new Plateforme();
         $this->testPlateforme->setPseudoId('Test Plateforme');
@@ -90,6 +93,8 @@ class AdminControllerTest extends WebTestCase
         $this->em->persist($this->plateformeHisto);
 
         $this->em->flush();
+        $this->unite = $unite;
+        $this->user = $user;
     }
 
     private function getUserAccessToken()
@@ -254,8 +259,8 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         $userInscription = new UtilisateurInscription();
-        $userInscription->setUniteDemande($this->em->getRepository(Entite::class)->findOneBy([]));
-        $userInscription->setOsuDemande(false);
+        $userInscription->setDirecteurUniteDemande(true);
+        $userInscription->setDirecteurOsuDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
 
@@ -291,7 +296,8 @@ class AdminControllerTest extends WebTestCase
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setPlateformeDemande($this->testPlateforme);
-        $userInscription->setOsuDemande(false);
+        $userInscription->setDirecteurOsuDemande(false);
+        $userInscription->setDirecteurUniteDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
 
@@ -329,7 +335,8 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         $userInscription = new UtilisateurInscription();
-        $userInscription->setOsuDemande(true);
+        $userInscription->setDirecteurOsuDemande(true);
+        $userInscription->setDirecteurUniteDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
 
@@ -363,7 +370,8 @@ class AdminControllerTest extends WebTestCase
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setPlateformeDemande($this->testPlateforme);
-        $userInscription->setOsuDemande(false);
+        $userInscription->setDirecteurOsuDemande(false);
+        $userInscription->setDirecteurUniteDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
 
@@ -521,7 +529,8 @@ class AdminControllerTest extends WebTestCase
         $us = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
         $us->setAdmis(false);
         $ui = new UtilisateurInscription();
-        $ui->setOsuDemande(true);
+        $ui->setDirecteurOsuDemande(true);
+        $ui->setDirecteurUniteDemande(false);
         $us->setUtilisateurInscription($ui);
         $this->em->flush();
 
@@ -550,11 +559,11 @@ class AdminControllerTest extends WebTestCase
         $this->assertNull(
             $data['0']['plateformeDemande']
         );
-        $this->assertNull(
-            $data['0']['uniteDemande']
+        $this->assertFalse(
+            $data['0']['directeurUniteDemande']
         );
         $this->assertTrue(
-            $data['0']['osuDemande']
+            $data['0']['directeurOsuDemande']
         );
 
         self::assertEmailCount(0);

@@ -53,15 +53,6 @@ class AuthControllerTest extends WebTestCase
 
         $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
-        $user = new Utilisateur();
-        $user->setNom('Test');
-        $user->setPrenom('User');
-        $user->setEmail('test@example.com');
-        $user->setMdp($hasher->hashPassword($user, 'password'));
-        $user->setAdmis(true);
-        $user->setEmailValide(true);
-        $this->em->persist($user);
-
         $categorie = new Categorie();
         $categorie->setNom('Test Categorie');
         $this->em->persist($categorie);
@@ -69,9 +60,19 @@ class AuthControllerTest extends WebTestCase
         $entite = new Entite();
         $entite->setNom('Test Entite');
         $entite->setCategorie($categorie);
-        $entite->setEmployeur(true);
-        $entite->setLaboratoire(false);
+        $entite->setEmployeur(false);
+        $entite->setLaboratoire(true);
         $this->em->persist($entite);
+
+        $user = new Utilisateur();
+        $user->setNom('Test');
+        $user->setPrenom('User');
+        $user->setEmail('test@example.com');
+        $user->setMdp($hasher->hashPassword($user, 'password'));
+        $user->setAdmis(true);
+        $user->setEmailValide(true);
+        $user->setUnite($entite);
+        $this->em->persist($user);
 
         $plateforme = new Plateforme();
         $plateforme->setPseudoId('Test Plateforme');
@@ -277,7 +278,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'osu_demande' => \true
+                'directeur_osu_demande' => \true
             ])
         );
 
@@ -303,7 +304,7 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'osu_demande' => \true
+                'directeur_osu_demande' => \true
             ])
         );
 
@@ -329,7 +330,7 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'mdp' => 'password',
-                'osu_demande' => \true
+                'directeur_osu_demande' => \true
             ])
         );
 
@@ -382,9 +383,12 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'osu_demande' => \true
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_osu_demande' => \true,
             ])
         );
+
+        $this->assertResponseStatusCodeSame(201);
 
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
         $this->assertNotNull($user);
@@ -393,11 +397,10 @@ class AuthControllerTest extends WebTestCase
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertTrue($userInscription->isOsuDemande());
-        $this->assertNull($userInscription->getUniteDemande());
+        $this->assertTrue($userInscription->isDirecteurOsuDemande());
+        $this->assertFalse($userInscription->isDirecteurUniteDemande());
         $this->assertNull($userInscription->getPlateformeDemande());
 
-        $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
@@ -423,7 +426,8 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'unite_demande_id' => $this->em->getRepository(Entite::class)->findOneBy([])->getId()
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -434,8 +438,8 @@ class AuthControllerTest extends WebTestCase
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isOsuDemande());
-        $this->assertNotNull($userInscription->getUniteDemande());
+        $this->assertFalse($userInscription->isDirecteurOsuDemande());
+        $this->assertTrue($userInscription->isDirecteurUniteDemande());
         $this->assertNull($userInscription->getPlateformeDemande());
 
         $this->assertResponseStatusCodeSame(201);
@@ -464,6 +468,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
                 'plateforme_demande_id' => $this->em->getRepository(Plateforme::class)->findOneBy([])->getId()
             ])
         );
@@ -475,8 +480,8 @@ class AuthControllerTest extends WebTestCase
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isOsuDemande());
-        $this->assertNull($userInscription->getUniteDemande());
+        $this->assertFalse($userInscription->isDirecteurOsuDemande());
+        $this->assertFalse($userInscription->isDirecteurUniteDemande());
         $this->assertNotNull($userInscription->getPlateformeDemande());
 
         $this->assertResponseStatusCodeSame(201);
@@ -649,7 +654,8 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
-                'osu_demande' => \true,
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_osu_demande' => \true,
             ])
         );
 
@@ -673,7 +679,8 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
-                'osu_demande' => \true,
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_osu_demande' => \true,
                 'token' => 'token_invalide'
             ])
         );
@@ -708,7 +715,8 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
-                'osu_demande' => \true,
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_osu_demande' => \true,
                 'token' => 'token123'
             ])
         );
@@ -743,7 +751,8 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
-                'osu_demande' => \true,
+                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
+                'directeur_osu_demande' => \true,
                 'token' => 'token123'
             ])
         );
@@ -836,6 +845,7 @@ class AuthControllerTest extends WebTestCase
         $admin->setPrenom('Admin');
         $admin->setNom('User');
         $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setUnite($this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true]));
         $this->em->persist($admin);
 
         $admin2 = new Utilisateur();
@@ -843,6 +853,7 @@ class AuthControllerTest extends WebTestCase
         $admin2->setPrenom('Admin2');
         $admin2->setNom('User2');
         $admin2->setRoles(['ROLE_ADMIN']);
+        $admin2->setUnite($this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true]));
         $this->em->persist($admin2);
 
         $this->em->flush();

@@ -56,6 +56,17 @@ class PlateformeControllerTest extends WebTestCase
         $anneeSaisie->setValeur("2025");
         $this->em->persist($anneeSaisie);
 
+        $labCat = new Categorie();
+        $labCat->setNom("Laboratoire");
+        $this->em->persist($labCat);
+
+        $unite = new Entite();
+        $unite->setNom("Unité de test");
+        $unite->setEmployeur(true);
+        $unite->setLaboratoire(false);
+        $unite->setCategorie($labCat);
+        $this->em->persist($unite);
+
         $user = new Utilisateur();
         $user->setNom('Test');
         $user->setPrenom('User');
@@ -63,6 +74,7 @@ class PlateformeControllerTest extends WebTestCase
         $user->setMdp($hasher->hashPassword($user, 'password'));
         $user->setAdmis(true);
         $user->setEmailValide(true);
+        $user->setUnite($unite);
         $this->em->persist($user);
 
         $admin = new Utilisateur();
@@ -72,6 +84,7 @@ class PlateformeControllerTest extends WebTestCase
         $admin->setMdp($hasher->hashPassword($admin, 'password'));
         $admin->setAdmis(true);
         $admin->setEmailValide(true);
+        $admin->setUnite($unite);
         $admin->setRoles(['ROLE_ADMIN']);
         $this->em->persist($admin);
 

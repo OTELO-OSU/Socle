@@ -20,11 +20,11 @@ class UtilisateurInscription
     #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
     private ?Plateforme $plateformeDemande = null;
 
-    #[ORM\ManyToOne(inversedBy: 'utilisateurInscriptions')]
-    private ?Entite $uniteDemande = null;
+    #[ORM\Column]
+    private ?bool $directeurUniteDemande = null;
 
     #[ORM\Column]
-    private ?bool $osuDemande = null;
+    private ?bool $directeurOsuDemande = null;
 
     public function getId(): ?int
     {
@@ -55,26 +55,26 @@ class UtilisateurInscription
         return $this;
     }
 
-    public function getUniteDemande(): ?Entite
+    public function isDirecteurUniteDemande(): ?bool
     {
-        return $this->uniteDemande;
+        return $this->directeurUniteDemande;
     }
 
-    public function setUniteDemande(?Entite $uniteDemande): static
+    public function setDirecteurUniteDemande(?bool $directeurUniteDemande): static
     {
-        $this->uniteDemande = $uniteDemande;
+        $this->directeurUniteDemande = $directeurUniteDemande;
 
         return $this;
     }
 
-    public function isOsuDemande(): ?bool
+    public function isDirecteurOsuDemande(): ?bool
     {
-        return $this->osuDemande;
+        return $this->directeurOsuDemande;
     }
 
-    public function setOsuDemande(bool $osuDemande): static
+    public function setDirecteurOsuDemande(bool $directeurOsuDemande): static
     {
-        $this->osuDemande = $osuDemande;
+        $this->directeurOsuDemande = $directeurOsuDemande;
 
         return $this;
     }

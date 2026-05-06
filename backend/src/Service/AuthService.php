@@ -99,14 +99,23 @@ class AuthService
         $user->setNom($dto->nom);
         $user->setMdp($this->passwordHasher->hashPassword($user, $dto->mdp));
 
+        // Vérifier que l'entité est une unité est qu'elle est valide
+        /** @var Entite|null $unite */
+        $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
+        if (!$unite || !$unite->isLaboratoire()) {
+            throw new Exception("L'unité spécifiée est invalide.", 400);
+        }
+
+        $user->setUnite($unite);
+
         $this->em->persist($user);
         $this->em->flush();
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setOsuDemande($dto->osu_demande === true ? true : false);
+        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
-        $userInscription->setUniteDemande($dto->unite_demande_id ? $this->em->getReference(Entite::class, $dto->unite_demande_id) : null);
+        $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
         $this->em->persist($userInscription);
         $this->em->flush();
 
@@ -157,32 +166,43 @@ class AuthService
 
         $user = new Utilisateur();
 
-        if ($inscriptionOAuth->getEmail()) $user->setEmail($inscriptionOAuth->getEmail());
-        else if ($dto->email) {
+        if ($inscriptionOAuth->getEmail()) {
+            // Vérifier si le mail n'est pas déjà utilisé
+            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+            if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+            $user->setEmail($inscriptionOAuth->getEmail());
+        } else {
             // Vérifier si le mail n'est pas déjà utilisé
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
             if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
             $user->setEmail($dto->email);
-        } else throw new Exception("L'email est obligatoire pour valider l'inscription OAuth.", 400);
+        }
 
         if ($inscriptionOAuth->getPrenom()) $user->setPrenom($inscriptionOAuth->getPrenom());
-        else if ($dto->prenom) $user->setPrenom($dto->prenom);
-        else throw new Exception("Le prénom est obligatoire pour valider l'inscription OAuth.", 400);
+        else $user->setPrenom($dto->prenom);
 
         if ($inscriptionOAuth->getNom()) $user->setNom($inscriptionOAuth->getNom());
-        else if ($dto->nom) $user->setNom($dto->nom);
-        else throw new Exception("Le nom est obligatoire pour valider l'inscription OAuth.", 400);
+        else $user->setNom($dto->nom);
 
         if ($inscriptionOAuth->getSubOrcid()) $user->setSubOrcid($inscriptionOAuth->getSubOrcid());
+
+        // Vérifier que l'entité est une unité est qu'elle est valide
+        /** @var Entite|null $unite */
+        $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
+        if (!$unite || !$unite->isLaboratoire()) {
+            throw new Exception("L'unité spécifiée est invalide.", 400);
+        }
+
+        $user->setUnite($unite);
 
         $this->em->persist($user);
         $this->em->flush();
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setOsuDemande($dto->osu_demande === true ? true : false);
+        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
-        $userInscription->setUniteDemande($dto->unite_demande_id ? $this->em->getReference(Entite::class, $dto->unite_demande_id) : null);
+        $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
 
         $this->em->persist($userInscription);
         $this->em->remove($inscriptionOAuth);
@@ -216,9 +236,6 @@ class AuthService
         }
     }
 
-    /**
-     * @return Cookie
-     */
     private function genererTokenCookieAvecRefreshToken(Utilisateur $user)
     {
         $token = $this->tokenManager->createFromPayload($user, [

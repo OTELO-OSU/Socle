@@ -30,8 +30,8 @@ class AdminService
                 "nom" => $user->getNom(),
                 "prenom" => $user->getPrenom(),
                 "plateformeDemande" => $user->getUtilisateurInscription()->getPlateformeDemande() ? $user->getUtilisateurInscription()->getPlateformeDemande()->getLastHistorique()->getNomOfficiel() : null,
-                "uniteDemande" => $user->getUtilisateurInscription()->getUniteDemande() ? $user->getUtilisateurInscription()->getUniteDemande()->getNom() : null,
-                "osuDemande" => $user->getUtilisateurInscription()->isOsuDemande(),
+                "directeurUniteDemande" => $user->getUtilisateurInscription()->isDirecteurUniteDemande(),
+                "directeurOsuDemande" => $user->getUtilisateurInscription()->isDirecteurOsuDemande(),
             ];
         }, $users);
     }
@@ -55,13 +55,13 @@ class AdminService
             $this->em->persist($personnelResponsablePlateforme);
         }
 
-        if ($userInscription->getUniteDemande()) {
-            $unite = $userInscription->getUniteDemande();
+        if ($userInscription->isDirecteurUniteDemande()) {
+            $unite = $userInscription->getUtilisateur()->getUnite();
             $unite->setDirecteur($user);
             $this->em->persist($unite);
         }
 
-        if ($userInscription->isOsuDemande()) {
+        if ($userInscription->isDirecteurOsuDemande()) {
             $user->setRoles(array_merge($user->getRoles(), ['ROLE_DIR_OSU']));
         }
 

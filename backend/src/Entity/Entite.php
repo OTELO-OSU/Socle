@@ -34,12 +34,6 @@ class Entite
     #[ORM\JoinColumn(nullable: false)]
     private ?Categorie $categorie = null;
 
-    /**
-     * @var Collection<int, UtilisateurInscription>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurInscription::class, mappedBy: 'uniteDemande')]
-    private Collection $utilisateurInscriptions;
-
     #[ORM\ManyToOne(inversedBy: 'entites')]
     private ?Utilisateur $directeur = null;
 
@@ -73,14 +67,20 @@ class Entite
     #[ORM\OneToMany(targetEntity: FinancementInstrument::class, mappedBy: 'financeur')]
     private Collection $financementInstruments;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'unite')]
+    private Collection $utilisateurs;
+
     public function __construct()
     {
-        $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
         $this->plateformeHistoriqueTutelles = new ArrayCollection();
         $this->posteFuturs = new ArrayCollection();
         $this->contributionTutelles = new ArrayCollection();
         $this->financementInstruments = new ArrayCollection();
+        $this->utilisateurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,36 +163,6 @@ class Entite
     public function setCategorie(?Categorie $categorie): static
     {
         $this->categorie = $categorie;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UtilisateurInscription>
-     */
-    public function getUtilisateurInscriptions(): Collection
-    {
-        return $this->utilisateurInscriptions;
-    }
-
-    public function addUtilisateurInscription(UtilisateurInscription $utilisateurInscription): static
-    {
-        if (!$this->utilisateurInscriptions->contains($utilisateurInscription)) {
-            $this->utilisateurInscriptions->add($utilisateurInscription);
-            $utilisateurInscription->setUniteDemande($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurInscription(UtilisateurInscription $utilisateurInscription): static
-    {
-        if ($this->utilisateurInscriptions->removeElement($utilisateurInscription)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurInscription->getUniteDemande() === $this) {
-                $utilisateurInscription->setUniteDemande(null);
-            }
-        }
 
         return $this;
     }
@@ -353,6 +323,36 @@ class Entite
             // set the owning side to null (unless already changed)
             if ($financementInstrument->getFinanceur() === $this) {
                 $financementInstrument->setFinanceur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getUtilisateurs(): Collection
+    {
+        return $this->utilisateurs;
+    }
+
+    public function addUtilisateur(Utilisateur $utilisateur): static
+    {
+        if (!$this->utilisateurs->contains($utilisateur)) {
+            $this->utilisateurs->add($utilisateur);
+            $utilisateur->setUnite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisateur(Utilisateur $utilisateur): static
+    {
+        if ($this->utilisateurs->removeElement($utilisateur)) {
+            // set the owning side to null (unless already changed)
+            if ($utilisateur->getUnite() === $this) {
+                $utilisateur->setUnite(null);
             }
         }
 

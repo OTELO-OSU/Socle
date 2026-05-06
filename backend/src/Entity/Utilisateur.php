@@ -108,6 +108,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'utilisateur')]
     private Collection $utilisateurEmploiTypes;
 
+    #[ORM\Column]
+    private bool $attenteApprobationDU = false;
+
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Entite $unite = null;
+
     public function __construct()
     {
         $this->emailValide = false;
@@ -482,6 +489,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
                 $utilisateurEmploiType->setUtilisateur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isAttenteApprobationDU(): bool
+    {
+        return $this->attenteApprobationDU;
+    }
+
+    public function setAttenteApprobationDU(bool $attenteApprobationDU): static
+    {
+        $this->attenteApprobationDU = $attenteApprobationDU;
+
+        return $this;
+    }
+
+    public function getUnite(): ?Entite
+    {
+        return $this->unite;
+    }
+
+    public function setUnite(?Entite $unite): static
+    {
+        $this->unite = $unite;
 
         return $this;
     }
