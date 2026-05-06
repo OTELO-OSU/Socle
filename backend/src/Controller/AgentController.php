@@ -7,8 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class AgentController extends AbstractController
 {
@@ -21,5 +19,24 @@ final class AgentController extends AbstractController
         $search = $request->query->get('search', null);
         $utilisateurs = $this->utilisateurService->getAgentParPage($page, $search);
         return $this->json($utilisateurs, 200, []);
+    }
+
+    #[Route('/agent', methods: ['POST'])]
+    public function creationUtilisateurParResponsable(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["corps"]) || !isset($data["grade"])) {
+            return $this->json(['message' => 'Champs requis manquants'], 400);
+        }
+        $utilisateur = $this->utilisateurService->creationUtilisateurParResponsable(
+            $data['nom'],
+            $data['prenom'],
+            $data['email'],
+            $data['employeur'],
+            $data['unite'],
+            $data['corps'],
+            $data['grade']
+        );
+        return $this->json(['message' => 'Soumission envoyée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }
 }

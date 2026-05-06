@@ -17,19 +17,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list'])]
     private ?string $email = null;
 
     #[Ignore]

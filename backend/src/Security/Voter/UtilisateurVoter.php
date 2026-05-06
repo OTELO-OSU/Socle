@@ -11,13 +11,15 @@ final class UtilisateurVoter extends Voter
 {
     public const GetEnAttenteDeValidation = 'GetEnAttenteDeValidation';
     public const APPROUVER = 'APPROUVER';
+    public const SOUMETTRE_AU_DU = 'SOUMETTRE_AU_DU';
+    public const SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE = 'SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         $a = in_array($attribute, [self::APPROUVER])
             && $subject instanceof \App\Entity\Utilisateur;
 
-        $b = in_array($attribute, [self::GetEnAttenteDeValidation])
+        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE])
             && $subject === Utilisateur::class;
 
         return $a || $b;
@@ -25,6 +27,7 @@ final class UtilisateurVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
+        /** @var \App\Entity\Utilisateur $user */
         $user = $token->getUser();
 
         if (!$user instanceof UserInterface) {
@@ -36,13 +39,46 @@ final class UtilisateurVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                return false;
                 break;
             case self::GetEnAttenteDeValidation:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                return false;
+                break;
+            case self::SOUMETTRE_AU_DU:
+                $plateformeHistorique = $user->getPlateformeHistoriquePersonnels();
+                foreach ($plateformeHistorique as $ph) {
+                    if ($ph->isResponsableScientifique() || $ph->isResponsableTechnique() || $ph->isResponsablePlateforme()) {
+                        $plateformeHisto = $ph->getPlateformeHistorique();
+                        $plateformeMere = $plateformeHisto->getPlateforme();
+                        $lastVersion = $plateformeMere->getLastHistorique();
+                        if ($plateformeHisto->getId() === $lastVersion->getId()) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+            case self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE:
+                $plateformeHistorique = $user->getPlateformeHistoriquePersonnels();
+                foreach ($plateformeHistorique as $ph) {
+                    if ($ph->isResponsableScientifique() || $ph->isResponsableTechnique() || $ph->isResponsablePlateforme()) {
+                        $plateformeHisto = $ph->getPlateformeHistorique();
+                        $plateformeMere = $plateformeHisto->getPlateforme();
+                        $lastVersion = $plateformeMere->getLastHistorique();
+                        if ($plateformeHisto->getId() === $lastVersion->getId()) {
+                            // On fait la liste des personnels dans cette unité pour vérifier si l'un est dans l'uar
+                            $toutPersonnel = $plateformeHisto->getPlateformeHistoriquePersonnels();
+                            foreach ($toutPersonnel as $personnel) {
+                                if ($personnel->isResponsableScientifique() || $personnel->isResponsableTechnique() || $personnel->isResponsablePlateforme()) {
+                                    $codeUnite = $personnel->getUtilisateur()->getUnite()->getCodeUnite();
+                                    if ($codeUnite && str_starts_with($codeUnite, 'UAR')) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 break;
         }
 
