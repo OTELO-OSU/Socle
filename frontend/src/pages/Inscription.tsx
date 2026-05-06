@@ -1,10 +1,12 @@
-import { Box, Button, Card, FormControl, FormHelperText, FormLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, FormControl, FormHelperText, FormLabel, InputLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
 import { useNavigate, Link as RouterLink, useSearchParams } from "react-router-dom";
 import { inscription, inscriptionSsMdp } from "../services/authService";
+import { DictionnaireContext } from "../context/dictionnaireContext";
+import { formatUniteLabel } from "../services/formatLabelService";
 
 export default function Inscription() {
     const [prenomError, setPrenomError] = useState(false);
@@ -13,6 +15,9 @@ export default function Inscription() {
     const [nomErrorMessage, setNomErrorMessage] = useState('');
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [unite, setUnite] = useState('');
+    const [uniteError, setUniteError] = useState(false);
+    const [uniteErrorMessage, setUniteErrorMessage] = useState('');
     const [role, setRole] = useState('');
     const [roleError, setRoleError] = useState(false);
     const [roleErrorMessage, setRoleErrorMessage] = useState('');
@@ -27,6 +32,7 @@ export default function Inscription() {
     const trigger = snackbarContext?.trigger;
     const token = searchParams.get("token");
     const ssMdp = searchParams.get("ssmdp");
+    const dictionnaireContext = useContext(DictionnaireContext);
 
     const prefill = useMemo(() => {
         const payload = searchParams.get("payload");
@@ -58,7 +64,8 @@ export default function Inscription() {
         const confirmMdp = data.get('confirmMdp') as string;
         const prenom = data.get('prenom') as string;
         const nom = data.get('nom') as string;
-        const selectedRole = data.get('role') as string;
+        const selectedRole = parseInt(data.get('role') as string);
+        const selectedUnite = parseInt(data.get('unite') as string);
 
         let hasError = false;
 
@@ -91,6 +98,15 @@ export default function Inscription() {
             setEmailErrorMessage('');
         }
 
+        if (!selectedUnite) {
+            setUniteError(true);
+            setUniteErrorMessage('Unité requise');
+            hasError = true;
+        } else {
+            setUniteError(false);
+            setUniteErrorMessage('');
+        }
+
         if (!selectedRole) {
             setRoleError(true);
             setRoleErrorMessage('Rôle requis');
@@ -99,6 +115,7 @@ export default function Inscription() {
             setRoleError(false);
             setRoleErrorMessage('');
         }
+
 
         if (!ssMdpBool) {
             if (!mdp) {
@@ -136,13 +153,13 @@ export default function Inscription() {
 
         try {
             if (!ssMdpBool) {
-                const { data } = await inscription(prenom, nom, email, mdp, selectedRole);
+                const { data } = await inscription(prenom, nom, email, mdp, selectedRole, selectedUnite);
                 snackbarContext?.trigger({
                     message: data.message,
                     couleur: 'success',
                 });
             } else {
-                const { data } = await inscriptionSsMdp(prenom, nom, email, selectedRole, token);
+                const { data } = await inscriptionSsMdp(prenom, nom, email, selectedRole, token, selectedUnite);
                 snackbarContext?.trigger({
                     message: data.message,
                     couleur: 'success',
@@ -225,9 +242,21 @@ export default function Inscription() {
                             color={emailError ? 'error' : 'primary'}
                         />
                     </FormControl>
+                    <FormControl fullWidth error={uniteError}>
+                        <InputLabel id="unite-label">Unité</InputLabel>
+                        <Select label="Unité" labelId="unite-label" id="unite" value={unite} onChange={(e) => setUnite(e.target.value)} name="unite">
+                            {dictionnaireContext?.unite.map((unite) => (
+                                <MenuItem key={unite.id} value={unite.id}>
+                                    {formatUniteLabel(unite)}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <FormHelperText>{uniteErrorMessage}</FormHelperText>
+                    </FormControl>
                     <FormControl fullWidth error={roleError}>
-                        <Select id="role" value={role} onChange={(e) => setRole(e.target.value)} name="role" displayEmpty>
-                            <MenuItem value="">Sélectionner un rôle</MenuItem>
+                        <InputLabel id="role-label">Rôle</InputLabel>
+                        <Select label="Rôle" labelId="role-label" id="role" value={role} onChange={(e) => setRole(e.target.value)} name="role">
+                            <MenuItem value="2">Directeur d'Unité</MenuItem>
                             <MenuItem value="3">Directeur OSU</MenuItem>
                         </Select>
                         <FormHelperText>{roleErrorMessage}</FormHelperText>

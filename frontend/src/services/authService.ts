@@ -23,11 +23,15 @@ export async function refreshSession() {
     return { data, status };
 }
 
-export async function inscription(prenom: string, nom: string, email: string, mdp: string, role: string) {
+export async function inscription(prenom: string, nom: string, email: string, mdp: string, role: number, unite_id: number) {
     let rolesValue;
-    if (role === '3') {
+    if (role === 3) {
         rolesValue = {
-            osu_demande: true
+            directeur_osu_demande: true
+        };
+    } else if (role === 2) {
+        rolesValue = {
+            directeur_unite_demande: true
         };
     }
     const {data, status} = await symfony.post('/inscription', {
@@ -35,17 +39,22 @@ export async function inscription(prenom: string, nom: string, email: string, md
         nom,
         email,
         mdp,
+        unite_id,
         ...rolesValue
     });
 
     return { data, status };
 }
 
-export async function inscriptionSsMdp(prenom: string, nom: string, email: string, role: string, token: string | null) {
+export async function inscriptionSsMdp(prenom: string, nom: string, email: string, role: number, token: string | null, unite_id: number) {
     let rolesValue;
-    if (role === '3') {
+    if (role === 3) {
         rolesValue = {
-            osu_demande: true
+            directeur_osu_demande: true
+        };
+    } else if (role === 2) {
+        rolesValue = {
+            directeur_unite_demande: true
         };
     }
     const {data, status} = await symfony.post('/inscription?ssmdp=true', {
@@ -53,6 +62,7 @@ export async function inscriptionSsMdp(prenom: string, nom: string, email: strin
         nom,
         email,
         token,
+        unite_id,
         ...rolesValue
     });
 
