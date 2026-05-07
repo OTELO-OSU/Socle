@@ -113,6 +113,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $attenteApprobationDU = false;
 
+    #[Groups(['utilisateur:list'])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Entite $unite = null;

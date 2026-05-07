@@ -15,14 +15,14 @@ class Entite
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['unite:list', 'employeur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
     private ?int $id = null;
 
-    #[Groups(['unite:list', 'employeur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['unite:list', 'employeur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
@@ -77,7 +77,7 @@ class Entite
     #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'unite')]
     private Collection $utilisateurs;
 
-    #[Groups(['unite:list'])]
+    #[Groups(['unite:list', 'utilisateur:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codeUnite = null;
 
