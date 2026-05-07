@@ -6,18 +6,22 @@ use App\Repository\CnuRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CnuRepository::class)]
 class Cnu
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["cnu:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(["cnu:list"])]
     #[ORM\Column]
     private ?int $numero = null;
 
+    #[Groups(["cnu:list"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 

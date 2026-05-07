@@ -56,4 +56,11 @@ final class DictionnaireController extends AbstractController
         $baps = $this->ds->getBaps();
         return $this->json($baps, 200, [], ['groups' => 'bap:list']);
     }
+
+    #[Route('/dictionnaire/cnus', methods: ['GET'])]
+    public function getCnus(): Response
+    {
+        $cnus = $this->ds->getCnu();
+        return $this->json($cnus, 200, [], ['groups' => 'cnu:list']);
+    }
 }

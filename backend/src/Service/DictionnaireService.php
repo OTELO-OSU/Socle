@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Bap;
+use App\Entity\Cnu;
 use App\Entity\Corps;
 use App\Entity\Entite;
 use App\Entity\TypeContrat;
@@ -43,5 +44,10 @@ class DictionnaireService
     function getBaps(): array
     {
         return $this->em->getRepository(Bap::class)->findBy([], ["lettre" => "ASC"]);
+    }
+
+    function getCnu(): array
+    {
+        return $this->em->getRepository(Cnu::class)->findBy([], ["numero" => "ASC"]);
     }
 }
