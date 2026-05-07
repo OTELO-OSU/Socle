@@ -13,6 +13,6 @@ class DictionnaireService
 
     function getUnite(): array
     {
-        return $this->em->getRepository(Entite::class)->findBy(["laboratoire" => true]);
+        return $this->em->getRepository(Entite::class)->findBy(["laboratoire" => true], ["nom" => "ASC"]);
     }
 }
