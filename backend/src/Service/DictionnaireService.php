@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Corps;
 use App\Entity\Entite;
 use App\Entity\TypeContrat;
+use App\Entity\Ville;
 use Doctrine\ORM\EntityManagerInterface;
 
 class DictionnaireService
@@ -26,5 +27,10 @@ class DictionnaireService
     function getTypeContrat(): array
     {
         return $this->em->getRepository(TypeContrat::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getVille(): array
+    {
+        return $this->em->getRepository(Ville::class)->findBy([], ["nom" => "ASC"]);
     }
 }
