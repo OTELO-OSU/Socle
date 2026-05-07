@@ -45,18 +45,11 @@ class Corps
     #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'corps')]
     private Collection $posteFuturs;
 
-    /**
-     * @var Collection<int, CorpsBapEmploiType>
-     */
-    #[ORM\OneToMany(targetEntity: CorpsBapEmploiType::class, mappedBy: 'corps')]
-    private Collection $corpsBapEmploiTypes;
-
     public function __construct()
     {
         $this->grades = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
         $this->posteFuturs = new ArrayCollection();
-        $this->corpsBapEmploiTypes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -166,36 +159,6 @@ class Corps
             // set the owning side to null (unless already changed)
             if ($posteFutur->getCorps() === $this) {
                 $posteFutur->setCorps(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CorpsBapEmploiType>
-     */
-    public function getCorpsBapEmploiTypes(): Collection
-    {
-        return $this->corpsBapEmploiTypes;
-    }
-
-    public function addCorpsBapEmploiType(CorpsBapEmploiType $corpsBapEmploiType): static
-    {
-        if (!$this->corpsBapEmploiTypes->contains($corpsBapEmploiType)) {
-            $this->corpsBapEmploiTypes->add($corpsBapEmploiType);
-            $corpsBapEmploiType->setCorps($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCorpsBapEmploiType(CorpsBapEmploiType $corpsBapEmploiType): static
-    {
-        if ($this->corpsBapEmploiTypes->removeElement($corpsBapEmploiType)) {
-            // set the owning side to null (unless already changed)
-            if ($corpsBapEmploiType->getCorps() === $this) {
-                $corpsBapEmploiType->setCorps(null);
             }
         }
 

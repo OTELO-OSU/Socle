@@ -143,28 +143,18 @@ class PlateformeControllerTest extends WebTestCase
         $emploiType1 = new EmploiType();
         $emploiType1->setNom("Emploi Type 1");
         $emploiType1->setAcronyme("ET1");
+        $emploiType1->addBap($bap1);
         $this->em->persist($emploiType1);
 
         $emploiType2 = new EmploiType();
         $emploiType2->setNom("Emploi Type 2");
         $emploiType2->setAcronyme("ET2");
+        $emploiType2->addBap($bap2);
         $this->em->persist($emploiType2);
 
         $corps = new Corps();
         $corps->setNom("Corps 1");
         $this->em->persist($corps);
-
-        $pivot1 = new CorpsBapEmploiType();
-        $pivot1->setBap($bap1);
-        $pivot1->setEmploiType($emploiType1);
-        $pivot1->setCorps($corps);
-        $this->em->persist($pivot1);
-
-        $pivot2 = new CorpsBapEmploiType();
-        $pivot2->setBap($bap2);
-        $pivot2->setEmploiType($emploiType2);
-        $pivot2->setCorps($corps);
-        $this->em->persist($pivot2);
 
         $this->em->flush();
     }
@@ -324,11 +314,8 @@ class PlateformeControllerTest extends WebTestCase
         $entiteIds = array_column($entites, 'id');
 
         $emploiType = $this->em->createQueryBuilder()
-            ->select('e.id')
-            ->from(CorpsBapEmploiType::class, 'c')
-            ->innerJoin('c.emploiType', 'e')
-            ->where('c.corps = :corps')
-            ->setParameter('corps', $corps)
+            ->select('et.id')
+            ->from(EmploiType::class, 'et')
             ->setMaxResults(2)
             ->getQuery()
             ->getResult();

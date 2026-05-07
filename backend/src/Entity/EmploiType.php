@@ -6,26 +6,31 @@ use App\Repository\EmploiTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: EmploiTypeRepository::class)]
 class EmploiType
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["bap:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(["bap:list"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[Groups(["bap:list"])]
     #[ORM\Column(length: 255)]
     private ?string $acronyme = null;
 
     /**
-     * @var Collection<int, CorpsBapEmploiType>
+     * @var Collection<int, Bap>
      */
-    #[ORM\OneToMany(targetEntity: CorpsBapEmploiType::class, mappedBy: 'emploiType')]
-    private Collection $corpsBapEmploiTypes;
+    #[ORM\ManyToMany(targetEntity: Bap::class)]
+    #[ORM\JoinTable(name: 'bap_emploi_type')]
+    private Collection $baps;
 
     /**
      * @var Collection<int, UtilisateurEmploiType>
@@ -41,7 +46,7 @@ class EmploiType
 
     public function __construct()
     {
-        $this->corpsBapEmploiTypes = new ArrayCollection();
+        $this->baps = new ArrayCollection();
         $this->utilisateurEmploiTypes = new ArrayCollection();
         $this->posteFuturEmploiTypes = new ArrayCollection();
     }
@@ -76,29 +81,28 @@ class EmploiType
     }
 
     /**
-     * @return Collection<int, CorpsBapEmploiType>
+     * @return Collection<int, Bap>
      */
-    public function getCorpsBapEmploiTypes(): Collection
+    public function getBaps(): Collection
     {
-        return $this->corpsBapEmploiTypes;
+        return $this->baps;
     }
 
-    public function addCorpsBapEmploiType(CorpsBapEmploiType $corpsBapEmploiType): static
+    public function addBap(Bap $bap): static
     {
-        if (!$this->corpsBapEmploiTypes->contains($corpsBapEmploiType)) {
-            $this->corpsBapEmploiTypes->add($corpsBapEmploiType);
-            $corpsBapEmploiType->setEmploiType($this);
+        if (!$this->baps->contains($bap)) {
+            $this->baps->add($bap);
         }
 
         return $this;
     }
 
-    public function removeCorpsBapEmploiType(CorpsBapEmploiType $corpsBapEmploiType): static
+    public function removeBap(Bap $bap): static
     {
-        if ($this->corpsBapEmploiTypes->removeElement($corpsBapEmploiType)) {
+        if ($this->baps->removeElement($bap)) {
             // set the owning side to null (unless already changed)
-            if ($corpsBapEmploiType->getEmploiType() === $this) {
-                $corpsBapEmploiType->setEmploiType(null);
+            if ($bap->getEmploiTypes()->contains($this)) {
+                $bap->getEmploiTypes()->removeElement($this);
             }
         }
 

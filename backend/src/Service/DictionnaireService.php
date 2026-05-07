@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Bap;
 use App\Entity\Corps;
 use App\Entity\Entite;
 use App\Entity\TypeContrat;
@@ -37,5 +38,10 @@ class DictionnaireService
     function getVille(): array
     {
         return $this->em->getRepository(Ville::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getBaps(): array
+    {
+        return $this->em->getRepository(Bap::class)->findBy([], ["lettre" => "ASC"]);
     }
 }
