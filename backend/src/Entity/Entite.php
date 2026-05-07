@@ -15,14 +15,14 @@ class Entite
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['unite:list'])]
+    #[Groups(['unite:list, employeur:list'])]
     private ?int $id = null;
 
-    #[Groups(['unite:list'])]
+    #[Groups(['unite:list', 'employeur:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['unite:list'])]
+    #[Groups(['unite:list', 'employeur:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
@@ -36,7 +36,6 @@ class Entite
     private ?bool $laboratoire = null;
 
     #[ORM\ManyToOne(inversedBy: 'entites')]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Categorie $categorie = null;
 
     #[ORM\ManyToOne(inversedBy: 'entites')]
