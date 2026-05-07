@@ -43,13 +43,23 @@ export default function PlateformeAdmin() {
         const data = new FormData(event.currentTarget);
         const nom = data.get('nom') as string;
 
-        const { message, plateforme_id } = await creerPlateforme(nom);
-        setDialogOpen(false);
-        snackbar?.trigger({
-            message: message,
-            couleur: "success",
-        })
-        navigation(`/plateforme/edition?id=${plateforme_id}`);
+        try {
+            const { message, plateforme_id } = await creerPlateforme(nom);
+            setDialogOpen(false);
+            snackbar?.trigger({
+                message: message,
+                couleur: "success",
+            })
+            navigation(`/plateforme/edition?id=${plateforme_id}`);
+        } catch (error) {
+            const errorAxios = error as AxiosError<ApiError>;
+            snackbar?.trigger({
+                message: errorAxios.response!.data.message,
+                couleur: "error",
+            })
+
+        }
+
     }
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
