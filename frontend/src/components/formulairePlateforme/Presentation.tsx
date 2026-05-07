@@ -8,7 +8,7 @@ import { RHFSelect } from "../RHFTextSelect";
 export function Presentation() {
     const { control } = useFormContext();
 
-    const { ville, laboratoire, tutelle } = useContext(DictionnaireContext);
+    const { villeOptions, uniteOptions, tutelle } = useContext(DictionnaireContext);
 
     return (
         <>
@@ -41,7 +41,7 @@ export function Presentation() {
                         label="Site web"
                         placeholder="<https://sarm.cnrs.fr/>"
                     />
-                    <RHFSelect name="ville" control={control} id="ville" label="Ville" items={ville} sx={{ mt: 2 }} />
+                    <RHFSelect name="ville" control={control} id="ville" label="Ville" items={villeOptions} sx={{ mt: 2 }} />
                     <RHFTextField
                         sx={{ mt: 2 }}
                         name="urlLogo"
@@ -65,7 +65,7 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFSelect name="laboratoireOperateur" control={control} label="Laboratoire opérateur" items={laboratoire} />
+                    <RHFSelect name="laboratoireOperateur" control={control} label="Laboratoire opérateur" items={uniteOptions} />
                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                         <RHFSelect name="tutellePrincipale" control={control} label="Tutelle principale" multiple items={tutelle} />
                         <RHFSelect name="tutelleSecondaire" control={control} label="Tutelle secondaire" multiple items={tutelle} />

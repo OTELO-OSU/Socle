@@ -1,40 +1,46 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
-import { fetchUnites, type Unite } from '../services/dictionnaireService';
+import { fetchBaps, fetchCnus, fetchCorps, fetchEmployeurs, fetchSectionCnrs, fetchTypeContrats, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type SectionCnrs, type TypeContrat, type Unite, type Ville } from '../services/dictionnaireService';
+import { formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
+
+type SelectOption = {
+    value: string | number;
+    label: string;
+};
 
 export type DictionnaireType = {
-    ville: {
-        value: string;
-        label: string;
-    }[],
-    laboratoire: {
-        value: string;
-        label: string;
-    }[],
+    ville: Ville[],
+    villeOptions: SelectOption[],
     tutelle: {
         value: string;
         label: string;
     }[],
     unite: Unite[];
+    uniteOptions: SelectOption[],
+    bap: Bap[];
+    sectionCnrs: SectionCnrs[];
+    typeContrat: TypeContrat[];
+    cnu: Cnu[];
+    employeur: Employeur[];
+    corps: Corps[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
-    ville: [
-        { value: 'Paris', label: 'Paris' },
-        { value: 'Lyon', label: 'Lyon' },
-        { value: 'Marseille', label: 'Marseille' },
-    ],
-    laboratoire: [
-        { value: 'CNRS', label: 'CNRS' },
-        { value: 'INSERM', label: 'INSERM' },
-        { value: 'INRAE', label: 'INRAE' },
-    ],
+    ville: [],
+    villeOptions: [],
     tutelle: [
         { value: 'Université de Paris', label: 'Université de Paris' },
         { value: 'Université de Lyon', label: 'Université de Lyon' },
         { value: 'Université de Marseille', label: 'Université de Marseille' },
     ],
     unite: [],
+    uniteOptions: [],
+    bap: [],
+    sectionCnrs: [],
+    typeContrat: [],
+    cnu: [],
+    employeur: [],
+    corps: [],
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -43,17 +49,36 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
     useEffect(() => {
         let isMounted = true;
 
-        const loadUnites = async () => {
+        const loadDictionnaire = async () => {
             const unite = await fetchUnites();
+            const ville = await fetchVilles();
+            const corps = await fetchCorps();
+            const bap = await fetchBaps();
+            const sectionCnrs = await fetchSectionCnrs();
+            const typeContrat = await fetchTypeContrats();
+            const cnu = await fetchCnus();
+            const employeur = await fetchEmployeurs();
             if (isMounted) {
+                const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
+                const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
+
                 setDictionnaire((current) => ({
                     ...current,
                     unite,
+                    ville,
+                    villeOptions,
+                    uniteOptions,
+                    corps,
+                    bap,
+                    sectionCnrs,
+                    typeContrat,
+                    cnu,
+                    employeur,
                 }));
             }
         };
 
-        loadUnites();
+        loadDictionnaire();
 
         return () => {
             isMounted = false;
