@@ -29,7 +29,6 @@ class EmploiType
      * @var Collection<int, Bap>
      */
     #[ORM\ManyToMany(targetEntity: Bap::class)]
-    #[ORM\JoinTable(name: 'bap_emploi_type')]
     private Collection $baps;
 
     /**
