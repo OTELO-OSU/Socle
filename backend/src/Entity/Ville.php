@@ -13,6 +13,7 @@ class Ville
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(['ville:list'])]
     #[ORM\Column]
     private ?int $id = null;
 
