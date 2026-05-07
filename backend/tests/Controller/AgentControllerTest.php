@@ -4,14 +4,13 @@ namespace App\Tests\Controller;
 
 use App\Entity\Categorie;
 use App\Entity\Corps;
-use App\Entity\CorpsGrade;
 use App\Entity\Entite;
 use App\Entity\Grade;
 use App\Entity\Plateforme;
 use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeHistoriquePersonnel;
+use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
-use App\Entity\UtilisateurInscription;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -137,6 +136,10 @@ class AgentControllerTest extends WebTestCase
         $plateformeHisto->setAnnee(2024);
         $this->em->persist($plateformeHisto);
 
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Test TypeContrat');
+        $this->em->persist($typeContrat);
+
         $this->testPlateforme = new Plateforme();
         $this->testPlateforme->setPseudoId('Test Plateforme');
         $this->em->persist($this->testPlateforme);
@@ -165,7 +168,8 @@ class AgentControllerTest extends WebTestCase
             'employeur' => $this->employeur->getId(),
             'unite' => $this->unite->getId(),
             'corps' => $this->corps->getId(),
-            'grade' => $this->grade->getId()
+            'grade' => $this->grade->getId(),
+            'typeContrat' => $typeContrat->getId()
         ];
     }
 
