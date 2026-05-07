@@ -33,7 +33,7 @@ class AgentService
 
         $qb = $conn->createQueryBuilder();
         $qb
-            ->select('u.id', 'u.nom, u.prenom, u.email')
+            ->select('u.id')
             ->from('utilisateur', 'u');
 
         if ($search) {
@@ -52,6 +52,8 @@ class AgentService
 
         $resQb = $qb->executeQuery()->fetchAllAssociative();
 
+        $agents = $this->em->getRepository(Utilisateur::class)->findBy(['id' => array_column($resQb, 'id')]);
+
         $countQb = $conn->createQueryBuilder();
         $countQb
             ->select('COUNT(DISTINCT u.id)')
@@ -69,7 +71,7 @@ class AgentService
         $total = (int) $countQb->executeQuery()->fetchOne();
 
         return [
-            'agents' => $resQb,
+            'agents' => $agents,
             'page' => $page,
             'pages_total' => ceil($total / self::AGENT_PAR_PAGE),
             'total' => $total

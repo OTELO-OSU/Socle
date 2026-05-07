@@ -7,3 +7,20 @@ export const formatUniteLabel = (unite: Unite) => {
     if (unite.codeUnite) str += ` (${unite.codeUnite})`
     return str
 }
+
+export const typePersonnelLabel = (corps: string | null | undefined, typeContrat: string | null | undefined) => {
+    let label = ""
+    const listeIt = ["IR", "IE", "AI", "T", "AJT"];
+    const listeChercheur = ["DR", "PR", "CR", "PHYS", "PHYS-A", "ASTRO", "ASTRO-A"];
+    if (listeIt.includes(corps || "")) {
+        label += "IT"
+    }
+    if (listeChercheur.includes(corps || "")) {
+        label += "Chercheur"
+    }
+
+    if (typeContrat) {
+        label += ` ${typeContrat}`
+    }
+    return label
+}

@@ -18,7 +18,7 @@ final class AgentController extends AbstractController
         $page = max(1, (int)$request->query->get('page', 1));
         $search = $request->query->get('search', null);
         $utilisateurs = $this->utilisateurService->getAgentParPage($page, $search);
-        return $this->json($utilisateurs, 200, []);
+        return $this->json($utilisateurs, 200, [], ['groups' => 'utilisateur:list']);
     }
 
     #[Route('/agent/en-attente-du-du', methods: ['GET'])]

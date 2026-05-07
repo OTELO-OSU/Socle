@@ -31,10 +31,6 @@ class PlateformeHistoriquePersonnel
     #[ORM\Column(name: 'responsable_technique')]
     private ?bool $responsableTechnique = false;
 
-    #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[ORM\JoinColumn(name: 'type_contrat_id', referencedColumnName: 'id', nullable: true)]
-    private ?TypeContrat $typeContrat = null;
-
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
     private ?int $quotite = 0;
@@ -94,18 +90,6 @@ class PlateformeHistoriquePersonnel
     public function setResponsableTechnique(bool $responsableTechnique): static
     {
         $this->responsableTechnique = $responsableTechnique;
-
-        return $this;
-    }
-
-    public function getTypeContrat(): ?TypeContrat
-    {
-        return $this->typeContrat;
-    }
-
-    public function setTypeContrat(?TypeContrat $typeContrat): static
-    {
-        $this->typeContrat = $typeContrat;
 
         return $this;
     }

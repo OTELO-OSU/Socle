@@ -84,9 +84,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
     private Collection $entites;
 
+    #[Groups(['utilisateur:list'])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Corps $corps = null;
 
+    #[Groups(['utilisateur:list'])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Grade $grade = null;
 
@@ -117,6 +119,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(inversedBy: 'employe')]
     private ?Entite $employeur = null;
+
+    #[Groups(['utilisateur:list'])]
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    private ?TypeContrat $typeContrat = null;
 
     public function __construct()
     {
@@ -528,6 +534,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmployeur(?Entite $employeur): static
     {
         $this->employeur = $employeur;
+
+        return $this;
+    }
+
+    public function getTypeContrat(): ?TypeContrat
+    {
+        return $this->typeContrat;
+    }
+
+    public function setTypeContrat(?TypeContrat $typeContrat): static
+    {
+        $this->typeContrat = $typeContrat;
 
         return $this;
     }

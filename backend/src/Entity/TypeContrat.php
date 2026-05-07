@@ -13,21 +13,25 @@ class TypeContrat
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(['utilisateur:list'])]
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['utilisateur:list'])]
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
     /**
-     * @var Collection<int, PlateformeHistoriquePersonnel>
+     * @var Collection<int, Utilisateur>
      */
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'typeContrat')]
-    private Collection $plateformeHistoriquePersonnels;
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'typeContrat')]
+    private Collection $utilisateurs;
 
     public function __construct()
     {
-        $this->plateformeHistoriquePersonnels = new ArrayCollection();
+        $this->utilisateurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -48,29 +52,29 @@ class TypeContrat
     }
 
     /**
-     * @return Collection<int, PlateformeHistoriquePersonnel>
+     * @return Collection<int, Utilisateur>
      */
-    public function getPlateformeHistoriquePersonnels(): Collection
+    public function getUtilisateurs(): Collection
     {
-        return $this->plateformeHistoriquePersonnels;
+        return $this->utilisateurs;
     }
 
-    public function addPlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    public function addUtilisateur(Utilisateur $utilisateur): static
     {
-        if (!$this->plateformeHistoriquePersonnels->contains($plateformeHistoriquePersonnel)) {
-            $this->plateformeHistoriquePersonnels->add($plateformeHistoriquePersonnel);
-            $plateformeHistoriquePersonnel->setTypeContrat($this);
+        if (!$this->utilisateurs->contains($utilisateur)) {
+            $this->utilisateurs->add($utilisateur);
+            $utilisateur->setTypeContrat($this);
         }
 
         return $this;
     }
 
-    public function removePlateformeHistoriquePersonnel(PlateformeHistoriquePersonnel $plateformeHistoriquePersonnel): static
+    public function removeUtilisateur(Utilisateur $utilisateur): static
     {
-        if ($this->plateformeHistoriquePersonnels->removeElement($plateformeHistoriquePersonnel)) {
+        if ($this->utilisateurs->removeElement($utilisateur)) {
             // set the owning side to null (unless already changed)
-            if ($plateformeHistoriquePersonnel->getTypeContrat() === $this) {
-                $plateformeHistoriquePersonnel->setTypeContrat(null);
+            if ($utilisateur->getTypeContrat() === $this) {
+                $utilisateur->setTypeContrat(null);
             }
         }
 

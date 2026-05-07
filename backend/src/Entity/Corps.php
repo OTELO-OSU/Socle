@@ -6,18 +6,22 @@ use App\Repository\CorpsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CorpsRepository::class)]
 class Corps
 {
     #[ORM\Id]
+    #[Groups(['utilisateur:list'])]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['utilisateur:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[Groups(['utilisateur:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
