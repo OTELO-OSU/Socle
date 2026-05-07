@@ -1,6 +1,6 @@
-import { Box, Button, Chip, Dialog, TextField, Typography } from "@mui/material";
+import { Box, Button, Chip, Dialog, Link, Stack, TextField, Typography } from "@mui/material";
 import Account from '@mui/icons-material/AccountCircle';
-import { useFormContext } from "react-hook-form";
+import { Controller, useForm, useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { AgentAutocompleteField } from "../../AgentAutocompleteField";
 import type { Agent, typeContrat, Corps, Grade } from "../../../services/agentService";
@@ -86,7 +86,7 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
                     <Typography variant="h6" component="h2">
                         Ajouter un personnel
                     </Typography>
-                    <AgentAutocompleteField label="agent" value={agent} onChange={handleAgentChange} />
+                    <AgentAutocompleteField label="Agent" value={agent} onChange={handleAgentChange} />
                     <TextField
                         label="Quotité de travail (%)"
                         placeholder="50"
@@ -103,6 +103,7 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
                             {errorMessage}
                         </Typography>
                     )}
+                    <DialogSoumettreAuDu onUtilisateurCree={setAgent} />
                     <Box sx={{ display: "flex", justifyContent: "end", gap: 1 }}>
                         <Button onClick={handleClose} color="primary">
                             Annuler
@@ -111,6 +112,116 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
                             Ajouter
                         </Button>
                     </Box>
+                </Box>
+            </Dialog>
+        </>
+    )
+}
+
+function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent: Agent) => void }) {
+    const [open, setOpen] = useState(false);
+    const { handleSubmit, control, reset } = useForm<{ nom: string; prenom: string; email: string }>({
+        defaultValues: {
+            nom: "",
+            prenom: "",
+            email: "",
+        },
+    });
+
+    const onSubmit = (data: { nom: string; prenom: string; email: string }) => {
+        console.log("test");
+
+        const computedId = data.email
+            .split("")
+            .reduce((accumulator, character) => accumulator + character.charCodeAt(0), 0);
+
+        onUtilisateurCree({
+            id: computedId,
+            nom: data.nom,
+            prenom: data.prenom,
+            email: data.email,
+        });
+        reset();
+        setOpen(false);
+    };
+
+    const onError = (errors: unknown) => {
+        console.log(errors);
+    };
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    return (
+        <>
+            <Link
+                onClick={(event) => {
+                    event.preventDefault();
+                    handleClickOpen();
+                }}
+                variant="body2"
+                href="#"
+                underline="hover"
+            >
+                L'agent
+                n'existe pas ? Cliquez ici pour le créer.
+            </Link>
+            <Dialog open={open} onClose={handleClose}>
+                <Box component={"form"} onSubmit={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubmit(onSubmit, onError)(e);
+                }} sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <Stack direction="row" spacing={2}>
+                        <Controller
+                            name="nom"
+                            control={control}
+                            rules={{ required: "Le nom est requis" }}
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    label="Nom"
+                                    {...field}
+                                    error={!!fieldState.error}
+                                    helperText={fieldState.error?.message}
+                                />
+                            )}
+                        />
+                        <Controller
+                            name="prenom"
+                            control={control}
+                            rules={{ required: "Le prénom est requis" }}
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    label="Prénom"
+                                    {...field}
+                                    error={!!fieldState.error}
+                                    helperText={fieldState.error?.message}
+                                />
+                            )}
+                        />
+                    </Stack>
+                    <Controller
+                        name="email"
+                        control={control}
+                        rules={{ required: "L'email est requis", pattern: { value: /^\S+@\S+$/i, message: "L'email n'est pas valide" } }}
+                        render={({ field, fieldState }) => (
+                            <TextField
+                                label="Email"
+                                {...field}
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                            />
+                        )}
+                    />
+
+                    <Button type="submit" variant="contained" color="primary">
+                        Créer l'agent
+                    </Button>
                 </Box>
             </Dialog>
         </>
