@@ -1,10 +1,14 @@
 import { Box, Button, Chip, Dialog, Link, Stack, TextField, Typography } from "@mui/material";
 import Account from '@mui/icons-material/AccountCircle';
-import { Controller, useForm, useFormContext } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useForm, useFormContext, useWatch } from "react-hook-form";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AgentAutocompleteField } from "../../AgentAutocompleteField";
-import type { Agent, typeContrat, Corps, Grade } from "../../../services/agentService";
+import { type Agent, type typeContrat, type Corps, type Grade, soumettreAgentAuDu } from "../../../services/agentService";
 import { typePersonnelLabel } from "../../../services/formatLabelService";
+import { RHFTextField } from "../../RHFTextField";
+import { RHFSelect } from "../../RHFTextSelect";
+import { DictionnaireContext } from "../../../context/dictionnaireContext";
+import { SnackbarContext } from "../../../context/snackbarContext";
 
 type PersonnelActuelFormValue = {
     agentId: number;
@@ -120,29 +124,98 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
 
 function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent: Agent) => void }) {
     const [open, setOpen] = useState(false);
-    const { handleSubmit, control, reset } = useForm<{ nom: string; prenom: string; email: string }>({
+    const { handleSubmit, control, reset } = useForm<{
+        nom: string;
+        prenom: string;
+        email: string;
+        employeur: number | null;
+        corps: number | null;
+        grade: number | null;
+        typeContrat: number | null;
+        unite: number | null;
+    }>({
         defaultValues: {
             nom: "",
             prenom: "",
             email: "",
+            employeur: null,
+            corps: null,
+            grade: null,
+            typeContrat: null,
+            unite: null,
         },
     });
 
-    const onSubmit = (data: { nom: string; prenom: string; email: string }) => {
-        console.log("test");
+    const snackbar = useContext(SnackbarContext);
 
-        const computedId = data.email
-            .split("")
-            .reduce((accumulator, character) => accumulator + character.charCodeAt(0), 0);
+    const { employeurOptions, corps, typeContratOptions, uniteOptions } = useContext(DictionnaireContext);
+    const selectedCorpsId = useWatch({ control, name: "corps" });
 
-        onUtilisateurCree({
-            id: computedId,
-            nom: data.nom,
-            prenom: data.prenom,
-            email: data.email,
-        });
-        reset();
-        setOpen(false);
+    const corpsOptions = useMemo(
+        () => corps.map((item) => ({ value: item.id, label: item.acronyme ?? item.nom })),
+        [corps],
+    );
+
+    const gradeOptions = useMemo(() => {
+        if (!selectedCorpsId) {
+            return [];
+        }
+
+        const selectedCorps = corps.find((item) => item.id === Number(selectedCorpsId));
+
+        return selectedCorps?.grades?.map((item) => ({ value: item.id, label: item.nom })) ?? [];
+    }, [corps, selectedCorpsId]);
+
+    const onSubmit = async (data: {
+        nom: string;
+        prenom: string;
+        email: string;
+        employeur: number | null;
+        corps: number | null;
+        grade: number | null;
+        typeContrat: number | null;
+        unite: number | null;
+    }) => {
+        try {
+            const res = await soumettreAgentAuDu({
+                nom: data.nom,
+                prenom: data.prenom,
+                email: data.email,
+                employeur: data.employeur,
+                corps: data.corps,
+                grade: data.grade,
+                typeContrat: data.typeContrat,
+                unite: data.unite,
+            });
+
+            onUtilisateurCree({
+                id: res.utilisateur.id,
+                nom: res.utilisateur.nom,
+                prenom: res.utilisateur.prenom,
+                email: res.utilisateur.email,
+                employeur: res.utilisateur.employeur,
+                corps: res.utilisateur.corps,
+                grade: res.utilisateur.grade,
+                typeContrat: res.utilisateur.typeContrat,
+                unite: res.utilisateur.unite,
+            });
+
+
+            reset();
+            setOpen(false);
+            snackbar?.trigger({
+                couleur: "success",
+                message: res.message,
+            })
+        }
+        catch (error) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            const message = axiosError.response?.data?.message ?? "Une erreur est survenue lors de la création de l'agent. Veuillez réessayer.";
+            snackbar?.trigger({
+                couleur: "error",
+                message: message,
+            })
+        }
     };
 
     const onError = (errors: unknown) => {
@@ -178,46 +251,32 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
                     handleSubmit(onSubmit, onError)(e);
                 }} sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
                     <Stack direction="row" spacing={2}>
-                        <Controller
+                        <RHFTextField
+                            control={control}
+                            label="Nom"
                             name="nom"
-                            control={control}
                             rules={{ required: "Le nom est requis" }}
-                            render={({ field, fieldState }) => (
-                                <TextField
-                                    label="Nom"
-                                    {...field}
-                                    error={!!fieldState.error}
-                                    helperText={fieldState.error?.message}
-                                />
-                            )}
                         />
-                        <Controller
-                            name="prenom"
+                        <RHFTextField
                             control={control}
+                            label="Prenom"
+                            name="prenom"
                             rules={{ required: "Le prénom est requis" }}
-                            render={({ field, fieldState }) => (
-                                <TextField
-                                    label="Prénom"
-                                    {...field}
-                                    error={!!fieldState.error}
-                                    helperText={fieldState.error?.message}
-                                />
-                            )}
                         />
                     </Stack>
-                    <Controller
-                        name="email"
+                    <RHFTextField
                         control={control}
+                        label="Email"
+                        name="email"
                         rules={{ required: "L'email est requis", pattern: { value: /^\S+@\S+$/i, message: "L'email n'est pas valide" } }}
-                        render={({ field, fieldState }) => (
-                            <TextField
-                                label="Email"
-                                {...field}
-                                error={!!fieldState.error}
-                                helperText={fieldState.error?.message}
-                            />
-                        )}
                     />
+                    <RHFSelect name="employeur" label="Employeur" control={control} items={employeurOptions} />
+                    <RHFSelect name="unite" label="Unité" control={control} items={uniteOptions} />
+                    <Stack direction="row" spacing={2}>
+                        <RHFSelect name="corps" label="Corps" control={control} items={corpsOptions} />
+                        <RHFSelect name="grade" label="Grade" control={control} items={gradeOptions} disabled={!selectedCorpsId} />
+                    </Stack>
+                    <RHFSelect name="typeContrat" label="Type de contrat" control={control} items={typeContratOptions} />
 
                     <Button type="submit" variant="contained" color="primary">
                         Créer l'agent

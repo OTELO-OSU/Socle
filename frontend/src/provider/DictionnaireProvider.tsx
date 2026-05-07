@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
 import { fetchBaps, fetchCnus, fetchCorps, fetchEmployeurs, fetchSectionCnrs, fetchTypeContrats, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type SectionCnrs, type TypeContrat, type Unite, type Ville } from '../services/dictionnaireService';
-import { formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
+import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
 
 type SelectOption = {
     value: string | number;
@@ -20,8 +20,10 @@ export type DictionnaireType = {
     bap: Bap[];
     sectionCnrs: SectionCnrs[];
     typeContrat: TypeContrat[];
+    typeContratOptions: SelectOption[];
     cnu: Cnu[];
     employeur: Employeur[];
+    employeurOptions: SelectOption[];
     corps: Corps[];
 }
 
@@ -38,8 +40,10 @@ const defaultDictionnaire: DictionnaireType = {
     bap: [],
     sectionCnrs: [],
     typeContrat: [],
+    typeContratOptions: [],
     cnu: [],
     employeur: [],
+    employeurOptions: [],
     corps: [],
 };
 
@@ -61,6 +65,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
+                const employeurOptions = employeur.map((item) => ({ value: item.id, label: formatEmployeurLabel(item) }));
+                const typeContratOptions = typeContrat.map((item) => ({ value: item.id, label: item.nom }));
 
                 setDictionnaire((current) => ({
                     ...current,
@@ -68,12 +74,14 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     ville,
                     villeOptions,
                     uniteOptions,
+                    employeurOptions,
                     corps,
                     bap,
                     sectionCnrs,
                     typeContrat,
                     cnu,
                     employeur,
+                    typeContratOptions,
                 }));
             }
         };

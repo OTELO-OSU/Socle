@@ -1,18 +1,25 @@
 import { FormControl, InputLabel, MenuItem, Select, type SelectProps } from "@mui/material";
-import { Controller, type Control, type FieldValues, type RegisterOptions } from "react-hook-form";
+import { Controller, type Control, type FieldValues, type Path, type RegisterOptions } from "react-hook-form";
 
-type RHFSelectProps = {
-    name: string;
+type RHFSelectProps<TFieldValues extends FieldValues = FieldValues> = {
+    name: Path<TFieldValues>;
     label: string;
-    control: Control<FieldValues>;
+    control: Control<TFieldValues>;
     items?: {
         value: string | number;
         label: string;
     }[];
-    rules?: RegisterOptions;
+    rules?: RegisterOptions<TFieldValues, Path<TFieldValues>>;
 } & SelectProps;
 
-export function RHFSelect({ name, label, control, rules, items, ...props }: RHFSelectProps) {
+export function RHFSelect<TFieldValues extends FieldValues = FieldValues>({
+    name,
+    label,
+    control,
+    rules,
+    items,
+    ...props
+}: RHFSelectProps<TFieldValues>) {
     const isMultiple = props.multiple === true;
     const labelId = `${name}-label`;
     const { sx, ...selectProps } = props;
@@ -21,7 +28,7 @@ export function RHFSelect({ name, label, control, rules, items, ...props }: RHFS
             name={name}
             control={control}
             rules={rules}
-            defaultValue={isMultiple ? [] : ""}
+            defaultValue={(isMultiple ? [] : "") as never}
             render={({ field, fieldState }) => (
                 <FormControl fullWidth error={!!fieldState.error} sx={sx}>
                     <InputLabel id={labelId}>{label}</InputLabel>

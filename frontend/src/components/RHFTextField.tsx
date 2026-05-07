@@ -1,20 +1,25 @@
 import { TextField, type TextFieldProps } from "@mui/material";
-import { Controller, type Control, type FieldValues, type RegisterOptions } from "react-hook-form";
+import { Controller, type Control, type FieldValues, type Path, type RegisterOptions } from "react-hook-form";
 
-type RHFTextFieldProps = {
-    name: string;
+type RHFTextFieldProps<TFieldValues extends FieldValues = FieldValues> = {
+    name: Path<TFieldValues>;
     label: string;
-    control: Control<FieldValues>;
-    rules?: RegisterOptions;
+    control: Control<TFieldValues>;
+    rules?: RegisterOptions<TFieldValues, Path<TFieldValues>>;
 } & TextFieldProps;
 
-export function RHFTextField({ name, label, control, rules, ...props }: RHFTextFieldProps) {
+export function RHFTextField<TFieldValues extends FieldValues = FieldValues>({
+    name,
+    label,
+    control,
+    rules,
+    ...props
+}: RHFTextFieldProps<TFieldValues>) {
     return (
         <Controller
             name={name}
             control={control}
             rules={rules}
-            defaultValue=""
             render={({ field, fieldState }) => (
                 <TextField
                     fullWidth

@@ -1,4 +1,4 @@
-import type { Unite, Ville } from "./dictionnaireService";
+import type { Employeur, Unite, Ville } from "./dictionnaireService";
 
 export const formatUniteLabel = (unite: Unite) => {
     let str = ""
@@ -12,6 +12,13 @@ export const formatVilleLabel = (ville: Ville) => {
     let str = ""
     str += ville.nom
     str += ` (${ville.numeroDepartement} - ${ville.departement})`
+    return str
+}
+
+export const formatEmployeurLabel = (employeur: Employeur) => {
+    let str = ""
+    if (employeur.acronyme) str += `${employeur.acronyme} - `
+    str += employeur.nom
     return str
 }
 
