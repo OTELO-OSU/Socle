@@ -394,7 +394,6 @@ class PlateformeService
                             $newRecord->setResponsableScientifique($perso["responsable_scientifique"]);
                             $newRecord->setResponsableTechnique($perso["responsable_technique"]);
                             $typeContrat = $this->em->getReference(TypeContrat::class, $perso["type_contrat_id"]);
-                            $newRecord->setTypeContrat($typeContrat);
                             $newRecord->setQuotite($perso["quotite"]);
                             $plateformeHisto->addPlateformeHistoriquePersonnel($newRecord);
                             $this->em->persist($newRecord);
