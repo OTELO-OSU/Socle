@@ -38,7 +38,7 @@ class AuthService
     {
         $userRepo = $this->em->getRepository(Utilisateur::class);
         /** @var Utilisateur | null $user */
-        $user = $userRepo->findOneBy(["email" => $email]);
+        $user = $userRepo->findOneBy(["email" => $email, "attenteApprobationDU" => false]);
 
         // Si l'email n'existe pas
         if (is_null($user)) throw new EmailOuMotDePasseIncorrectException();
@@ -57,7 +57,7 @@ class AuthService
 
     function connexionFede(string $email, string $prenom, string $nom)
     {
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "attenteApprobationDU" => false]);
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
 
