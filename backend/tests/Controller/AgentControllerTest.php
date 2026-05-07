@@ -117,18 +117,14 @@ class AgentControllerTest extends WebTestCase
         $unite->setDirecteur($admin);
         $this->em->persist($unite);
 
-        $corps = new Corps();
-        $corps->setNom('Test Corps');
-        $this->em->persist($corps);
-
         $grade = new Grade();
         $grade->setNom('Test Grade');
         $this->em->persist($grade);
 
-        $corpsGrade = new CorpsGrade();
-        $corpsGrade->setCorps($corps);
-        $corpsGrade->setGrade($grade);
-        $this->em->persist($corpsGrade);
+        $corps = new Corps();
+        $corps->setNom('Test Corps');
+        $corps->addGrade($grade);
+        $this->em->persist($corps);
 
         $plateforme = new Plateforme();
         $plateforme->setPseudoId('Test Plateforme');
