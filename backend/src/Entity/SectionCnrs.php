@@ -6,18 +6,22 @@ use App\Repository\SectionCnrsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SectionCnrsRepository::class)]
 class SectionCnrs
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["section_cnrs:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(["section_cnrs:list"])]
     #[ORM\Column]
     private ?int $numero = null;
 
+    #[Groups(["section_cnrs:list"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 

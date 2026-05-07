@@ -63,4 +63,11 @@ final class DictionnaireController extends AbstractController
         $cnus = $this->ds->getCnu();
         return $this->json($cnus, 200, [], ['groups' => 'cnu:list']);
     }
+
+    #[Route('/dictionnaire/sections_cnrs', methods: ['GET'])]
+    public function getSectionsCNRS(): Response
+    {
+        $sections = $this->ds->getSectionsCNRS();
+        return $this->json($sections, 200, [], ['groups' => 'section_cnrs:list']);
+    }
 }

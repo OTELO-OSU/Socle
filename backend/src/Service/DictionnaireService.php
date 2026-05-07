@@ -6,6 +6,7 @@ use App\Entity\Bap;
 use App\Entity\Cnu;
 use App\Entity\Corps;
 use App\Entity\Entite;
+use App\Entity\SectionCnrs;
 use App\Entity\TypeContrat;
 use App\Entity\Ville;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,5 +50,10 @@ class DictionnaireService
     function getCnu(): array
     {
         return $this->em->getRepository(Cnu::class)->findBy([], ["numero" => "ASC"]);
+    }
+
+    function getSectionsCNRS(): array
+    {
+        return $this->em->getRepository(SectionCnrs::class)->findBy([], ["numero" => "ASC"]);
     }
 }
