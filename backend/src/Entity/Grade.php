@@ -13,19 +13,13 @@ class Grade
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', "corps:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', 'corps:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
-
-    /**
-     * @var Collection<int, CorpsGrade>
-     */
-    #[ORM\OneToMany(targetEntity: CorpsGrade::class, mappedBy: 'grade')]
-    private Collection $corpsGrades;
 
     /**
      * @var Collection<int, Utilisateur>
@@ -35,7 +29,6 @@ class Grade
 
     public function __construct()
     {
-        $this->corpsGrades = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
     }
 
@@ -52,36 +45,6 @@ class Grade
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CorpsGrade>
-     */
-    public function getCorpsGrades(): Collection
-    {
-        return $this->corpsGrades;
-    }
-
-    public function addCorpsGrade(CorpsGrade $corpsGrade): static
-    {
-        if (!$this->corpsGrades->contains($corpsGrade)) {
-            $this->corpsGrades->add($corpsGrade);
-            $corpsGrade->setGrade($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCorpsGrade(CorpsGrade $corpsGrade): static
-    {
-        if ($this->corpsGrades->removeElement($corpsGrade)) {
-            // set the owning side to null (unless already changed)
-            if ($corpsGrade->getGrade() === $this) {
-                $corpsGrade->setGrade(null);
-            }
-        }
 
         return $this;
     }

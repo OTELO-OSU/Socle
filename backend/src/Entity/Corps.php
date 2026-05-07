@@ -12,24 +12,26 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class Corps
 {
     #[ORM\Id]
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', 'corps:list'])]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', 'corps:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', 'corps:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
     /**
-     * @var Collection<int, CorpsGrade>
+     * @var Collection<int, Grade>
      */
-    #[ORM\OneToMany(targetEntity: CorpsGrade::class, mappedBy: 'corps')]
-    private Collection $corpsGrades;
+    #[Groups(['corps:list'])]
+    #[ORM\ManyToMany(targetEntity: Grade::class)]
+    #[ORM\JoinTable(name: 'corps_grade')]
+    private Collection $grades;
 
     /**
      * @var Collection<int, Utilisateur>
@@ -51,7 +53,7 @@ class Corps
 
     public function __construct()
     {
-        $this->corpsGrades = new ArrayCollection();
+        $this->grades = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
         $this->posteFuturs = new ArrayCollection();
         $this->corpsBapEmploiTypes = new ArrayCollection();
@@ -87,31 +89,25 @@ class Corps
     }
 
     /**
-     * @return Collection<int, CorpsGrade>
+     * @return Collection<int, Grade>
      */
-    public function getCorpsGrades(): Collection
+    public function getGrades(): Collection
     {
-        return $this->corpsGrades;
+        return $this->grades;
     }
 
-    public function addCorpsGrade(CorpsGrade $corpsGrade): static
+    public function addGrade(Grade $grade): static
     {
-        if (!$this->corpsGrades->contains($corpsGrade)) {
-            $this->corpsGrades->add($corpsGrade);
-            $corpsGrade->setCorps($this);
+        if (!$this->grades->contains($grade)) {
+            $this->grades->add($grade);
         }
 
         return $this;
     }
 
-    public function removeCorpsGrade(CorpsGrade $corpsGrade): static
+    public function removeGrade(Grade $grade): static
     {
-        if ($this->corpsGrades->removeElement($corpsGrade)) {
-            // set the owning side to null (unless already changed)
-            if ($corpsGrade->getCorps() === $this) {
-                $corpsGrade->setCorps(null);
-            }
-        }
+        $this->grades->removeElement($grade);
 
         return $this;
     }

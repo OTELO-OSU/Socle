@@ -120,9 +120,9 @@ class AgentService
         }
 
         // Vérification de la liaison corps_grade
-        $corpsEntity->getCorpsGrades()->filter(function ($cg) use ($gradeEntity) {
-            return $cg->getGrade()->getId() === $gradeEntity->getId();
-        })->first() ?? throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+        if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
+            throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+        }
 
         //* Création du User
         $user = new Utilisateur();

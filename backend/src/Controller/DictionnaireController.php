@@ -18,4 +18,12 @@ final class DictionnaireController extends AbstractController
 
         return $this->json($unites, 200, [], ['groups' => 'unite:list']);
     }
+
+    #[Route('/dictionnaire/corps', methods: ['GET'])]
+    public function getCorps(): Response
+    {
+        $corps = $this->ds->getCorps();
+
+        return $this->json($corps, 200, [], ['groups' => 'corps:list']);
+    }
 }
