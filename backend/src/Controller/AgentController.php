@@ -32,7 +32,7 @@ final class AgentController extends AbstractController
     public function creationUtilisateurParResponsable(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["corps"]) || !isset($data["grade"])) {
+        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["corps"]) || !isset($data["grade"]) || !isset($data["typeContrat"])) {
             return $this->json(['message' => 'Champs requis manquants'], 400);
         }
         $utilisateur = $this->utilisateurService->creationUtilisateurParResponsable(
@@ -42,7 +42,8 @@ final class AgentController extends AbstractController
             $data['employeur'],
             $data['unite'],
             $data['corps'],
-            $data['grade']
+            $data['grade'],
+            $data['typeContrat']
         );
         return $this->json(['message' => 'Soumission envoyée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }

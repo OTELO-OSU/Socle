@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Corps;
 use App\Entity\Entite;
 use App\Entity\Grade;
+use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -78,7 +79,7 @@ class AgentService
         ];
     }
 
-    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, int $corps, int $grade): Utilisateur
+    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, int $corps, int $grade, int $typeContrat): Utilisateur
     {
         if (!$this->security->isGranted("SOUMETTRE_AU_DU", Utilisateur::class)) {
             throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
@@ -124,6 +125,13 @@ class AgentService
             throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
         }
 
+        // Vérification du type de contrat
+        /** @var TypeContrat $typeContratEntity */
+        $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
+        if (!$typeContratEntity) {
+            throw new Exception("Le type de contrat spécifié est invalide.", 400);
+        }
+
         //* Création du User
         $user = new Utilisateur();
         $user->setNom($nom);
@@ -133,6 +141,7 @@ class AgentService
         $user->setUnite($u);
         $user->setCorps($corpsEntity);
         $user->setGrade($gradeEntity);
+        $user->setTypeContrat($typeContratEntity);
 
         $this->em->persist($user);
         $this->em->flush();
