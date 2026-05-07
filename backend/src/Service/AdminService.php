@@ -23,7 +23,7 @@ class AdminService
     {
         if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour voir les utilisateurs en attente de validation", 403);
 
-        $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false]);
+        $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false, "emailValide" => true]);
         return array_map(function (Utilisateur $user) {
             return [
                 "email" => $user->getEmail(),
@@ -38,7 +38,7 @@ class AdminService
 
     function approuverUtilisateur(string $email)
     {
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false]);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
         if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour approuver cet utilisateur", 403);
@@ -78,7 +78,7 @@ class AdminService
 
     function refuserUtilisateur(string $email)
     {
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false]);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
         if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour refuser cet utilisateur", 403);
