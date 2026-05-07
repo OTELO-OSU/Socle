@@ -19,6 +19,11 @@ class DictionnaireService
         return $this->em->getRepository(Entite::class)->findBy(["laboratoire" => true], ["nom" => "ASC"]);
     }
 
+    function getEmployeur(): array
+    {
+        return $this->em->getRepository(Entite::class)->findBy(["employeur" => true], ["nom" => "ASC"]);
+    }
+
     function getCorps(): array
     {
         return $this->em->getRepository(Corps::class)->findBy([], ["nom" => "ASC"]);

@@ -15,7 +15,7 @@ class Entite
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['unite:list, employeur:list'])]
+    #[Groups(['unite:list', 'employeur:list'])]
     private ?int $id = null;
 
     #[Groups(['unite:list', 'employeur:list'])]
