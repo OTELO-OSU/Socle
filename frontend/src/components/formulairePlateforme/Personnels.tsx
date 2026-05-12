@@ -1,8 +1,9 @@
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { allyProps } from "./allyProps";
 import { CustomTabPanel } from "../CustomTabPanel";
 import { PersonnelActuels } from "./personnels/PersonnelsActuels";
+import { PersonnelFuturs } from "./personnels/PersonnelsFuturs";
 
 export function Personnels() {
     const [value, setValue] = useState(0);
@@ -22,9 +23,7 @@ export function Personnels() {
                 <PersonnelActuels />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <Typography variant="h6" component="h2">
-                    Futurs
-                </Typography>
+                <PersonnelFuturs />
             </CustomTabPanel>
         </>
     )
