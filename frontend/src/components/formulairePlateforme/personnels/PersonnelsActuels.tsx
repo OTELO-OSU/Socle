@@ -365,9 +365,13 @@ export function PersonnelActuels() {
 
     return (
         <Box sx={{ p: 1 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "end" }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
+                    Personnels actuels
+                </Typography>
                 <DialogAjoutPersonnel onAdd={handleAddPersonnel} />
             </Box>
+
             {personnels.map((personnel) => (
                 <PersonnelCard
                     key={personnel.agentId}
@@ -377,7 +381,7 @@ export function PersonnelActuels() {
             ))}
             {personnels.length === 0 && (
                 <Typography sx={{ mt: 2 }} color="text.secondary">
-                    Aucun personnel actuel ajouté.
+                    Aucun personnel actuel.
                 </Typography>
             )}
         </Box>
