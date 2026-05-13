@@ -7,6 +7,7 @@ use App\Entity\Categorie;
 use App\Entity\Cnu;
 use App\Entity\Corps;
 use App\Entity\Entite;
+use App\Entity\Operation;
 use App\Entity\SectionCnrs;
 use App\Entity\TypeContrat;
 use App\Entity\Ville;
@@ -98,5 +99,10 @@ class DictionnaireService
     function getSourceFinancement(): array
     {
         return $this->em->getRepository(Entite::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getOperations(): array
+    {
+        return $this->em->getRepository(Operation::class)->findBy([], ["nom" => "ASC"]);
     }
 }

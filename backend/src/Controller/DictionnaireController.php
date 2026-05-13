@@ -86,4 +86,11 @@ final class DictionnaireController extends AbstractController
         $sections = $this->ds->getSectionsCNRS();
         return $this->json($sections, 200, [], ['groups' => 'section_cnrs:list']);
     }
+
+    #[Route('/dictionnaire/operations', methods: ['GET'])]
+    public function getOperations(): Response
+    {
+        $operations = $this->ds->getOperations();
+        return $this->json($operations, 200, [], ['groups' => 'operation:list']);
+    }
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { allyProps } from "./allyProps";
 import { CustomTabPanel } from "../CustomTabPanel";
 import { EquipementActuels } from "./equipements/EquipementsActuels";
+import { EquipementFuturs } from "./equipements/EquipementsFuturs";
 
 export function Equipements() {
     const [value, setValue] = useState(0);
@@ -23,7 +24,7 @@ export function Equipements() {
                 <EquipementActuels />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <h1>Futurs</h1>
+                <EquipementFuturs />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
                 <h1>Maintenance</h1>

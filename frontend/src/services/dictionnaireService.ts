@@ -74,6 +74,12 @@ export type SourceFinancement = {
     acronyme: string | null;
 }
 
+export type Operation = {
+    id: number;
+    nom: string;
+    description: string | null;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -130,6 +136,12 @@ export async function fetchTreeViewFinancement() {
 
 export async function fetchSourcesFinancement() {
     const { data } = await symfony.get<SourceFinancement[]>("/dictionnaire/sources_financement");
+
+    return data;
+}
+
+export async function fetchOperations() {
+    const { data } = await symfony.get<Operation[]>("/dictionnaire/operations");
 
     return data;
 }
