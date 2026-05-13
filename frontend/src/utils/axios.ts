@@ -26,9 +26,11 @@ const refreshAccessToken = async () => {
             .post(`${API_URL}/refresh`, {}, { withCredentials: true })
             .then((response) => {
                 const refreshedToken = response.data?.token;
+                const authBridge = getAuthBridge();
 
                 if (typeof refreshedToken === "string" && refreshedToken.length > 0) {
-                    getAuthBridge()!.setToken!(refreshedToken);
+                    authBridge.setToken?.(refreshedToken);
+                    symfony.defaults.headers.common.Authorization = `Bearer ${refreshedToken}`;
                     return refreshedToken;
                 }
 
@@ -43,7 +45,8 @@ const refreshAccessToken = async () => {
 };
 
 const forceLogout = () => {
-    getAuthBridge()!.clearToken!();
+    const authBridge = getAuthBridge();
+    authBridge.clearToken?.();
     showSnackbar({
         message: "Votre session a expire, veuillez vous reconnecter.",
         couleur: "error",
@@ -58,8 +61,12 @@ symfony.interceptors.response.use(
         const status = error.response?.status;
         const originalRequest = error.config as RetriableRequestConfig | undefined;
         const isRefreshRequest = originalRequest?.url?.includes('/refresh');
+        const isAuthEndpoint =
+            originalRequest?.url?.includes('/connexion') ||
+            originalRequest?.url?.includes('/inscription');
+        const shouldTryRefresh = status === 401 || status === 403;
 
-        if (status === 401 && originalRequest && !originalRequest._retry && !isRefreshRequest) {
+        if (shouldTryRefresh && originalRequest && !originalRequest._retry && !isRefreshRequest && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             try {
@@ -101,7 +108,7 @@ symfony.interceptors.response.use(
 // Interceptor pour mettre le bearer token dans les headers de chaque requete
 symfony.interceptors.request.use(
     config => {
-        const token = getAuthBridge()!.getToken?.();
+        const token = getAuthBridge().getToken?.();
         if (token) {
             config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${token}`;
