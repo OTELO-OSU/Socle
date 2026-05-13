@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Bap;
+use App\Entity\Categorie;
 use App\Entity\Cnu;
 use App\Entity\Corps;
 use App\Entity\Entite;
@@ -55,5 +56,42 @@ class DictionnaireService
     function getSectionsCNRS(): array
     {
         return $this->em->getRepository(SectionCnrs::class)->findBy([], ["numero" => "ASC"]);
+    }
+
+    function getSourceFinancement(): array
+    {
+        $cat = $this->em->getRepository(Categorie::class)->findBy([], ["nom" => "ASC"]);
+        $noChild = [];
+        $retour = [];
+        foreach ($cat as $c) {
+            $child = $c->getEntites()->toArray();
+            usort($child, static function (Entite $a, Entite $b): int {
+                return strcmp($a->getNom() ?? '', $b->getNom() ?? '');
+            });
+            $childArray = [];
+            foreach ($child as $ch) {
+                $childArray[] = [
+                    "id" => $ch->getId(),
+                    "label" => $ch->getNom(),
+                ];
+            }
+
+            if (count($childArray) === 0) {
+                continue;
+            }
+
+            if ($c->getNom() === "no-child") {
+                $noChild = $childArray;
+                continue;
+            }
+            $retour[] = [
+                "id" => $c->getId() * -1,
+                "label" => $c->getNom(),
+                "children" => $childArray
+            ];
+        }
+
+        $retour = array_merge($retour, $noChild);
+        return $retour;
     }
 }

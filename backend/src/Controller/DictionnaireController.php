@@ -27,6 +27,14 @@ final class DictionnaireController extends AbstractController
         return $this->json($employeurs, 200, [], ['groups' => 'employeur:list']);
     }
 
+    #[Route('/dictionnaire/sources_financement', methods: ['GET'])]
+    public function getSourcesFinancement(): Response
+    {
+        $sources = $this->ds->getSourceFinancement();
+
+        return $this->json($sources, 200, []);
+    }
+
     #[Route('/dictionnaire/corps', methods: ['GET'])]
     public function getCorps(): Response
     {

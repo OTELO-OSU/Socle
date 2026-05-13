@@ -62,6 +62,12 @@ export type TypeContrat = {
     nom: string;
 }
 
+export type TreeNode = {
+    id: number;
+    label: string;
+    children?: TreeNode[];
+};
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -106,6 +112,12 @@ export async function fetchSectionCnrs() {
 
 export async function fetchTypeContrats() {
     const { data } = await symfony.get<TypeContrat[]>("/dictionnaire/type_contrat");
+
+    return data;
+}
+
+export async function fetchSourcesFinancement() {
+    const { data } = await symfony.get<TreeNode[]>("/dictionnaire/sources_financement");
 
     return data;
 }

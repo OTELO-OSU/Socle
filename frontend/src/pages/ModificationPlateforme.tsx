@@ -5,6 +5,7 @@ import { Presentation } from "../components/formulairePlateforme/Presentation";
 import { CustomTabPanel } from "../components/CustomTabPanel";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { Personnels } from "../components/formulairePlateforme/Personnels";
+import { Equipements } from "../components/formulairePlateforme/Equipements";
 
 export default function ModificationPlateforme() {
     const methods = useForm<FieldValues>();
@@ -32,7 +33,7 @@ export default function ModificationPlateforme() {
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                                 <Tab label="Présentation" {...allyProps(0)} />
                                 <Tab label="Personnels" {...allyProps(1)} />
-                                <Tab label="Item Three" {...allyProps(2)} />
+                                <Tab label="Equipements" {...allyProps(2)} />
                             </Tabs>
                         </Box>
                         <CustomTabPanel value={value} index={0}>
@@ -40,6 +41,9 @@ export default function ModificationPlateforme() {
                         </CustomTabPanel>
                         <CustomTabPanel value={value} index={1}>
                             <Personnels />
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={2}>
+                            <Equipements />
                         </CustomTabPanel>
                     </Card>
                     <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit">
