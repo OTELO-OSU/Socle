@@ -68,6 +68,12 @@ export type TreeNode = {
     children?: TreeNode[];
 };
 
+export type SourceFinancement = {
+    id: number;
+    nom: string;
+    acronyme: string | null;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -116,8 +122,14 @@ export async function fetchTypeContrats() {
     return data;
 }
 
+export async function fetchTreeViewFinancement() {
+    const { data } = await symfony.get<TreeNode[]>("/dictionnaire/treeview_financement");
+
+    return data;
+}
+
 export async function fetchSourcesFinancement() {
-    const { data } = await symfony.get<TreeNode[]>("/dictionnaire/sources_financement");
+    const { data } = await symfony.get<SourceFinancement[]>("/dictionnaire/sources_financement");
 
     return data;
 }

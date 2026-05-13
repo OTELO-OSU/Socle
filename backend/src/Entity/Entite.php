@@ -15,17 +15,18 @@ class Entite
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
     private ?int $id = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $statutJuridique = null;
 

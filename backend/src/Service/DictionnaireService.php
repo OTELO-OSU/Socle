@@ -58,7 +58,7 @@ class DictionnaireService
         return $this->em->getRepository(SectionCnrs::class)->findBy([], ["numero" => "ASC"]);
     }
 
-    function getSourceFinancement(): array
+    function getTreeViewFinancement(): array
     {
         $cat = $this->em->getRepository(Categorie::class)->findBy([], ["nom" => "ASC"]);
         $noChild = [];
@@ -93,5 +93,10 @@ class DictionnaireService
 
         $retour = array_merge($retour, $noChild);
         return $retour;
+    }
+
+    function getSourceFinancement(): array
+    {
+        return $this->em->getRepository(Entite::class)->findBy([], ["nom" => "ASC"]);
     }
 }
