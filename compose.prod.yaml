@@ -1,0 +1,62 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - ${NGINX_PORT}:80
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./backend:/var/www/backend:ro
+      - ./frontend/dist:/var/www/frontend:ro
+    depends_on:
+      php:
+        condition: service_started
+      builder: 
+        condition: service_completed_successfully
+
+
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MAILER_DSN: ${MAILER_DSN}
+      NOREPLY_EMAIL: ${NOREPLY_EMAIL}
+    volumes:
+      - ./backend:/var/www/backend:rw
+    depends_on:
+      - database
+
+  builder:
+    image: node:24-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run build"
+    environment:
+      - VITE_API_URL=${API_URL}
+    volumes:
+      - ./frontend:/app
+
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:16-alpine
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "poe", "-U", "root"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data
+  ###< doctrine/doctrine-bundle ###
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  database_data:

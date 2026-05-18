@@ -8,7 +8,7 @@ import { EquipementFuturs } from "./equipements/EquipementsFuturs";
 export function Equipements() {
     const [value, setValue] = useState(0);
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = (_: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
     return (
@@ -27,7 +27,6 @@ export function Equipements() {
                 <EquipementFuturs />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                <h1>Maintenance</h1>
             </CustomTabPanel>
         </>
     )

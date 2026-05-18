@@ -5,7 +5,7 @@ services:
       - "80:80"
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./backend:/var/www/html:ro
+      - ./backend:/var/www/backend:ro
     depends_on:
       - php
 
@@ -18,7 +18,7 @@ services:
       MAILER_DSN: smtp://mailer:1025
       NOREPLY_EMAIL: noreply@ul.fr
     volumes:
-      - ./backend:/var/www/html:rw
+      - ./backend:/var/www/backend:rw
     depends_on:
       - database
 
