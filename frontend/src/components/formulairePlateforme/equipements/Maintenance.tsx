@@ -76,9 +76,9 @@ function InstrumentActuelMaintenanceCard({
                             </FormControl>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={1.5} sx={{ mb: 1.5, alignItems: "center" }}>
-                        <Grid size={{ xs: "grow" }}>
-                            <FormControl>
+                    <Grid container spacing={1.5} sx={{ mb: 1.5, alignItems: "stretch" }}>
+                        <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
+                            <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <RadioGroup
                                     value={instrument.contratMaintenanceId ?? ""}
                                     onChange={(event) => onEdit({ ...instrument, contratMaintenanceId: Number(event.target.value) })}
@@ -91,30 +91,30 @@ function InstrumentActuelMaintenanceCard({
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: "grow" }}>
-                            <FormControl>
+                        <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
+                            <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <TextField
                                     multiline
-                                    rows={4}
                                     value={instrument.commentaireNatureContrat}
                                     onChange={(event) => onEdit({ ...instrument, commentaireNatureContrat: event.target.value })}
                                     placeholder="Commentaire"
+                                    sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: "grow" }}>
-                            <FormControl>
+                        <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
+                            <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <TextField
                                     multiline
-                                    rows={4}
                                     value={instrument.fournisseurContrat}
                                     onChange={(event) => onEdit({ ...instrument, fournisseurContrat: event.target.value })}
                                     placeholder="fournisseur / entreprise"
+                                    sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: "grow" }}>
-                            <FormControl>
+                        <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
+                            <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <RadioGroup
                                     value={instrument.mutualiseAutreInstrument ? "mutualiseAutreInstrument" : instrument.mutualiseUmrOsu ? "mutualiseUmrOsu" : instrument.mutualiseSite ? "mutualiseSite" : ""}
 
@@ -158,15 +158,15 @@ function InstrumentActuelMaintenanceCard({
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: "grow" }}>
-                            <FormControl>
+                        <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
+                            <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <TextField
                                     multiline
                                     type="number"
-                                    rows={4}
                                     value={instrument.coutMaintenance}
                                     onChange={(event) => onEdit({ ...instrument, coutMaintenance: event.target.value ? Number(event.target.value) : null })}
                                     placeholder="Coût K€/an"
+                                    sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
                             </FormControl>
                         </Grid>
