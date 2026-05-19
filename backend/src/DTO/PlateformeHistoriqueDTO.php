@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Validator\EntityExists;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Expression;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -156,6 +157,11 @@ class PlateformeHistoriqueDTO
     #[Assert\All([
         new Assert\Collection(
             fields: [
+                'futur' =>
+                new Assert\Required([
+                    new Assert\NotNull(message: 'La temporalité de l\'équipement est requise.'),
+                    new Assert\Type('boolean'),
+                ]),
                 'nom' =>
                 new Assert\Required([
                     new Assert\NotBlank(message: 'Le nom de l\'équipement est requis.'),
@@ -170,23 +176,35 @@ class PlateformeHistoriqueDTO
                     new Assert\Type('string'),
                 ]),
                 'annee_acquisition' =>
-                new Assert\Required([
-                    new Assert\NotBlank(message: 'L\'année d\'acquisition de l\'équipement est requise.', groups: ['validation']),
+                new Assert\Optional([
+                    new Expression(
+                        "this.futur === true or value !== null",
+                        message: 'L\'année d\'acquisition de l\'équipement est requise.',
+                        groups: ['validation']
+                    ),
                     new Assert\Type('string'),
                 ]),
                 'cout' =>
-                new Assert\Required([
+                new Assert\Optional([
                     new Assert\NotBlank(message: 'Le coût de l\'équipement est requis.', groups: ['validation']),
                     new Assert\Type('float'),
                 ]),
                 'valeur_remplacement' =>
-                new Assert\Required([
-                    new Assert\NotBlank(message: 'La valeur de remplacement de l\'équipement est requise.', groups: ['validation']),
+                new Assert\Optional([
+                    new Assert\Expression(
+                        "this.futur === true or value !== null",
+                        message: 'La valeur de remplacement de l\'équipement est requise.',
+                        groups: ['validation']
+                    ),
                     new Assert\Type('float'),
                 ]),
                 'duree_utilisation' =>
-                new Assert\Required([
-                    new Assert\NotBlank(message: 'La durée d\'utilisation de l\'équipement est requise.', groups: ['validation']),
+                new Assert\Optional([
+                    new Assert\Expression(
+                        "this.futur === true or value !== null",
+                        message: 'La durée d\'utilisation de l\'équipement est requise.',
+                        groups: ['validation']
+                    ),
                     new Assert\Type('integer'),
                 ]),
                 'source_financement' =>
@@ -242,100 +260,32 @@ class PlateformeHistoriqueDTO
                 "cout_maintenance" =>
                 new Assert\Optional([
                     new Assert\Type('float'),
-                ])
-            ]
-        )
-    ])]
-    public ?array $instrument_actuel = null;
-
-    #[Assert\Callback(groups: ['post_validation'])]
-    public function sourceFinancementEquippementActuelCentPourcent(ExecutionContextInterface $context): void
-    {
-        if ($this->instrument_actuel !== null) {
-            foreach ($this->instrument_actuel as $index => $instrument) {
-                $somme = 0;
-                foreach ($instrument['source_financement'] as $source) {
-                    $somme += $source['taux'];
-                }
-
-                if ($somme !== 100) {
-                    $context->buildViolation('La somme des pourcentages de source de financement doit être égale à 100%.')
-                        ->atPath("instrument_actuel[$index].source_financement")
-                        ->addViolation();
-                }
-            }
-        }
-    }
-
-    #[Assert\All([
-        new Assert\Collection(
-            fields: [
-                'nom' => [
-                    new Assert\Required([
-                        new Assert\NotBlank(message: 'Le nom de l\'équipement est requis.'),
-                        new Assert\Type('string'),
-                    ])
-                ],
-                'marque' => [
-                    new Assert\Optional([
-                        new Assert\Type('string'),
-                    ])
-                ],
-                'modele' => [
-                    new Assert\Optional([
-                        new Assert\Type('string'),
-                    ])
-                ],
+                ]),
                 'operation_id' => [
                     new Assert\Optional([
                         new Assert\Type('integer'),
                     ])
                 ],
                 'annee_achat_envisagee' => [
-                    new Assert\Required([
-                        new Assert\NotBlank(message: 'L\'année d\'achat envisagée de l\'équipement est requise.', groups: ['validation']),
+                    new Assert\Optional([
+                        new Assert\Expression(
+                            "this.futur === false or value !== null",
+                            message: 'L\'année d\'achat envisagée de l\'équipement est requise.',
+                            groups: ['validation']
+                        ),
                         new Assert\Type('integer'),
-                    ])
-                ],
-                'cout' => [
-                    new Assert\Required([
-                        new Assert\NotBlank(message: 'Le coût de l\'équipement est requis.', groups: ['validation']),
-                        new Assert\Type('float'),
-                    ])
-                ],
-                'source_financement' => [
-                    new Assert\Required([
-                        new Assert\NotBlank(message: 'La source de financement de l\'équipement est requise.', groups: ['validation']),
-                        new Assert\All([
-                            new Assert\Collection(
-                                fields: [
-                                    "financeur_id" => [
-                                        new Assert\Required([
-                                            new Assert\NotBlank(message: 'Le financeur de l\'équipement est requis.'),
-                                            new Assert\Type('integer'),
-                                        ])
-                                    ],
-                                    "taux" => [
-                                        new Assert\Required([
-                                            new Assert\NotBlank(message: 'Le taux de financement de l\'équipement est requis.'),
-                                            new Assert\Type('integer'),
-                                        ])
-                                    ],
-                                ]
-                            )
-                        ])
                     ])
                 ],
             ]
         )
     ])]
-    public ?array $instrument_futur = null;
+    public ?array $equipements = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
-    public function sourceFinancementEquippementFuturCentPourcent(ExecutionContextInterface $context): void
+    public function sourceFinancementEquippementActuelCentPourcent(ExecutionContextInterface $context): void
     {
-        if ($this->instrument_futur !== null) {
-            foreach ($this->instrument_futur as $index => $instrument) {
+        if ($this->equipements !== null) {
+            foreach ($this->equipements as $index => $instrument) {
                 $somme = 0;
                 foreach ($instrument['source_financement'] as $source) {
                     $somme += $source['taux'];
@@ -343,7 +293,7 @@ class PlateformeHistoriqueDTO
 
                 if ($somme !== 100) {
                     $context->buildViolation('La somme des pourcentages de source de financement doit être égale à 100%.')
-                        ->atPath("instrument_futur[$index].source_financement")
+                        ->atPath("equipements[$index].source_financement")
                         ->addViolation();
                 }
             }

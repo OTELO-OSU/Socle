@@ -253,6 +253,277 @@ class PlateformeService
         ];
     }
 
+    private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
+    {
+        $instrumentsActuels = $plateformeHisto->getInstruments();
+        foreach ($instrumentsActuels as $instrumentExistant) {
+            // Ne traiter ici que les instruments actuels.
+            if ($instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            $instrumentId = $instrumentExistant->getId();
+            $existeDeja = false;
+            foreach ($value as $instrument) {
+                if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
+                if ($instrument["id"] == $instrumentId) {
+                    $existeDeja = true;
+                    // Overrider les champs de l'instrument
+                    $instrumentExistant->setNom($instrument["nom"]);
+                    $instrumentExistant->setMarque($instrument["marque"]);
+                    $instrumentExistant->setModele($instrument["modele"]);
+                    if ($instrument["annee_acquisition"] !== null) {
+                        $instrumentExistant->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                    } else {
+                        $instrumentExistant->setAnneeAcquisition(null);
+                    }
+                    $instrumentExistant->setCout($instrument["cout"]);
+                    $instrumentExistant->setValeurRemplacement($instrument["valeur_remplacement"]);
+                    $instrumentExistant->setDureeUtilisation($instrument["duree_utilisation"]);
+                    $instrumentExistant->setFutur(false);
+
+                    $contratMaintenanceId = $instrument["type_contrat_id"] ?? $instrument["contrat_maintenance_id"] ?? null;
+                    $instrumentExistant->setContratMaintenance($contratMaintenanceId !== null ? $this->em->getReference(ContratMaintenance::class, $contratMaintenanceId) : null);
+                    $instrumentExistant->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"] ?? null);
+                    $instrumentExistant->setFournisseurContrat($instrument["fournisseur_contrat"] ?? null);
+                    $instrumentExistant->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"] ?? false);
+                    $instrumentExistant->setMutualiseSite($instrument["mutualisation_site"] ?? false);
+                    $instrumentExistant->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"] ?? false);
+                    $instrumentExistant->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
+
+                    $mutualisationAutreInstrumentDetailleActuelle = $instrumentExistant->getInstrumentMutualisations();
+                    $mutualisations = $instrument["mutualisation_autre_instrument_detaille"] ?? [];
+                    foreach ($mutualisationAutreInstrumentDetailleActuelle as $record) {
+                        $instrumentMutualisationId = $record->getInstrumentCible()->getId();
+                        $detailExiste = false;
+                        foreach ($mutualisations as $mutualisation) {
+                            if ($mutualisation == $instrumentMutualisationId) {
+                                // Le record de mutualisation existe déjà, pas besoin de le recréer
+                                $detailExiste = true;
+                                break;
+                            }
+                        }
+                        if (!$detailExiste) {
+                            // Le record de mutualisation n'existe plus, il doit être supprimé
+                            $this->em->remove($record);
+                        }
+                    }
+
+                    foreach ($mutualisations as $instrumentMutualisationId) {
+                        $detailExiste = false;
+                        foreach ($instrumentExistant->getInstrumentMutualisations() as $record) {
+                            if ($record->getInstrumentCible()->getId() == $instrumentMutualisationId) {
+                                // Le record de mutualisation existe déjà, pas besoin de le recréer
+                                $detailExiste = true;
+                                break;
+                            }
+                        }
+                        if (!$detailExiste) {
+                            // Le record de mutualisation n'existe pas encore, il doit être créé
+                            $newRecord = new \App\Entity\InstrumentMutualisation();
+                            $newRecord->setInstrumentSource($instrumentExistant);
+                            $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
+                            $newRecord->setInstrumentCible($instrumentCible);
+                            $this->em->persist($newRecord);
+                        }
+                    }
+
+                    $financementExistant = $instrumentExistant->getFinancementInstruments();
+                    $sourcesFinancement = $instrument["source_financement"] ?? [];
+                    foreach ($financementExistant as $financement) {
+                        $financeurId = $financement->getFinanceur()->getId();
+                        $financementExiste = false;
+                        foreach ($sourcesFinancement as $financeur) {
+                            if ($financeur["financeur_id"] == $financeurId) {
+                                $financementExiste = true;
+
+                                // Overrider les champs du financement
+                                $financement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
+                                break;
+                            }
+                        }
+                        if (!$financementExiste) {
+                            $this->em->remove($financement);
+                        }
+                    }
+
+                    // Ajouter les nouveaux financements
+                    foreach ($sourcesFinancement as $financeur) {
+                        $financeurExiste = false;
+                        foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
+                            if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
+                                $financeurExiste = true;
+                                break;
+                            }
+                        }
+                        if (!$financeurExiste) {
+                            $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+                            $newFinancement = new \App\Entity\FinancementInstrument();
+                            $newFinancement->setFinanceur($newFinanceur);
+                            $newFinancement->setInstrument($instrumentExistant);
+                            $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
+                            $this->em->persist($newFinancement);
+                        }
+                    }
+                }
+            }
+            if (!$existeDeja) {
+                // L'instrument n'existe plus, il doit être supprimé
+                $plateformeHisto->removeInstrument($instrumentExistant);
+                $this->em->remove($instrumentExistant);
+            }
+        }
+
+        // Ajouter les nouveaux instruments
+        foreach ($value as $instrument) {
+            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
+                $newInstrument = new \App\Entity\Instrument();
+                $newInstrument->setPlateformeHistorique($plateformeHisto);
+                $newInstrument->setNom($instrument["nom"]);
+                $newInstrument->setMarque($instrument["marque"]);
+                $newInstrument->setModele($instrument["modele"]);
+                if (($instrument["annee_acquisition"] ?? null) !== null) {
+                    $newInstrument->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                } else {
+                    $newInstrument->setAnneeAcquisition(null);
+                }
+                $newInstrument->setCout($instrument["cout"]);
+                $newInstrument->setValeurRemplacement($instrument["valeur_remplacement"]);
+                $newInstrument->setDureeUtilisation($instrument["duree_utilisation"]);
+                $newInstrument->setFutur(false);
+
+                $contratMaintenanceId = $instrument["contrat_maintenance_id"] ?? $instrument["type_contrat_id"] ?? null;
+                $newInstrument->setContratMaintenance($contratMaintenanceId !== null ? $this->em->getReference(ContratMaintenance::class, $contratMaintenanceId) : null);
+                $newInstrument->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"] ?? null);
+                $newInstrument->setFournisseurContrat($instrument["fournisseur_contrat"] ?? null);
+                $newInstrument->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"] ?? false);
+                $newInstrument->setMutualiseSite($instrument["mutualisation_site"] ?? false);
+                $newInstrument->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"] ?? false);
+                $newInstrument->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
+
+                $plateformeHisto->addInstrument($newInstrument);
+                $this->em->persist($newInstrument);
+
+                if (array_key_exists("mutualisation_autre_instrument_detaille", $instrument)) {
+                    foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
+                        $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
+                        $newRecord = new \App\Entity\InstrumentMutualisation();
+                        $newRecord->setInstrumentSource($newInstrument);
+                        $newRecord->setInstrumentCible($instrumentCible);
+                        $this->em->persist($newRecord);
+                    }
+                }
+
+                foreach (($instrument["source_financement"] ?? []) as $financeur) {
+                    $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+                    $newFinancement = new FinancementInstrument();
+                    $newFinancement->setFinanceur($financeurEntite);
+                    $newFinancement->setInstrument($newInstrument);
+                    $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
+                    $this->em->persist($newFinancement);
+                }
+            }
+        }
+    }
+
+    private function synchroniserInstrumentsFuturs(PlateformeHistorique $plateformeHisto, array $value): void
+    {
+        $instrumentsActuels = $plateformeHisto->getInstruments();
+        foreach ($instrumentsActuels as $instrumentExistant) {
+            // Ne traiter ici que les instruments futurs.
+            if (!$instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            $instrumentId = $instrumentExistant->getId();
+            $existeDeja = false;
+            foreach ($value as $instrument) {
+                if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
+                if ($instrument["id"] == $instrumentId) {
+                    $existeDeja = true;
+                    // Overrider les champs de l'instrument
+                    $instrumentExistant->setNom($instrument["nom"]);
+                    $instrumentExistant->setMarque($instrument["marque"]);
+                    $instrumentExistant->setModele($instrument["modele"]);
+                    $instrumentExistant->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                    $instrumentExistant->setCout($instrument["cout"]);
+                    $instrumentExistant->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
+                    $instrumentExistant->setFutur(true);
+
+                    $financementExistant = $instrumentExistant->getFinancementInstruments();
+                    $sourcesFinancement = $instrument["source_financement"] ?? [];
+                    foreach ($financementExistant as $financement) {
+                        $financeurId = $financement->getFinanceur()->getId();
+                        $financementExiste = false;
+                        foreach ($sourcesFinancement as $financeur) {
+                            if ($financeur["financeur_id"] == $financeurId) {
+                                $financementExiste = true;
+
+                                // Overrider les champs du financement
+                                $financement->setTaux($financeur["taux"]);
+                                break;
+                            }
+                        }
+                        if (!$financementExiste) {
+                            $this->em->remove($financement);
+                        }
+                    }
+
+                    // Ajouter les nouveaux financements
+                    foreach ($sourcesFinancement as $financeur) {
+                        $financeurExiste = false;
+                        foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
+                            if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
+                                $financeurExiste = true;
+                                break;
+                            }
+                        }
+                        if (!$financeurExiste) {
+                            $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+                            $newFinancement = new FinancementInstrument();
+                            $newFinancement->setFinanceur($newFinanceur);
+                            $newFinancement->setInstrument($instrumentExistant);
+                            $newFinancement->setTaux($financeur["taux"]);
+                            $this->em->persist($newFinancement);
+                        }
+                    }
+                }
+            }
+            if (!$existeDeja) {
+                // L'instrument n'existe plus, il doit être supprimé
+                $plateformeHisto->removeInstrument($instrumentExistant);
+                $this->em->remove($instrumentExistant);
+            }
+        }
+
+        // Ajouter les nouveaux instruments
+        foreach ($value as $instrument) {
+            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
+                $newInstrument = new \App\Entity\Instrument();
+                $newInstrument->setPlateformeHistorique($plateformeHisto);
+                $newInstrument->setNom($instrument["nom"]);
+                $newInstrument->setMarque($instrument["marque"]);
+                $newInstrument->setModele($instrument["modele"]);
+                $newInstrument->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                $newInstrument->setCout($instrument["cout"]);
+                $newInstrument->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
+                $newInstrument->setFutur(true);
+
+                $plateformeHisto->addInstrument($newInstrument);
+                $this->em->persist($newInstrument);
+
+                foreach (($instrument["source_financement"] ?? []) as $financeur) {
+                    $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+                    $newFinancement = new \App\Entity\FinancementInstrument();
+                    $newFinancement->setFinanceur($financeurEntite);
+                    $newFinancement->setInstrument($newInstrument);
+                    $newFinancement->setTaux($financeur["taux"]);
+                    $this->em->persist($newFinancement);
+                }
+            }
+        }
+    }
+
     function ecraserChampsPlateforme(PlateformeHistorique $plateformeHisto, PlateformeHistoriqueDTO $dto): PlateformeHistorique
     {
         foreach ($dto as $key => $value) {
@@ -485,267 +756,32 @@ class PlateformeService
                         }
                     }
                     break;
+                case "equipements":
+                    if (!is_array($value)) {
+                        break;
+                    }
+
+                    $instrumentsActuels = array_values(array_filter(
+                        $value,
+                        static fn(array $instrument): bool => ($instrument["futur"] ?? false) !== true
+                    ));
+
+                    $instrumentsFuturs = array_values(array_filter(
+                        $value,
+                        static fn(array $instrument): bool => ($instrument["futur"] ?? false) === true
+                    ));
+
+                    $this->synchroniserInstrumentsActuels($plateformeHisto, $instrumentsActuels);
+                    $this->synchroniserInstrumentsFuturs($plateformeHisto, $instrumentsFuturs);
+                    break;
                 case "instrument_actuel":
-                    $instrumentsActuels = $plateformeHisto->getInstruments();
-                    foreach ($instrumentsActuels as $instrumentExistant) {
-                        // Ne traiter ici que les instruments actuels.
-                        if ($instrumentExistant->isFutur()) {
-                            continue;
-                        }
-
-                        $instrumentId = $instrumentExistant->getId();
-                        $existeDeja = false;
-                        foreach ($value as $instrument) {
-                            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
-                            if ($instrument["id"] == $instrumentId) {
-                                $existeDeja = true;
-                                // Overrider les champs de l'instrument
-                                $instrumentExistant->setNom($instrument["nom"]);
-                                $instrumentExistant->setMarque($instrument["marque"]);
-                                $instrumentExistant->setModele($instrument["modele"]);
-                                if ($instrument["annee_acquisition"] !== null) {
-                                    $instrumentExistant->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
-                                } else {
-                                    $instrumentExistant->setAnneeAcquisition(null);
-                                }
-                                $instrumentExistant->setCout($instrument["cout"]);
-                                $instrumentExistant->setValeurRemplacement($instrument["valeur_remplacement"]);
-                                $instrumentExistant->setDureeUtilisation($instrument["duree_utilisation"]);
-                                $instrumentExistant->setFutur(false);
-
-                                $instrumentExistant->setContratMaintenance($this->em->getReference(ContratMaintenance::class, $instrument["type_contrat_id"]));
-                                $instrumentExistant->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"]);
-                                $instrumentExistant->setFournisseurContrat($instrument["fournisseur_contrat"]);
-                                $instrumentExistant->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"]);
-                                $instrumentExistant->setMutualiseSite($instrument["mutualisation_site"]);
-                                $instrumentExistant->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"]);
-                                $instrumentExistant->setCoutMaintenance($instrument["cout_maintenance"]);
-
-                                $mutualisationAutreInstrumentDetailleActuelle = $instrumentExistant->getInstrumentMutualisations();
-                                foreach ($mutualisationAutreInstrumentDetailleActuelle as $record) {
-                                    $instrumentMutualisationId = $record->getInstrumentCible()->getId();
-                                    $existeDeja = false;
-                                    foreach ($instrument["mutualisation_autre_instrument_detaille"] as $mutualisation) {
-                                        if ($mutualisation == $instrumentMutualisationId) {
-                                            // Le record de mutualisation existe déjà, pas besoin de le recréer
-                                            $existeDeja = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$existeDeja) {
-                                        // Le record de mutualisation n'existe plus, il doit être supprimé
-                                        $this->em->remove($record);
-                                    }
-                                }
-
-                                foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
-                                    $existeDeja = false;
-                                    foreach ($instrumentExistant->getInstrumentMutualisations() as $record) {
-                                        if ($record->getInstrumentCible()->getId() == $instrumentMutualisationId) {
-                                            // Le record de mutualisation existe déjà, pas besoin de le recréer
-                                            $existeDeja = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$existeDeja) {
-                                        // Le record de mutualisation n'existe pas encore, il doit être créé
-                                        $newRecord = new \App\Entity\InstrumentMutualisation();
-                                        $newRecord->setInstrumentSource($instrumentExistant);
-                                        $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
-                                        $newRecord->setInstrumentCible($instrumentCible);
-                                        $this->em->persist($newRecord);
-                                    }
-                                }
-
-                                $financementExistant = $instrumentExistant->getFinancementInstruments();
-                                foreach ($financementExistant as $financement) {
-                                    $financeurId = $financement->getFinanceur()->getId();
-                                    $financementExiste = false;
-                                    foreach ($instrument["source_financement"] as $financeur) {
-                                        if ($financeur["financeur_id"] == $financeurId) {
-                                            $financementExiste = true;
-
-                                            // Overrider les champs du financement
-                                            $financement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
-                                            break;
-                                        }
-                                    }
-                                    if (!$financementExiste) {
-                                        $this->em->remove($financement);
-                                    }
-                                }
-
-                                // Ajouter les nouveaux financements
-                                foreach ($instrument["source_financement"] as $financeur) {
-                                    $financeurExiste = false;
-                                    foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
-                                        if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
-                                            $financeurExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$financeurExiste) {
-                                        $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                        $newFinancement = new \App\Entity\FinancementInstrument();
-                                        $newFinancement->setFinanceur($newFinanceur);
-                                        $newFinancement->setInstrument($instrumentExistant);
-                                        $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
-                                        $this->em->persist($newFinancement);
-                                    }
-                                }
-                            }
-                        }
-                        if (!$existeDeja) {
-                            // L'instrument n'existe plus, il doit être supprimé
-                            $plateformeHisto->removeInstrument($instrumentExistant);
-                            $this->em->remove($instrumentExistant);
-                        }
+                    if (is_array($value)) {
+                        $this->synchroniserInstrumentsActuels($plateformeHisto, $value);
                     }
-
-                    // Ajouter les nouveaux instruments
-                    foreach ($value as $instrument) {
-                        if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
-                            $newInstrument = new \App\Entity\Instrument();
-                            $newInstrument->setPlateformeHistorique($plateformeHisto);
-                            $newInstrument->setNom($instrument["nom"]);
-                            $newInstrument->setMarque($instrument["marque"]);
-                            $newInstrument->setModele($instrument["modele"]);
-                            if ($instrument["annee_acquisition"] !== null) {
-                                $newInstrument->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
-                            } else {
-                                $newInstrument->setAnneeAcquisition(null);
-                            }
-                            $newInstrument->setCout($instrument["cout"]);
-                            $newInstrument->setValeurRemplacement($instrument["valeur_remplacement"]);
-                            $newInstrument->setDureeUtilisation($instrument["duree_utilisation"]);
-                            $newInstrument->setFutur(false);
-
-                            $newInstrument->setContratMaintenance($this->em->getReference(ContratMaintenance::class, $instrument["contrat_maintenance_id"]));
-                            $newInstrument->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"]);
-                            $newInstrument->setFournisseurContrat($instrument["fournisseur_contrat"]);
-                            $newInstrument->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"]);
-                            $newInstrument->setMutualiseSite($instrument["mutualisation_site"]);
-                            $newInstrument->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"]);
-                            $newInstrument->setCoutMaintenance($instrument["cout_maintenance"]);
-
-                            $plateformeHisto->addInstrument($newInstrument);
-                            $this->em->persist($newInstrument);
-
-                            if (array_key_exists("mutualisation_autre_instrument_detaille", $instrument)) {
-                                foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
-                                    $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
-                                    $newRecord = new \App\Entity\InstrumentMutualisation();
-                                    $newRecord->setInstrumentSource($newInstrument);
-                                    $newRecord->setInstrumentCible($instrumentCible);
-                                    $this->em->persist($newRecord);
-                                }
-                            }
-
-                            foreach ($instrument["source_financement"] as $financeur) {
-                                $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                $newFinancement = new FinancementInstrument();
-                                $newFinancement->setFinanceur($financeurEntite);
-                                $newFinancement->setInstrument($newInstrument);
-                                $newFinancement->setTaux($financeur["taux"]);
-                                $this->em->persist($newFinancement);
-                            }
-                        }
-                    }
-
                     break;
                 case "instrument_futur":
-                    $instrumentsActuels = $plateformeHisto->getInstruments();
-                    foreach ($instrumentsActuels as $instrumentExistant) {
-                        // Ne traiter ici que les instruments futurs.
-                        if (!$instrumentExistant->isFutur()) {
-                            continue;
-                        }
-
-                        $instrumentId = $instrumentExistant->getId();
-                        $existeDeja = false;
-                        foreach ($value as $instrument) {
-                            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
-                            if ($instrument["id"] == $instrumentId) {
-                                $existeDeja = true;
-                                // Overrider les champs de l'instrument
-                                $instrumentExistant->setNom($instrument["nom"]);
-                                $instrumentExistant->setMarque($instrument["marque"]);
-                                $instrumentExistant->setModele($instrument["modele"]);
-                                $instrumentExistant->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
-                                $instrumentExistant->setCout($instrument["cout"]);
-                                $instrumentExistant->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
-                                $instrumentExistant->setFutur(true);
-
-                                $financementExistant = $instrumentExistant->getFinancementInstruments();
-                                foreach ($financementExistant as $financement) {
-                                    $financeurId = $financement->getFinanceur()->getId();
-                                    $financementExiste = false;
-                                    foreach ($instrument["source_financement"] as $financeur) {
-                                        if ($financeur["financeur_id"] == $financeurId) {
-                                            $financementExiste = true;
-
-                                            // Overrider les champs du financement
-                                            $financement->setTaux($financeur["taux"]);
-                                            break;
-                                        }
-                                    }
-                                    if ($financementExiste) {
-                                        $this->em->remove($financement);
-                                    }
-                                }
-
-                                // Ajouter les nouveaux financements
-                                foreach ($instrument["source_financement"] as $financeur) {
-                                    $financeurExiste = false;
-                                    foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
-                                        if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
-                                            $financeurExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$financeurExiste) {
-                                        $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                        $newFinancement = new FinancementInstrument();
-                                        $newFinancement->setFinanceur($newFinanceur);
-                                        $newFinancement->setInstrument($instrumentExistant);
-                                        $newFinancement->setTaux($financeur["taux"]);
-                                        $this->em->persist($newFinancement);
-                                    }
-                                }
-                            }
-                        }
-                        if (!$existeDeja) {
-                            // L'instrument n'existe plus, il doit être supprimé
-                            $plateformeHisto->removeInstrument($instrumentExistant);
-                            $this->em->remove($instrumentExistant);
-                        }
-                    }
-
-                    // Ajouter les nouveaux instruments
-                    foreach ($value as $instrument) {
-                        if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
-                            $newInstrument = new \App\Entity\Instrument();
-                            $newInstrument->setPlateformeHistorique($plateformeHisto);
-                            $newInstrument->setNom($instrument["nom"]);
-                            $newInstrument->setMarque($instrument["marque"]);
-                            $newInstrument->setModele($instrument["modele"]);
-                            $newInstrument->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
-                            $newInstrument->setCout($instrument["cout"]);
-                            $newInstrument->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
-                            $newInstrument->setFutur(true);
-
-                            $plateformeHisto->addInstrument($newInstrument);
-                            $this->em->persist($newInstrument);
-
-                            foreach ($instrument["source_financement"] as $financeur) {
-                                $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                                $newFinancement = new \App\Entity\FinancementInstrument();
-                                $newFinancement->setFinanceur($financeurEntite);
-                                $newFinancement->setInstrument($newInstrument);
-                                $newFinancement->setTaux($financeur["taux"]);
-                                $this->em->persist($newFinancement);
-                            }
-                        }
+                    if (is_array($value)) {
+                        $this->synchroniserInstrumentsFuturs($plateformeHisto, $value);
                     }
                     break;
                 case "materiel_consommable":

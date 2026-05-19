@@ -356,8 +356,9 @@ class PlateformeControllerTest extends WebTestCase
                     "rang_denominateur" => 2
                 ]
             ],
-            "instrument_actuel" => [
+            "equipements" => [
                 [
+                    "futur" => false,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
                     "modele" => "Modèle Test",
@@ -382,10 +383,9 @@ class PlateformeControllerTest extends WebTestCase
                     "mutualisation_site" => false,
                     "mutualisation_umr_osu" => false,
                     "cout_maintenance" => 10000.2,
-                ]
-            ],
-            "instrument_futur" => [
+                ],
                 [
+                    "futur" => true,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
                     "modele" => "Modèle Test",
@@ -404,7 +404,6 @@ class PlateformeControllerTest extends WebTestCase
                     ],
                 ]
             ],
-
             "materiel_consommable" => 10.2,
             "contrat_entretien" => 10.3,
             "etude_prestation" => 10.4,
@@ -1565,7 +1564,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["nom"] = null;
+        $plateformeData["equipements"][0]["nom"] = null;
 
         $client->request(
             'UPDATE',
@@ -1625,7 +1624,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["annee_acquisition"] = null;
+        $plateformeData["equipements"][0]["annee_acquisition"] = null;
 
         $client->request(
             'UPDATE',
@@ -1685,7 +1684,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["cout"] = null;
+        $plateformeData["equipements"][0]["cout"] = null;
 
         $client->request(
             'UPDATE',
@@ -1745,7 +1744,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["valeur_remplacement"] = null;
+        $plateformeData["equipements"][0]["valeur_remplacement"] = null;
 
         $client->request(
             'UPDATE',
@@ -1805,7 +1804,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["duree_utilisation"] = null;
+        $plateformeData["equipements"][0]["duree_utilisation"] = null;
 
         $client->request(
             'UPDATE',
@@ -1865,7 +1864,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["source_financement"] = [];
+        $plateformeData["equipements"][0]["source_financement"] = [];
 
         $client->request(
             'UPDATE',
@@ -1925,7 +1924,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["source_financement"][0]["taux"] = null;
+        $plateformeData["equipements"][0]["source_financement"][0]["taux"] = null;
 
         $client->request(
             'UPDATE',
@@ -1985,7 +1984,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["source_financement"][0]["financeur_id"] = null;
+        $plateformeData["equipements"][0]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
             'UPDATE',
@@ -2045,7 +2044,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_actuel"][0]["source_financement"][0]["taux"] = 75;
+        $plateformeData["equipements"][0]["source_financement"][0]["taux"] = 75;
 
         $client->request(
             'UPDATE',
@@ -2105,7 +2104,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["nom"] = null;
+        $plateformeData["equipements"][1]["nom"] = null;
 
         $client->request(
             'UPDATE',
@@ -2165,7 +2164,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["annee_achat_envisagee"] = null;
+        $plateformeData["equipements"][1]["annee_achat_envisagee"] = null;
 
         $client->request(
             'UPDATE',
@@ -2225,7 +2224,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["cout"] = null;
+        $plateformeData["equipements"][1]["cout"] = null;
 
         $client->request(
             'UPDATE',
@@ -2285,7 +2284,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["source_financement"] = [];
+        $plateformeData["equipements"][1]["source_financement"] = [];
 
         $client->request(
             'UPDATE',
@@ -2345,7 +2344,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["source_financement"][0]["taux"] = null;
+        $plateformeData["equipements"][1]["source_financement"][0]["taux"] = null;
 
         $client->request(
             'UPDATE',
@@ -2405,7 +2404,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["source_financement"][0]["financeur_id"] = null;
+        $plateformeData["equipements"][1]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
             'UPDATE',
@@ -2465,7 +2464,7 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["instrument_futur"][0]["source_financement"][0]["taux"] = 75;
+        $plateformeData["equipements"][1]["source_financement"][0]["taux"] = 75;
 
         $client->request(
             'UPDATE',
