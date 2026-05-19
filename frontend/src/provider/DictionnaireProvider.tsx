@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
-import { fetchBaps, fetchCnus, fetchCorps, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type Unite, type Ville } from '../services/dictionnaireService';
+import { fetchBaps, fetchCnus, fetchCorps, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Ville } from '../services/dictionnaireService';
 import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
 
 type SelectOption = {
@@ -29,6 +29,7 @@ export type DictionnaireType = {
     sourcesFinancement: SourceFinancement[];
     operations: Operation[];
     operationsOptions: SelectOption[];
+    typeContratMaintenance: TypeContratMaintenance[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
@@ -53,6 +54,7 @@ const defaultDictionnaire: DictionnaireType = {
     sourcesFinancement: [],
     operations: [],
     operationsOptions: [],
+    typeContratMaintenance: [],
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -73,6 +75,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             const financeurTreeView = await fetchTreeViewFinancement();
             const sourcesFinancement = await fetchSourcesFinancement();
             const operations = await fetchOperations();
+            const typeContratMaintenance = await fetchTypesContratsMaintenance();
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
@@ -98,6 +101,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     sourcesFinancement,
                     operations,
                     operationsOptions,
+                    typeContratMaintenance,
                 }));
             }
         };

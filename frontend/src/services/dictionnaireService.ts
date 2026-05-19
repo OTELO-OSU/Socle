@@ -80,6 +80,11 @@ export type Operation = {
     description: string | null;
 }
 
+export type TypeContratMaintenance = {
+    id: number;
+    nom: string;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -142,6 +147,12 @@ export async function fetchSourcesFinancement() {
 
 export async function fetchOperations() {
     const { data } = await symfony.get<Operation[]>("/dictionnaire/operations");
+
+    return data;
+}
+
+export async function fetchTypesContratsMaintenance() {
+    const { data } = await symfony.get<TypeContratMaintenance[]>("/dictionnaire/type_contrat_maintenance");
 
     return data;
 }

@@ -4,6 +4,7 @@ import { allyProps } from "./allyProps";
 import { CustomTabPanel } from "../CustomTabPanel";
 import { EquipementActuels } from "./equipements/EquipementsActuels";
 import { EquipementFuturs } from "./equipements/EquipementsFuturs";
+import { EquipementActuelsMaintenance } from "./equipements/Maintenance";
 
 export function Equipements() {
     const [value, setValue] = useState(0);
@@ -27,6 +28,7 @@ export function Equipements() {
                 <EquipementFuturs />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
+                <EquipementActuelsMaintenance />
             </CustomTabPanel>
         </>
     )

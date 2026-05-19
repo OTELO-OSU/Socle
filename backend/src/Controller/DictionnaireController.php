@@ -59,6 +59,14 @@ final class DictionnaireController extends AbstractController
         return $this->json($typeContrats, 200, [], ['groups' => 'type_contrat:list']);
     }
 
+    #[Route('/dictionnaire/type_contrat_maintenance', methods: ['GET'])]
+    public function getTypeContratsMaintenance(): Response
+    {
+        $typeContrats = $this->ds->getTypeContratsMaintenance();
+
+        return $this->json($typeContrats, 200, [], ['groups' => 'type_contrat_maintenance:list']);
+    }
+
     #[Route('/dictionnaire/villes', methods: ['GET'])]
     public function getVilles(): Response
     {

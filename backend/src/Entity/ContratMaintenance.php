@@ -6,15 +6,18 @@ use App\Repository\ContratMaintenanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ContratMaintenanceRepository::class)]
 class ContratMaintenance
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(['type_contrat_maintenance:list'])]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['type_contrat_maintenance:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 

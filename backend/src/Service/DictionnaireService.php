@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Bap;
 use App\Entity\Categorie;
 use App\Entity\Cnu;
+use App\Entity\ContratMaintenance;
 use App\Entity\Corps;
 use App\Entity\Entite;
 use App\Entity\Operation;
@@ -37,6 +38,11 @@ class DictionnaireService
     function getTypeContrat(): array
     {
         return $this->em->getRepository(TypeContrat::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getTypeContratsMaintenance(): array
+    {
+        return $this->em->getRepository(ContratMaintenance::class)->findBy([], ["nom" => "ASC"]);
     }
 
     function getVille(): array
