@@ -6,15 +6,18 @@ use App\Repository\DeterminationTarifMethodeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: DeterminationTarifMethodeRepository::class)]
 class DeterminationTarifMethode
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups("determination_tarif:list")]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups("determination_tarif:list")]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
