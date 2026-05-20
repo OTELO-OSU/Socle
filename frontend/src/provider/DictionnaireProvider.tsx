@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
-import { fetchBaps, fetchCnus, fetchCorps, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Ville } from '../services/dictionnaireService';
+import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Ville } from '../services/dictionnaireService';
 import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
 
 type SelectOption = {
@@ -30,6 +30,8 @@ export type DictionnaireType = {
     operations: Operation[];
     operationsOptions: SelectOption[];
     typeContratMaintenance: TypeContratMaintenance[];
+    determinationTarifPlateforme: MethodeDeterminationTarif[];
+    determinationTarifPlateformeOptions: SelectOption[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
@@ -55,6 +57,8 @@ const defaultDictionnaire: DictionnaireType = {
     operations: [],
     operationsOptions: [],
     typeContratMaintenance: [],
+    determinationTarifPlateforme: [],
+    determinationTarifPlateformeOptions: [],
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -76,12 +80,14 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             const sourcesFinancement = await fetchSourcesFinancement();
             const operations = await fetchOperations();
             const typeContratMaintenance = await fetchTypesContratsMaintenance();
+            const determinationTarifPlateforme = await fetchDeterminationTarifPlateforme();
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
                 const employeurOptions = employeur.map((item) => ({ value: item.id, label: formatEmployeurLabel(item) }));
                 const typeContratOptions = typeContrat.map((item) => ({ value: item.id, label: item.nom }));
                 const operationsOptions = operations.map((item) => ({ value: item.id, label: item.nom }));
+                const determinationTarifPlateformeOptions = determinationTarifPlateforme.map((item) => ({ value: item.id, label: item.nom }));
 
                 setDictionnaire((current) => ({
                     ...current,
@@ -102,6 +108,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     operations,
                     operationsOptions,
                     typeContratMaintenance,
+                    determinationTarifPlateforme,
+                    determinationTarifPlateformeOptions,
                 }));
             }
         };

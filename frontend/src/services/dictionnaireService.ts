@@ -85,6 +85,11 @@ export type TypeContratMaintenance = {
     nom: string;
 }
 
+export type MethodeDeterminationTarif = {
+    id: number;
+    nom: string;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -153,6 +158,12 @@ export async function fetchOperations() {
 
 export async function fetchTypesContratsMaintenance() {
     const { data } = await symfony.get<TypeContratMaintenance[]>("/dictionnaire/type_contrat_maintenance");
+
+    return data;
+}
+
+export async function fetchDeterminationTarifPlateforme() {
+    const { data } = await symfony.get<MethodeDeterminationTarif[]>("/dictionnaire/determination_tarif");
 
     return data;
 }
