@@ -7,6 +7,7 @@ use App\Entity\Categorie;
 use App\Entity\Cnu;
 use App\Entity\ContratMaintenance;
 use App\Entity\Corps;
+use App\Entity\DeterminationTarifMethode;
 use App\Entity\Entite;
 use App\Entity\Operation;
 use App\Entity\SectionCnrs;
@@ -110,5 +111,10 @@ class DictionnaireService
     function getOperations(): array
     {
         return $this->em->getRepository(Operation::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getDeterminationTarif(): array
+    {
+        return $this->em->getRepository(DeterminationTarifMethode::class)->findBy([], ["nom" => "ASC"]);
     }
 }

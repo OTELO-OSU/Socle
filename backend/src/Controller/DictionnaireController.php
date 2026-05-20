@@ -101,4 +101,11 @@ final class DictionnaireController extends AbstractController
         $operations = $this->ds->getOperations();
         return $this->json($operations, 200, [], ['groups' => 'operation:list']);
     }
+
+    #[Route('/dictionnaire/determination_tarif', methods: ['GET'])]
+    public function getDeterminationTarif(): Response
+    {
+        $determinationTarif = $this->ds->getDeterminationTarif();
+        return $this->json($determinationTarif, 200, [], ['groups' => 'determination_tarif:list']);
+    }
 }
