@@ -3,6 +3,7 @@ import { useState } from "react";
 import { allyProps } from "./allyProps";
 import { CustomTabPanel } from "../CustomTabPanel";
 import Couts from "./fonctionnement/Couts";
+import Ressources from "./fonctionnement/Ressources";
 
 export function Fonctionnement() {
     const [value, setValue] = useState(0);
@@ -22,7 +23,7 @@ export function Fonctionnement() {
                 <Couts />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <h1>Ressources</h1>
+                <Ressources />
             </CustomTabPanel>
         </>
     )

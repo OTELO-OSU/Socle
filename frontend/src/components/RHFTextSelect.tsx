@@ -22,7 +22,7 @@ export function RHFSelect<TFieldValues extends FieldValues = FieldValues>({
 }: RHFSelectProps<TFieldValues>) {
     const isMultiple = props.multiple === true;
     const labelId = `${name}-label`;
-    const { sx, ...selectProps } = props;
+    const { sx, size, ...selectProps } = props;
     return (
         <Controller
             name={name}
@@ -30,7 +30,7 @@ export function RHFSelect<TFieldValues extends FieldValues = FieldValues>({
             rules={rules}
             defaultValue={(isMultiple ? [] : "") as never}
             render={({ field, fieldState }) => (
-                <FormControl fullWidth error={!!fieldState.error} sx={sx}>
+                <FormControl fullWidth error={!!fieldState.error} sx={sx} size={size}>
                     <InputLabel id={labelId}>{label}</InputLabel>
                     <Select
                         labelId={labelId}
@@ -39,6 +39,7 @@ export function RHFSelect<TFieldValues extends FieldValues = FieldValues>({
                         {...selectProps}
                         error={!!fieldState.error}
                         label={label}
+                        size={size}
                     >
                         {items?.map((item) => (
                             <MenuItem key={item.value} value={item.value}>
