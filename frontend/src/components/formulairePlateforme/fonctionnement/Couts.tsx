@@ -21,7 +21,7 @@ export default function Couts() {
     }
     return (
         <Box>
-            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
+            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 2 }}>
                 Coût annuel de fonctionnement</Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
                 <CoutTextFieldHint label="Matériel et consommables" name="materiel_consommable" helperText="Tout petit équipement nécessaire au fonctionnement quotidien de la plateforme (gaz, contenant, solvants, acides, EPI...)" />
@@ -47,7 +47,7 @@ export default function Couts() {
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Comment sont déterminés les tarifs de la plateforme</Typography>
-            <RHFSelect control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={dictionnaireContext.determinationTarifPlateformeOptions} />
+            <RHFSelect sx={{ mt: 2 }} control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={dictionnaireContext.determinationTarifPlateformeOptions} />
         </Box>
 
     );
