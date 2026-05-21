@@ -8,7 +8,7 @@ import { RHFSelect } from "../RHFTextSelect";
 export function Presentation() {
     const { control } = useFormContext();
 
-    const { villeOptions, uniteOptions, tutelle } = useContext(DictionnaireContext);
+    const { villeOptions, uniteOptions, employeurOptions } = useContext(DictionnaireContext);
 
     return (
         <>
@@ -67,8 +67,8 @@ export function Presentation() {
                 <Grid size="grow">
                     <RHFSelect name="laboratoireOperateur" control={control} label="Laboratoire opérateur" items={uniteOptions} />
                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                        <RHFSelect name="tutellePrincipale" control={control} label="Tutelle principale" multiple items={tutelle} />
-                        <RHFSelect name="tutelleSecondaire" control={control} label="Tutelle secondaire" multiple items={tutelle} />
+                        <RHFSelect name="tutellePrincipale" control={control} label="Tutelle(s) principale(s)" multiple items={employeurOptions} />
+                        <RHFSelect name="tutelleSecondaire" control={control} label="Tutelle(s) secondaire(s)" multiple items={employeurOptions} />
                     </Stack>
                 </Grid>
             </Grid>

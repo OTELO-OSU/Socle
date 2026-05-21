@@ -3,7 +3,7 @@ import { DictionnaireContext } from '../context/dictionnaireContext';
 import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Ville } from '../services/dictionnaireService';
 import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
 
-type SelectOption = {
+export type SelectOption = {
     value: string | number;
     label: string;
 };
@@ -11,10 +11,6 @@ type SelectOption = {
 export type DictionnaireType = {
     ville: Ville[],
     villeOptions: SelectOption[],
-    tutelle: {
-        value: string;
-        label: string;
-    }[],
     unite: Unite[];
     uniteOptions: SelectOption[],
     bap: Bap[];
@@ -37,11 +33,6 @@ export type DictionnaireType = {
 const defaultDictionnaire: DictionnaireType = {
     ville: [],
     villeOptions: [],
-    tutelle: [
-        { value: 'Université de Paris', label: 'Université de Paris' },
-        { value: 'Université de Lyon', label: 'Université de Lyon' },
-        { value: 'Université de Marseille', label: 'Université de Marseille' },
-    ],
     unite: [],
     uniteOptions: [],
     bap: [],
@@ -67,20 +58,56 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
     useEffect(() => {
         let isMounted = true;
 
+        const getSettledValue = <T,>(
+            result: PromiseSettledResult<T>,
+            fallback: T,
+        ) => (result.status === 'fulfilled' ? result.value : fallback);
+
         const loadDictionnaire = async () => {
-            const unite = await fetchUnites();
-            const ville = await fetchVilles();
-            const corps = await fetchCorps();
-            const bap = await fetchBaps();
-            const sectionCnrs = await fetchSectionCnrs();
-            const typeContrat = await fetchTypeContrats();
-            const cnu = await fetchCnus();
-            const employeur = await fetchEmployeurs();
-            const financeurTreeView = await fetchTreeViewFinancement();
-            const sourcesFinancement = await fetchSourcesFinancement();
-            const operations = await fetchOperations();
-            const typeContratMaintenance = await fetchTypesContratsMaintenance();
-            const determinationTarifPlateforme = await fetchDeterminationTarifPlateforme();
+            const [
+                uniteResult,
+                villeResult,
+                corpsResult,
+                bapResult,
+                sectionCnrsResult,
+                typeContratResult,
+                cnuResult,
+                employeurResult,
+                financeurTreeViewResult,
+                sourcesFinancementResult,
+                operationsResult,
+                typeContratMaintenanceResult,
+                determinationTarifPlateformeResult,
+            ] = await Promise.allSettled([
+                fetchUnites(),
+                fetchVilles(),
+                fetchCorps(),
+                fetchBaps(),
+                fetchSectionCnrs(),
+                fetchTypeContrats(),
+                fetchCnus(),
+                fetchEmployeurs(),
+                fetchTreeViewFinancement(),
+                fetchSourcesFinancement(),
+                fetchOperations(),
+                fetchTypesContratsMaintenance(),
+                fetchDeterminationTarifPlateforme(),
+            ]);
+
+            const unite = getSettledValue(uniteResult, defaultDictionnaire.unite);
+            const ville = getSettledValue(villeResult, defaultDictionnaire.ville);
+            const corps = getSettledValue(corpsResult, defaultDictionnaire.corps);
+            const bap = getSettledValue(bapResult, defaultDictionnaire.bap);
+            const sectionCnrs = getSettledValue(sectionCnrsResult, defaultDictionnaire.sectionCnrs);
+            const typeContrat = getSettledValue(typeContratResult, defaultDictionnaire.typeContrat);
+            const cnu = getSettledValue(cnuResult, defaultDictionnaire.cnu);
+            const employeur = getSettledValue(employeurResult, defaultDictionnaire.employeur);
+            const financeurTreeView = getSettledValue(financeurTreeViewResult, defaultDictionnaire.financeurTreeView);
+            const sourcesFinancement = getSettledValue(sourcesFinancementResult, defaultDictionnaire.sourcesFinancement);
+            const operations = getSettledValue(operationsResult, defaultDictionnaire.operations);
+            const typeContratMaintenance = getSettledValue(typeContratMaintenanceResult, defaultDictionnaire.typeContratMaintenance);
+            const determinationTarifPlateforme = getSettledValue(determinationTarifPlateformeResult, defaultDictionnaire.determinationTarifPlateforme);
+
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));

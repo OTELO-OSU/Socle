@@ -15,10 +15,10 @@ export const formatVilleLabel = (ville: Ville) => {
     return str
 }
 
-export const formatEmployeurLabel = (employeur: Employeur) => {
+export const formatEmployeurLabel = (employeur: Employeur | null | undefined) => {
     let str = ""
-    if (employeur.acronyme) str += `${employeur.acronyme} - `
-    str += employeur.nom
+    if (employeur?.acronyme) str += `${employeur.acronyme} - `
+    str += employeur?.nom || ""
     return str
 }
 

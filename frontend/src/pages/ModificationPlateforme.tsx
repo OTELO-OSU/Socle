@@ -7,6 +7,7 @@ import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { Personnels } from "../components/formulairePlateforme/Personnels";
 import { Equipements } from "../components/formulairePlateforme/Equipements";
 import { Fonctionnement } from "../components/formulairePlateforme/Fontionnement";
+import { Activites } from "../components/formulairePlateforme/Activites";
 
 export default function ModificationPlateforme() {
     const methods = useForm<FieldValues>();
@@ -36,6 +37,7 @@ export default function ModificationPlateforme() {
                                 <Tab label="Personnels" {...allyProps(1)} />
                                 <Tab label="Equipements" {...allyProps(2)} />
                                 <Tab label="Fonctionnement" {...allyProps(3)} />
+                                <Tab label="Activités" {...allyProps(4)} />
                             </Tabs>
                         </Box>
                         <CustomTabPanel value={value} index={0}>
@@ -49,6 +51,9 @@ export default function ModificationPlateforme() {
                         </CustomTabPanel>
                         <CustomTabPanel value={value} index={3}>
                             <Fonctionnement />
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={4}>
+                            <Activites />
                         </CustomTabPanel>
                     </Card>
                     <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit">
