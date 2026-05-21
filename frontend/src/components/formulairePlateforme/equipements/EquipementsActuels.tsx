@@ -184,7 +184,7 @@ function DialogInstrumentActuel({
         (source) => (Number(source.taux) || 0) <= 0,
     );
 
-    const financeurNonRenseigne = sourceFinancement.every(
+    const financeurNonRenseigne = sourceFinancement.some(
         (source) => source.financeurId === null,
     );
 
