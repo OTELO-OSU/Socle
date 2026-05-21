@@ -184,6 +184,10 @@ function DialogInstrumentActuel({
         (source) => (Number(source.taux) || 0) <= 0,
     );
 
+    const financeurNonRenseigne = sourceFinancement.every(
+        (source) => source.financeurId === null,
+    );
+
     useEffect(() => {
         if (!open) {
             return;
@@ -403,6 +407,12 @@ function DialogInstrumentActuel({
                         </Typography>
                     )}
 
+                    {financeurNonRenseigne && (
+                        <Typography variant="body2" color="error.main" sx={{ mt: 0.5, fontWeight: 600 }}>
+                            Chaque source doit avoir un financeur renseigné.
+                        </Typography>
+                    )}
+
                     <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: "end" }}>
                         <Button variant="contained" color="secondary" onClick={() => setStep(0)}>
                             Retour
@@ -411,7 +421,7 @@ function DialogInstrumentActuel({
                             variant="contained"
                             color="primary"
                             type="submit"
-                            disabled={!isTotalFinancementValid || hasInvalidTaux}
+                            disabled={!isTotalFinancementValid || hasInvalidTaux || financeurNonRenseigne}
                         >
                             {instrumentToEdit ? "Enregistrer" : "Ajouter"}
                         </Button>
