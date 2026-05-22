@@ -2,6 +2,9 @@ import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { allyProps } from "./allyProps";
 import { CustomTabPanel } from "../CustomTabPanel";
+import Accesibilite from "./activites/Accesibilite";
+import Utilisation from "./activites/Utilisation";
+import EmpreinteCarbone from "./activites/EmpreinteCarbone";
 
 export function Activites() {
     const [value, setValue] = useState(0);
@@ -19,13 +22,13 @@ export function Activites() {
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
-                <h1>Accesibilité</h1>
+                <Accesibilite />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <h1>Utilisation</h1>
+                <Utilisation />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                <h1>Empreinte Carbone</h1>
+                <EmpreinteCarbone />
             </CustomTabPanel>
         </>
     )
