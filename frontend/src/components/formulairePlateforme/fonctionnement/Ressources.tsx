@@ -1,12 +1,13 @@
 import { Autocomplete, Box, Button, Dialog, Grid, IconButton, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import TauxTextFieldHint from "../../TauxTextFieldHint";
-import CoutTextFieldHint from "../../CoutTextFieldHint";
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useState } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { formatEmployeurLabel } from "../../../services/formatLabelService";
 import type { SelectOption } from "../../../provider/DictionnaireProvider";
+import LayoutLabelHintInput from "../../LayoutLabelHintInput";
+import NombreTextFieldHint from "../../NombreTextFieldHint";
 
 type ContributionTutelleDetail = {
     tutelleId: number | null;
@@ -187,7 +188,7 @@ export default function Ressources() {
                 <TauxTextFieldHint label="Contribution directe du laboratoire sur ses crédits" name="contribution_credit_taux" helperText="" />
                 <TauxTextFieldHint label="Contribution directe de projets de recherche (ANR, ERC, INSU, ...)" name="contribution_projet_recherche_taux" helperText="" />
                 <TauxTextFieldHint label="Contribution directe de structures PIA (LABEX, Equipex, ...)" name="contribution_structure_pia_taux" helperText="" />
-                <CoutTextFieldHint label="Somme des pourcentages" name="" helperText="" >
+                <LayoutLabelHintInput label="Somme des pourcentages" helperText="" >
                     <TextField
                         label="Somme des %"
                         variant="outlined"
@@ -201,12 +202,16 @@ export default function Ressources() {
                             }
                         }}
                     />
-                </CoutTextFieldHint>
+                </LayoutLabelHintInput>
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Information Instrument National
             </Typography>
-            <CoutTextFieldHint label="Dotation de fonctionnement de la part de l’INSU à titre d’Instrument National" name="dotation_instrument_national" helperText="" />
+            <NombreTextFieldHint slotProps={{
+                input: {
+                    endAdornment: 'k€'
+                }
+            }} labelTF="Coût" label="Dotation de fonctionnement de la part de l’INSU à titre d’Instrument National" name="dotation_instrument_national" helperText="" />
         </Box>
 
     );

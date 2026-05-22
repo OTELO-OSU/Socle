@@ -1,11 +1,11 @@
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import CoutTextFieldHint from "./CoutTextFieldHint";
 import { Controller, useFormContext } from "react-hook-form";
+import LayoutLabelHintInput from "./LayoutLabelHintInput";
 
 export default function RadioTextFieldHint({ label, name, helperText }: { label: string; name: string; helperText: string }) {
     const { control } = useFormContext();
     return (
-        <CoutTextFieldHint label={label} name={name} helperText={helperText}>
+        <LayoutLabelHintInput label={label} helperText={helperText}>
             <Controller
                 name={name}
                 control={control}
@@ -25,6 +25,6 @@ export default function RadioTextFieldHint({ label, name, helperText }: { label:
                     )
                 }}
             />
-        </CoutTextFieldHint>
+        </LayoutLabelHintInput>
     );
 }

@@ -1,8 +1,8 @@
 import { Box, Link, TextField, Typography } from "@mui/material";
 import RadioTextFieldHint from "../../RadioTextFieldHint";
 import { useFormContext, useWatch } from "react-hook-form";
-import BGESTextFieldHint from "../../BGESTextFieldHint";
-import CoutTextFieldHint from "../../CoutTextFieldHint";
+import LayoutLabelHintInput from "../../LayoutLabelHintInput";
+import NombreTextFieldHint from "../../NombreTextFieldHint";
 
 export default function EmpreinteCarbone() {
     const { getValues, watch } = useFormContext();
@@ -32,15 +32,15 @@ export default function EmpreinteCarbone() {
             <RadioTextFieldHint label="Avez-vous réalisé un BGES à l’échelle de la plateforme ?" name="bges_realise" helperText="" />
             {bgesRealise && (
                 <>
-                    <BGESTextFieldHint label="Domicile-Travail" name="bges_domicile_travail" helperText="" />
-                    <BGESTextFieldHint label="Missions" name="bges_mission" helperText="" />
-                    <BGESTextFieldHint label="Missions ext." name="bges_mission_ext" helperText="" />
-                    <BGESTextFieldHint label="Consommables" name="bges_consommable" helperText="" />
-                    <BGESTextFieldHint label="Equipements" name="bges_equipement" helperText="" />
-                    <BGESTextFieldHint label="Envoi des échantillons" name="bges_envoi_echantillon" helperText="" />
-                    <BGESTextFieldHint label="Bâtiment" name="bges_batiment" helperText="" />
-                    <BGESTextFieldHint label="Déchets" name="bges_dechet" helperText="" />
-                    <CoutTextFieldHint label="Somme des postes" name="" helperText="" >
+                    <NombreTextFieldHint label="Domicile-Travail" name="bges_domicile_travail" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Missions" name="bges_mission" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Missions ext." name="bges_mission_ext" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Consommables" name="bges_consommable" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Equipements" name="bges_equipement" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Envoi des échantillons" name="bges_envoi_echantillon" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Bâtiment" name="bges_batiment" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint label="Déchets" name="bges_dechet" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <LayoutLabelHintInput label="Somme des postes" helperText="" >
                         <TextField
                             label="Somme des kg eCO2"
                             variant="outlined"
@@ -54,7 +54,7 @@ export default function EmpreinteCarbone() {
                                 }
                             }}
                         />
-                    </CoutTextFieldHint>
+                    </LayoutLabelHintInput>
                 </>
             )}
         </Box>

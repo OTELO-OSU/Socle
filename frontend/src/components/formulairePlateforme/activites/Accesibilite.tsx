@@ -2,7 +2,7 @@ import { Box, TextField, Typography } from "@mui/material";
 import RadioTextFieldHint from "../../RadioTextFieldHint";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import TauxTextFieldHint from "../../TauxTextFieldHint";
-import CoutTextFieldHint from "../../CoutTextFieldHint";
+import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 
 export default function Accesibilite() {
     const { setValue } = useFormContext();
@@ -20,7 +20,7 @@ export default function Accesibilite() {
                 <RadioTextFieldHint label="Votre plateforme a-t-elle une labellisation/certification qualité (ISO, Cofrac...) ?" name="labellisation_qualite" helperText="" />
                 {(possedeLabellisation) && (
                     <>
-                        <CoutTextFieldHint label="Quel est le nom de la labellisation/certification qualité ?" name="" helperText="">
+                        <LayoutLabelHintInput label="Quel est le nom de la labellisation/certification qualité ?" helperText="">
                             <Controller
                                 name="nom_labellisation_qualite"
                                 render=
@@ -28,7 +28,7 @@ export default function Accesibilite() {
                                     <TextField fullWidth size="small" label="Nom de la labellisation" {...field} />
                                 )}>
                             </Controller>
-                        </CoutTextFieldHint>
+                        </LayoutLabelHintInput>
                     </>
                 )}
                 <TauxTextFieldHint label="Pourcentage d'accueil international (Projets et prestations internationaux / Projets et prestations totaux)" name="accueil_international_taux" helperText="" />

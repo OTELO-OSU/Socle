@@ -1,11 +1,11 @@
-import CoutTextFieldHint from "./CoutTextFieldHint";
+import LayoutLabelHintInput from "./LayoutLabelHintInput";
 import { RHFSelect } from "./RHFTextSelect";
 import { useFormContext } from "react-hook-form";
 
 export default function TauxTextFieldHint({ label, name, helperText }: { label: string; name: string; helperText: string }) {
     const { control } = useFormContext();
     return (
-        <CoutTextFieldHint label={label} name={name} helperText={helperText}>
+        <LayoutLabelHintInput label={label} helperText={helperText}>
             <RHFSelect
                 name={name}
                 control={control}
@@ -36,6 +36,6 @@ export default function TauxTextFieldHint({ label, name, helperText }: { label: 
                     { value: "100", label: "100%" },
                 ]}
             />
-        </CoutTextFieldHint>
+        </LayoutLabelHintInput>
     );
 }

@@ -1,9 +1,6 @@
 import { FormControl, Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
-import { RHFTextField } from "./RHFTextField";
 
-export default function CoutTextFieldHint({ label, name, helperText, children }: { label: string; name: string; helperText: string, children?: React.ReactNode }) {
-    const { control } = useFormContext();
+export default function LayoutLabelHintInput({ label, helperText, children }: { label: string; helperText: string, children?: React.ReactNode }) {
     return (
         <FormControl fullWidth sx={{ mt: 2 }}>
             <Grid container spacing={2}>
@@ -13,19 +10,7 @@ export default function CoutTextFieldHint({ label, name, helperText, children }:
                     </Typography>
                 </Grid>
                 <Grid size={{ xs: 3 }}>
-                    {children || (
-                        <RHFTextField
-                            name={name}
-                            label="Coût"
-                            control={control}
-                            size="small"
-                            slotProps={{
-                                input: {
-                                    endAdornment: "k€",
-                                }
-                            }}
-                        />
-                    )}
+                    {children}
                 </Grid>
             </Grid>
             <Grid container spacing={2}>

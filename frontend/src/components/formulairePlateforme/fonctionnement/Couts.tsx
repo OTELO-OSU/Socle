@@ -3,7 +3,8 @@ import { useFormContext } from "react-hook-form";
 import { RHFSelect } from "../../RHFTextSelect";
 import { useContext } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-import CoutTextFieldHint from "../../CoutTextFieldHint";
+import LayoutLabelHintInput from "../../LayoutLabelHintInput";
+import NombreTextFieldHint from "../../NombreTextFieldHint";
 
 export default function Couts() {
     const { getValues, watch, control } = useFormContext();
@@ -24,12 +25,22 @@ export default function Couts() {
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 2 }}>
                 Coût annuel de fonctionnement</Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-                <CoutTextFieldHint label="Matériel et consommables" name="materiel_consommable" helperText="Tout petit équipement nécessaire au fonctionnement quotidien de la plateforme (gaz, contenant, solvants, acides, EPI...)" />
-                <CoutTextFieldHint label="Contrats d'entretien" name="contrat_entretien" helperText="Contrats avec des entreprises extérieures (ou le fournisseur de l’équipement) opérant sur la maintenance, calibration, SAV, de l’instrument" />
-                <CoutTextFieldHint label="Études et prestations" name="etude_prestation" helperText="Tout type de sous-traitance externe (hors entretien)" />
-                <CoutTextFieldHint label="Fluides et énergies (chauffage, électricité, eau, refroidissement...)" name="fluide_energie" helperText="Dépenses liées à la consommation en eau et en électricité de la plateforme et des instruments (fonctionnement des instruments, chauffage, refroidissement climatisation...), si payées directement par la plateforme, ou via une contribution de la plateforme aux frais de fluides et d’énergies du laboratoire" />
-                <CoutTextFieldHint label="Missions et frais généraux" name="mission_frais_generaux" helperText="Déplacements en formations/réunions/congrès du personnel de la plateforme et autres frais généraux" />
-                <CoutTextFieldHint label="Somme des coûts" name="" helperText="" >
+                <NombreTextFieldHint labelTF="Coût" slotProps={
+                    { input: { endAdornment: "k€" } }
+                } label="Matériel et consommables" name="materiel_consommable" helperText="Tout petit équipement nécessaire au fonctionnement quotidien de la plateforme (gaz, contenant, solvants, acides, EPI...)" />
+                <NombreTextFieldHint labelTF="Coût" slotProps={
+                    { input: { endAdornment: "k€" } }
+                } label="Contrats d'entretien" name="contrat_entretien" helperText="Contrats avec des entreprises extérieures (ou le fournisseur de l’équipement) opérant sur la maintenance, calibration, SAV, de l’instrument" />
+                <NombreTextFieldHint labelTF="Coût" slotProps={
+                    { input: { endAdornment: "k€" } }
+                } label="Études et prestations" name="etude_prestation" helperText="Tout type de sous-traitance externe (hors entretien)" />
+                <NombreTextFieldHint labelTF="Coût" slotProps={
+                    { input: { endAdornment: "k€" } }
+                } label="Fluides et énergies (chauffage, électricité, eau, refroidissement...)" name="fluide_energie" helperText="Dépenses liées à la consommation en eau et en électricité de la plateforme et des instruments (fonctionnement des instruments, chauffage, refroidissement climatisation...), si payées directement par la plateforme, ou via une contribution de la plateforme aux frais de fluides et d’énergies du laboratoire" />
+                <NombreTextFieldHint labelTF="Coût" slotProps={
+                    { input: { endAdornment: "k€" } }
+                } label="Missions et frais généraux" name="mission_frais_generaux" helperText="Déplacements en formations/réunions/congrès du personnel de la plateforme et autres frais généraux" />
+                <LayoutLabelHintInput label="Somme des coûts" helperText="" >
                     <TextField
                         label="Somme des coûts"
                         variant="outlined"
@@ -43,7 +54,7 @@ export default function Couts() {
                             }
                         }}
                     />
-                </CoutTextFieldHint>
+                </LayoutLabelHintInput>
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Comment sont déterminés les tarifs de la plateforme</Typography>
