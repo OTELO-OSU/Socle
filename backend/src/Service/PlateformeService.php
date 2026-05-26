@@ -249,6 +249,7 @@ class PlateformeService
         return [
             'id' => $plateforme->getId(),
             'pseudo_id' => $plateforme->getPseudoId(),
+            'instrument_national' => $plateforme->isInstrumentNational(),
             'dernier_historique' => $dernierHistorique,
         ];
     }
@@ -273,7 +274,7 @@ class PlateformeService
                     $instrumentExistant->setMarque($instrument["marque"]);
                     $instrumentExistant->setModele($instrument["modele"]);
                     if ($instrument["annee_acquisition"] !== null) {
-                        $instrumentExistant->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                        $instrumentExistant->setAnneeAcquisition($instrument["annee_acquisition"]);
                     } else {
                         $instrumentExistant->setAnneeAcquisition(null);
                     }
@@ -383,7 +384,7 @@ class PlateformeService
                 $newInstrument->setMarque($instrument["marque"]);
                 $newInstrument->setModele($instrument["modele"]);
                 if (($instrument["annee_acquisition"] ?? null) !== null) {
-                    $newInstrument->setAnneeAcquisition(new \DateTime($instrument["annee_acquisition"]));
+                    $newInstrument->setAnneeAcquisition($instrument["annee_acquisition"]);
                 } else {
                     $newInstrument->setAnneeAcquisition(null);
                 }

@@ -1,11 +1,11 @@
 import { Box, Button, IconButton, Stack, TextField, Typography } from "@mui/material";
 import NombreTextFieldHint from "../NombreTextFieldHint";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import type { FormValues } from "../../pages/ModificationPlateforme";
 import DeleteIcon from "@mui/icons-material/Delete";
+import type { DernierHistorique } from "../../services/plateformeService";
 
 function PublicationRow({ numero, onDelete }: { numero: number; onDelete: () => void }) {
-    const { control } = useFormContext<FormValues>();
+    const { control } = useFormContext<DernierHistorique>();
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
             <Typography variant="body1">{numero}</Typography>
@@ -29,7 +29,7 @@ function PublicationRow({ numero, onDelete }: { numero: number; onDelete: () => 
 }
 
 export function Publications() {
-    const { control } = useFormContext<FormValues>();
+    const { control } = useFormContext<DernierHistorique>();
     const { fields, replace, remove } = useFieldArray({
         control,
         name: "publications",

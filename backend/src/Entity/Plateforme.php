@@ -41,6 +41,10 @@ class Plateforme
     #[ORM\OneToMany(targetEntity: PlateformeHistorique::class, mappedBy: 'plateforme', cascade: ['remove'], orphanRemoval: true)]
     private Collection $plateformeHistoriques;
 
+    #[ORM\Column]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
+    private bool $instrumentNational = false;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
@@ -120,6 +124,18 @@ class Plateforme
                 $plateformeHistorique->setPlateforme(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isInstrumentNational(): ?bool
+    {
+        return $this->instrumentNational;
+    }
+
+    public function setInstrumentNational(bool $instrumentNational): static
+    {
+        $this->instrumentNational = $instrumentNational;
 
         return $this;
     }

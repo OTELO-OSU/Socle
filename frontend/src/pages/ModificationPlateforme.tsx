@@ -9,88 +9,24 @@ import { Equipements } from "../components/formulairePlateforme/Equipements";
 import { Fonctionnement } from "../components/formulairePlateforme/Fontionnement";
 import { Activites } from "../components/formulairePlateforme/Activites";
 import { Publications } from "../components/formulairePlateforme/Publlications";
-import { fetchPlateformeDetails } from "../services/plateformeService";
+import { fetchPlateformeDetails, type DernierHistorique } from "../services/plateformeService";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
-
-export type FormValues = {
-    id: number;
-    nom_officiel: string;
-    forme_developpee_nom_officiel: string | null;
-    site_web: string | null;
-    ville_id: number | null;
-    logo_url: string | null;
-    autre_type_labellisation: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    espace_bureau: number | null;
-    espace_laboratoire: number | null;
-    personnels: {
-        id: number;
-        quotite: number | null;
-    }[]
-    materiel_consommable: number | null;
-    contrat_entretien: number | null;
-    etude_prestation: number | null;
-    fluide_energie: number | null;
-    mission_frais_generaux: number | null;
-    contribution_tutelle_taux: number | null;
-    contribution_fond_public_taux: number | null;
-    contribution_fond_prive_taux: number | null;
-    contribution_credit_taux: number | null;
-    contribution_projet_recherche_taux: number | null;
-    contribution_structure_pia_taux: number | null;
-    dotation_instrument_national: number | null;
-    labellisation_qualite: boolean | null;
-    nom_labellisation_qualite: string | null;
-    procedure_transparente_tous: boolean | null;
-    procedure_transparente_prestation_exterieure: boolean | null;
-    accueil_international_taux: number | null;
-    modele_77_2424_taux: number | null;
-    modele_77_1224_taux: number | null;
-    modele_57_2424_taux: number | null;
-    modele_57_1224_taux: number | null;
-    utilisation_fonctionnement_taux: number | null;
-    utilisation_maintenance_taux: number | null;
-    utilisation_developpement_taux: number | null;
-    utilisation_panne_taux: number | null;
-    utilisation_temps_mort_taux: number | null;
-    utilisation_equipe_operante_taux: number | null;
-    utilisation_collaboration_interne_taux: number | null;
-    utilisation_collaboration_externe_taux: number | null;
-    utilisation_prestation_service_taux: number | null;
-    bges_realise: boolean | null;
-    bges_domicile_travail: number | null;
-    bges_mission: number | null;
-    bges_mission_ext: number | null;
-    bges_consommable: number | null;
-    bges_equipement: number | null;
-    bges_envoi_echantillon: number | null;
-    bges_batiment: number | null;
-    bges_dechet: number | null;
-    publication_equipe_operante: number | null;
-    publication_collaboration_interne: number | null;
-    publication_collaboration_externe: number | null;
-    publication_autre_type: number | null;
-    publication_these: number | null;
-    publications: {
-        numero: number;
-        doi: string;
-    }[]
-}
 
 export default function ModificationPlateforme() {
-    const methods = useForm<FormValues>({
+    const methods = useForm<DernierHistorique>({
         defaultValues: {
             publications: []
         }
     });
     const { handleSubmit, formState: { errors } } = methods;
 
-    function onSubmit(data: FormValues) {
+    function onSubmit(data: DernierHistorique) {
         console.log(data);
     }
 
     const [value, setValue] = useState(0);
+    const [instrumentNational, setInstrumentNational] = useState(false);
 
     const handleChange = (_: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -106,6 +42,14 @@ export default function ModificationPlateforme() {
                 .then((data) => {
                     // Mettre à jour les valeurs du formulaire avec les données récupérées
                     methods.reset(data.dernier_historique);
+                    setInstrumentNational(data.instrument_national);
+                    if (data.instrument_national) {
+                        if (methods.getValues("dotation_instrument_national") === undefined) {
+                            methods.setValue("dotation_instrument_national", null);
+                        }
+                    } else {
+                        methods.setValue("dotation_instrument_national", undefined);
+                    }
                 }).catch((error) => {
                     console.error("Erreur lors du chargement des détails de la plateforme :", error);
                 });
@@ -120,10 +64,15 @@ export default function ModificationPlateforme() {
             <FormProvider {...methods}>
                 <form noValidate onSubmit={handleSubmit(onSubmit)}>
                     <Card sx={{ display: "flex", flexDirection: "column", p: 4 }}>
-                        <Typography variant="h4" component="h1">
-                            Modifier une Plateforme
+                        <Box sx={{ display: "flex", justifyContent: 'space-between' }}><Typography variant="h4" component="h1">
+                            Modification Plateforme
                         </Typography>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            {instrumentNational && <Typography sx={{ display: "flex", alignItems: 'center', bgcolor: 'primary.main', color: 'white', p: 2, borderRadius: 1 }} variant="h5">
+                                <WorkspacePremiumIcon fontSize="large" />
+                                Instrument national
+                            </Typography>}
+                        </Box>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                                 <Tab label="Présentation" {...allyProps(0)} />
                                 <Tab label="Personnels" {...allyProps(1)} />

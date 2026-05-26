@@ -200,14 +200,18 @@ export default function Ressources() {
                     />
                 </LayoutLabelHintInput>
             </Box>
-            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
-                Information Instrument National
-            </Typography>
-            <NombreTextFieldHint slotProps={{
-                input: {
-                    endAdornment: 'k€'
-                }
-            }} labelTF="Coût" label="Dotation de fonctionnement de la part de l’INSU à titre d’Instrument National" name="dotation_instrument_national" helperText="" />
+            {getValues("dotation_instrument_national") !== undefined && (
+                <>
+                    <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
+                        Information Instrument National
+                    </Typography>
+                    <NombreTextFieldHint slotProps={{
+                        input: {
+                            endAdornment: 'k€'
+                        }
+                    }} labelTF="Coût" label="Dotation de fonctionnement de la part de l’INSU à titre d’Instrument National" name="dotation_instrument_national" helperText="" />
+                </>
+            )}
         </Box>
 
     );
