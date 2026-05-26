@@ -20,17 +20,26 @@ export function RHFTextField<TFieldValues extends FieldValues = FieldValues>({
             name={name}
             control={control}
             rules={rules}
-            render={({ field, fieldState }) => (
-                <TextField
-                    fullWidth
-                    {...field}
-                    {...props}
-                    id={name}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    label={label}
-                />
-            )}
+            render={({ field, fieldState }) => {
+                const hasValue = field.value !== undefined && field.value !== null && field.value !== "";
+
+                return (
+                    <TextField
+                        fullWidth
+                        {...field}
+                        {...props}
+                        value={field.value ?? ""}
+                        id={name}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        label={label}
+                        slotProps={{
+                            ...props.slotProps,
+                            inputLabel: { shrink: hasValue },
+                        }}
+                    />
+                );
+            }}
         />
     );
 }

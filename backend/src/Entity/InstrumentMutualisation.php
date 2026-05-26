@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\InstrumentMutualisationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: InstrumentMutualisationRepository::class)]
 class InstrumentMutualisation
@@ -19,6 +21,8 @@ class InstrumentMutualisation
 
     #[ORM\ManyToOne(inversedBy: 'instrumentMutualisations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["plateforme:detail"])]
+    #[MaxDepth(1)]
     private ?Instrument $instrumentCible = null;
 
     public function getId(): ?int
@@ -28,24 +32,24 @@ class InstrumentMutualisation
 
     public function getInstrumentSource(): ?Instrument
     {
-        return $this->instrument_source;
+        return $this->instrumentSource;
     }
 
     public function setInstrumentSource(?Instrument $instrumentSource): static
     {
-        $this->instrument_source = $instrumentSource;
+        $this->instrumentSource = $instrumentSource;
 
         return $this;
     }
 
     public function getInstrumentCible(): ?Instrument
     {
-        return $this->instrument_cible;
+        return $this->instrumentCible;
     }
 
     public function setInstrumentCible(?Instrument $instrumentCible): static
     {
-        $this->instrument_cible = $instrumentCible;
+        $this->instrumentCible = $instrumentCible;
 
         return $this;
     }

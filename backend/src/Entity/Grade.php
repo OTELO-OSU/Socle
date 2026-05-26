@@ -13,11 +13,11 @@ class Grade
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(['utilisateur:list', "corps:list"])]
+    #[Groups(['utilisateur:list', "corps:list", "plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['utilisateur:list', 'corps:list'])]
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 

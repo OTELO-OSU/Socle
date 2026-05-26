@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -35,6 +36,8 @@ final class PlateformeController extends AbstractController
             200,
             [],
             [
+                'groups' => ['plateforme:detail', 'instrument:mutualisation'],
+                AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
                 AbstractNormalizer::IGNORED_ATTRIBUTES => ['plateforme'],
                 AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => static function (object $object): mixed {
                     return method_exists($object, 'getId') ? $object->getId() : spl_object_id($object);
@@ -42,6 +45,21 @@ final class PlateformeController extends AbstractController
             ]
         );
     }
+
+    // #[Route('/plateforme/{id}', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    // public function getPlateformeDetail(int $id): Response
+    // {
+    //     $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($id);
+
+    //     return $this->json(
+    //         $plateforme,
+    //         200,
+    //         [],
+    //         [
+    //             "groups" => ["plateforme:detail"],
+    //         ]
+    //     );
+    // }
 
     #[Route('/plateforme', methods: ['POST'])]
     public function creerPlateforme(Request $request): Response

@@ -21,14 +21,14 @@ export function Presentation() {
                 <Grid size="grow">
                     <Stack direction="row" spacing={2}>
                         <RHFTextField
-                            name="nom"
+                            name="nom_officiel"
                             control={control}
                             rules={{ required: "Le nom de la plateforme est requis" }}
                             label="Nom officiel de la plateforme"
                             placeholder="<SARM>"
                         />
                         <RHFTextField
-                            name="nomDevelope"
+                            name="forme_developpee_nom_officiel"
                             control={control}
                             label="Signification de l'acronyme (si le nom officiel en est un)"
                             placeholder="<Service d'Analyse des Roches et des Minéraux>"
@@ -36,22 +36,22 @@ export function Presentation() {
                     </Stack>
                     <RHFTextField
                         sx={{ mt: 2 }}
-                        name="siteweb"
+                        name="site_web"
                         control={control}
                         label="Site web"
                         placeholder="<https://sarm.cnrs.fr/>"
                     />
-                    <RHFSelect name="ville" control={control} id="ville" label="Ville" items={villeOptions} sx={{ mt: 2 }} />
+                    <RHFSelect name="ville_id" control={control} id="ville" label="Ville" items={villeOptions} sx={{ mt: 2 }} />
                     <RHFTextField
                         sx={{ mt: 2 }}
-                        name="urlLogo"
+                        name="logo_url"
                         control={control}
                         label="URL du logo de la plateforme"
                         placeholder="<https://sarm.cnrs.fr/images/logo.png>"
                     />
                     <RHFTextField
                         sx={{ mt: 2 }}
-                        name="autreTypeLabellisation"
+                        name="autre_type_labellisation"
                         control={control}
                         label="Autre type de labellisation"
                     />
@@ -65,10 +65,10 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFSelect name="laboratoireOperateur" control={control} label="Laboratoire opérateur" items={uniteOptions} />
+                    <RHFSelect name="laboratoire_operateur_id" control={control} label="Laboratoire opérateur" items={uniteOptions} />
                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                        <RHFSelect name="tutellePrincipale" control={control} label="Tutelle(s) principale(s)" multiple items={employeurOptions} />
-                        <RHFSelect name="tutelleSecondaire" control={control} label="Tutelle(s) secondaire(s)" multiple items={employeurOptions} />
+                        <RHFSelect name="tutelles_principales_ids" control={control} label="Tutelle(s) principale(s)" multiple items={employeurOptions} />
+                        <RHFSelect name="tutelles_secondaires_ids" control={control} label="Tutelle(s) secondaire(s)" multiple items={employeurOptions} />
                     </Stack>
                 </Grid>
             </Grid>
@@ -92,8 +92,8 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFTextField name="espaceBureau" control={control} label="Espace bureau en m²" placeholder="90" />
-                    <RHFTextField name="espaceLaboratoire" control={control} label="Espace laboratoire en m²" placeholder="210" sx={{ mt: 2 }} />
+                    <RHFTextField name="espace_bureau" control={control} label="Espace bureau en m²" placeholder="90" />
+                    <RHFTextField name="espace_laboratoire" control={control} label="Espace laboratoire en m²" placeholder="210" sx={{ mt: 2 }} />
                 </Grid>
             </Grid>
         </>

@@ -4,12 +4,14 @@ namespace App\Entity;
 
 use App\Repository\PlateformeHistoriqueTutelleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriqueTutelleRepository::class)]
 class PlateformeHistoriqueTutelle
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -19,9 +21,11 @@ class PlateformeHistoriqueTutelle
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriqueTutelles')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["plateforme:detail"])]
     private ?Entite $tutelle = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
     private ?bool $principale = null;
 
     public function getId(): ?int

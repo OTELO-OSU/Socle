@@ -1,18 +1,25 @@
 import { Box, Button, IconButton, Stack, TextField, Typography } from "@mui/material";
 import NombreTextFieldHint from "../NombreTextFieldHint";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import type { FormValues } from "../../pages/ModificationPlateforme";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 function PublicationRow({ numero, onDelete }: { numero: number; onDelete: () => void }) {
-    const { register } = useFormContext<FormValues>();
+    const { control } = useFormContext<FormValues>();
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
             <Typography variant="body1">{numero}</Typography>
-            <TextField
-                label="DOI"
-                fullWidth
-                {...register(`publications.${numero - 1}.doi`)}
+            <Controller
+                name={`publications.${numero - 1}.doi`}
+                control={control}
+                render={({ field }) => (
+                    <TextField
+                        {...field}
+                        label="DOI"
+                        fullWidth
+                        value={field.value ?? ""}
+                    />
+                )}
             />
             <IconButton type="button" onClick={onDelete}>
                 <DeleteIcon />

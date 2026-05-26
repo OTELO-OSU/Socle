@@ -5,50 +5,22 @@ import { RHFTextField } from "../../RHFTextField";
 import TreeViewFinance from "../../TreeSelectFinance";
 import TroisPoints from "@mui/icons-material/MoreVert";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-
-type InstrumentActuelProps = {
-    id: number | string;
-    nom: string | null;
-    marque: string | null;
-    modele: string | null;
-    anneeAcquisition: number | null;
-    cout: number | null;
-    valeurRemplacement: number | null;
-    dureeUtilisation: number | null;
-    sourceFinancement: sourceFinancement[];
-    futur: boolean;
-};
-
-type sourceFinancement = {
-    financeurId: number | null;
-    taux: number;
-}
-
-type InstrumentFormValues = {
-    nom?: string;
-    marque?: string;
-    modele?: string;
-    anneeAcquisition?: string;
-    cout?: string;
-    valeurRemplacement?: string;
-    dureeUtilisation?: string;
-    sourceFinancement?: Array<{ financeurId: number | null; taux: number }>;
-};
+import type { Instrument, SourceFinancement } from "../../../services/plateformeService";
 
 function InstrumentActuelCard({
     instrument,
     onEdit,
 }: {
-    instrument: InstrumentActuelProps;
-    onEdit: (instrument: InstrumentActuelProps) => void;
+    instrument: Instrument;
+    onEdit: (instrument: Instrument) => void;
 }) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const dictionnaireContext = useContext(DictionnaireContext);
 
 
-    const displayValue = (value: string | number | null, suffix = "") => {
-        if (value === null || value === "") {
+    const displayValue = (value: number | string | null | undefined, suffix = "") => {
+        if (value === null || value === undefined || value === "") {
             return "Non renseigné";
         }
         return `${value}${suffix}`;
@@ -83,19 +55,19 @@ function InstrumentActuelCard({
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="body2" color="text.secondary">Année d'acquisition</Typography>
-                            <Typography variant="body1">{displayValue(instrument.anneeAcquisition)}</Typography>
+                            <Typography variant="body1">{displayValue(instrument.annee_acquisition)}</Typography>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="body2" color="text.secondary">Durée d'utilisation</Typography>
-                            <Typography variant="body1">{displayValue(instrument.dureeUtilisation, " ans")}</Typography>
+                            <Typography variant="body1">{displayValue(instrument.duree_utilisation, " ans")}</Typography>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="body2" color="text.secondary">Coût</Typography>
-                            <Typography variant="body1">{displayValue(instrument.cout, " €")}</Typography>
+                            <Typography variant="body1">{displayValue(instrument.cout, " k€")}</Typography>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="body2" color="text.secondary">Valeur de remplacement</Typography>
-                            <Typography variant="body1">{displayValue(instrument.valeurRemplacement, " €")}</Typography>
+                            <Typography variant="body1">{displayValue(instrument.valeur_remplacemment, " k€")}</Typography>
                         </Grid>
                     </Grid>
 
@@ -105,16 +77,16 @@ function InstrumentActuelCard({
                         Sources de financement
                     </Typography>
                     <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-                        {instrument.sourceFinancement.length === 0 && (
+                        {instrument.source_financement.length === 0 && (
                             <Chip label="Aucune source" size="small" variant="outlined" />
                         )}
-                        {instrument.sourceFinancement.map((source) => (
+                        {instrument.source_financement.map((source) => (
                             <Chip
-                                key={source.financeurId}
+                                key={source.financeur_id}
                                 size="small"
                                 color="primary"
                                 variant="outlined"
-                                label={`${dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeurId)?.nom} • ${source.taux}%`}
+                                label={`${dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeur_id)?.nom} • ${source.taux}%`}
                             />
                         ))}
                     </Stack>
@@ -149,8 +121,8 @@ function InstrumentActuelCard({
 type DialogInstrumentActuelProps = {
     open: boolean;
     onClose: () => void;
-    onSave: (instrument: InstrumentActuelProps) => void;
-    instrumentToEdit?: InstrumentActuelProps;
+    onSave: (instrument: Instrument) => void;
+    instrumentToEdit?: Instrument;
 };
 
 function DialogInstrumentActuel({
@@ -159,18 +131,18 @@ function DialogInstrumentActuel({
     onSave,
     instrumentToEdit,
 }: DialogInstrumentActuelProps) {
-    const { control, handleSubmit, reset, setValue, getValues, trigger } = useForm<InstrumentFormValues>({
+    const { control, handleSubmit, reset, setValue, getValues, trigger } = useForm<Instrument>({
         shouldUnregister: false,
         defaultValues: {
-            sourceFinancement: [],
+            source_financement: [],
         },
     });
     const [step, setStep] = useState(0);
 
     const sourceFinancement = (useWatch({
         control,
-        name: "sourceFinancement",
-    }) as sourceFinancement[] | undefined) || [];
+        name: "source_financement",
+    }) as SourceFinancement[] | undefined) || [];
 
     const totalFinancement = sourceFinancement.reduce(
         (sum, source) => sum + (Number(source.taux) || 0),
@@ -185,7 +157,7 @@ function DialogInstrumentActuel({
     );
 
     const financeurNonRenseigne = sourceFinancement.some(
-        (source) => source.financeurId === null,
+        (source) => source.financeur_id === null,
     );
 
     useEffect(() => {
@@ -198,11 +170,11 @@ function DialogInstrumentActuel({
                 nom: "",
                 marque: "",
                 modele: "",
-                anneeAcquisition: "",
-                cout: "",
-                valeurRemplacement: "",
-                dureeUtilisation: "",
-                sourceFinancement: [],
+                annee_acquisition: null,
+                cout: null,
+                valeur_remplacemment: null,
+                duree_utilisation: null,
+                source_financement: [],
             });
             return;
         }
@@ -211,24 +183,24 @@ function DialogInstrumentActuel({
             nom: instrumentToEdit.nom ?? "",
             marque: instrumentToEdit.marque ?? "",
             modele: instrumentToEdit.modele ?? "",
-            anneeAcquisition: instrumentToEdit.anneeAcquisition?.toString() ?? "",
-            cout: instrumentToEdit.cout?.toString() ?? "",
-            valeurRemplacement: instrumentToEdit.valeurRemplacement?.toString() ?? "",
-            dureeUtilisation: instrumentToEdit.dureeUtilisation?.toString() ?? "",
-            sourceFinancement: instrumentToEdit.sourceFinancement.map((source) => ({
-                financeurId: source.financeurId ?? null,
+            annee_acquisition: instrumentToEdit.annee_acquisition ?? null,
+            cout: instrumentToEdit.cout ?? null,
+            valeur_remplacemment: instrumentToEdit.valeur_remplacemment ?? null,
+            duree_utilisation: instrumentToEdit.duree_utilisation ?? null,
+            source_financement: instrumentToEdit.source_financement.map((source) => ({
+                financeur_id: source.financeur_id ?? null,
                 taux: source.taux,
             })),
         });
     }, [open, instrumentToEdit, reset]);
 
-    const onSubmit = (data: InstrumentFormValues) => {
-        const total = (data.sourceFinancement || []).reduce(
+    const onSubmit = (data: Instrument) => {
+        const total = (data.source_financement || []).reduce(
             (sum, source) => sum + (Number(source.taux) || 0),
             0,
         );
 
-        const hasInvalidRate = (data.sourceFinancement || []).some(
+        const hasInvalidRate = (data.source_financement || []).some(
             (source) => (Number(source.taux) || 0) <= 0,
         );
 
@@ -236,17 +208,19 @@ function DialogInstrumentActuel({
             return;
         }
 
-        const newInstrument: InstrumentActuelProps = {
-            id: instrumentToEdit?.id ?? Date.now(),
+        const hashNouveauInstrument = Math.random().toString(36).substring(2, 9);
+
+        const newInstrument: Instrument = {
+            id: instrumentToEdit?.id ?? hashNouveauInstrument,
             nom: data.nom ?? null,
             marque: data.marque ?? null,
             modele: data.modele ?? null,
-            anneeAcquisition: data.anneeAcquisition ? parseInt(data.anneeAcquisition) : null,
-            cout: data.cout ? parseFloat(data.cout) : null,
-            valeurRemplacement: data.valeurRemplacement ? parseFloat(data.valeurRemplacement) : null,
-            dureeUtilisation: data.dureeUtilisation ? parseInt(data.dureeUtilisation) : null,
-            sourceFinancement: (data.sourceFinancement || []).map((source) => ({
-                financeurId: source.financeurId ?? null,
+            annee_acquisition: data.annee_acquisition ?? null,
+            cout: data.cout ?? null,
+            valeur_remplacemment: data.valeur_remplacemment ?? null,
+            duree_utilisation: data.duree_utilisation ?? null,
+            source_financement: (data.source_financement || []).map((source) => ({
+                financeur_id: source.financeur_id ?? null,
                 taux: Number(source.taux),
             })),
             futur: false,
@@ -300,14 +274,14 @@ function DialogInstrumentActuel({
                             <RHFTextField name="marque" control={control} label="Marque" fullWidth sx={{ mb: 2 }} />
                             <RHFTextField name="modele" control={control} label="Modèle" fullWidth sx={{ mb: 2 }} />
                         </Stack>
-                        <RHFTextField name="anneeAcquisition" control={control} label="Année d'acquisition" type="number" fullWidth sx={{ mb: 2 }} />
+                        <RHFTextField name="annee_acquisition" control={control} label="Année d'acquisition" type="number" fullWidth sx={{ mb: 2 }} />
                         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                            <RHFTextField name="cout" control={control} label="Coût (€)" type="number" fullWidth sx={{ mb: 2 }} />
-                            <RHFTextField name="valeurRemplacement" control={control} label="Valeur de remplacement (€)" type="number" fullWidth sx={{ mb: 2 }} />
+                            <RHFTextField name="cout" control={control} label="Coût (k€)" type="number" fullWidth sx={{ mb: 2 }} />
+                            <RHFTextField name="valeur_remplacemment" control={control} label="Valeur de remplacement (k€)" type="number" fullWidth sx={{ mb: 2 }} />
                         </Stack>
 
 
-                        <RHFTextField name="dureeUtilisation" control={control} label="Durée d'utilisation (ans)" type="number" fullWidth sx={{ mb: 2 }} />
+                        <RHFTextField name="duree_utilisation" control={control} label="Durée d'utilisation (ans)" type="number" fullWidth sx={{ mb: 2 }} />
                         <Stack direction="row" spacing={2} sx={{ justifyContent: "end" }}>
                             <Button variant="contained" color="secondary" onClick={onClose}>
                                 Annuler
@@ -330,15 +304,15 @@ function DialogInstrumentActuel({
                         <Grid size={{ xs: 6 }}>
                             <Select fullWidth size="small" value={sourceFinancement.length} onChange={(e) => {
                                 const value = Number(e.target.value);
-                                const currentSources = getValues("sourceFinancement") || [];
+                                const currentSources = getValues("source_financement") || [];
                                 if (value > currentSources.length) {
                                     const newSources = [...currentSources];
                                     for (let i = currentSources.length; i < value; i++) {
-                                        newSources.push({ financeurId: null, taux: 0 });
+                                        newSources.push({ financeur_id: null, taux: 0 });
                                     }
-                                    setValue("sourceFinancement", newSources);
+                                    setValue("source_financement", newSources);
                                 } else if (value < currentSources.length) {
-                                    setValue("sourceFinancement", currentSources.slice(0, value));
+                                    setValue("source_financement", currentSources.slice(0, value));
                                 }
 
                             }}>
@@ -354,19 +328,19 @@ function DialogInstrumentActuel({
                     {sourceFinancement.map((_, index) => (
                         <Stack key={index} direction="row" spacing={2} sx={{ mb: 2 }}>
                             <TreeViewFinance
-                                selectedId={sourceFinancement[index].financeurId ?? undefined}
+                                selectedId={sourceFinancement[index].financeur_id ?? undefined}
                                 onSelectedIdChange={(id) => {
-                                    const currentSources = getValues("sourceFinancement") || [];
+                                    const currentSources = getValues("source_financement") || [];
                                     const updatedSources = [...currentSources];
                                     updatedSources[index] = {
                                         ...updatedSources[index],
-                                        financeurId: id,
+                                        financeur_id: id,
                                     };
-                                    setValue("sourceFinancement", updatedSources);
+                                    setValue("source_financement", updatedSources);
                                 }}
                             />
                             <RHFTextField
-                                name={`sourceFinancement.${index}.taux`}
+                                name={`source_financement.${index}.taux`}
                                 control={control}
                                 label="Taux (%)"
                                 type="number"
@@ -436,18 +410,18 @@ function DialogInstrumentActuel({
 export function EquipementActuels() {
     const { control, getValues, setValue } = useFormContext();
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
-    const [instrumentToEdit, setInstrumentToEdit] = useState<InstrumentActuelProps | undefined>(undefined);
+    const [instrumentToEdit, setInstrumentToEdit] = useState<Instrument | undefined>(undefined);
     useEffect(() => {
-        const equipements = getValues("equipements") as InstrumentActuelProps[] | undefined;
-        if (!Array.isArray(equipements)) {
-            setValue("equipements", []);
+        const instruments = getValues("instruments") as Instrument[] | undefined;
+        if (!Array.isArray(instruments)) {
+            setValue("instruments", []);
         }
     }, [getValues, setValue]);
 
     const equipements = (useWatch({
         control,
-        name: "equipements",
-    }) as InstrumentActuelProps[] | undefined) || [];
+        name: "instruments",
+    }) as Instrument[] | undefined) || [];
     const actuels = equipements?.filter(e => !e.futur) || [];
     return (
         <>
@@ -465,9 +439,9 @@ export function EquipementActuels() {
                     open
                     onClose={() => setOpenCreateDialog(false)}
                     onSave={(instrument) => {
-                        const equipements = getValues("equipements") as InstrumentActuelProps[] | undefined;
-                        const newEquipements = [...(equipements || []), instrument];
-                        setValue("equipements", newEquipements);
+                        const instruments = getValues("instruments") as Instrument[] | undefined;
+                        const newInstruments = [...(instruments || []), instrument];
+                        setValue("instruments", newInstruments);
                     }}
                 />
             )}
@@ -478,13 +452,13 @@ export function EquipementActuels() {
                     instrumentToEdit={instrumentToEdit}
                     onClose={() => setInstrumentToEdit(undefined)}
                     onSave={(updatedInstrument) => {
-                        const equipements = getValues("equipements") as InstrumentActuelProps[] | undefined;
-                        const newEquipements = (equipements || []).map((instrument) =>
+                        const instruments = getValues("instruments") as Instrument[] | undefined;
+                        const newInstruments = (instruments || []).map((instrument) =>
                             instrument.id === updatedInstrument.id
                                 ? updatedInstrument
                                 : instrument,
                         );
-                        setValue("equipements", newEquipements);
+                        setValue("instruments", newInstruments);
                         setInstrumentToEdit(undefined);
                     }}
                 />

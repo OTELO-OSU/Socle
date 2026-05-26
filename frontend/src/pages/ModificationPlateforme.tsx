@@ -1,5 +1,5 @@
 import { Box, Button, Card, Container, Tab, Tabs, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type FieldError, FormProvider } from "react-hook-form";
 import { Presentation } from "../components/formulairePlateforme/Presentation";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -9,23 +9,25 @@ import { Equipements } from "../components/formulairePlateforme/Equipements";
 import { Fonctionnement } from "../components/formulairePlateforme/Fontionnement";
 import { Activites } from "../components/formulairePlateforme/Activites";
 import { Publications } from "../components/formulairePlateforme/Publlications";
+import { fetchPlateformeDetails } from "../services/plateformeService";
 
 
 export type FormValues = {
     id: number;
     nom_officiel: string;
-    forme_developpee_nom_officiel: string;
-    site_web: string;
-    logo_url: string;
-    autre_type_labellisation: string;
+    forme_developpee_nom_officiel: string | null;
+    site_web: string | null;
+    ville_id: number | null;
+    logo_url: string | null;
+    autre_type_labellisation: string | null;
     latitude: number | null;
     longitude: number | null;
     espace_bureau: number | null;
+    espace_laboratoire: number | null;
     personnels: {
         id: number;
         quotite: number | null;
     }[]
-    espace_laboratoire: number | null;
     materiel_consommable: number | null;
     contrat_entretien: number | null;
     etude_prestation: number | null;
@@ -37,11 +39,11 @@ export type FormValues = {
     contribution_credit_taux: number | null;
     contribution_projet_recherche_taux: number | null;
     contribution_structure_pia_taux: number | null;
-    dotation_instrument_national: number;
+    dotation_instrument_national: number | null;
     labellisation_qualite: boolean | null;
-    nom_labellisation_qualite: string;
-    procedure_transparente_tous: boolean;
-    procedure_transparente_prestation_exterieure: boolean;
+    nom_labellisation_qualite: string | null;
+    procedure_transparente_tous: boolean | null;
+    procedure_transparente_prestation_exterieure: boolean | null;
     accueil_international_taux: number | null;
     modele_77_2424_taux: number | null;
     modele_77_1224_taux: number | null;
@@ -93,6 +95,25 @@ export default function ModificationPlateforme() {
     const handleChange = (_: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    useEffect(() => {
+        // Récupérer l'id de la plateforme à partir de l'URL
+        const searchParams = new URLSearchParams(window.location.search);
+        const id = searchParams.get('id');
+
+        if (id) {
+            fetchPlateformeDetails(parseInt(id))
+                .then((data) => {
+                    // Mettre à jour les valeurs du formulaire avec les données récupérées
+                    methods.reset(data.dernier_historique);
+                }).catch((error) => {
+                    console.error("Erreur lors du chargement des détails de la plateforme :", error);
+                });
+        } else {
+            // Redirect à la liste des plateformes
+            window.location.href = "/plateformes";
+        }
+    }, [methods]);
 
     return (
         <Container sx={{ py: 4 }}>

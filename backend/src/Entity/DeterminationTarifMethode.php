@@ -13,11 +13,11 @@ class DeterminationTarifMethode
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups("determination_tarif:list")]
+    #[Groups(["plateforme:detail", "determination_tarif:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups("determination_tarif:list")]
+    #[Groups(["plateforme:detail", "determination_tarif:list"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 

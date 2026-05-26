@@ -8,21 +8,17 @@ import { formatEmployeurLabel } from "../../../services/formatLabelService";
 import type { SelectOption } from "../../../provider/DictionnaireProvider";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
-
-type ContributionTutelleDetail = {
-    tutelleId: number | null;
-    taux: number;
-};
+import type { SourceFinancement } from "../../../services/plateformeService";
 
 function DialogModifDetailTutelle() {
     const [open, setOpen] = useState(false);
     const { getValues, setValue, watch } = useFormContext();
     const contribution_tutelle_detail = watch("contribution_tutelle_detail") || [];
     const dictionnaireContext = useContext(DictionnaireContext);
-    const tauxTotaleTutelle = contribution_tutelle_detail.reduce((acc: number, source: ContributionTutelleDetail) => acc + (source.taux || 0), 0);
+    const tauxTotaleTutelle = contribution_tutelle_detail.reduce((acc: number, source: SourceFinancement) => acc + (source.taux || 0), 0);
     const estTauxTutelleValide = tauxTotaleTutelle === 100;
-    const estAucunTauxA0 = !contribution_tutelle_detail.some((source: ContributionTutelleDetail) => source.taux === 0);
-    const tutelleNonRenseignee = contribution_tutelle_detail.some((source: ContributionTutelleDetail) => source.tutelleId === null);
+    const estAucunTauxA0 = !contribution_tutelle_detail.some((source: SourceFinancement) => source.taux === 0);
+    const tutelleNonRenseignee = contribution_tutelle_detail.some((source: SourceFinancement) => source.financeur_id === null);
     return (
         <>
             <IconButton size="small" sx={{ width: "fit-content", mt: 1 }} onClick={() => setOpen(true)}>
@@ -44,7 +40,7 @@ function DialogModifDetailTutelle() {
                                 if (value > currentSources.length) {
                                     const newSources = [...currentSources];
                                     for (let i = currentSources.length; i < value; i++) {
-                                        newSources.push({ tutelleId: null, taux: 0 });
+                                        newSources.push({ financeur_id: null, taux: 0 });
                                     }
                                     setValue("contribution_tutelle_detail", newSources);
                                 } else if (value < currentSources.length) {
@@ -61,18 +57,18 @@ function DialogModifDetailTutelle() {
                             </Select>
                         </Grid>
                     </Grid>
-                    {contribution_tutelle_detail.map((source: ContributionTutelleDetail, index: number) => (
+                    {contribution_tutelle_detail.map((source: SourceFinancement, index: number) => (
                         <Stack key={index} direction="row" spacing={2}>
                             <Autocomplete<SelectOption, false, false, false>
                                 options={dictionnaireContext.employeurOptions}
                                 fullWidth
-                                value={dictionnaireContext.employeurOptions.find((option) => option.value === source.tutelleId) ?? null}
+                                value={dictionnaireContext.employeurOptions.find((option) => option.value === source.financeur_id) ?? null}
                                 onChange={(_, value) => {
                                     const selectedValue = value?.value;
-                                    const tutelleId = typeof selectedValue === "number" ? selectedValue : null;
-                                    const currentSources = (getValues("contribution_tutelle_detail") as ContributionTutelleDetail[] | undefined) || [];
+                                    const financeurId = typeof selectedValue === "number" ? selectedValue : null;
+                                    const currentSources = (getValues("contribution_tutelle_detail") as SourceFinancement[] | undefined) || [];
                                     const newSources = [...currentSources];
-                                    newSources[index] = { ...newSources[index], tutelleId };
+                                    newSources[index] = { ...newSources[index], financeur_id: financeurId };
                                     setValue("contribution_tutelle_detail", newSources);
                                 }}
                                 renderInput={(params) => <TextField {...params} label={`Tutelle financeur #${index + 1}`} size="small" />}
@@ -170,9 +166,9 @@ export default function Ressources() {
                                 </Typography>
                                 <DialogModifDetailTutelle />
                             </Stack>
-                            {detailTutelle.length > 0 ? detailTutelle.map((detail: { tutelleId: number, taux: number }, index: number) => (
+                            {detailTutelle.length > 0 ? detailTutelle.map((detail: SourceFinancement, index: number) => (
                                 <Typography key={index} variant="body2" component="p">
-                                    {formatEmployeurLabel(dictionnaireContext.employeur.find((tutelle) => tutelle.id === detail.tutelleId))}: {detail.taux}%
+                                    {formatEmployeurLabel(dictionnaireContext.employeur.find((tutelle) => tutelle.id === detail.financeur_id))}: {detail.taux}%
                                 </Typography>
                             )) : null}
                             {detailTutelle.length === 0 && (

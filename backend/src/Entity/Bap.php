@@ -13,15 +13,15 @@ class Bap
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(["bap:list"])]
+    #[Groups(["bap:list", "plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(["bap:list"])]
+    #[Groups(["bap:list", "plateforme:detail"])]
     #[ORM\Column(length: 1)]
     private ?string $lettre = null;
 
-    #[Groups(["bap:list"])]
+    #[Groups(["bap:list", "plateforme:detail"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
@@ -39,17 +39,10 @@ class Bap
     #[ORM\OneToMany(targetEntity: UtilisateurBap::class, mappedBy: 'bap')]
     private Collection $utilisateurBaps;
 
-    /**
-     * @var Collection<int, PosteFuturBap>
-     */
-    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'bap')]
-    private Collection $posteFuturBaps;
-
     public function __construct()
     {
         $this->emploiTypes = new ArrayCollection();
         $this->utilisateurBaps = new ArrayCollection();
-        $this->posteFuturBaps = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,36 +128,6 @@ class Bap
             // set the owning side to null (unless already changed)
             if ($utilisateurBap->getBap() === $this) {
                 $utilisateurBap->setBap(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, PosteFuturBap>
-     */
-    public function getPosteFuturBaps(): Collection
-    {
-        return $this->posteFuturBaps;
-    }
-
-    public function addPosteFuturBap(PosteFuturBap $posteFuturBap): static
-    {
-        if (!$this->posteFuturBaps->contains($posteFuturBap)) {
-            $this->posteFuturBaps->add($posteFuturBap);
-            $posteFuturBap->setBap($this);
-        }
-
-        return $this;
-    }
-
-    public function removePosteFuturBap(PosteFuturBap $posteFuturBap): static
-    {
-        if ($this->posteFuturBaps->removeElement($posteFuturBap)) {
-            // set the owning side to null (unless already changed)
-            if ($posteFuturBap->getBap() === $this) {
-                $posteFuturBap->setBap(null);
             }
         }
 

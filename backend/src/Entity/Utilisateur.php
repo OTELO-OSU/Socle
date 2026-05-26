@@ -21,15 +21,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['plateforme:list', 'utilisateur:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['plateforme:list', 'utilisateur:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['plateforme:list', 'utilisateur:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $email = null;
 
     #[Ignore]
@@ -84,11 +84,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
     private Collection $entites;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Corps $corps = null;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Grade $grade = null;
 
@@ -121,7 +121,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToOne(inversedBy: 'employe')]
     private ?Entite $employeur = null;
 
-    #[Groups(['utilisateur:list'])]
+    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?TypeContrat $typeContrat = null;
 

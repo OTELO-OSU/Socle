@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\ContributionTutelleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: ContributionTutelleRepository::class)]
 class ContributionTutelle
@@ -21,6 +23,7 @@ class ContributionTutelle
     #[ORM\JoinColumn(nullable: false)]
     private ?Entite $financeur = null;
 
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $taux = null;
 
@@ -39,6 +42,13 @@ class ContributionTutelle
         $this->plateformeHistorique = $plateformeHistorique;
 
         return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('financeur_id')]
+    public function getFinanceurId(): ?int
+    {
+        return $this->financeur?->getId();
     }
 
     public function getFinanceur(): ?Entite

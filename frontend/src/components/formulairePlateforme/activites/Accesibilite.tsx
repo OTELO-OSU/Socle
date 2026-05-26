@@ -7,7 +7,7 @@ import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 export default function Accesibilite() {
     const { setValue } = useFormContext();
 
-    const possedeLabellisation = useWatch({ name: "labellisation_qualite", compute: (value) => value === "true" });
+    const possedeLabellisation = useWatch({ name: "labellisation_qualite", compute: (value) => value === true });
     if (!possedeLabellisation) {
         setValue("nom_labellisation_qualite", "");
     }

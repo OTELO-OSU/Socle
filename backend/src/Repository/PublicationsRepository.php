@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\PosteFuturBap;
+use App\Entity\Publications;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<PosteFuturBap>
+ * @extends ServiceEntityRepository<Publications>
  */
-class PosteFuturBapRepository extends ServiceEntityRepository
+class PublicationsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PosteFuturBap::class);
+        parent::__construct($registry, Publications::class);
     }
 
     //    /**
-    //     * @return PosteFuturBap[] Returns an array of PosteFuturBap objects
+    //     * @return Publications[] Returns an array of Publications objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class PosteFuturBapRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?PosteFuturBap
+    //    public function findOneBySomeField($value): ?Publications
     //    {
     //        return $this->createQueryBuilder('p')
     //            ->andWhere('p.exampleField = :val')

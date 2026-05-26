@@ -2,29 +2,16 @@ import { Box, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Radio, R
 import { useContext, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-
-type InstrumentActuelMaintenanceProps = {
-    id: number | string;
-    nom: string;
-    contratMaintenanceId: number | null;
-    commentaireNatureContrat: string | null;
-    fournisseurContrat: string | null;
-    mutualiseAutreInstrument: boolean | null;
-    mutualiseAutreInstrumentDetail: number[];
-    mutualiseUmrOsu: boolean | null;
-    mutualiseSite: boolean | null;
-    coutMaintenance: number | null;
-    futur: boolean;
-};
+import type { Instrument } from "../../../services/plateformeService";
 
 function InstrumentActuelMaintenanceCard({
     instrument,
     instrumentList,
     onEdit,
 }: {
-    instrument: InstrumentActuelMaintenanceProps;
-    instrumentList: InstrumentActuelMaintenanceProps[];
-    onEdit: (instrument: InstrumentActuelMaintenanceProps) => void;
+    instrument: Instrument;
+    instrumentList: Instrument[];
+    onEdit: (instrument: Instrument) => void;
 }) {
     const dictionnaireContext = useContext(DictionnaireContext);
 
@@ -80,8 +67,8 @@ function InstrumentActuelMaintenanceCard({
                         <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
                             <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <RadioGroup
-                                    value={instrument.contratMaintenanceId ?? ""}
-                                    onChange={(event) => onEdit({ ...instrument, contratMaintenanceId: Number(event.target.value) })}
+                                    value={instrument.contrat_maintenance_id ?? ""}
+                                    onChange={(event) => onEdit({ ...instrument, contrat_maintenance_id: Number(event.target.value) })}
                                     aria-labelledby={`${instrument.id}-label`}
                                     name="radio-buttons-group"
                                 >
@@ -95,8 +82,8 @@ function InstrumentActuelMaintenanceCard({
                             <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <TextField
                                     multiline
-                                    value={instrument.commentaireNatureContrat}
-                                    onChange={(event) => onEdit({ ...instrument, commentaireNatureContrat: event.target.value })}
+                                    value={instrument.commentaire_nature_contrat}
+                                    onChange={(event) => onEdit({ ...instrument, commentaire_nature_contrat: event.target.value })}
                                     placeholder="Commentaire"
                                     sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
@@ -106,8 +93,8 @@ function InstrumentActuelMaintenanceCard({
                             <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <TextField
                                     multiline
-                                    value={instrument.fournisseurContrat}
-                                    onChange={(event) => onEdit({ ...instrument, fournisseurContrat: event.target.value })}
+                                    value={instrument.fournisseur_contrat}
+                                    onChange={(event) => onEdit({ ...instrument, fournisseur_contrat: event.target.value })}
                                     placeholder="fournisseur / entreprise"
                                     sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
@@ -116,16 +103,16 @@ function InstrumentActuelMaintenanceCard({
                         <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
                             <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <RadioGroup
-                                    value={instrument.mutualiseAutreInstrument ? "mutualiseAutreInstrument" : instrument.mutualiseUmrOsu ? "mutualiseUmrOsu" : instrument.mutualiseSite ? "mutualiseSite" : ""}
+                                    value={instrument.mutualise_autre_instrument ? "mutualiseAutreInstrument" : instrument.mutualise_umr_osu ? "mutualiseUmrOsu" : instrument.mutualise_site ? "mutualiseSite" : ""}
 
                                     onChange={(event) => {
                                         const selectedValue = event.target.value;
                                         onEdit({
                                             ...instrument,
-                                            mutualiseAutreInstrument: selectedValue === "mutualiseAutreInstrument",
-                                            mutualiseUmrOsu: selectedValue === "mutualiseUmrOsu",
-                                            mutualiseSite: selectedValue === "mutualiseSite",
-                                            mutualiseAutreInstrumentDetail: [],
+                                            mutualise_autre_instrument: selectedValue === "mutualiseAutreInstrument",
+                                            mutualise_umr_osu: selectedValue === "mutualiseUmrOsu",
+                                            mutualise_site: selectedValue === "mutualiseSite",
+                                            mutualise_autre_instrument_ids: [],
                                         });
                                     }}
                                     aria-labelledby={`${instrument.id}-label`}
@@ -136,18 +123,18 @@ function InstrumentActuelMaintenanceCard({
                                     <FormControlLabel value="mutualiseSite" control={<Radio />} label="Mutualisé à l'échelle du site (Université)" />
                                     <Select
                                         sx={{ mt: 2 }}
-                                        value={instrument.mutualiseAutreInstrumentDetail || []}
+                                        value={instrument.mutualise_autre_instrument_ids || []}
                                         onChange={(event) => {
                                             const selectedValue = event.target.value;
                                             const selectedIds = Array.isArray(selectedValue)
                                                 ? selectedValue.map((value) => Number(value)).filter((value) => Number.isFinite(value))
                                                 : [Number(selectedValue)].filter((value) => Number.isFinite(value));
 
-                                            onEdit({ ...instrument, mutualiseAutreInstrumentDetail: selectedIds });
+                                            onEdit({ ...instrument, mutualise_autre_instrument_ids: selectedIds });
                                         }}
                                         multiple
                                         displayEmpty
-                                        disabled={!instrument.mutualiseAutreInstrument}
+                                        disabled={!instrument.mutualise_autre_instrument}
                                     >
                                         {instrumentList.map((item) => (
                                             <MenuItem key={item.id} value={item.id}>
@@ -163,8 +150,8 @@ function InstrumentActuelMaintenanceCard({
                                 <TextField
                                     multiline
                                     type="number"
-                                    value={instrument.coutMaintenance}
-                                    onChange={(event) => onEdit({ ...instrument, coutMaintenance: event.target.value ? Number(event.target.value) : null })}
+                                    value={instrument.cout_maintenance}
+                                    onChange={(event) => onEdit({ ...instrument, cout_maintenance: event.target.value ? Number(event.target.value) : null })}
                                     placeholder="Coût K€/an"
                                     sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />
@@ -180,16 +167,16 @@ function InstrumentActuelMaintenanceCard({
 export function EquipementActuelsMaintenance() {
     const { control, getValues, setValue } = useFormContext();
     useEffect(() => {
-        const equipements = getValues("equipements") as InstrumentActuelMaintenanceProps[] | undefined;
+        const equipements = getValues("instruments") as Instrument[] | undefined;
         if (!Array.isArray(equipements)) {
-            setValue("equipements", []);
+            setValue("instruments", []);
         }
     }, [getValues, setValue]);
 
     const equipements = (useWatch({
         control,
-        name: "equipements",
-    }) as InstrumentActuelMaintenanceProps[] | undefined) || [];
+        name: "instruments",
+    }) as Instrument[] | undefined) || [];
     const actuels = equipements?.filter(e => !e.futur) || [];
     return (
         <>
@@ -209,7 +196,7 @@ export function EquipementActuelsMaintenance() {
                     key={instrument.id}
                     instrument={instrument}
                     instrumentList={equipements}
-                    onEdit={(instrumentToUpdate) => setValue("equipements", equipements.map(e => e.id === instrument.id ? instrumentToUpdate : e))}
+                    onEdit={(instrumentToUpdate) => setValue("instruments", equipements.map(e => e.id === instrument.id ? instrumentToUpdate : e))}
                 />
             ))}
         </>

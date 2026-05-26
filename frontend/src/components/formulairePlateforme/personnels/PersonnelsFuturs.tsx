@@ -2,18 +2,10 @@ import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typogr
 import { useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
+import type { PosteFutur } from "../../../services/plateformeService";
+import type { EmploiType } from "../../../services/dictionnaireService";
 
-const PERSONNELS_FIELD_NAME = "personnelsFuturs";
-
-export type PersonnelFuturFormValue = {
-    employeur: number | null;
-    corps: number | null;
-    bap: number | null;
-    emploiType: number | null;
-    quotite: number | null;
-    rang_numerateur: number | null;
-    rang_denominateur: number | null;
-};
+const PERSONNELS_FIELD_NAME = "postes_futurs";
 
 function ChampPosteFutur({ children, label }: { children: React.ReactNode; label: string }) {
     return (
@@ -30,18 +22,25 @@ function ChampPosteFutur({ children, label }: { children: React.ReactNode; label
     )
 }
 
-function PersonnelFuturCarte({ poste, onChange }: { poste: PersonnelFuturFormValue; onChange?: (updatedPoste: PersonnelFuturFormValue) => void }) {
+function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void }) {
     const { employeurOptions, corps, bap } = useContext(DictionnaireContext);
 
-    const emploiType = poste.bap ? bap.find((b) => b.id === poste.bap)?.emploiTypes : null;
+    const emploiTypeDisponible: EmploiType[] = []
+    poste.baps_ids.forEach((bapId) => {
+        const et = bap.find((b) => b.id === bapId)?.emploiTypes;
+        if (et) {
+            emploiTypeDisponible.push(...et);
+        }
+    });
+
 
     return (
         <Box sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 1, p: 2 }}>
             <ChampPosteFutur label="Employeur">
                 <Select
                     fullWidth
-                    value={poste.employeur ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, employeur: e.target.value as number })}
+                    value={poste.employeur_id ?? ""}
+                    onChange={(e) => onChange?.({ ...poste, employeur_id: e.target.value as number })}
                     displayEmpty
                 >
                     {employeurOptions.map((option) => (
@@ -54,8 +53,8 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PersonnelFuturFormVal
             <ChampPosteFutur label="Corps">
                 <Select
                     fullWidth
-                    value={poste.corps ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, corps: e.target.value as number })}
+                    value={poste.corps_id ?? ""}
+                    onChange={(e) => onChange?.({ ...poste, corps_id: e.target.value as number })}
                     displayEmpty
                 >
                     {corps.map((option) => (
@@ -67,9 +66,13 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PersonnelFuturFormVal
             </ChampPosteFutur>
             <ChampPosteFutur label="BAP">
                 <Select
+                    multiple
                     fullWidth
-                    value={poste.bap ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, bap: e.target.value as number })}
+                    value={poste.baps_ids ?? []}
+                    onChange={(e) => {
+                        const nextBapIds = (Array.isArray(e.target.value) ? e.target.value : [e.target.value]).map(Number);
+                        onChange?.({ ...poste, baps_ids: nextBapIds });
+                    }}
                     displayEmpty
                 >
                     {bap.map((option) => (
@@ -81,13 +84,17 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PersonnelFuturFormVal
             </ChampPosteFutur>
             <ChampPosteFutur label="Emploi type">
                 <Select
+                    multiple
                     fullWidth
-                    value={poste.emploiType ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, emploiType: e.target.value as number })}
+                    value={poste.emploi_types_ids ?? []}
+                    onChange={(e) => {
+                        const nextEmploiTypeIds = (Array.isArray(e.target.value) ? e.target.value : [e.target.value]).map(Number);
+                        onChange?.({ ...poste, emploi_types_ids: nextEmploiTypeIds });
+                    }}
                     displayEmpty
-                    disabled={!poste.bap}
+                    disabled={!poste.baps_ids?.length}
                 >
-                    {emploiType?.map((option) => (
+                    {emploiTypeDisponible?.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
                             {option.nom}
                         </MenuItem>
@@ -115,7 +122,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PersonnelFuturFormVal
                     }}
                 />
             </ChampPosteFutur>
-            <ChampPosteFutur label="Quotité">
+            <ChampPosteFutur label="Rang">
                 <Grid container spacing={2} sx={{ alignItems: "center" }}>
                     <Grid size={{ xs: 5 }}>
                         <TextField
@@ -172,14 +179,14 @@ export function PersonnelFuturs() {
     const { control, getValues, setValue } = useFormContext();
 
     function handleNombrePostesChange(nombre: number) {
-        const currentPostes = (getValues(PERSONNELS_FIELD_NAME) as PersonnelFuturFormValue[] | undefined) ?? [];
+        const currentPostes = (getValues(PERSONNELS_FIELD_NAME) as PosteFutur[] | undefined) ?? [];
         if (nombre > currentPostes.length) {
             // Ajouter des postes vides
             const postesToAdd = Array.from({ length: nombre - currentPostes.length }, () => ({
-                employeur: null,
-                corps: null,
-                bap: null,
-                emploiType: null,
+                employeur_id: null,
+                corps_id: null,
+                baps_ids: [],
+                emploi_types_ids: [],
                 quotite: null,
                 rang_numerateur: null,
                 rang_denominateur: null,
@@ -193,13 +200,13 @@ export function PersonnelFuturs() {
 
     // Remplissage initial
     useEffect(() => {
-        const initialValue = getValues(PERSONNELS_FIELD_NAME) as PersonnelFuturFormValue[] | undefined;
+        const initialValue = getValues(PERSONNELS_FIELD_NAME) as PosteFutur[] | undefined;
         if (!Array.isArray(initialValue)) {
             setValue(PERSONNELS_FIELD_NAME, [], { shouldDirty: false, shouldValidate: false });
         }
     }, [getValues, setValue]);
 
-    const postFutures = (useWatch({ control, name: PERSONNELS_FIELD_NAME }) as PersonnelFuturFormValue[] | undefined) ?? [];
+    const postFutures = (useWatch({ control, name: PERSONNELS_FIELD_NAME }) as PosteFutur[] | undefined) ?? [];
     const nombrePostes = postFutures.length;
 
     return (
@@ -234,7 +241,7 @@ export function PersonnelFuturs() {
                     <PersonnelFuturCarte
                         poste={poste}
                         onChange={(updatedPoste) => {
-                            const currentPostes = (getValues(PERSONNELS_FIELD_NAME) as PersonnelFuturFormValue[] | undefined) ?? [];
+                            const currentPostes = (getValues(PERSONNELS_FIELD_NAME) as PosteFutur[] | undefined) ?? [];
                             const nextPostes = currentPostes.map((currentPoste, currentIndex) =>
                                 currentIndex === index ? updatedPoste : currentPoste
                             );

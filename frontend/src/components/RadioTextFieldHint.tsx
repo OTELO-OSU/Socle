@@ -10,13 +10,15 @@ export default function RadioTextFieldHint({ label, name, helperText }: { label:
                 name={name}
                 control={control}
                 render={({ field }) => {
-                    const { value, ...fieldProps } = field;
+                    const { value, onChange, ...fieldProps } = field;
+                    const radioValue = value === true ? "true" : value === false ? "false" : "";
                     return (
                         <>
                             <RadioGroup
                                 row
                                 {...fieldProps}
-                                value={value ?? null}
+                                value={radioValue}
+                                onChange={(event) => onChange(event.target.value === "true")}
                             >
                                 <FormControlLabel value="true" control={<Radio />} label="Oui" />
                                 <FormControlLabel value="false" control={<Radio />} label="Non" />

@@ -6,6 +6,7 @@ use App\Repository\PlateformeHistoriquePersonnelRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriquePersonnelRepository::class)]
 class PlateformeHistoriquePersonnel
@@ -18,23 +19,29 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
-    #[Ignore]
     private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     #[ORM\JoinColumn(name: 'utilisateur_id_id', referencedColumnName: 'id', nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
+    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[SerializedName("responsable_scientifique")]
     #[ORM\Column(name: 'responsable_scientifique')]
     private ?bool $responsableScientifique = false;
 
+    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[SerializedName("responsable_technique")]
     #[ORM\Column(name: 'responsable_technique')]
     private ?bool $responsableTechnique = false;
 
     #[ORM\Column]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?int $quotite = 0;
 
+    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[SerializedName("responsable_plateforme")]
     #[ORM\Column(name: 'responsable_plateforme')]
     private ?bool $responsablePlateforme = false;
 
@@ -55,7 +62,13 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('utilisateur_id')]
+    public function getUtilisateurId(): ?int
+    {
+        return $this->utilisateur?->getId();
+    }
+
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -68,7 +81,6 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
-    #[Groups(['plateforme:list'])]
     public function isResponsableScientifique(): ?bool
     {
         return $this->responsableScientifique;
@@ -81,7 +93,6 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
-    #[Groups(['plateforme:list'])]
     public function isResponsableTechnique(): ?bool
     {
         return $this->responsableTechnique;
@@ -106,7 +117,6 @@ class PlateformeHistoriquePersonnel
         return $this;
     }
 
-    #[Groups(['plateforme:list'])]
     public function isResponsablePlateforme(): ?bool
     {
         return $this->responsablePlateforme;

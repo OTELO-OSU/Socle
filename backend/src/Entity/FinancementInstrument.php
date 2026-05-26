@@ -4,12 +4,14 @@ namespace App\Entity;
 
 use App\Repository\FinancementInstrumentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: FinancementInstrumentRepository::class)]
 class FinancementInstrument
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -19,9 +21,11 @@ class FinancementInstrument
 
     #[ORM\ManyToOne(inversedBy: 'financementInstruments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["plateforme:detail"])]
     private ?Entite $financeur = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
     private ?int $taux = null;
 
     public function getId(): ?int

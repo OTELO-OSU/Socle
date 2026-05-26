@@ -11,17 +11,23 @@ import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { SnackbarContext } from "../../../context/snackbarContext";
 
 type PersonnelActuelFormValue = {
-    agentId: number;
-    nom: string;
-    prenom: string;
-    email: string;
+    utilisateur_id: number;
+    utilisateur: {
+        id: number;
+        nom: string;
+        prenom: string;
+        email: string;
+        corps: Corps | null;
+        grade: Grade | null;
+        typeContrat: typeContrat | null;
+    }
     quotite: number;
-    corps?: Corps | null;
-    grade?: Grade | null;
-    typeContrat?: typeContrat | null;
+    responsable_scientifique: boolean;
+    responsable_technique: boolean;
+    responsable_plateforme: boolean;
 };
 
-const PERSONNELS_FIELD_NAME = "personnelsActuels";
+const PERSONNELS_FIELD_NAME = "personnels";
 
 type DialogAjoutPersonnelProps = {
     onAdd: (personnel: PersonnelActuelFormValue) => void;
@@ -67,14 +73,20 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
         }
 
         onAdd({
-            agentId: agent.id,
-            nom: agent.nom,
-            prenom: agent.prenom,
-            email: agent.email,
+            utilisateur_id: agent.id,
+            utilisateur: {
+                id: agent.id,
+                nom: agent.nom,
+                prenom: agent.prenom,
+                email: agent.email,
+                corps: agent.corps ?? null,
+                grade: agent.grade ?? null,
+                typeContrat: agent.typeContrat ?? null,
+            },
             quotite: quotiteNumber,
-            corps: agent.corps,
-            grade: agent.grade,
-            typeContrat: agent.typeContrat,
+            responsable_scientifique: false,
+            responsable_technique: false,
+            responsable_plateforme: false,
         });
 
         handleClose();
@@ -303,11 +315,11 @@ function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
                 display: "flex", alignItems: "center", gap: 1
             }}>
                 <Account />
-                <Typography>{personnel.nom}</Typography>
-                <Typography>{personnel.prenom}</Typography>
-                <Typography>{personnel.email}</Typography>
+                <Typography>{personnel.utilisateur.nom}</Typography>
+                <Typography>{personnel.utilisateur.prenom}</Typography>
+                <Typography>{personnel.utilisateur.email}</Typography>
                 <Chip label={`${personnel.quotite}%`} size="small" />
-                {(personnel.typeContrat || personnel.corps) && <Chip color="info" label={typePersonnelLabel(personnel.corps?.acronyme, personnel.typeContrat?.nom)} size="small" />}
+                {(personnel.utilisateur.typeContrat || personnel.utilisateur.corps) && <Chip color="info" label={typePersonnelLabel(personnel.utilisateur.corps?.acronyme, personnel.utilisateur.typeContrat?.nom)} size="small" />}
             </Box >
             <Button color="error" onClick={onDelete}>
                 Supprimer
@@ -334,7 +346,7 @@ export function PersonnelActuels() {
     const handleAddPersonnel = (personnel: PersonnelActuelFormValue) => {
         // Ici personnel et le nouvel agent
         const currentPersonnels = (getValues(PERSONNELS_FIELD_NAME) as PersonnelActuelFormValue[] | undefined) ?? [];
-        const existingPersonnelIndex = currentPersonnels.findIndex((current) => current.agentId === personnel.agentId);
+        const existingPersonnelIndex = currentPersonnels.findIndex((current) => current.utilisateur_id === personnel.utilisateur_id);
 
         // On modifie la personne si elle existe déjà
         if (existingPersonnelIndex >= 0) {
@@ -352,9 +364,9 @@ export function PersonnelActuels() {
         }
     };
 
-    const handleDeletePersonnel = (agentId: number) => {
+    const handleDeletePersonnel = (utilisateur_id: number) => {
         const currentPersonnels = (getValues(PERSONNELS_FIELD_NAME) as PersonnelActuelFormValue[] | undefined) ?? [];
-        const nextPersonnels = currentPersonnels.filter((personnel) => personnel.agentId !== agentId);
+        const nextPersonnels = currentPersonnels.filter((personnel) => personnel.utilisateur_id !== utilisateur_id);
 
         setValue(PERSONNELS_FIELD_NAME, nextPersonnels, {
             shouldDirty: true,
@@ -374,9 +386,9 @@ export function PersonnelActuels() {
 
             {personnels.map((personnel) => (
                 <PersonnelCard
-                    key={personnel.agentId}
+                    key={personnel.utilisateur_id}
                     personnel={personnel}
-                    onDelete={() => handleDeletePersonnel(personnel.agentId)}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
                 />
             ))}
             {personnels.length === 0 && (

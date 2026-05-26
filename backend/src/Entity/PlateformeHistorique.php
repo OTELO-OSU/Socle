@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: PlateformeHistoriqueRepository::class)]
 class PlateformeHistorique
@@ -14,7 +15,7 @@ class PlateformeHistorique
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
@@ -22,213 +23,332 @@ class PlateformeHistorique
     private ?Plateforme $plateforme = null;
 
     #[ORM\Column]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?int $annee = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['plateforme:list'])]
+    #[SerializedName("nom_officiel")]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?string $nomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['plateforme:list'])]
+    #[SerializedName("forme_developpee_nom_officiel")]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?string $formeDeveloppeeNomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[SerializedName("site_web")]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?string $siteWeb = null;
 
+    #[Groups(['plateforme:list'])]
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Ville $ville = null;
 
     #[ORM\Column(length: 500, nullable: true)]
+    #[SerializedName("logo_url")]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?string $logoUrl = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[SerializedName("autre_type_labellisation")]
+    #[Groups(["plateforme:detail"])]
     private ?string $autreTypeLabellisation = null;
 
+    #[SerializedName("laboratoire_operateur")]
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Entite $laboratoireOperateur = null;
 
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("espace_bureau")]
     #[ORM\Column(nullable: true)]
     private ?float $espaceBureau = null;
 
     /**
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
+    #[SerializedName("personnels")]
     #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateformeHistorique')]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
     private Collection $plateformeHistoriquePersonnels;
 
+    #[SerializedName("espace_laboratoire")]
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
     private ?float $espaceLaboratoire = null;
 
+    #[SerializedName("materiel_consommable")]
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
     private ?float $materielConsommable = null;
 
+    #[SerializedName("contrat_entretien")]
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
     private ?float $contratEntretien = null;
 
+    #[SerializedName("etude_prestation")]
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
     private ?float $etudePrestation = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("fluide_energie")]
+    #[Groups(["plateforme:detail"])]
     private ?float $fluideEnergie = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("mission_frais_generaux")]
+    #[Groups(["plateforme:detail"])]
     private ?float $missionFraisGeneraux = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?DeterminationTarifMethode $determinationTarifPlateforme = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_tutelle_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionTutelleTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_fond_public_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionFondPublicTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_fond_prive_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionFondPriveTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_credit_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionCreditTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_projet_recherche_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionProjetRechercheTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("contribution_structure_pia_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $contributionStructurePiaTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("dotation_instrument_national")]
+    #[Groups(["plateforme:detail"])]
     private ?float $dotationInstrumentNational = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("labellisation_qualite")]
+    #[Groups(["plateforme:detail"])]
     private ?bool $labellisationQualite = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[SerializedName("nom_labellisation_qualite")]
+    #[Groups(["plateforme:detail"])]
     private ?string $nomLabellisationQualite = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("procedure_transparente_tous")]
+    #[Groups(["plateforme:detail"])]
     private ?bool $procedureTransparenteTous = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("procedure_transparente_prestation_exterieure")]
+    #[Groups(["plateforme:detail"])]
     private ?bool $procedureTransparentePrestationExterieure = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("accueil_international_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $accueilInternationalTaux = null;
 
     #[ORM\Column(name: 'modele_77_2424_taux', nullable: true)]
+    #[SerializedName("modele_77_2424_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $modele772424Taux = null;
 
     #[ORM\Column(name: 'modele_77_1224_taux', nullable: true)]
+    #[SerializedName("modele_77_1224_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $modele771224Taux = null;
 
     #[ORM\Column(name: 'modele_57_2424_taux', nullable: true)]
+    #[SerializedName("modele_57_2424_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $modele572424Taux = null;
 
     #[ORM\Column(name: 'modele_57_1224_taux', nullable: true)]
+    #[SerializedName("modele_57_1224_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $modele571224Taux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_fonctionnement_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationFonctionnementTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_maintenance_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationMaintenanceTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_developpement_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationDeveloppementTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_panne_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationPanneTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_temps_mort_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationTempsMortTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_equipe_operante_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationEquipeOperanteTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_collaboration_interne_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationCollaborationInterneTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_collaboration_externe_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationCollaborationExterneTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("utilisation_prestation_service_taux")]
+    #[Groups(["plateforme:detail"])]
     private ?int $utilisationPrestationServiceTaux = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_realise")]
+    #[Groups(["plateforme:detail"])]
     private ?bool $bgesRealise = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_domicile_travail")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesDomicileTravail = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_mission")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesMission = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_mission_ext")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesMissionExt = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_consommable")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesConsommable = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_equipement")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesEquipement = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_envoi_echantillon")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesEnvoiEchantillon = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_batiment")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesBatiment = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("bges_dechet")]
+    #[Groups(["plateforme:detail"])]
     private ?float $bgesDechet = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("publication_equipe_operante")]
+    #[Groups(["plateforme:detail"])]
     private ?int $publicationEquipeOperante = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("publication_collaboration_interne")]
+    #[Groups(["plateforme:detail"])]
     private ?int $publicationCollaborationInterne = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("publication_collaboration_externe")]
+    #[Groups(["plateforme:detail"])]
     private ?int $publicationCollaborationExterne = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("publication_autre_type")]
+    #[Groups(["plateforme:detail"])]
     private ?int $publicationAutreType = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("publication_these")]
+    #[Groups(["plateforme:detail"])]
     private ?int $publicationThese = null;
 
     /**
      * @var Collection<int, PlateformeHistoriqueTutelle>
      */
+    #[SerializedName("tutelles")]
     #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateformeHistorique')]
     private Collection $plateformeHistoriqueTutelles;
 
     /**
      * @var Collection<int, PosteFutur>
      */
+    #[SerializedName("postes_futurs")]
     #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateformeHistorique')]
+    #[Groups(["plateforme:detail"])]
     private Collection $posteFuturs;
 
     /**
      * @var Collection<int, ContributionTutelle>
      */
     #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateformeHistorique')]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("contribution_tutelle_detail")]
     private Collection $contributionTutelles;
 
     /**
      * @var Collection<int, Instrument>
      */
     #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateformeHistorique')]
+    #[Groups(["plateforme:detail"])]
     private Collection $instruments;
 
     #[ORM\Column]
     #[Groups(['plateforme:list'])]
     private ?bool $brouillon = null;
+
+    /**
+     * @var Collection<int, Publications>
+     */
+    #[ORM\OneToMany(targetEntity: Publications::class, mappedBy: 'plateformeHistorique')]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("publications")]
+    private Collection $publications;
 
     public function __construct()
     {
@@ -237,6 +357,7 @@ class PlateformeHistorique
         $this->posteFuturs = new ArrayCollection();
         $this->contributionTutelles = new ArrayCollection();
         $this->instruments = new ArrayCollection();
+        $this->publications = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -310,6 +431,13 @@ class PlateformeHistorique
         return $this;
     }
 
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('ville_id')]
+    public function getVilleId(): ?int
+    {
+        return $this->ville?->getId();
+    }
+
     public function getVille(): ?Ville
     {
         return $this->ville;
@@ -344,6 +472,13 @@ class PlateformeHistorique
         $this->autreTypeLabellisation = $autreTypeLabellisation;
 
         return $this;
+    }
+
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('laboratoire_operateur_id')]
+    public function getLaboratoireOperateurId(): ?int
+    {
+        return $this->laboratoireOperateur?->getId();
     }
 
     public function getLaboratoireOperateur(): ?Entite
@@ -464,6 +599,13 @@ class PlateformeHistorique
         $this->missionFraisGeneraux = $missionFraisGeneraux;
 
         return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("determination_tarif_plateforme_id")]
+    function getDeterminationTarifPlateformeId(): ?int
+    {
+        return $this->determinationTarifPlateforme?->getId();
     }
 
     public function getDeterminationTarifPlateforme(): ?DeterminationTarifMethode
@@ -946,6 +1088,32 @@ class PlateformeHistorique
         return $this;
     }
 
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('tutelles_principales_ids')]
+    public function getTutellesPrincipalesIds(): array
+    {
+        $ids = [];
+        foreach ($this->plateformeHistoriqueTutelles as $plateformeHistoriqueTutelle) {
+            if ($plateformeHistoriqueTutelle->isPrincipale()) {
+                $ids[] = $plateformeHistoriqueTutelle->getTutelle()->getId();
+            }
+        }
+        return $ids;
+    }
+
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('tutelles_secondaires_ids')]
+    public function getTutellesSecondairesIds(): array
+    {
+        $ids = [];
+        foreach ($this->plateformeHistoriqueTutelles as $plateformeHistoriqueTutelle) {
+            if (!$plateformeHistoriqueTutelle->isPrincipale()) {
+                $ids[] = $plateformeHistoriqueTutelle->getTutelle()->getId();
+            }
+        }
+        return $ids;
+    }
+
     /**
      * @return Collection<int, PlateformeHistoriqueTutelle>
      */
@@ -1104,6 +1272,36 @@ class PlateformeHistorique
     public function setBrouillon(bool $brouillon): static
     {
         $this->brouillon = $brouillon;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Publications>
+     */
+    public function getPublications(): Collection
+    {
+        return $this->publications;
+    }
+
+    public function addPublication(Publications $publication): static
+    {
+        if (!$this->publications->contains($publication)) {
+            $this->publications->add($publication);
+            $publication->setPlateformeHistorique($this);
+        }
+
+        return $this;
+    }
+
+    public function removePublication(Publications $publication): static
+    {
+        if ($this->publications->removeElement($publication)) {
+            // set the owning side to null (unless already changed)
+            if ($publication->getPlateformeHistorique() === $this) {
+                $publication->setPlateformeHistorique(null);
+            }
+        }
 
         return $this;
     }

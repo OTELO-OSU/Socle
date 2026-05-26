@@ -6,12 +6,15 @@ use App\Repository\PosteFuturRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: PosteFuturRepository::class)]
 class PosteFutur
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -28,30 +31,46 @@ class PosteFutur
     private ?Corps $corps = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
     private ?int $quotite = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('rang_numerateur')]
     private ?int $rangNumerateur = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('rang_denominateur')]
     private ?int $rangDenominateur = null;
 
-    /**
-     * @var Collection<int, PosteFuturBap>
-     */
-    #[ORM\OneToMany(targetEntity: PosteFuturBap::class, mappedBy: 'posteFutur', cascade: ['remove'], orphanRemoval: true)]
-    private Collection $posteFuturBaps;
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('baps_ids')]
+    public function getBapsIds(): array
+    {
+        $array = [];
+        foreach ($this->baps as $bap) {
+            $array[] = $bap->getId();
+        }
+        return $array;
+    }
 
     /**
-     * @var Collection<int, PosteFuturEmploiType>
+     * @var Collection<int, Bap>
      */
-    #[ORM\OneToMany(targetEntity: PosteFuturEmploiType::class, mappedBy: 'posteFutur', cascade: ['remove'], orphanRemoval: true)]
-    private Collection $posteFuturEmploiTypes;
+    #[ORM\ManyToMany(targetEntity: Bap::class, cascade: ['remove'])]
+    private Collection $baps;
+
+    /**
+     * @var Collection<int, EmploiType>
+     */
+    #[ORM\ManyToMany(targetEntity: EmploiType::class, cascade: ['remove'])]
+    private Collection $emploiTypes;
 
     public function __construct()
     {
-        $this->posteFuturBaps = new ArrayCollection();
-        $this->posteFuturEmploiTypes = new ArrayCollection();
+        $this->baps = new ArrayCollection();
+        $this->emploiTypes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,6 +90,13 @@ class PosteFutur
         return $this;
     }
 
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('employeur_id')]
+    public function getEmployeurId(): ?int
+    {
+        return $this->employeur?->getId();
+    }
+
     public function getEmployeur(): ?Entite
     {
         return $this->employeur;
@@ -81,6 +107,12 @@ class PosteFutur
         $this->employeur = $employeur;
 
         return $this;
+    }
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('corps_id')]
+    public function getCorpsId(): ?int
+    {
+        return $this->corps?->getId();
     }
 
     public function getCorps(): ?Corps
@@ -132,62 +164,59 @@ class PosteFutur
     }
 
     /**
-     * @return Collection<int, PosteFuturBap>
+     * @return Collection<int, Bap>
      */
-    public function getPosteFuturBaps(): Collection
+    public function getBaps(): Collection
     {
-        return $this->posteFuturBaps;
+        return $this->baps;
     }
 
-    public function addPosteFuturBap(PosteFuturBap $posteFuturBap): static
+    public function addBap(Bap $posteFuturBap): static
     {
-        if (!$this->posteFuturBaps->contains($posteFuturBap)) {
-            $this->posteFuturBaps->add($posteFuturBap);
-            $posteFuturBap->setPosteFutur($this);
+        if (!$this->baps->contains($posteFuturBap)) {
+            $this->baps->add($posteFuturBap);
         }
 
         return $this;
     }
 
-    public function removePosteFuturBap(PosteFuturBap $posteFuturBap): static
+    public function removeBap(Bap $posteFuturBap): static
     {
-        if ($this->posteFuturBaps->removeElement($posteFuturBap)) {
-            // set the owning side to null (unless already changed)
-            if ($posteFuturBap->getPosteFutur() === $this) {
-                $posteFuturBap->setPosteFutur(null);
-            }
-        }
-
+        $this->baps->removeElement($posteFuturBap);
         return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('emploi_types_ids')]
+    public function getEmploiTypesIds(): array
+    {
+        $array = [];
+        foreach ($this->emploiTypes as $emploiType) {
+            $array[] = $emploiType->getId();
+        }
+        return $array;
     }
 
     /**
-     * @return Collection<int, PosteFuturEmploiType>
+     * @return Collection<int, EmploiType>
      */
-    public function getPosteFuturEmploiTypes(): Collection
+    public function getEmploiTypes(): Collection
     {
-        return $this->posteFuturEmploiTypes;
+        return $this->emploiTypes;
     }
 
-    public function addPosteFuturEmploiType(PosteFuturEmploiType $posteFuturEmploiType): static
+    public function addEmploiType(EmploiType $posteFuturEmploiType): static
     {
-        if (!$this->posteFuturEmploiTypes->contains($posteFuturEmploiType)) {
-            $this->posteFuturEmploiTypes->add($posteFuturEmploiType);
-            $posteFuturEmploiType->setPosteFutur($this);
+        if (!$this->emploiTypes->contains($posteFuturEmploiType)) {
+            $this->emploiTypes->add($posteFuturEmploiType);
         }
 
         return $this;
     }
 
-    public function removePosteFuturEmploiType(PosteFuturEmploiType $posteFuturEmploiType): static
+    public function removeEmploiType(EmploiType $posteFuturEmploiType): static
     {
-        if ($this->posteFuturEmploiTypes->removeElement($posteFuturEmploiType)) {
-            // set the owning side to null (unless already changed)
-            if ($posteFuturEmploiType->getPosteFutur() === $this) {
-                $posteFuturEmploiType->setPosteFutur(null);
-            }
-        }
-
+        $this->emploiTypes->removeElement($posteFuturEmploiType);
         return $this;
     }
 }

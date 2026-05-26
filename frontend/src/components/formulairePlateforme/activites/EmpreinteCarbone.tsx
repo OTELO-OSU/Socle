@@ -9,7 +9,7 @@ export default function EmpreinteCarbone() {
     watch(["bges_domicile_travail", "bges_mission", "bges_mission_ext", "bges_consommable", "bges_equipement", "bges_envoi_echantillon", "bges_batiment", "bges_dechet"], () => {
         totalBGES();
     });
-    const bgesRealise = useWatch({ name: "bges_realise", compute: (value) => value === "true" });
+    const bgesRealise = useWatch({ name: "bges_realise", compute: (value) => value === true });
     function totalBGES() {
         const bges_domicile_travail = Number(getValues("bges_domicile_travail")) || 0;
         const bges_mission = Number(getValues("bges_mission")) || 0;

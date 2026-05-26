@@ -7,12 +7,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: InstrumentRepository::class)]
 class Instrument
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["plateforme:detail", "instrument:mutualisation"])]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -21,33 +24,46 @@ class Instrument
     private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["plateforme:detail", "instrument:mutualisation"])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["plateforme:detail", "instrument:mutualisation"])]
     private ?string $marque = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["plateforme:detail", "instrument:mutualisation"])]
     private ?string $modele = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $anneeAcquisition = null;
+    #[ORM\Column(nullable: true)]
+    #[SerializedName("annee_acquisition")]
+    #[Groups(["plateforme:detail"])]
+    private ?int $anneeAcquisition = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
     private ?float $cout = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("valeur_remplacement")]
+    #[Groups(["plateforme:detail"])]
     private ?float $valeurRemplacement = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("duree_utilisation")]
+    #[Groups(["plateforme:detail"])]
     private ?int $dureeUtilisation = null;
 
     #[ORM\ManyToOne(inversedBy: 'instruments')]
     private ?Operation $operation = null;
 
     #[ORM\Column(nullable: true)]
+    #[SerializedName("annee_achat_envisagee")]
+    #[Groups(["plateforme:detail"])]
     private ?int $anneeAchatEnvisagee = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
     private ?bool $futur = null;
 
     /**
@@ -60,27 +76,41 @@ class Instrument
     private ?ContratMaintenance $contratMaintenance = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('commentaire_nature_contrat')]
     private ?string $commentaireNatureContrat = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('fournisseur_contrat')]
     private ?string $fournisseurContrat = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('mutualise_autre_instrument')]
     private ?bool $mutualiseAutreInstrument = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('mutualise_umr_osu')]
     private ?bool $mutualiseUmrOsu = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('mutualise_site')]
     private ?bool $mutualiseSite = null;
 
     /**
      * @var Collection<int, FinancementInstrument>
      */
     #[ORM\OneToMany(targetEntity: FinancementInstrument::class, mappedBy: 'instrument', cascade: ['remove'], orphanRemoval: true)]
+    #[SerializedName("source_financement")]
+    #[Groups(["plateforme:detail"])]
     private Collection $financementInstruments;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('cout_maintenance')]
     private ?float $coutMaintenance = null;
 
     public function __construct()
@@ -142,12 +172,12 @@ class Instrument
         return $this;
     }
 
-    public function getAnneeAcquisition(): ?\DateTime
+    public function getAnneeAcquisition(): ?int
     {
         return $this->anneeAcquisition;
     }
 
-    public function setAnneeAcquisition(?\DateTime $anneeAcquisition): static
+    public function setAnneeAcquisition(?int $anneeAcquisition): static
     {
         $this->anneeAcquisition = $anneeAcquisition;
 
@@ -190,6 +220,13 @@ class Instrument
         return $this;
     }
 
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('operation_id')]
+    public function getOperationId(): ?int
+    {
+        return $this->operation?->getId();
+    }
+
     public function getOperation(): ?Operation
     {
         return $this->operation;
@@ -226,6 +263,17 @@ class Instrument
         return $this;
     }
 
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('mutualise_autre_instrument_ids')]
+    function getInstrumentMutualisationsIds(): array
+    {
+        $array = [];
+        foreach ($this->instrumentMutualisations as $instrumentMutualisation) {
+            $array[] = $instrumentMutualisation->getId();
+        }
+        return $array;
+    }
+
     /**
      * @return Collection<int, InstrumentMutualisation>
      */
@@ -254,6 +302,13 @@ class Instrument
         }
 
         return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('contrat_maintenance_id')]
+    function getContratMaintenanceId(): ?int
+    {
+        return $this->contratMaintenance?->getId();
     }
 
     public function getContratMaintenance(): ?ContratMaintenance

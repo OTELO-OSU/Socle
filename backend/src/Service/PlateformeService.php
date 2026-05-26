@@ -632,9 +632,6 @@ class PlateformeService
                 case 'espace_laboratoire':
                     $plateformeHisto->setEspaceLaboratoire($value);
                     break;
-                case 'espace_laboratoire':
-                    $plateformeHisto->setEspaceLaboratoire($value);
-                    break;
                 case 'personnel':
                     // Supprimer parmis les actuelles ceux qui n'existe plus
                     foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
@@ -687,8 +684,8 @@ class PlateformeService
 
                                 // Supprimer les baps en trop
                                 $nouvellesBaps = $poste["bap"];
-                                foreach ($posteFuturExistant->getPosteFuturBaps() as $bapExistant) {
-                                    $bapId = $bapExistant->getBap()->getId();
+                                foreach ($posteFuturExistant->getBaps() as $bapExistant) {
+                                    $bapId = $bapExistant->getId();
                                     $bapExiste = false;
                                     foreach ($nouvellesBaps as $bap) {
                                         if ($bap == $bapId) {
@@ -704,25 +701,23 @@ class PlateformeService
                                 // Ajouter les nouveaux baps
                                 foreach ($poste["bap"] as $bap) {
                                     $bapExiste = false;
-                                    foreach ($posteFuturExistant->getPosteFuturBaps() as $bapExistant) {
-                                        if ($bapExistant->getBap()->getId() == $bap) {
+                                    foreach ($posteFuturExistant->getBaps() as $bapExistant) {
+                                        if ($bapExistant->getId() == $bap) {
                                             $bapExiste = true;
                                             break;
                                         }
                                     }
                                     if (!$bapExiste) {
                                         $newBap = $this->em->getReference(Bap::class, $bap);
-                                        $newPivot = new PosteFuturBap();
-                                        $newPivot->setBap($newBap);
-                                        $newPivot->setPosteFutur($posteFuturExistant);
-                                        $this->em->persist($newPivot);
+                                        $posteFuturExistant->addBap($newBap);
+                                        $this->em->persist($posteFuturExistant);
                                     }
                                 }
 
                                 // Supprimer les emplois type en trop
                                 $nouveauxEt = $poste["emploi_type"];
-                                foreach ($posteFuturExistant->getPosteFuturEmploiTypes() as $etExistant) {
-                                    $etId = $etExistant->getEmploiType()->getId();
+                                foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
+                                    $etId = $etExistant->getId();
                                     $etExiste = false;
                                     foreach ($nouveauxEt as $et) {
                                         if ($et == $etId) {
@@ -738,18 +733,16 @@ class PlateformeService
                                 // Ajouter les nouveaux emplois types
                                 foreach ($poste["emploi_type"] as $et) {
                                     $etExiste = false;
-                                    foreach ($posteFuturExistant->getPosteFuturEmploiTypes() as $etExistant) {
-                                        if ($etExistant->getEmploiType()->getId() == $et) {
+                                    foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
+                                        if ($etExistant->getId() == $et) {
                                             $etExiste = true;
                                             break;
                                         }
                                     }
                                     if (!$etExiste) {
                                         $newEt = $this->em->getReference(EmploiType::class, $et);
-                                        $newPivot = new PosteFuturEmploiType();
-                                        $newPivot->setEmploiType($newEt);
-                                        $newPivot->setPosteFutur($posteFuturExistant);
-                                        $this->em->persist($newPivot);
+                                        $posteFuturExistant->addEmploiType($newEt);
+                                        $this->em->persist($posteFuturExistant);
                                     }
                                 }
                             }

@@ -58,7 +58,7 @@ export function ListePlateforme() {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.lastHistorique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                                <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
                                     Voir les détails
                                 </Link>
                             </CardActions>

@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class Corps
 {
     #[ORM\Id]
-    #[Groups(['utilisateur:list', 'corps:list'])]
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
