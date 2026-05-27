@@ -10,7 +10,10 @@ export type RetourFetchPlateformeParPage = {
 export type PlateformeLight = {
     id: number;
     pseudo_id: string;
-    lastHistorique: DernierHistorique;
+    instrument_national: boolean;
+    lastHistorique: DernierHistorique & {
+        brouillon: boolean;
+    };
 }
 
 export type PlateformeCree = {

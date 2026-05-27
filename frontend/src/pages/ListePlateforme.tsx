@@ -1,7 +1,104 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, Pagination, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
+import { Done, Group, Save, Verified } from "@mui/icons-material";
+
+function IconeTitre({ brouillon }: { brouillon: boolean }) {
+    if (brouillon) {
+        return <Save />
+    } else {
+        return <Done />
+    }
+}
+
+function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
+    const personnel = plateforme.lastHistorique.personnels
+
+    const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
+    const responsableTechnique = personnel.filter(p => p.responsable_technique);
+    const responsablePlateforme = personnel.filter(p => p.responsable_plateforme);
+
+
+
+    return (
+        <>
+            <Card key={plateforme.id}>
+                <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box>
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.lastHistorique.brouillon} />{plateforme.lastHistorique.nom_officiel}</Typography>
+                            {plateforme.instrument_national && (
+                                <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
+                                    <Verified fontSize="small" />
+                                    Instrument national
+                                </Typography>
+                            )}
+                            {responsableScientifique.length > 0 && (
+                                <>
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
+                                            <Group />
+                                            Responsable Scientifique :
+                                        </Typography>
+                                        <List sx={{ px: 4 }}>
+                                            {responsableScientifique.map((personnel) => (
+                                                <Typography key={personnel.utilisateur_id} variant="body2" color="textPrimary">
+                                                    {personnel.utilisateur.prenom} {personnel.utilisateur.nom} | {personnel.utilisateur.email}
+                                                </Typography>
+                                            ))}
+                                        </List>
+                                    </Box>
+                                </>)}
+                            {responsableTechnique.length > 0 && (
+                                <>
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
+                                            <Group />
+                                            Responsable Technique :
+                                        </Typography>
+                                        <List sx={{ px: 4 }}>
+                                            {responsableTechnique.map((personnel) => (
+                                                <Typography key={personnel.utilisateur_id} variant="body2" color="textPrimary">
+                                                    {personnel.utilisateur.prenom} {personnel.utilisateur.nom} | {personnel.utilisateur.email}
+                                                </Typography>
+                                            ))}
+                                        </List>
+                                    </Box>
+                                </>)}
+                            {responsablePlateforme.length > 0 && (
+                                <>
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
+                                            <Group />
+                                            Responsable Plateforme :
+                                        </Typography>
+                                        <List sx={{ px: 4 }}>
+                                            {responsablePlateforme.map((personnel) => (
+                                                <Typography key={personnel.utilisateur_id} variant="body2" color="textPrimary">
+                                                    {personnel.utilisateur.prenom} {personnel.utilisateur.nom} | {personnel.utilisateur.email}
+                                                </Typography>
+                                            ))}
+                                        </List>
+                                    </Box>
+                                </>)}
+                        </Box>
+                        {plateforme.lastHistorique.logo_url &&
+                            <Box>
+                                <img src={plateforme.lastHistorique.logo_url} alt={`${plateforme.lastHistorique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
+                            </Box>
+                        }
+                    </Box>
+                </CardContent>
+                <CardActions>
+                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                        Voir les détails
+                    </Link>
+                </CardActions>
+            </Card >
+        </>
+    )
+}
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
@@ -50,28 +147,7 @@ export function ListePlateforme() {
             ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {plateformes.map((plateforme) => (
-                        <Card key={plateforme.id}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Box>
-                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Année : {plateforme.lastHistorique.annee}
-                                        </Typography>
-                                    </Box>
-                                    {plateforme.lastHistorique.logo_url &&
-                                        <Box>
-                                            <img src={plateforme.lastHistorique.logo_url} alt={`${plateforme.lastHistorique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
-                                        </Box>
-                                    }
-                                </Box>
-                            </CardContent>
-                            <CardActions>
-                                <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
-                                    Voir les détails
-                                </Link>
-                            </CardActions>
-                        </Card>
+                        <PlateformeCard key={plateforme.id} plateforme={plateforme} />
                     ))}
                 </Box>
             )}
