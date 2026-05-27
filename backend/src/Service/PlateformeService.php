@@ -652,11 +652,20 @@ class PlateformeService
                 case 'personnels':
                     // Supprimer parmis les actuelles ceux qui n'existe plus
                     foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
-                        $personnelId = $personnelExistant->getId();
+                        $utilisateurId = $personnelExistant->getUtilisateur()?->getId();
+                        $existeEncore = false;
                         foreach ($value as $perso) {
-                            if ($perso["utilisateur_id"] == $personnelId) {
-                                $this->em->remove($personnelExistant);
+                            if ($perso["utilisateur_id"] == $utilisateurId) {
+                                $existeEncore = true;
                                 break;
+                            }
+                        }
+
+                        if (!$existeEncore) {
+                            $editeur = $personnelExistant->isResponsablePlateforme() || $personnelExistant->isResponsableScientifique() || $personnelExistant->isResponsableTechnique();
+                            if (!$editeur) {
+                                $plateformeHisto->removePlateformeHistoriquePersonnel($personnelExistant);
+                                $this->em->remove($personnelExistant);
                             }
                         }
                     }
@@ -678,8 +687,9 @@ class PlateformeService
                             $newRecord->setPlateformeHistorique($plateformeHisto);
                             $utilisateur = $this->em->getReference(Utilisateur::class, $nouveauItilisateurId);
                             $newRecord->setUtilisateur($utilisateur);
-                            $newRecord->setResponsableScientifique($perso["responsable_scientifique"]);
-                            $newRecord->setResponsableTechnique($perso["responsable_technique"]);
+                            $newRecord->setResponsableScientifique(false);
+                            $newRecord->setResponsableTechnique(false);
+                            $newRecord->setResponsablePlateforme(false);
                             $newRecord->setQuotite($perso["quotite"]);
                             $plateformeHisto->addPlateformeHistoriquePersonnel($newRecord);
                             $this->em->persist($newRecord);

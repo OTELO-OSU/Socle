@@ -305,9 +305,11 @@ type PersonnelCardProps = {
 };
 
 function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
+    const estResponsable = personnel.responsable_plateforme || personnel.responsable_scientifique || personnel.responsable_technique;
     return (
         <Box sx={{
-            p: 2, py: 1, my: 2, border: "1px solid", borderColor: "divider", borderRadius: 5, display: "flex", justifyContent: "space-between", gap: 2
+            p: 2, py: 1, my: 2, border: "1px solid", borderColor: "divider", borderRadius: 5, display: "flex", justifyContent: "space-between", gap: 2,
+            background: estResponsable ? "linear-gradient(90deg, #ede7f6 0%, #ffffff 100%)" : "background.paper",
         }}>
 
 
@@ -320,8 +322,9 @@ function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
                 <Typography>{personnel.utilisateur.email}</Typography>
                 <Chip label={`${personnel.quotite}%`} size="small" />
                 {(personnel.utilisateur.typeContrat || personnel.utilisateur.corps) && <Chip color="info" label={typePersonnelLabel(personnel.utilisateur.corps?.acronyme, personnel.utilisateur.typeContrat?.nom)} size="small" />}
+                {estResponsable && <Chip color="secondary" label="Responsable" size="small" />}
             </Box >
-            <Button color="error" onClick={onDelete}>
+            <Button color="error" disabled={estResponsable} onClick={onDelete}>
                 Supprimer
             </Button>
         </Box >

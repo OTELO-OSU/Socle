@@ -10,30 +10,7 @@ export type RetourFetchPlateformeParPage = {
 export type PlateformeLight = {
     id: number;
     pseudo_id: string;
-    lastHistorique: {
-        id: number;
-        annee: number;
-        nomOfficiel: string;
-        formeDeveloppeeNomOfficiel: string | null;
-        plateformeHistoriquePersonnels: {
-            id: number;
-            utilisateur: {
-                id: number;
-                nom: string;
-                prenom: string;
-                email: string;
-            },
-            responsableScientifique: boolean,
-            responsableTechnique: boolean,
-            responsablePlateforme: boolean,
-            quotite: number;
-        }[];
-        brouillon: boolean;
-    }
-    prenom: string;
-    plateformeDemande: string | null;
-    uniteDemande: string | null;
-    osuDemande: boolean;
+    lastHistorique: DernierHistorique;
 }
 
 export type PlateformeCree = {

@@ -99,8 +99,13 @@ class AdminService
         if (!$this->security->isGranted(PlateformeVoter::AFFILIER, Plateforme::class)) throw new Exception("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.", 403);
 
         // Est-ce que la plateforme existe ?
-        /** @var PlateformeHistorique $plateforme */
-        $plateforme = $this->em->getRepository(PlateformeHistorique::class)->find($plateformeId);
+        /** @var Plateforme $plateforme */
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+        if (!$plateforme) {
+            throw new Exception("La plateforme n'existe pas.", 404);
+        }
+
+        $plateforme = $plateforme->getLastHistorique();
         if (!$plateforme) {
             throw new Exception("La plateforme n'existe pas.", 404);
         }
@@ -144,14 +149,7 @@ class AdminService
         }
 
         foreach ($responsablesScientifiques as $responsableScientifique) {
-            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableScientifique) {
-                return $personnel->getUtilisateur()?->getId() === $responsableScientifique->getId();
-            })->first();
-            if (!$personnel) {
-                $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateur($responsableScientifique);
-                $personnel->setPlateformeHistorique($plateforme);
-            }
+            $personnel = $this->trouverOuCreerPersonnelPlateforme($plateforme, $responsableScientifique);
             $personnel->setResponsableScientifique(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
@@ -162,14 +160,7 @@ class AdminService
         }
 
         foreach ($responsablesTechniques as $responsableTechnique) {
-            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsableTechnique) {
-                return $personnel->getUtilisateur()?->getId() === $responsableTechnique->getId();
-            })->first();
-            if (!$personnel) {
-                $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateur($responsableTechnique);
-                $personnel->setPlateformeHistorique($plateforme);
-            }
+            $personnel = $this->trouverOuCreerPersonnelPlateforme($plateforme, $responsableTechnique);
             $personnel->setResponsableTechnique(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
@@ -180,14 +171,7 @@ class AdminService
         }
 
         foreach ($responsablesPlateformes as $responsablePlateforme) {
-            $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($responsablePlateforme) {
-                return $personnel->getUtilisateur()?->getId() === $responsablePlateforme->getId();
-            })->first();
-            if (!$personnel) {
-                $personnel = new PlateformeHistoriquePersonnel();
-                $personnel->setUtilisateur($responsablePlateforme);
-                $personnel->setPlateformeHistorique($plateforme);
-            }
+            $personnel = $this->trouverOuCreerPersonnelPlateforme($plateforme, $responsablePlateforme);
             $personnel->setResponsablePlateforme(true);
             $this->em->persist($personnel);
             $this->mailerService->sendEmailToUser(
@@ -198,5 +182,22 @@ class AdminService
         }
 
         $this->em->flush();
+    }
+
+    private function trouverOuCreerPersonnelPlateforme(PlateformeHistorique $plateforme, Utilisateur $utilisateur): PlateformeHistoriquePersonnel
+    {
+        $personnel = $plateforme->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($utilisateur) {
+            return $personnel->getUtilisateur()?->getId() === $utilisateur->getId();
+        })->first();
+
+        if ($personnel instanceof PlateformeHistoriquePersonnel) {
+            return $personnel;
+        }
+
+        $personnel = new PlateformeHistoriquePersonnel();
+        $personnel->setUtilisateur($utilisateur);
+        $plateforme->addPlateformeHistoriquePersonnel($personnel);
+
+        return $personnel;
     }
 }

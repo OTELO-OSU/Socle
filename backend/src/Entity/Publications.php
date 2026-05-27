@@ -24,6 +24,7 @@ class Publications
     private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\Column]
+    #[Groups(["plateforme:detail"])]
     private ?int $numero = null;
 
     public function getId(): ?int

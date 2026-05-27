@@ -83,18 +83,18 @@ export default function PlateformeAdmin() {
         }
 
         setResponsablesScientifiques(
-            selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsableScientifique)
+            selectedPlateforme.lastHistorique.personnels
+                .filter((personnel) => personnel.responsable_scientifique)
                 .map((personnel) => personnel.utilisateur)
         );
         setResponsablesTechniques(
-            selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsableTechnique)
+            selectedPlateforme.lastHistorique.personnels
+                .filter((personnel) => personnel.responsable_technique)
                 .map((personnel) => personnel.utilisateur)
         );
         setResponsablesPlateforme(
-            selectedPlateforme.lastHistorique.plateformeHistoriquePersonnels
-                .filter((personnel) => personnel.responsablePlateforme)
+            selectedPlateforme.lastHistorique.personnels
+                .filter((personnel) => personnel.responsable_plateforme)
                 .map((personnel) => personnel.utilisateur)
         );
         setEditDialogOpen(true);
@@ -153,7 +153,7 @@ export default function PlateformeAdmin() {
                 <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography variant="h4" component="h2">Modifier les responsables</Typography>
                     <Typography variant="body1">
-                        Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nomOfficiel ?? "N/A"}
+                        Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nom_officiel ?? "N/A"}
                     </Typography>
                     <AgentAutocompleteField
                         multiple={true}
@@ -210,7 +210,7 @@ export default function PlateformeAdmin() {
                             <CardContent>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
                                     <Box>
-                                        <Typography variant="h6">{plateforme.lastHistorique.nomOfficiel}</Typography>
+                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
                                         <Typography variant="body2" color="textSecondary">
                                             Année : {plateforme.lastHistorique.annee}
                                         </Typography>
