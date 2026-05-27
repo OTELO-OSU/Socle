@@ -52,10 +52,19 @@ export function ListePlateforme() {
                     {plateformes.map((plateforme) => (
                         <Card key={plateforme.id}>
                             <CardContent>
-                                <Typography variant="h6">{plateforme.lastHistorique.nomOfficiel}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Année : {plateforme.lastHistorique.annee}
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Box>
+                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            Année : {plateforme.lastHistorique.annee}
+                                        </Typography>
+                                    </Box>
+                                    {plateforme.lastHistorique.logo_url &&
+                                        <Box>
+                                            <img src={plateforme.lastHistorique.logo_url} alt={`${plateforme.lastHistorique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
+                                        </Box>
+                                    }
+                                </Box>
                             </CardContent>
                             <CardActions>
                                 <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
