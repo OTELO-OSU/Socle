@@ -5,11 +5,22 @@ import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 
 export default function EmpreinteCarbone() {
-    const { getValues, watch } = useFormContext();
+    const { getValues, setValue, watch } = useFormContext();
     watch(["bges_domicile_travail", "bges_mission", "bges_mission_ext", "bges_consommable", "bges_equipement", "bges_envoi_echantillon", "bges_batiment", "bges_dechet"], () => {
         totalBGES();
     });
     const bgesRealise = useWatch({ name: "bges_realise", compute: (value) => value === true });
+
+    function resetBGES() {
+        setValue("bges_domicile_travail", null);
+        setValue("bges_mission", null);
+        setValue("bges_mission_ext", null);
+        setValue("bges_consommable", null);
+        setValue("bges_equipement", null);
+        setValue("bges_envoi_echantillon", null);
+        setValue("bges_batiment", null);
+        setValue("bges_dechet", null);
+    }
     function totalBGES() {
         const bges_domicile_travail = Number(getValues("bges_domicile_travail")) || 0;
         const bges_mission = Number(getValues("bges_mission")) || 0;
@@ -20,6 +31,10 @@ export default function EmpreinteCarbone() {
         const bges_batiment = Number(getValues("bges_batiment")) || 0;
         const bges_dechet = Number(getValues("bges_dechet")) || 0;
         return bges_domicile_travail + bges_mission + bges_mission_ext + bges_consommable + bges_equipement + bges_envoi_echantillon + bges_batiment + bges_dechet;
+    }
+
+    if (!bgesRealise) {
+        resetBGES();
     }
     return (
         <Box>

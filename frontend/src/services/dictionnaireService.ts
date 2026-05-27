@@ -22,7 +22,7 @@ export type Grade = {
 export type Ville = {
     id: number;
     nom: string;
-    numeroDepartement: number;
+    numero_departement: number;
     departement: string;
 }
 

@@ -11,14 +11,17 @@ use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\FinancementInstrument;
+use App\Entity\Instrument;
 use App\Entity\Operation;
 use App\Entity\Parametre;
 use App\Entity\Plateforme;
 use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\PlateformeHistoriqueTutelle;
+use App\Entity\PosteFutur;
 use App\Entity\PosteFuturBap;
 use App\Entity\PosteFuturEmploiType;
+use App\Entity\Publications;
 use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
 use App\Entity\Ville;
@@ -79,7 +82,11 @@ class PlateformeService
 
     function sauvegarderPlateforme(PlateformeHistoriqueDTO $dto, bool $brouillon)
     {
-        $plateformeHisto = $this->em->getRepository(PlateformeHistorique::class)->find($dto->id);
+        /** @var Plateforme $plateforme * */
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($dto->id);
+        if (!$plateforme) throw new Exception("Plateforme non trouvée.", 404);
+
+        $plateformeHisto = $plateforme->getLastHistorique();
         if (!$plateformeHisto) throw new Exception("Historique de la plateforme non trouvée.", 404);
         if (!$this->security->isGranted('SAUVEGARDER', $plateformeHisto->getPlateforme())) throw new Exception("Vous n'avez pas les droits pour sauvegarder cette plateforme", 403);
 
@@ -97,7 +104,6 @@ class PlateformeService
                 throw new Exception("Impossible de sauvegarder une plateforme pour une année inférieure à l'année de saisie en cours.", 403);
             }
         }
-
         $plateformeHisto = $this->ecraserChampsPlateforme($plateformeHisto, $dto);
         $plateformeHisto->setBrouillon($brouillon);
         $this->em->persist($plateformeHisto);
@@ -256,173 +262,183 @@ class PlateformeService
 
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
     {
-        $instrumentsActuels = $plateformeHisto->getInstruments();
-        foreach ($instrumentsActuels as $instrumentExistant) {
-            // Ne traiter ici que les instruments actuels.
+        $payloadParNom = [];
+        foreach ($value as $instrument) {
+            if ($instrument["nom"] === null) {
+                continue;
+            }
+
+            $payloadParNom[$instrument["nom"]] = $instrument;
+        }
+
+        $this->supprimerInstrumentsActuels($plateformeHisto, $payloadParNom);
+        $this->modifierInstrumentsActuels($plateformeHisto, $payloadParNom);
+        $this->ajouterInstrumentsActuels($plateformeHisto, $payloadParNom);
+    }
+
+    private function supprimerInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    {
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
             if ($instrumentExistant->isFutur()) {
                 continue;
             }
 
-            $instrumentId = $instrumentExistant->getId();
-            $existeDeja = false;
-            foreach ($value as $instrument) {
-                if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
-                if ($instrument["id"] == $instrumentId) {
-                    $existeDeja = true;
-                    // Overrider les champs de l'instrument
-                    $instrumentExistant->setNom($instrument["nom"]);
-                    $instrumentExistant->setMarque($instrument["marque"]);
-                    $instrumentExistant->setModele($instrument["modele"]);
-                    if ($instrument["annee_acquisition"] !== null) {
-                        $instrumentExistant->setAnneeAcquisition($instrument["annee_acquisition"]);
-                    } else {
-                        $instrumentExistant->setAnneeAcquisition(null);
-                    }
-                    $instrumentExistant->setCout($instrument["cout"]);
-                    $instrumentExistant->setValeurRemplacement($instrument["valeur_remplacement"]);
-                    $instrumentExistant->setDureeUtilisation($instrument["duree_utilisation"]);
-                    $instrumentExistant->setFutur(false);
-
-                    $contratMaintenanceId = $instrument["type_contrat_id"] ?? $instrument["contrat_maintenance_id"] ?? null;
-                    $instrumentExistant->setContratMaintenance($contratMaintenanceId !== null ? $this->em->getReference(ContratMaintenance::class, $contratMaintenanceId) : null);
-                    $instrumentExistant->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"] ?? null);
-                    $instrumentExistant->setFournisseurContrat($instrument["fournisseur_contrat"] ?? null);
-                    $instrumentExistant->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"] ?? false);
-                    $instrumentExistant->setMutualiseSite($instrument["mutualisation_site"] ?? false);
-                    $instrumentExistant->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"] ?? false);
-                    $instrumentExistant->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
-
-                    $mutualisationAutreInstrumentDetailleActuelle = $instrumentExistant->getInstrumentMutualisations();
-                    $mutualisations = $instrument["mutualisation_autre_instrument_detaille"] ?? [];
-                    foreach ($mutualisationAutreInstrumentDetailleActuelle as $record) {
-                        $instrumentMutualisationId = $record->getInstrumentCible()->getId();
-                        $detailExiste = false;
-                        foreach ($mutualisations as $mutualisation) {
-                            if ($mutualisation == $instrumentMutualisationId) {
-                                // Le record de mutualisation existe déjà, pas besoin de le recréer
-                                $detailExiste = true;
-                                break;
-                            }
-                        }
-                        if (!$detailExiste) {
-                            // Le record de mutualisation n'existe plus, il doit être supprimé
-                            $this->em->remove($record);
-                        }
-                    }
-
-                    foreach ($mutualisations as $instrumentMutualisationId) {
-                        $detailExiste = false;
-                        foreach ($instrumentExistant->getInstrumentMutualisations() as $record) {
-                            if ($record->getInstrumentCible()->getId() == $instrumentMutualisationId) {
-                                // Le record de mutualisation existe déjà, pas besoin de le recréer
-                                $detailExiste = true;
-                                break;
-                            }
-                        }
-                        if (!$detailExiste) {
-                            // Le record de mutualisation n'existe pas encore, il doit être créé
-                            $newRecord = new \App\Entity\InstrumentMutualisation();
-                            $newRecord->setInstrumentSource($instrumentExistant);
-                            $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
-                            $newRecord->setInstrumentCible($instrumentCible);
-                            $this->em->persist($newRecord);
-                        }
-                    }
-
-                    $financementExistant = $instrumentExistant->getFinancementInstruments();
-                    $sourcesFinancement = $instrument["source_financement"] ?? [];
-                    foreach ($financementExistant as $financement) {
-                        $financeurId = $financement->getFinanceur()->getId();
-                        $financementExiste = false;
-                        foreach ($sourcesFinancement as $financeur) {
-                            if ($financeur["financeur_id"] == $financeurId) {
-                                $financementExiste = true;
-
-                                // Overrider les champs du financement
-                                $financement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
-                                break;
-                            }
-                        }
-                        if (!$financementExiste) {
-                            $this->em->remove($financement);
-                        }
-                    }
-
-                    // Ajouter les nouveaux financements
-                    foreach ($sourcesFinancement as $financeur) {
-                        $financeurExiste = false;
-                        foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
-                            if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
-                                $financeurExiste = true;
-                                break;
-                            }
-                        }
-                        if (!$financeurExiste) {
-                            $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                            $newFinancement = new \App\Entity\FinancementInstrument();
-                            $newFinancement->setFinanceur($newFinanceur);
-                            $newFinancement->setInstrument($instrumentExistant);
-                            $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
-                            $this->em->persist($newFinancement);
-                        }
-                    }
-                }
-            }
-            if (!$existeDeja) {
-                // L'instrument n'existe plus, il doit être supprimé
+            if ($instrumentExistant->getNom() === null || !isset($payloadParNom[$instrumentExistant->getNom()])) {
                 $plateformeHisto->removeInstrument($instrumentExistant);
                 $this->em->remove($instrumentExistant);
             }
         }
+    }
 
-        // Ajouter les nouveaux instruments
-        foreach ($value as $instrument) {
-            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
-                $newInstrument = new \App\Entity\Instrument();
-                $newInstrument->setPlateformeHistorique($plateformeHisto);
-                $newInstrument->setNom($instrument["nom"]);
-                $newInstrument->setMarque($instrument["marque"]);
-                $newInstrument->setModele($instrument["modele"]);
-                if (($instrument["annee_acquisition"] ?? null) !== null) {
-                    $newInstrument->setAnneeAcquisition($instrument["annee_acquisition"]);
-                } else {
-                    $newInstrument->setAnneeAcquisition(null);
+    private function modifierInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    {
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
+            if ($instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            if ($instrumentExistant->getNom() === null || !isset($payloadParNom[$instrumentExistant->getNom()])) {
+                continue;
+            }
+
+            $payload = $payloadParNom[$instrumentExistant->getNom()];
+            $this->appliquerChampsInstrumentActuel($instrumentExistant, $payload);
+            $this->synchroniserMutualisationsInstrumentActuel($instrumentExistant, $payload["mutualise_autre_instrument_ids"] ?? []);
+            $this->synchroniserFinancementInstrument($instrumentExistant, $payload["source_financement"] ?? []);
+        }
+    }
+
+    private function ajouterInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    {
+        $nomsExistants = [];
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
+            if ($instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            if ($instrumentExistant->getNom() !== null) {
+                $nomsExistants[$instrumentExistant->getNom()] = true;
+            }
+        }
+
+        foreach ($payloadParNom as $nomNormalise => $instrument) {
+            if (isset($nomsExistants[$nomNormalise])) {
+                continue;
+            }
+
+            $newInstrument = new Instrument();
+            $newInstrument->setPlateformeHistorique($plateformeHisto);
+
+            $this->appliquerChampsInstrumentActuel($newInstrument, $instrument);
+
+            $plateformeHisto->addInstrument($newInstrument);
+            $this->em->persist($newInstrument);
+
+            $this->synchroniserMutualisationsInstrumentActuel($newInstrument, $instrument["mutualise_autre_instrument_ids"] ?? []);
+            $this->synchroniserFinancementInstrument($newInstrument, $instrument["source_financement"] ?? []);
+
+            $nomsExistants[$nomNormalise] = true;
+        }
+    }
+
+    private function appliquerChampsInstrumentActuel(Instrument $instrumentEntity, array $instrument): void
+    {
+        $instrumentEntity->setNom($instrument["nom"]);
+        $instrumentEntity->setMarque($instrument["marque"]);
+        $instrumentEntity->setModele($instrument["modele"]);
+
+        if (($instrument["annee_acquisition"] ?? null) !== null) {
+            $instrumentEntity->setAnneeAcquisition($instrument["annee_acquisition"]);
+        } else {
+            $instrumentEntity->setAnneeAcquisition(null);
+        }
+
+        $instrumentEntity->setCout($instrument["cout"]);
+        $instrumentEntity->setValeurRemplacement($instrument["valeur_remplacement"]);
+        $instrumentEntity->setDureeUtilisation($instrument["duree_utilisation"]);
+        $instrumentEntity->setFutur(false);
+
+        $contratMaintenanceId = $instrument["type_contrat_id"] ?? $instrument["contrat_maintenance_id"] ?? null;
+        $instrumentEntity->setContratMaintenance($contratMaintenanceId !== null ? $this->em->getReference(ContratMaintenance::class, $contratMaintenanceId) : null);
+        $instrumentEntity->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"] ?? null);
+        $instrumentEntity->setFournisseurContrat($instrument["fournisseur_contrat"] ?? null);
+        $instrumentEntity->setMutualiseAutreInstrument($instrument["mutualise_autre_instrument"] ?? false);
+        $instrumentEntity->setMutualiseSite($instrument["mutualise_site"] ?? false);
+        $instrumentEntity->setMutualiseUmrOsu($instrument["mutualise_umr_osu"] ?? false);
+        $instrumentEntity->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
+    }
+
+    private function synchroniserMutualisationsInstrumentActuel(Instrument $instrumentEntity, array $mutualisations): void
+    {
+        foreach ($instrumentEntity->getInstrumentMutualisations() as $record) {
+            $instrumentMutualisationId = $record->getInstrumentCible()->getId();
+            $detailExiste = false;
+            foreach ($mutualisations as $mutualisation) {
+                if ($mutualisation == $instrumentMutualisationId) {
+                    $detailExiste = true;
+                    break;
                 }
-                $newInstrument->setCout($instrument["cout"]);
-                $newInstrument->setValeurRemplacement($instrument["valeur_remplacement"]);
-                $newInstrument->setDureeUtilisation($instrument["duree_utilisation"]);
-                $newInstrument->setFutur(false);
+            }
 
-                $contratMaintenanceId = $instrument["contrat_maintenance_id"] ?? $instrument["type_contrat_id"] ?? null;
-                $newInstrument->setContratMaintenance($contratMaintenanceId !== null ? $this->em->getReference(ContratMaintenance::class, $contratMaintenanceId) : null);
-                $newInstrument->setCommentaireNatureContrat($instrument["commentaire_nature_contrat"] ?? null);
-                $newInstrument->setFournisseurContrat($instrument["fournisseur_contrat"] ?? null);
-                $newInstrument->setMutualiseAutreInstrument($instrument["mutualisation_autre_instrument"] ?? false);
-                $newInstrument->setMutualiseSite($instrument["mutualisation_site"] ?? false);
-                $newInstrument->setMutualiseUmrOsu($instrument["mutualisation_umr_osu"] ?? false);
-                $newInstrument->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
+            if (!$detailExiste) {
+                $this->em->remove($record);
+            }
+        }
 
-                $plateformeHisto->addInstrument($newInstrument);
-                $this->em->persist($newInstrument);
-
-                if (array_key_exists("mutualisation_autre_instrument_detaille", $instrument)) {
-                    foreach ($instrument["mutualisation_autre_instrument_detaille"] as $instrumentMutualisationId) {
-                        $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
-                        $newRecord = new \App\Entity\InstrumentMutualisation();
-                        $newRecord->setInstrumentSource($newInstrument);
-                        $newRecord->setInstrumentCible($instrumentCible);
-                        $this->em->persist($newRecord);
-                    }
+        foreach ($mutualisations as $instrumentMutualisationId) {
+            $detailExiste = false;
+            foreach ($instrumentEntity->getInstrumentMutualisations() as $record) {
+                if ($record->getInstrumentCible()->getId() == $instrumentMutualisationId) {
+                    $detailExiste = true;
+                    break;
                 }
+            }
 
-                foreach (($instrument["source_financement"] ?? []) as $financeur) {
-                    $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                    $newFinancement = new FinancementInstrument();
-                    $newFinancement->setFinanceur($financeurEntite);
-                    $newFinancement->setInstrument($newInstrument);
-                    $newFinancement->setTaux($financeur["taux"] ?? $financeur["pourcentage"]);
-                    $this->em->persist($newFinancement);
+            if (!$detailExiste) {
+                $newRecord = new \App\Entity\InstrumentMutualisation();
+                $newRecord->setInstrumentSource($instrumentEntity);
+                $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
+                $newRecord->setInstrumentCible($instrumentCible);
+                $this->em->persist($newRecord);
+            }
+        }
+    }
+
+    private function synchroniserFinancementInstrument(Instrument $instrumentEntity, array $sourcesFinancement): void
+    {
+        $financementExistant = $instrumentEntity->getFinancementInstruments();
+        foreach ($financementExistant as $financement) {
+            $financeurId = $financement->getFinanceur()->getId();
+            $financementExiste = false;
+            foreach ($sourcesFinancement as $financeur) {
+                if ($financeur["financeur_id"] == $financeurId) {
+                    $financementExiste = true;
+                    $financement->setTaux($financeur["taux"]);
+                    break;
                 }
+            }
+
+            if (!$financementExiste) {
+                $this->em->remove($financement);
+            }
+        }
+
+        foreach ($sourcesFinancement as $financeur) {
+            $financeurExiste = false;
+            foreach ($instrumentEntity->getFinancementInstruments() as $financement) {
+                if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
+                    $financeurExiste = true;
+                    break;
+                }
+            }
+
+            if (!$financeurExiste) {
+                $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+                $newFinancement = new FinancementInstrument();
+                $newFinancement->setFinanceur($newFinanceur);
+                $newFinancement->setInstrument($instrumentEntity);
+                $newFinancement->setTaux($financeur["taux"]);
+                $this->em->persist($newFinancement);
             }
         }
     }
@@ -561,7 +577,7 @@ class PlateformeService
                         $plateformeHisto->setLaboratoireOperateur($this->em->getReference(Entite::class, $value));
                         break;
                     }
-                case 'tutelle_principale':
+                case 'tutelles_principales_ids':
                     $tutellePrincipaleActuelle = $plateformeHisto->getPlateformeHistoriqueTutelles();
                     foreach ($tutellePrincipaleActuelle as $record) {
                         if ($record->isPrincipale() && !in_array($record->getTutelle()->getId(), $value)) {
@@ -591,7 +607,7 @@ class PlateformeService
                         }
                     }
                     break;
-                case 'tutelle_secondaire':
+                case 'tutelles_secondaires_ids':
                     $tutelleSecondaireActuelle = $plateformeHisto->getPlateformeHistoriqueTutelles();
                     foreach ($tutelleSecondaireActuelle as $record) {
                         if (!$record->isPrincipale() && !in_array($record->getTutelle()->getId(), $value)) {
@@ -633,7 +649,7 @@ class PlateformeService
                 case 'espace_laboratoire':
                     $plateformeHisto->setEspaceLaboratoire($value);
                     break;
-                case 'personnel':
+                case 'personnels':
                     // Supprimer parmis les actuelles ceux qui n'existe plus
                     foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
                         $personnelId = $personnelExistant->getId();
@@ -652,6 +668,8 @@ class PlateformeService
                         foreach ($plateformeHisto->getPlateformeHistoriquePersonnels() as $personnelExistant) {
                             if ($personnelExistant->getUtilisateur()->getId() == $nouveauItilisateurId) {
                                 $existeDeja = true;
+                                // Overrider la quotité
+                                $personnelExistant->setQuotite($perso["quotite"]);
                                 break;
                             }
                         }
@@ -662,7 +680,6 @@ class PlateformeService
                             $newRecord->setUtilisateur($utilisateur);
                             $newRecord->setResponsableScientifique($perso["responsable_scientifique"]);
                             $newRecord->setResponsableTechnique($perso["responsable_technique"]);
-                            $typeContrat = $this->em->getReference(TypeContrat::class, $perso["type_contrat_id"]);
                             $newRecord->setQuotite($perso["quotite"]);
                             $plateformeHisto->addPlateformeHistoriquePersonnel($newRecord);
                             $this->em->persist($newRecord);
@@ -670,87 +687,125 @@ class PlateformeService
                     }
                     break;
                 case 'postes_futurs':
+                    if (!is_array($value)) {
+                        break;
+                    }
+
+                    $postesParRang = [];
+                    foreach ($value as $poste) {
+                        if (!isset($poste["rang_numerateur"], $poste["rang_denominateur"])) {
+                            continue;
+                        }
+
+                        $cleRang = $poste["rang_numerateur"] . '/' . $poste["rang_denominateur"];
+                        $postesParRang[$cleRang] = $poste;
+                    }
+
                     foreach ($plateformeHisto->getPosteFuturs() as $posteFuturExistant) {
-                        $numerateur = $posteFuturExistant->getRangNumerateur();
-                        $denominateur = $posteFuturExistant->getRangDenominateur();
-                        $existeDeja = false;
-                        foreach ($value as $poste) {
-                            if ($poste["rang_numerateur"] == $numerateur && $poste["rang_denominateur"] == $denominateur) {
-                                $existeDeja = true;
+                        $cleRang = $posteFuturExistant->getRangNumerateur() . '/' . $posteFuturExistant->getRangDenominateur();
+                        if (!array_key_exists($cleRang, $postesParRang)) {
+                            $plateformeHisto->removePosteFutur($posteFuturExistant);
+                            $this->em->remove($posteFuturExistant);
+                            continue;
+                        }
 
-                                // Overrider les champs du poste futur
-                                $posteFuturExistant->setCorps($this->em->getReference(Corps::class, $poste["corps_id"]));
-                                $posteFuturExistant->setEmployeur($this->em->getReference(Entite::class, $poste["employeur_id"]));
-                                $posteFuturExistant->setQuotite($poste["quotite"]);
+                        $poste = $postesParRang[$cleRang];
 
-                                // Supprimer les baps en trop
-                                $nouvellesBaps = $poste["bap"];
-                                foreach ($posteFuturExistant->getBaps() as $bapExistant) {
-                                    $bapId = $bapExistant->getId();
-                                    $bapExiste = false;
-                                    foreach ($nouvellesBaps as $bap) {
-                                        if ($bap == $bapId) {
-                                            $bapExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if ($bapExiste) {
-                                        $this->em->remove($bapExistant);
-                                    }
-                                }
+                        // Overrider les champs du poste futur
+                        $posteFuturExistant->setCorps($this->em->getReference(Corps::class, $poste["corps_id"]));
+                        $posteFuturExistant->setEmployeur($this->em->getReference(Entite::class, $poste["employeur_id"]));
+                        $posteFuturExistant->setQuotite($poste["quotite"]);
 
-                                // Ajouter les nouveaux baps
-                                foreach ($poste["bap"] as $bap) {
-                                    $bapExiste = false;
-                                    foreach ($posteFuturExistant->getBaps() as $bapExistant) {
-                                        if ($bapExistant->getId() == $bap) {
-                                            $bapExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$bapExiste) {
-                                        $newBap = $this->em->getReference(Bap::class, $bap);
-                                        $posteFuturExistant->addBap($newBap);
-                                        $this->em->persist($posteFuturExistant);
-                                    }
-                                }
-
-                                // Supprimer les emplois type en trop
-                                $nouveauxEt = $poste["emploi_type"];
-                                foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
-                                    $etId = $etExistant->getId();
-                                    $etExiste = false;
-                                    foreach ($nouveauxEt as $et) {
-                                        if ($et == $etId) {
-                                            $etExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if ($etExiste) {
-                                        $this->em->remove($etExistant);
-                                    }
-                                }
-
-                                // Ajouter les nouveaux emplois types
-                                foreach ($poste["emploi_type"] as $et) {
-                                    $etExiste = false;
-                                    foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
-                                        if ($etExistant->getId() == $et) {
-                                            $etExiste = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!$etExiste) {
-                                        $newEt = $this->em->getReference(EmploiType::class, $et);
-                                        $posteFuturExistant->addEmploiType($newEt);
-                                        $this->em->persist($posteFuturExistant);
-                                    }
+                        // Supprimer les baps en trop
+                        $nouvellesBaps = $poste["baps_ids"] ?? [];
+                        foreach ($posteFuturExistant->getBaps() as $bapExistant) {
+                            $bapId = $bapExistant->getId();
+                            $bapExiste = false;
+                            foreach ($nouvellesBaps as $bap) {
+                                if ($bap == $bapId) {
+                                    $bapExiste = true;
+                                    break;
                                 }
                             }
+                            if (!$bapExiste) {
+                                $posteFuturExistant->removeBap($bapExistant);
+                            }
                         }
+
+                        // Ajouter les nouveaux baps
+                        foreach ($nouvellesBaps as $bap) {
+                            $bapExiste = false;
+                            foreach ($posteFuturExistant->getBaps() as $bapExistant) {
+                                if ($bapExistant->getId() == $bap) {
+                                    $bapExiste = true;
+                                    break;
+                                }
+                            }
+                            if (!$bapExiste) {
+                                $newBap = $this->em->getReference(Bap::class, $bap);
+                                $posteFuturExistant->addBap($newBap);
+                            }
+                        }
+
+                        // Supprimer les emplois type en trop
+                        $nouveauxEt = $poste["emploi_types_ids"] ?? [];
+                        foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
+                            $etId = $etExistant->getId();
+                            $etExiste = false;
+                            foreach ($nouveauxEt as $et) {
+                                if ($et == $etId) {
+                                    $etExiste = true;
+                                    break;
+                                }
+                            }
+                            if (!$etExiste) {
+                                $posteFuturExistant->removeEmploiType($etExistant);
+                            }
+                        }
+
+                        // Ajouter les nouveaux emplois types
+                        foreach ($nouveauxEt as $et) {
+                            $etExiste = false;
+                            foreach ($posteFuturExistant->getEmploiTypes() as $etExistant) {
+                                if ($etExistant->getId() == $et) {
+                                    $etExiste = true;
+                                    break;
+                                }
+                            }
+                            if (!$etExiste) {
+                                $newEt = $this->em->getReference(EmploiType::class, $et);
+                                $posteFuturExistant->addEmploiType($newEt);
+                            }
+                        }
+
+                        $this->em->persist($posteFuturExistant);
+                        unset($postesParRang[$cleRang]);
+                    }
+
+                    // Ajouter les postes futurs manquants, identifiés par le rang.
+                    foreach ($postesParRang as $poste) {
+                        $newPosteFutur = new PosteFutur();
+                        $newPosteFutur->setRangNumerateur($poste["rang_numerateur"]);
+                        $newPosteFutur->setRangDenominateur($poste["rang_denominateur"]);
+                        $newPosteFutur->setCorps($this->em->getReference(Corps::class, $poste["corps_id"]));
+                        $newPosteFutur->setEmployeur($this->em->getReference(Entite::class, $poste["employeur_id"]));
+                        $newPosteFutur->setQuotite($poste["quotite"]);
+
+                        foreach (($poste["baps_ids"] ?? []) as $bap) {
+                            $newBap = $this->em->getReference(Bap::class, $bap);
+                            $newPosteFutur->addBap($newBap);
+                        }
+
+                        foreach (($poste["emploi_types_ids"] ?? []) as $et) {
+                            $newEt = $this->em->getReference(EmploiType::class, $et);
+                            $newPosteFutur->addEmploiType($newEt);
+                        }
+
+                        $plateformeHisto->addPosteFutur($newPosteFutur);
+                        $this->em->persist($newPosteFutur);
                     }
                     break;
-                case "equipements":
+                case "instruments":
                     if (!is_array($value)) {
                         break;
                     }
@@ -767,16 +822,6 @@ class PlateformeService
 
                     $this->synchroniserInstrumentsActuels($plateformeHisto, $instrumentsActuels);
                     $this->synchroniserInstrumentsFuturs($plateformeHisto, $instrumentsFuturs);
-                    break;
-                case "instrument_actuel":
-                    if (is_array($value)) {
-                        $this->synchroniserInstrumentsActuels($plateformeHisto, $value);
-                    }
-                    break;
-                case "instrument_futur":
-                    if (is_array($value)) {
-                        $this->synchroniserInstrumentsFuturs($plateformeHisto, $value);
-                    }
                     break;
                 case "materiel_consommable":
                     $plateformeHisto->setMaterielConsommable($value);
@@ -805,7 +850,7 @@ class PlateformeService
                         $entiteId = $record->getFinanceur()->getId();
                         $existeDeja = false;
                         foreach ($value as $detail) {
-                            if ($detail["tutelle_id"] == $entiteId) {
+                            if ($detail["financeur_id"] == $entiteId) {
                                 $existeDeja = true;
                                 // Overrider les champs du detail
                                 $record->setTaux($detail["taux"]);
@@ -820,7 +865,7 @@ class PlateformeService
                     }
                     if (is_array($value)) {
                         foreach ($value as $detail) {
-                            $entiteId = $detail["tutelle_id"];
+                            $entiteId = $detail["financeur_id"];
                             $existeDeja = false;
                             foreach ($detailActuel as $record) {
                                 if ($record->getFinanceur()->getId() == $entiteId) {
@@ -955,6 +1000,44 @@ class PlateformeService
                     break;
                 case "publication_these":
                     $plateformeHisto->setPublicationThese($value);
+                    break;
+                case "nom_labellisation_qualite":
+                    $plateformeHisto->setNomLabellisationQualite($value);
+                    break;
+                case "publications":
+                    $publiTraitees = [];
+                    foreach ($plateformeHisto->getPublications() as $publicationExistant) {
+                        $publicationId = $publicationExistant->getNumero();
+                        $existeDeja = false;
+                        foreach ($value as $publication) {
+                            if ($publication["numero"] == $publicationId) {
+                                $existeDeja = true;
+                                $publicationExistant->setDoi($publication["doi"]);
+                                $publiTraitees[] = $publication["numero"];
+                                break;
+                            }
+                        }
+                        if (!$existeDeja) {
+                            // La publication n'existe plus, elle doit être supprimée
+                            $plateformeHisto->removePublication($publicationExistant);
+                            $this->em->remove($publicationExistant);
+                        }
+                    }
+
+                    foreach ($value as $publication) {
+                        $publicationId = $publication["numero"];
+                        if (in_array($publicationId, $publiTraitees)) {
+                            continue;
+                        }
+
+                        // La publication n'existe pas encore, elle doit être créée
+                        $newPublication = new Publications();
+                        $newPublication->setPlateformeHistorique($plateformeHisto);
+                        $newPublication->setNumero($publicationId);
+                        $newPublication->setDoi($publication["doi"]);
+                        $plateformeHisto->addPublication($newPublication);
+                        $this->em->persist($newPublication);
+                    }
                     break;
             }
         }

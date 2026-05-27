@@ -14,7 +14,6 @@ class PosteFutur
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 

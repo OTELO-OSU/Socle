@@ -151,7 +151,13 @@ function InstrumentActuelMaintenanceCard({
                                     multiline
                                     type="number"
                                     value={instrument.cout_maintenance}
-                                    onChange={(event) => onEdit({ ...instrument, cout_maintenance: event.target.value ? Number(event.target.value) : null })}
+                                    onChange={(event) => {
+                                        let v = event.target.value;
+                                        v = v.replace(/[^0-9.]/g, "");
+                                        v = v.replace(/(\..*)\./g, "$1");
+
+                                        onEdit({ ...instrument, cout_maintenance: event.target.value ? Number(v) : null });
+                                    }}
                                     placeholder="Coût K€/an"
                                     sx={{ height: "100%", "& .MuiInputBase-root": { height: "100%", alignItems: "flex-start" } }}
                                 />

@@ -97,7 +97,7 @@ export type Instrument = {
     modele: string | null;
     annee_acquisition?: number | null;
     cout: number | null;
-    valeur_remplacemment?: number | null;
+    valeur_remplacement?: number | null;
     duree_utilisation?: number | null;
     operation_id?: number | null;
     annee_achat_envisagee?: number | null;
@@ -115,7 +115,7 @@ export type Instrument = {
 
 export type DernierHistorique = {
     id: number;
-    annee: number;
+    annee: number | undefined;
     nom_officiel: string;
     forme_developpee_nom_officiel: string | null;
     site_web: string | null;
@@ -204,4 +204,14 @@ export async function fetchPlateformeDetails(plateformeId: number) {
     const { data } = await symfony.get<plateformeDetails>(`/plateforme/${plateformeId}`);
 
     return data;
+}
+
+export async function enregistrerPlateformeBrouillon(plateformeId: number, data: DernierHistorique) {
+    const { data: { message } } = await symfony.put<{ message: string }>(`/plateforme`, {
+        ...data,
+        id: plateformeId,
+        brouillon: true,
+    });
+
+    return { message: message };
 }

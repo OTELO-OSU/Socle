@@ -23,6 +23,9 @@ class Publications
     #[ORM\JoinColumn(nullable: false)]
     private ?PlateformeHistorique $plateformeHistorique = null;
 
+    #[ORM\Column]
+    private ?int $numero = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -48,6 +51,18 @@ class Publications
     public function setPlateformeHistorique(?PlateformeHistorique $plateformeHistorique): static
     {
         $this->plateformeHistorique = $plateformeHistorique;
+
+        return $this;
+    }
+
+    public function getNumero(): ?int
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(int $numero): static
+    {
+        $this->numero = $numero;
 
         return $this;
     }

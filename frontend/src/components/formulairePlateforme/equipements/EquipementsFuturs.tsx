@@ -1,12 +1,13 @@
 import { Box, Button, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { useForm, useFormContext, useWatch } from "react-hook-form";
+import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { RHFTextField } from "../../RHFTextField";
 import TreeViewFinance from "../../TreeSelectFinance";
 import TroisPoints from "@mui/icons-material/MoreVert";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { RHFSelect } from "../../RHFTextSelect";
 import type { Instrument, SourceFinancement } from "../../../services/plateformeService";
+import NombreTextField from "../../NombreTextField";
 
 function InstrumentFuturCard({
     instrument,
@@ -128,12 +129,13 @@ function DialogInstrumentFutur({
     onSave,
     instrumentToEdit,
 }: DialogInstrumentFuturProps) {
-    const { control, handleSubmit, reset, setValue, getValues, trigger } = useForm<Instrument>({
+    const formInstru = useForm<Instrument>({
         shouldUnregister: false,
         defaultValues: {
             source_financement: [],
         },
     });
+    const { control, handleSubmit, reset, setValue, getValues, trigger } = formInstru;
     const [step, setStep] = useState(0);
     const dictionnaireContext = useContext(DictionnaireContext);
 
@@ -247,153 +249,155 @@ function DialogInstrumentFutur({
             }}
         >
 
-            <Box component="form" onSubmit={(e) => {
-                e?.preventDefault()
-                e?.stopPropagation();
-                handleSubmit(onSubmit)();
-            }} sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                    {instrumentToEdit
-                        ? "Modifier un équipement futur"
-                        : "Ajouter un équipement futur"}
-                </Typography>
-                {step === 0 &&
-                    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
+            <FormProvider {...formInstru}>
+                <Box component="form" onSubmit={(e) => {
+                    e?.preventDefault()
+                    e?.stopPropagation();
+                    handleSubmit(onSubmit)();
+                }} sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        {instrumentToEdit
+                            ? "Modifier un équipement futur"
+                            : "Ajouter un équipement futur"}
+                    </Typography>
+                    {step === 0 &&
+                        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
+                            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+                                Général
+                            </Typography>
+                            <RHFTextField rules={{ required: "Le champs nom est requis" }} name="nom" control={control} label="Nom de l'équipement" fullWidth sx={{ mb: 2 }} />
+                            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                                <RHFTextField name="marque" control={control} label="Marque" fullWidth sx={{ mb: 2 }} />
+                                <RHFTextField name="modele" control={control} label="Modèle" fullWidth sx={{ mb: 2 }} />
+                            </Stack>
+                            <RHFSelect name="operation_id" items={dictionnaireContext.operationsOptions} control={control} label="Type d'opération" fullWidth sx={{ mb: 2 }}>
+                            </RHFSelect>
+                            <NombreTextField name="annee_achat_envisagee" label="Année d'achat envisagée" type="number" fullWidth sx={{ mb: 2 }} />
+                            <NombreTextField name="cout" label="Coût (k€)" type="number" fullWidth sx={{ mb: 2 }} />
+
+
+                            <Stack direction="row" spacing={2} sx={{ justifyContent: "end" }}>
+                                <Button variant="contained" color="secondary" onClick={onClose}>
+                                    Annuler
+                                </Button>
+                                <Button variant="contained" color="primary" onClick={handleNextStep}>
+                                    Suivant
+                                </Button>
+
+                            </Stack>
+                        </Box>
+                    }
+                    {step === 1 && <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
                         <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-                            Général
+                            Sources de financement
                         </Typography>
-                        <RHFTextField rules={{ required: "Le champs nom est requis" }} name="nom" control={control} label="Nom de l'équipement" fullWidth sx={{ mb: 2 }} />
-                        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                            <RHFTextField name="marque" control={control} label="Marque" fullWidth sx={{ mb: 2 }} />
-                            <RHFTextField name="modele" control={control} label="Modèle" fullWidth sx={{ mb: 2 }} />
-                        </Stack>
-                        <RHFSelect name="operation_id" items={dictionnaireContext.operationsOptions} control={control} label="Type d'opération" fullWidth sx={{ mb: 2 }}>
-                        </RHFSelect>
-                        <RHFTextField name="annee_achat_envisagee" control={control} label="Année d'achat envisagée" type="number" fullWidth sx={{ mb: 2 }} />
-                        <RHFTextField name="cout" control={control} label="Coût (k€)" type="number" fullWidth sx={{ mb: 2 }} />
+                        <Grid container spacing={2} sx={{ mb: 2 }}>
+                            <Grid size={{ xs: 6 }}>
+                                <Typography variant="body2">Combien il y a t'il de sources de financement pour cette equipement ?</Typography>
+                            </Grid>
+                            <Grid size={{ xs: 6 }}>
+                                <Select fullWidth size="small" value={sourceFinancement.length} onChange={(e) => {
+                                    const value = Number(e.target.value);
+                                    const currentSources = getValues("source_financement") || [];
+                                    if (value > currentSources.length) {
+                                        const newSources = [...currentSources];
+                                        for (let i = currentSources.length; i < value; i++) {
+                                            newSources.push({ financeur_id: null, taux: 0 });
+                                        }
+                                        setValue("source_financement", newSources);
+                                    } else if (value < currentSources.length) {
+                                        setValue("source_financement", currentSources.slice(0, value));
+                                    }
 
+                                }}>
+                                    <MenuItem value={0}>0</MenuItem>
+                                    <MenuItem value={1}>1</MenuItem>
+                                    <MenuItem value={2}>2</MenuItem>
+                                    <MenuItem value={3}>3</MenuItem>
+                                    <MenuItem value={4}>4</MenuItem>
+                                    <MenuItem value={5}>5</MenuItem>
+                                </Select>
+                            </Grid>
+                        </Grid>
+                        {sourceFinancement.map((_, index) => (
+                            <Stack key={index} direction="row" spacing={2} sx={{ mb: 2 }}>
+                                <TreeViewFinance
+                                    selectedId={sourceFinancement[index].financeur_id ?? undefined}
+                                    onSelectedIdChange={(id) => {
+                                        const currentSources = getValues("source_financement") || [];
+                                        const updatedSources = [...currentSources];
+                                        updatedSources[index] = {
+                                            ...updatedSources[index],
+                                            financeur_id: id,
+                                        };
+                                        setValue("source_financement", updatedSources);
+                                    }}
+                                />
+                                <RHFTextField
+                                    name={`source_financement.${index}.taux`}
+                                    control={control}
+                                    label="Taux (%)"
+                                    type="number"
+                                    fullWidth
+                                    sx={{ mb: 2 }}
+                                    rules={{
+                                        required: "Le taux est requis",
+                                        validate: (value) =>
+                                            Number(value) > 0 || "Le taux doit etre strictement superieur a 0%",
+                                    }}
+                                    slotProps={{
+                                        htmlInput: {
+                                            min: 0.01,
+                                            step: 0.01,
+                                        },
+                                    }}
+                                />
+                            </Stack>
+                        ))}
 
-                        <Stack direction="row" spacing={2} sx={{ justifyContent: "end" }}>
-                            <Button variant="contained" color="secondary" onClick={onClose}>
-                                Annuler
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 1,
+                                color: isTotalFinancementValid
+                                    ? "success.main"
+                                    : "error.main",
+                                fontWeight: 600,
+                            }}
+                        >
+                            Total financement: {totalFinancement}%
+                            {!isTotalFinancementValid && " (la somme doit etre egale a 100%)"}
+                        </Typography>
+
+                        {hasInvalidTaux && (
+                            <Typography variant="body2" color="error.main" sx={{ mt: 0.5, fontWeight: 600 }}>
+                                Chaque source doit avoir un taux strictement superieur a 0%.
+                            </Typography>
+                        )}
+
+                        {financeurNonRenseigne && (
+                            <Typography variant="body2" color="error.main" sx={{ mt: 0.5, fontWeight: 600 }}>
+                                Chaque source doit avoir un financeur renseigné.
+                            </Typography>
+                        )}
+
+                        <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: "end" }}>
+                            <Button variant="contained" color="secondary" onClick={() => setStep(0)}>
+                                Retour
                             </Button>
-                            <Button variant="contained" color="primary" onClick={handleNextStep}>
-                                Suivant
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!isTotalFinancementValid || hasInvalidTaux || financeurNonRenseigne}
+                            >
+                                {instrumentToEdit ? "Enregistrer" : "Ajouter"}
                             </Button>
-
                         </Stack>
                     </Box>
-                }
-                {step === 1 && <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-                        Sources de financement
-                    </Typography>
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid size={{ xs: 6 }}>
-                            <Typography variant="body2">Combien il y a t'il de sources de financement pour cette equipement ?</Typography>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
-                            <Select fullWidth size="small" value={sourceFinancement.length} onChange={(e) => {
-                                const value = Number(e.target.value);
-                                const currentSources = getValues("source_financement") || [];
-                                if (value > currentSources.length) {
-                                    const newSources = [...currentSources];
-                                    for (let i = currentSources.length; i < value; i++) {
-                                        newSources.push({ financeur_id: null, taux: 0 });
-                                    }
-                                    setValue("source_financement", newSources);
-                                } else if (value < currentSources.length) {
-                                    setValue("source_financement", currentSources.slice(0, value));
-                                }
-
-                            }}>
-                                <MenuItem value={0}>0</MenuItem>
-                                <MenuItem value={1}>1</MenuItem>
-                                <MenuItem value={2}>2</MenuItem>
-                                <MenuItem value={3}>3</MenuItem>
-                                <MenuItem value={4}>4</MenuItem>
-                                <MenuItem value={5}>5</MenuItem>
-                            </Select>
-                        </Grid>
-                    </Grid>
-                    {sourceFinancement.map((_, index) => (
-                        <Stack key={index} direction="row" spacing={2} sx={{ mb: 2 }}>
-                            <TreeViewFinance
-                                selectedId={sourceFinancement[index].financeur_id ?? undefined}
-                                onSelectedIdChange={(id) => {
-                                    const currentSources = getValues("source_financement") || [];
-                                    const updatedSources = [...currentSources];
-                                    updatedSources[index] = {
-                                        ...updatedSources[index],
-                                        financeur_id: id,
-                                    };
-                                    setValue("source_financement", updatedSources);
-                                }}
-                            />
-                            <RHFTextField
-                                name={`source_financement.${index}.taux`}
-                                control={control}
-                                label="Taux (%)"
-                                type="number"
-                                fullWidth
-                                sx={{ mb: 2 }}
-                                rules={{
-                                    required: "Le taux est requis",
-                                    validate: (value) =>
-                                        Number(value) > 0 || "Le taux doit etre strictement superieur a 0%",
-                                }}
-                                slotProps={{
-                                    htmlInput: {
-                                        min: 0.01,
-                                        step: 0.01,
-                                    },
-                                }}
-                            />
-                        </Stack>
-                    ))}
-
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            mt: 1,
-                            color: isTotalFinancementValid
-                                ? "success.main"
-                                : "error.main",
-                            fontWeight: 600,
-                        }}
-                    >
-                        Total financement: {totalFinancement}%
-                        {!isTotalFinancementValid && " (la somme doit etre egale a 100%)"}
-                    </Typography>
-
-                    {hasInvalidTaux && (
-                        <Typography variant="body2" color="error.main" sx={{ mt: 0.5, fontWeight: 600 }}>
-                            Chaque source doit avoir un taux strictement superieur a 0%.
-                        </Typography>
-                    )}
-
-                    {financeurNonRenseigne && (
-                        <Typography variant="body2" color="error.main" sx={{ mt: 0.5, fontWeight: 600 }}>
-                            Chaque source doit avoir un financeur renseigné.
-                        </Typography>
-                    )}
-
-                    <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: "end" }}>
-                        <Button variant="contained" color="secondary" onClick={() => setStep(0)}>
-                            Retour
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            disabled={!isTotalFinancementValid || hasInvalidTaux || financeurNonRenseigne}
-                        >
-                            {instrumentToEdit ? "Enregistrer" : "Ajouter"}
-                        </Button>
-                    </Stack>
+                    }
                 </Box>
-                }
-            </Box>
+            </FormProvider>
         </Dialog >
     )
 }

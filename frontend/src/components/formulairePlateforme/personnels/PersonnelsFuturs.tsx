@@ -71,7 +71,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                     value={poste.baps_ids ?? []}
                     onChange={(e) => {
                         const nextBapIds = (Array.isArray(e.target.value) ? e.target.value : [e.target.value]).map(Number);
-                        onChange?.({ ...poste, baps_ids: nextBapIds });
+                        onChange?.({ ...poste, baps_ids: nextBapIds, emploi_types_ids: [] });
                     }}
                     displayEmpty
                 >

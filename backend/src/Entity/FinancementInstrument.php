@@ -5,13 +5,13 @@ namespace App\Entity;
 use App\Repository\FinancementInstrumentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: FinancementInstrumentRepository::class)]
 class FinancementInstrument
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(["plateforme:detail"])]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -21,7 +21,6 @@ class FinancementInstrument
 
     #[ORM\ManyToOne(inversedBy: 'financementInstruments')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["plateforme:detail"])]
     private ?Entite $financeur = null;
 
     #[ORM\Column]
@@ -43,6 +42,13 @@ class FinancementInstrument
         $this->instrument = $instrument;
 
         return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('financeur_id')]
+    public function getFinanceurId()
+    {
+        return $this->financeur?->getId();
     }
 
     public function getFinanceur(): ?Entite

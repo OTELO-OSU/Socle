@@ -17,11 +17,11 @@ class Corps
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['utilisateur:list', 'corps:list'])]
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['utilisateur:list', 'corps:list'])]
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 

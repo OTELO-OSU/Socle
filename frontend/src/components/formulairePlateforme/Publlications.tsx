@@ -5,7 +5,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import type { DernierHistorique } from "../../services/plateformeService";
 
 function PublicationRow({ numero, onDelete }: { numero: number; onDelete: () => void }) {
-    const { control } = useFormContext<DernierHistorique>();
+    const { control, setValue } = useFormContext<DernierHistorique>();
+    setValue(`publications.${numero - 1}.numero`, numero);
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
             <Typography variant="body1">{numero}</Typography>

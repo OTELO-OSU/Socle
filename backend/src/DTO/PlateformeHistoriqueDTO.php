@@ -50,13 +50,13 @@ class PlateformeHistoriqueDTO
         new EntityExists(entity: 'App\Entity\Entite'),
         new Assert\Type('integer'),
     ])]
-    public array $tutelle_principale = [];
+    public array $tutelles_principales_ids = [];
 
     #[Assert\All([
         new Assert\Type('integer'),
         new EntityExists(entity: 'App\Entity\Entite'),
     ])]
-    public array $tutelle_secondaire = [];
+    public array $tutelles_secondaires_ids = [];
 
     #[Assert\NotBlank(groups: ['validation'], message: 'La latitude de la plateforme est requise.')]
     public ?float $latitude = null;
@@ -89,22 +89,17 @@ class PlateformeHistoriqueDTO
                     new Assert\NotNull(),
                     new Assert\Type('boolean'),
                 ]),
-                'type_contrat_id' =>
-                new Assert\Required([
-                    new Assert\NotNull(message: 'Le type de contrat du personnel est requis.'),
-                    new Assert\Type('integer'),
-                ]),
                 'quotite' =>
                 new Assert\Required([
                     new Assert\NotNull(message: 'La quotité du personnel est requise.'),
                     new Assert\Type('integer'),
                     new Assert\Range(min: 0, max: 100),
                 ])
-
-            ]
+            ],
+            allowExtraFields: true
         )
     ])]
-    public ?array $personnel = null;
+    public ?array $personnels = null;
 
     #[Assert\All([
         new Assert\Collection(
@@ -119,14 +114,14 @@ class PlateformeHistoriqueDTO
                     new Assert\NotBlank(message: 'Le corps du poste futur est requis.'),
                     new Assert\Type('integer'),
                 ]),
-                'bap' =>
+                'baps_ids' =>
                 new Assert\Required([
                     new Assert\NotBlank(message: 'Au moins une BAP est requise pour le poste futur.'),
                     new Assert\All([
                         new Assert\Type('integer'),
                     ])
                 ]),
-                'emploi_type' =>
+                'emploi_types_ids' =>
                 new Assert\Required([
                     new Assert\NotBlank(message: 'Au moins un emploi type est requis pour le poste futur.'),
                     new Assert\All([
@@ -182,12 +177,12 @@ class PlateformeHistoriqueDTO
                         message: 'L\'année d\'acquisition de l\'équipement est requise.',
                         groups: ['validation']
                     ),
-                    new Assert\Type('string'),
+                    new Assert\Type('integer'),
                 ]),
                 'cout' =>
                 new Assert\Optional([
                     new Assert\NotBlank(message: 'Le coût de l\'équipement est requis.', groups: ['validation']),
-                    new Assert\Type('float'),
+                    new Assert\Type('numeric'),
                 ]),
                 'valeur_remplacement' =>
                 new Assert\Optional([
@@ -196,7 +191,7 @@ class PlateformeHistoriqueDTO
                         message: 'La valeur de remplacement de l\'équipement est requise.',
                         groups: ['validation']
                     ),
-                    new Assert\Type('float'),
+                    new Assert\Type('numeric'),
                 ]),
                 'duree_utilisation' =>
                 new Assert\Optional([
@@ -239,19 +234,19 @@ class PlateformeHistoriqueDTO
                 new Assert\Optional([
                     new Assert\Type('string'),
                 ]),
-                "mutualisation_autre_instrument" =>
+                "mutualise_autre_instrument" =>
                 new Assert\Optional([
                     new Assert\Type('boolean'),
                 ]),
-                "mutualisation_site" =>
+                "mutualise_site" =>
                 new Assert\Optional([
                     new Assert\Type('boolean'),
                 ]),
-                "mutualisation_umr_osu" =>
+                "mutualise_umr_osu" =>
                 new Assert\Optional([
                     new Assert\Type('boolean'),
                 ]),
-                "mutualisation_autre_instrument_detaille" =>
+                "mutualise_autre_instrument_ids" =>
                 new Assert\Optional([
                     new Assert\All([
                         new Assert\Type('integer'),
@@ -259,7 +254,7 @@ class PlateformeHistoriqueDTO
                 ]),
                 "cout_maintenance" =>
                 new Assert\Optional([
-                    new Assert\Type('float'),
+                    new Assert\Type('numeric'),
                 ]),
                 'operation_id' => [
                     new Assert\Optional([
@@ -276,16 +271,17 @@ class PlateformeHistoriqueDTO
                         new Assert\Type('integer'),
                     ])
                 ],
-            ]
+            ],
+            allowExtraFields: true
         )
     ])]
-    public ?array $equipements = null;
+    public ?array $instruments = null;
 
     #[Assert\Callback(groups: ['post_validation'])]
     public function sourceFinancementEquippementActuelCentPourcent(ExecutionContextInterface $context): void
     {
-        if ($this->equipements !== null) {
-            foreach ($this->equipements as $index => $instrument) {
+        if ($this->instruments !== null) {
+            foreach ($this->instruments as $index => $instrument) {
                 $somme = 0;
                 foreach ($instrument['source_financement'] as $source) {
                     $somme += $source['taux'];
@@ -293,7 +289,7 @@ class PlateformeHistoriqueDTO
 
                 if ($somme !== 100) {
                     $context->buildViolation('La somme des pourcentages de source de financement doit être égale à 100%.')
-                        ->atPath("equipements[$index].source_financement")
+                        ->atPath("instruments[$index].source_financement")
                         ->addViolation();
                 }
             }
@@ -342,7 +338,7 @@ class PlateformeHistoriqueDTO
     #[Assert\All([
         new Assert\Collection(
             fields: [
-                'tutelle_id' => [
+                'financeur_id' => [
                     new Assert\Required([
                         new Assert\NotBlank(message: 'La tutelle est requise.'),
                         new Assert\Type('integer'),
@@ -425,7 +421,7 @@ class PlateformeHistoriqueDTO
     #[Assert\NotNull(groups: ['validation'], message: 'Le statut de labellisation qualité de la plateforme est requis.')]
     public ?bool $labellisation_qualite = null;
 
-    public ?string $nom_labelisation_qualite = null;
+    public ?string $nom_labellisation_qualite = null;
 
     #[Assert\NotNull(groups: ['validation'], message: 'Le statut de procédure transparente de la plateforme est requis.')]
     public ?bool $procedure_transparente_tous = null;
@@ -643,4 +639,24 @@ class PlateformeHistoriqueDTO
     #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre de publications de thèse de la plateforme est requis.')]
     #[Assert\PositiveOrZero(message: 'Le nombre de publications de thèse de la plateforme doit être supérieur ou égal à 0.')]
     public ?int $publication_these = null;
+
+    #[Assert\All([
+        new Assert\Collection(
+            fields: [
+                'numero' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(message: 'Le numéro de publication est requis.'),
+                        new Assert\Type('integer'),
+                    ])
+                ],
+                'doi' => [
+                    new Assert\Required([
+                        new Assert\NotBlank(message: 'Le DOI de publication est requis.'),
+                    ])
+                ]
+            ],
+            allowExtraFields: true
+        )
+    ])]
+    public array $publications = [];
 }

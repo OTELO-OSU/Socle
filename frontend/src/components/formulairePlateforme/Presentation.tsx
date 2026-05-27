@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { DictionnaireContext } from "../../context/dictionnaireContext";
 import { RHFTextField } from "../RHFTextField";
 import { RHFSelect } from "../RHFTextSelect";
+import NombreTextField from "../NombreTextField";
 
 export function Presentation() {
     const { control } = useFormContext();
@@ -80,8 +81,8 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFTextField name="latitude" control={control} label="Latitude" placeholder="48.65609" />
-                    <RHFTextField name="longitude" control={control} label="Longitude" placeholder="6.15496" sx={{ mt: 2 }} />
+                    <NombreTextField name="latitude" size="medium" label="Latitude" placeholder="48.65609" />
+                    <NombreTextField name="longitude" size="medium" label="Longitude" placeholder="6.15496" sx={{ mt: 2 }} />
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
@@ -92,8 +93,8 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFTextField name="espace_bureau" control={control} label="Espace bureau en m²" placeholder="90" />
-                    <RHFTextField name="espace_laboratoire" control={control} label="Espace laboratoire en m²" placeholder="210" sx={{ mt: 2 }} />
+                    <NombreTextField name="espace_bureau" size="medium" label="Espace bureau en m²" placeholder="90" />
+                    <NombreTextField name="espace_laboratoire" size="medium" label="Espace laboratoire en m²" placeholder="210" sx={{ mt: 2 }} />
                 </Grid>
             </Grid>
         </>

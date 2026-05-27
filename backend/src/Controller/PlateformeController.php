@@ -71,14 +71,17 @@ final class PlateformeController extends AbstractController
         return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getLastHistorique()->getId()], 201);
     }
 
-    #[Route('/plateforme', methods: ['UPDATE'])]
+    #[Route('/plateforme', methods: ['PUT'])]
     public function sauvegarderPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
         $brouillon = $json['brouillon'] ?? null;
         if ($brouillon === null) return $this->json(['message' => 'Le statut de l\'enregistrement doit être spécifié'], 400);
+        unset($json['brouillon']);
 
-        $dto = $this->serializer->deserialize($request->getContent(), PlateformeHistoriqueDTO::class, 'json');
+        $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
+
+        $errors = [];
 
         if ($brouillon) {
             // Plateforme enregistrée en tant que brouillon, on ne fait rien de plus

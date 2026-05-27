@@ -11,7 +11,7 @@ export const formatUniteLabel = (unite: Unite) => {
 export const formatVilleLabel = (ville: Ville) => {
     let str = ""
     str += ville.nom
-    str += ` (${ville.numeroDepartement} - ${ville.departement})`
+    str += ` (${ville.numero_departement} - ${ville.departement})`
     return str
 }
 

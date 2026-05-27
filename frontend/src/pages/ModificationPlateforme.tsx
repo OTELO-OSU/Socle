@@ -1,5 +1,5 @@
 import { Box, Button, Card, Container, Tab, Tabs, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm, type FieldError, FormProvider } from "react-hook-form";
 import { Presentation } from "../components/formulairePlateforme/Presentation";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -9,9 +9,12 @@ import { Equipements } from "../components/formulairePlateforme/Equipements";
 import { Fonctionnement } from "../components/formulairePlateforme/Fontionnement";
 import { Activites } from "../components/formulairePlateforme/Activites";
 import { Publications } from "../components/formulairePlateforme/Publlications";
-import { fetchPlateformeDetails, type DernierHistorique } from "../services/plateformeService";
+import { enregistrerPlateformeBrouillon, fetchPlateformeDetails, type DernierHistorique } from "../services/plateformeService";
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
-
+import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { SnackbarContext } from "../context/snackbarContext";
 
 export default function ModificationPlateforme() {
     const methods = useForm<DernierHistorique>({
@@ -21,11 +24,23 @@ export default function ModificationPlateforme() {
     });
     const { handleSubmit, formState: { errors } } = methods;
 
+    const snackbarContext = useContext(SnackbarContext);
+
     function onSubmit(data: DernierHistorique) {
         console.log(data);
     }
 
+    async function sauvegarderAuBroullon() {
+        const data = methods.getValues();
+        const res = await enregistrerPlateformeBrouillon(idPlateforme, data)
+        snackbarContext?.trigger({
+            couleur: "success",
+            message: res.message,
+        })
+    }
+
     const [value, setValue] = useState(0);
+    const [idPlateforme, setIdPlateforme] = useState(0);
     const [instrumentNational, setInstrumentNational] = useState(false);
 
     const handleChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -40,8 +55,10 @@ export default function ModificationPlateforme() {
         if (id) {
             fetchPlateformeDetails(parseInt(id))
                 .then((data) => {
+                    setIdPlateforme(parseInt(id));
                     // Mettre à jour les valeurs du formulaire avec les données récupérées
                     methods.reset(data.dernier_historique);
+                    methods.setValue("annee", undefined);
                     setInstrumentNational(data.instrument_national);
                     if (data.instrument_national) {
                         if (methods.getValues("dotation_instrument_national") === undefined) {
@@ -101,9 +118,20 @@ export default function ModificationPlateforme() {
                             <Publications />
                         </CustomTabPanel>
                     </Card>
-                    <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit">
-                        Enregistrer les modifications
-                    </Button>
+                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                        <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit">
+                            <SendIcon sx={{ mr: 1 }} />
+                            Valider
+                        </Button>
+                        <Button variant="contained" color="warning" sx={{ mt: 2 }} type="submit">
+                            <RefreshIcon sx={{ mr: 1 }} />
+                            Tester
+                        </Button>
+                        <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="submit" onClick={sauvegarderAuBroullon}>
+                            <SaveIcon sx={{ mr: 1 }} />
+                            Enregistrer au brouillon
+                        </Button>
+                    </Box>
                 </form>
                 <ul>
                     {Object.entries(errors).map(([field, error]) => {
