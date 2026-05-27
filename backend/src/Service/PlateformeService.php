@@ -948,7 +948,7 @@ class PlateformeService
                 case "utilisation_maintenance_taux":
                     $plateformeHisto->setUtilisationMaintenanceTaux($value);
                     break;
-                case "utilisation_developemment_taux":
+                case "utilisation_developpement_taux":
                     $plateformeHisto->setUtilisationDeveloppementTaux($value);
                     break;
                 case "utilisation_panne_taux":

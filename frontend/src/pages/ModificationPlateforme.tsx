@@ -1,4 +1,4 @@
-import { Box, Button, Card, Container, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, Card, Container, List, ListItem, ListItemText, Tab, Tabs, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { useForm, type FieldError, FormProvider } from "react-hook-form";
 import { Presentation } from "../components/formulairePlateforme/Presentation";
@@ -9,22 +9,48 @@ import { Equipements } from "../components/formulairePlateforme/Equipements";
 import { Fonctionnement } from "../components/formulairePlateforme/Fontionnement";
 import { Activites } from "../components/formulairePlateforme/Activites";
 import { Publications } from "../components/formulairePlateforme/Publlications";
-import { enregistrerPlateformeBrouillon, fetchPlateformeDetails, type DernierHistorique } from "../services/plateformeService";
+import { enregistrerPlateformeBrouillon, enregistrerPlateformeValidee, fetchPlateformeDetails, testerPlateforme, type DernierHistorique } from "../services/plateformeService";
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import SaveIcon from '@mui/icons-material/Save';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SnackbarContext } from "../context/snackbarContext";
+import { isAxiosError } from "axios";
 
 export default function ModificationPlateforme() {
+    const [errorsArray, setErrorsArray] = useState<string[]>([]);
     const methods = useForm<DernierHistorique>({
         defaultValues: {
             publications: []
         }
     });
-    const { handleSubmit, formState: { errors } } = methods;
 
+    const {
+        formState: { isDirty },
+        reset,
+    } = methods;
+
+    const [verificationValide, setVerificationValide] = useState(false);
+
+    const boutonActif = verificationValide && !isDirty;
+
+
+    const { handleSubmit, formState: { errors } } = methods;
     const snackbarContext = useContext(SnackbarContext);
+
+    function updateErrorsArray(error: unknown) {
+        if (!isAxiosError(error)) {
+            return;
+        }
+
+        if (error.response?.status === 400) {
+            const data = error.response.data as { messageArray?: string[] };
+            setErrorsArray(data.messageArray ?? []);
+            return;
+        }
+
+        setErrorsArray([]);
+    }
 
     function onSubmit(data: DernierHistorique) {
         console.log(data);
@@ -32,11 +58,65 @@ export default function ModificationPlateforme() {
 
     async function sauvegarderAuBroullon() {
         const data = methods.getValues();
-        const res = await enregistrerPlateformeBrouillon(idPlateforme, data)
-        snackbarContext?.trigger({
-            couleur: "success",
-            message: res.message,
-        })
+        setErrorsArray([]);
+        try {
+            const res = await enregistrerPlateformeBrouillon(idPlateforme, data)
+            snackbarContext?.trigger({
+                couleur: "success",
+                message: res.message,
+            })
+        } catch (error) {
+            updateErrorsArray(error);
+
+            console.error("Erreur lors de l'enregistrement au brouillon :", error);
+            snackbarContext?.trigger({
+                couleur: "error",
+                message: "Erreur lors de l'enregistrement au brouillon",
+            })
+        }
+
+    }
+
+    async function sauvegarder() {
+        const data = methods.getValues();
+        setErrorsArray([]);
+        try {
+            const res = await enregistrerPlateformeValidee(idPlateforme, data)
+            snackbarContext?.trigger({
+                couleur: "success",
+                message: res.message,
+            })
+        } catch (error) {
+            updateErrorsArray(error);
+
+            console.error("Erreur lors de l'enregistrement valide :", error);
+            snackbarContext?.trigger({
+                couleur: "error",
+                message: "Erreur lors de l'enregistrement valide",
+            })
+        }
+
+    }
+
+    async function testPlateforme() {
+        const data = methods.getValues();
+        setErrorsArray([]);
+        try {
+            const res = await testerPlateforme(idPlateforme, data)
+            snackbarContext?.trigger({
+                couleur: "success",
+                message: res.message,
+            })
+            setVerificationValide(true);
+            reset(methods.getValues());
+        } catch (error) {
+            updateErrorsArray(error);
+            console.error("Erreur lors du test de la plateforme :", error);
+            snackbarContext?.trigger({
+                couleur: "error",
+                message: "Erreur lors du test de la plateforme",
+            })
+        }
     }
 
     const [value, setValue] = useState(0);
@@ -118,16 +198,28 @@ export default function ModificationPlateforme() {
                             <Publications />
                         </CustomTabPanel>
                     </Card>
+                    {errorsArray.length > 0 && (
+                        <Box sx={{ mt: 2, p: 2, border: "1px solid", borderColor: "error.main", borderRadius: 1 }}>
+                            <List dense>
+                                {errorsArray.map((error, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemText sx={{ color: "error.main" }} primary={error} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
+                    )}
+
                     <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                        <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit">
+                        <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit" onClick={sauvegarder} disabled={!boutonActif}>
                             <SendIcon sx={{ mr: 1 }} />
                             Valider
                         </Button>
-                        <Button variant="contained" color="warning" sx={{ mt: 2 }} type="submit">
+                        <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme}>
                             <RefreshIcon sx={{ mr: 1 }} />
                             Tester
                         </Button>
-                        <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="submit" onClick={sauvegarderAuBroullon}>
+                        <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon}>
                             <SaveIcon sx={{ mr: 1 }} />
                             Enregistrer au brouillon
                         </Button>

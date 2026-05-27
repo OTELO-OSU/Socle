@@ -192,3 +192,22 @@ export async function enregistrerPlateformeBrouillon(plateformeId: number, data:
 
     return { message: message };
 }
+
+export async function enregistrerPlateformeValidee(plateformeId: number, data: DernierHistorique) {
+    const { data: { message } } = await symfony.put<{ message: string }>(`/plateforme`, {
+        ...data,
+        id: plateformeId,
+        brouillon: false,
+    });
+
+    return { message: message };
+}
+
+export async function testerPlateforme(plateformeId: number, data: DernierHistorique) {
+    const { data: { message } } = await symfony.post<{ message: string }>(`/plateforme/test`, {
+        ...data,
+        id: plateformeId,
+    });
+
+    return { message: message };
+}

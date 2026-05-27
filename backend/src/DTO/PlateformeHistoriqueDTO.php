@@ -172,11 +172,6 @@ class PlateformeHistoriqueDTO
                 ]),
                 'annee_acquisition' =>
                 new Assert\Optional([
-                    new Expression(
-                        "this.futur === true or value !== null",
-                        message: 'L\'année d\'acquisition de l\'équipement est requise.',
-                        groups: ['validation']
-                    ),
                     new Assert\Type('integer'),
                 ]),
                 'cout' =>
@@ -186,20 +181,10 @@ class PlateformeHistoriqueDTO
                 ]),
                 'valeur_remplacement' =>
                 new Assert\Optional([
-                    new Assert\Expression(
-                        "this.futur === true or value !== null",
-                        message: 'La valeur de remplacement de l\'équipement est requise.',
-                        groups: ['validation']
-                    ),
                     new Assert\Type('numeric'),
                 ]),
                 'duree_utilisation' =>
                 new Assert\Optional([
-                    new Assert\Expression(
-                        "this.futur === true or value !== null",
-                        message: 'La durée d\'utilisation de l\'équipement est requise.',
-                        groups: ['validation']
-                    ),
                     new Assert\Type('integer'),
                 ]),
                 'source_financement' =>
@@ -263,11 +248,6 @@ class PlateformeHistoriqueDTO
                 ],
                 'annee_achat_envisagee' => [
                     new Assert\Optional([
-                        new Assert\Expression(
-                            "this.futur === false or value !== null",
-                            message: 'L\'année d\'achat envisagée de l\'équipement est requise.',
-                            groups: ['validation']
-                        ),
                         new Assert\Type('integer'),
                     ])
                 ],
@@ -292,6 +272,48 @@ class PlateformeHistoriqueDTO
                         ->atPath("instruments[$index].source_financement")
                         ->addViolation();
                 }
+            }
+        }
+    }
+
+    #[Assert\Callback(groups: ['validation'])]
+    public function validerChampsInstrumentsSelonTemporalite(ExecutionContextInterface $context): void
+    {
+        if ($this->instruments === null) {
+            return;
+        }
+
+        foreach ($this->instruments as $index => $instrument) {
+            if (!is_array($instrument)) {
+                continue;
+            }
+
+            $futur = $instrument['futur'] ?? null;
+
+            if ($futur === false) {
+                if (($instrument['annee_acquisition'] ?? null) === null) {
+                    $context->buildViolation("L'année d'acquisition de l'équipement est requise.")
+                        ->atPath("instruments[$index].annee_acquisition")
+                        ->addViolation();
+                }
+
+                if (($instrument['valeur_remplacement'] ?? null) === null) {
+                    $context->buildViolation("La valeur de remplacement de l'équipement est requise.")
+                        ->atPath("instruments[$index].valeur_remplacement")
+                        ->addViolation();
+                }
+
+                if (($instrument['duree_utilisation'] ?? null) === null) {
+                    $context->buildViolation("La durée d'utilisation de l'équipement est requise.")
+                        ->atPath("instruments[$index].duree_utilisation")
+                        ->addViolation();
+                }
+            }
+
+            if ($futur === true && ($instrument['annee_achat_envisagee'] ?? null) === null) {
+                $context->buildViolation("L'année d'achat envisagée de l'équipement est requise.")
+                    ->atPath("instruments[$index].annee_achat_envisagee")
+                    ->addViolation();
             }
         }
     }

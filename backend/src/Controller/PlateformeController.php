@@ -108,4 +108,33 @@ final class PlateformeController extends AbstractController
         $this->plateformeService->sauvegarderPlateforme($dto, $brouillon);
         return $this->json(['message' => 'Plateforme sauvegardée avec succès.'], 200);
     }
+
+    #[Route('/plateforme/test', methods: ['POST'])]
+    public function testPlateforme(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+
+        $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
+
+        $errors = [];
+
+        // Plateforme enregistrée pour validation. Vérification du groupe validation
+        $errors = $this->validator->validate($dto, null, ['Default', 'validation']);
+
+        if (count($errors) === 0) {
+            $errors = $this->validator->validate($dto, null, ['post_validation']);
+        }
+
+        $errorMessages = [];
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['messageArray' => $errorMessages], 400);
+        }
+
+        return $this->json(['message' => 'La plateforme est prête à être validée.'], 200);
+    }
 }
