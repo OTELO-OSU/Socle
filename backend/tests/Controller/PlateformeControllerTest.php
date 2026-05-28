@@ -6,7 +6,6 @@ use App\Entity\Bap;
 use App\Entity\Categorie;
 use App\Entity\ContratMaintenance;
 use App\Entity\Corps;
-use App\Entity\CorpsBapEmploiType;
 use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
@@ -330,18 +329,15 @@ class PlateformeControllerTest extends WebTestCase
             "logo_url" => "https://www.plateformetest.com/logo.png",
             "autre_type_labellisation" => "Label Test",
             "laboratoire_operateur_id" => $this->em->getRepository(Entite::class)->findOneBy([])->getId(),
-            "tutelle_principale" => [$this->em->getRepository(Entite::class)->findOneBy([])->getId()],
-            "tutelle_secondaire" => [$this->em->getRepository(Entite::class)->findOneBy([])->getId()],
+            "tutelles_principales_ids" => [$this->em->getRepository(Entite::class)->findOneBy([])->getId()],
+            "tutelles_secondaires_ids" => [$this->em->getRepository(Entite::class)->findOneBy([])->getId()],
             "latitude" => 48.8566,
             "longitude" => 2.3522,
             "espace_bureau" => 20.2,
             "espace_laboratoire" => 30.5,
-            "personnel" => [
+            "personnels" => [
                 [
                     "utilisateur_id" => $this->em->getRepository(Utilisateur::class)->findOneBy([])->getId(),
-                    "responsable_scientifique" => true,
-                    "responsable_technique" => false,
-                    "type_contrat_id" => $this->em->getRepository(TypeContrat::class)->findOneBy([])->getId(),
                     "quotite" => 100
                 ]
             ],
@@ -349,20 +345,20 @@ class PlateformeControllerTest extends WebTestCase
                 [
                     "employeur_id" => $this->em->getRepository(Entite::class)->findOneBy([])->getId(),
                     "corps_id" => $this->em->getRepository(Corps::class)->findOneBy([])->getId(),
-                    "bap" => $bapArray,
-                    "emploi_type" => $emploiTypeArray,
+                    "baps_ids" => $bapArray,
+                    "emploi_types_ids" => $emploiTypeArray,
                     "quotite" => 50,
                     "rang_numerateur" => 1,
                     "rang_denominateur" => 2
                 ]
             ],
-            "equipements" => [
+            "instruments" => [
                 [
                     "futur" => false,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
                     "modele" => "Modèle Test",
-                    "annee_acquisition" => "2020",
+                    "annee_acquisition" => 2020,
                     "cout" => 10000.2,
                     "valeur_remplacement" => 12000.5,
                     "duree_utilisation" => 5,
@@ -413,11 +409,11 @@ class PlateformeControllerTest extends WebTestCase
             "contribution_tutelle_taux" => 25,
             "contribution_tutelle_detail" => [
                 [
-                    "tutelle_id" => $entiteIds[0],
+                    "financeur_id" => $entiteIds[0],
                     "taux" => 50,
                 ],
                 [
-                    "tutelle_id" => $entiteIds[1],
+                    "financeur_id" => $entiteIds[1],
                     "taux" => 50,
                 ]
             ],
@@ -486,7 +482,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["nom_officiel"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -506,7 +502,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -546,7 +542,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["site_web"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -566,7 +562,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -606,7 +602,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["ville_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -626,7 +622,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -666,7 +662,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["laboratoire_operateur_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -686,7 +682,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -723,10 +719,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["tutelle_principale"] = [];
+        $plateformeData["tutelles_principales_ids"] = [];
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -746,7 +742,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -786,7 +782,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["latitude"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -806,7 +802,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -846,7 +842,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["longitude"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -866,7 +862,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -906,7 +902,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["espace_bureau"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -926,7 +922,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -966,7 +962,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["espace_laboratoire"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -986,7 +982,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -998,67 +994,6 @@ class PlateformeControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "L'espace de laboratoire de la plateforme est requis.",
-            $data['messageArray'][0]
-        );
-
-        self::assertEmailCount(0);
-    }
-
-    public function testSauvegarderPlateformePersonnelSansTypeContrat(): void
-    {
-        $client = $this->client;
-
-        $client->request(
-            'POST',
-            '/api/plateforme',
-            [],
-            [],
-            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
-            \json_encode(['nom' => 'Test Plateforme'])
-        );
-
-        $creationResponse = json_decode($client->getResponse()->getContent(), true);
-        $plateformeData = $this->getPlateformeCompleteArray();
-        $plateformeData['id'] = $creationResponse['plateforme_id'];
-
-        $plateformeData['brouillon'] = true;
-
-        $plateformeData["personnel"][0]["type_contrat_id"] = null;
-
-        $client->request(
-            'UPDATE',
-            '/api/plateforme',
-            [],
-            [],
-            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
-            \json_encode($plateformeData)
-        );
-
-        $this->assertResponseStatusCodeSame(400);
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(
-            "Le type de contrat du personnel est requis.",
-            $data['messageArray'][0]
-        );
-
-
-        self::assertEmailCount(0);
-
-        $plateformeData['brouillon'] = false;
-
-        $client->request(
-            'UPDATE',
-            '/api/plateforme',
-            [],
-            [],
-            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
-            \json_encode($plateformeData)
-        );
-
-        $this->assertResponseStatusCodeSame(400);
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(
-            "Le type de contrat du personnel est requis.",
             $data['messageArray'][0]
         );
 
@@ -1084,10 +1019,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["personnel"][0]["quotite"] = null;
+        $plateformeData["personnels"][0]["quotite"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1107,7 +1042,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1147,7 +1082,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["employeur_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1167,7 +1102,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1207,7 +1142,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["corps_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1227,7 +1162,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1264,10 +1199,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["postes_futurs"][0]["bap"] = [];
+        $plateformeData["postes_futurs"][0]["baps_ids"] = [];
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1287,7 +1222,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1324,10 +1259,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["postes_futurs"][0]["emploi_type"] = [];
+        $plateformeData["postes_futurs"][0]["emploi_types_ids"] = [];
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1347,7 +1282,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1387,7 +1322,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["quotite"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1407,7 +1342,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1447,7 +1382,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["rang_numerateur"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1467,7 +1402,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1507,7 +1442,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["postes_futurs"][0]["rang_denominateur"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1527,7 +1462,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1564,10 +1499,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["nom"] = null;
+        $plateformeData["instruments"][0]["nom"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1587,7 +1522,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1624,10 +1559,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["annee_acquisition"] = null;
+        $plateformeData["instruments"][0]["annee_acquisition"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1647,7 +1582,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1684,10 +1619,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["cout"] = null;
+        $plateformeData["instruments"][0]["cout"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1707,7 +1642,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1744,10 +1679,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["valeur_remplacement"] = null;
+        $plateformeData["instruments"][0]["valeur_remplacement"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1767,7 +1702,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1804,10 +1739,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["duree_utilisation"] = null;
+        $plateformeData["instruments"][0]["duree_utilisation"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1827,7 +1762,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1864,10 +1799,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["source_financement"] = [];
+        $plateformeData["instruments"][0]["source_financement"] = [];
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1887,7 +1822,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1924,10 +1859,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["source_financement"][0]["taux"] = null;
+        $plateformeData["instruments"][0]["source_financement"][0]["taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1947,7 +1882,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -1984,10 +1919,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["source_financement"][0]["financeur_id"] = null;
+        $plateformeData["instruments"][0]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2007,7 +1942,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2044,10 +1979,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][0]["source_financement"][0]["taux"] = 75;
+        $plateformeData["instruments"][0]["source_financement"][0]["taux"] = 75;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2067,7 +2002,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2104,10 +2039,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["nom"] = null;
+        $plateformeData["instruments"][1]["nom"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2127,7 +2062,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2164,10 +2099,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["annee_achat_envisagee"] = null;
+        $plateformeData["instruments"][1]["annee_achat_envisagee"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2187,7 +2122,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2224,10 +2159,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["cout"] = null;
+        $plateformeData["instruments"][1]["cout"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2247,7 +2182,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2284,10 +2219,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["source_financement"] = [];
+        $plateformeData["instruments"][1]["source_financement"] = [];
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2307,7 +2242,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2344,10 +2279,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["source_financement"][0]["taux"] = null;
+        $plateformeData["instruments"][1]["source_financement"][0]["taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2367,7 +2302,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2404,10 +2339,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["source_financement"][0]["financeur_id"] = null;
+        $plateformeData["instruments"][1]["source_financement"][0]["financeur_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2427,7 +2362,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2464,10 +2399,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["equipements"][1]["source_financement"][0]["taux"] = 75;
+        $plateformeData["instruments"][1]["source_financement"][0]["taux"] = 75;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2487,7 +2422,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2527,7 +2462,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["materiel_consommable"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2547,7 +2482,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2587,7 +2522,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contrat_entretien"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2607,7 +2542,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2647,7 +2582,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["etude_prestation"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2667,7 +2602,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2707,7 +2642,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["fluide_energie"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2727,7 +2662,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2767,7 +2702,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["mission_frais_generaux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2787,7 +2722,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2827,7 +2762,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["determination_tarif_plateforme_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2847,7 +2782,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2887,7 +2822,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2907,7 +2842,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2947,7 +2882,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -2967,7 +2902,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3007,7 +2942,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3027,7 +2962,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3067,7 +3002,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3087,7 +3022,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3127,7 +3062,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_prive_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3147,7 +3082,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3187,7 +3122,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_prive_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3207,7 +3142,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3247,7 +3182,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_credit_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3267,7 +3202,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3307,7 +3242,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_credit_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3327,7 +3262,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3367,7 +3302,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_projet_recherche_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3387,7 +3322,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3427,7 +3362,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_projet_recherche_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3447,7 +3382,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3487,7 +3422,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3507,7 +3442,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3547,7 +3482,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3567,7 +3502,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3607,7 +3542,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_structure_pia_taux"] = 100;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3627,7 +3562,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3669,7 +3604,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_fond_public_taux"] = 50;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3689,7 +3624,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3729,7 +3664,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3749,7 +3684,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3786,10 +3721,10 @@ class PlateformeControllerTest extends WebTestCase
 
         $plateformeData['brouillon'] = true;
 
-        $plateformeData["contribution_tutelle_detail"][0]["tutelle_id"] = null;
+        $plateformeData["contribution_tutelle_detail"][0]["financeur_id"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3809,7 +3744,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3849,7 +3784,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"][0]["taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3869,7 +3804,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3909,7 +3844,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["contribution_tutelle_detail"][0]["taux"] = 110;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3929,7 +3864,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3969,7 +3904,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["labellisation_qualite"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -3989,7 +3924,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4029,7 +3964,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["procedure_transparente_tous"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4049,7 +3984,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4089,7 +4024,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["procedure_transparente_prestation_exterieure"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4109,7 +4044,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4149,7 +4084,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["accueil_international_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4169,7 +4104,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4209,7 +4144,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["accueil_international_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4229,7 +4164,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4269,7 +4204,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_2424_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4289,7 +4224,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4329,7 +4264,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_2424_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4349,7 +4284,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4389,7 +4324,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_1224_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4409,7 +4344,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4449,7 +4384,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_77_1224_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4469,7 +4404,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4509,7 +4444,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_2424_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4529,7 +4464,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4569,7 +4504,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_2424_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4589,7 +4524,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4629,7 +4564,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4649,7 +4584,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4689,7 +4624,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4709,7 +4644,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4749,7 +4684,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["modele_57_1224_taux"] = 100;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4769,7 +4704,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4809,7 +4744,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_fonctionnement_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4829,7 +4764,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4869,7 +4804,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_fonctionnement_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4889,7 +4824,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4929,7 +4864,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_maintenance_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4949,7 +4884,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -4989,7 +4924,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_maintenance_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5009,7 +4944,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5049,7 +4984,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_developpement_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5069,7 +5004,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5109,7 +5044,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_developpement_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5129,7 +5064,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5169,7 +5104,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_panne_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5189,7 +5124,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5229,7 +5164,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_panne_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5249,7 +5184,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5289,7 +5224,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5309,7 +5244,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5349,7 +5284,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5369,7 +5304,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5409,7 +5344,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_temps_mort_taux"] = 100;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5429,7 +5364,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5469,7 +5404,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_equipe_operante_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5489,7 +5424,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5529,7 +5464,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_equipe_operante_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5549,7 +5484,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5589,7 +5524,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_interne_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5609,7 +5544,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5649,7 +5584,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_interne_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5669,7 +5604,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5709,7 +5644,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_externe_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5729,7 +5664,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5769,7 +5704,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_collaboration_externe_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5789,7 +5724,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5829,7 +5764,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5849,7 +5784,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5889,7 +5824,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = 101;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5909,7 +5844,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5949,7 +5884,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["utilisation_prestation_service_taux"] = 100;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -5969,7 +5904,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6009,7 +5944,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_realise"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6029,7 +5964,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6077,7 +6012,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6097,7 +6032,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6137,7 +6072,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_domicile_travail"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6157,7 +6092,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6197,7 +6132,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_domicile_travail"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6217,7 +6152,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6257,7 +6192,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6277,7 +6212,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6317,7 +6252,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6337,7 +6272,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6377,7 +6312,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission_ext"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6397,7 +6332,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6437,7 +6372,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_mission_ext"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6457,7 +6392,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6497,7 +6432,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_consommable"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6517,7 +6452,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6557,7 +6492,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_consommable"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6577,7 +6512,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6617,7 +6552,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_equipement"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6637,7 +6572,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6677,7 +6612,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_equipement"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6697,7 +6632,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6737,7 +6672,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_envoi_echantillon"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6757,7 +6692,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6797,7 +6732,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_envoi_echantillon"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6817,7 +6752,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6857,7 +6792,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_batiment"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6877,7 +6812,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6917,7 +6852,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_batiment"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6937,7 +6872,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6977,7 +6912,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -6997,7 +6932,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7037,7 +6972,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["bges_dechet"] = -2;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7057,7 +6992,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7097,7 +7032,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_equipe_operante"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7117,7 +7052,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7157,7 +7092,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_equipe_operante"] = -1;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7177,7 +7112,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7217,7 +7152,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_interne"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7237,7 +7172,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7277,7 +7212,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_interne"] = -1;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7297,7 +7232,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7337,7 +7272,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_externe"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7357,7 +7292,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7397,7 +7332,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_collaboration_externe"] = -1;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7417,7 +7352,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7457,7 +7392,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_autre_type"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7477,7 +7412,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7517,7 +7452,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_autre_type"] = -1;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7537,7 +7472,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7577,7 +7512,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_these"] = null;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7597,7 +7532,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7637,7 +7572,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData["publication_these"] = -1;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7657,7 +7592,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],
@@ -7696,7 +7631,7 @@ class PlateformeControllerTest extends WebTestCase
         $plateformeData['brouillon'] = false;
 
         $client->request(
-            'UPDATE',
+            'PUT',
             '/api/plateforme',
             [],
             [],

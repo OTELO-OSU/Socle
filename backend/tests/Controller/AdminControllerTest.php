@@ -401,9 +401,6 @@ class AdminControllerTest extends WebTestCase
     {
         $client = $this->client;
 
-        // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->testPlateforme->getId();
-
         $client->request(
             'PATCH',
             '/api/plateforme/responsables',
@@ -451,7 +448,7 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->testPlateforme->getId();
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
 
         $client->request(
             'PATCH',
@@ -477,7 +474,7 @@ class AdminControllerTest extends WebTestCase
         $client = $this->client;
 
         // Récupérer l'ID de la plateforme créée dans le setUp
-        $plateformeId = $this->plateformeHisto->getId();
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
 
         $client->request(
             'PATCH',

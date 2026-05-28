@@ -68,7 +68,7 @@ final class PlateformeController extends AbstractController
         if (!isset($json['nom'])) return $this->json(['message' => 'Le nom officiel de la plateforme est requis.'], 400);
 
         $plt = $this->plateformeService->creerPlateforme($json['nom']);
-        return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getLastHistorique()->getId()], 201);
+        return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getId()], 201);
     }
 
     #[Route('/plateforme', methods: ['PUT'])]

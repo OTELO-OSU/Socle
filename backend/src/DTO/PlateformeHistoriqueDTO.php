@@ -79,16 +79,6 @@ class PlateformeHistoriqueDTO
                     new Assert\NotBlank(),
                     new Assert\Type('integer'),
                 ]),
-                'responsable_scientifique' =>
-                new Assert\Required([
-                    new Assert\NotNull(),
-                    new Assert\Type('boolean'),
-                ]),
-                'responsable_technique' =>
-                new Assert\Required([
-                    new Assert\NotNull(),
-                    new Assert\Type('boolean'),
-                ]),
                 'quotite' =>
                 new Assert\Required([
                     new Assert\NotNull(message: 'La quotité du personnel est requise.'),
