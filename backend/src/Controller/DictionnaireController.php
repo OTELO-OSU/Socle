@@ -102,6 +102,13 @@ final class DictionnaireController extends AbstractController
         return $this->json($operations, 200, [], ['groups' => 'operation:list']);
     }
 
+    #[Route('/dictionnaire/universites', methods: ['GET'])]
+    public function getUniversites(): Response
+    {
+        $universites = $this->ds->getUniversites();
+        return $this->json($universites, 200, [], ['groups' => 'universite:list']);
+    }
+
     #[Route('/dictionnaire/determination_tarif', methods: ['GET'])]
     public function getDeterminationTarif(): Response
     {

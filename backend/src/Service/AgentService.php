@@ -79,7 +79,7 @@ class AgentService
         ];
     }
 
-    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, int $corps, int $grade, int $typeContrat): Utilisateur
+    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement): Utilisateur
     {
         if (!$this->security->isGranted("SOUMETTRE_AU_DU", Utilisateur::class)) {
             throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
@@ -106,30 +106,56 @@ class AgentService
             throw new Exception("L'employeur spécifié est invalide.", 400);
         }
 
-        // Vérification du corps
-        /** @var Corps $corpsEntity */
-        $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
-        if (!$corpsEntity) {
-            throw new Exception("Le corps spécifié est invalide.", 400);
-        }
-
-        // Vérfication du grade
-        /** @var Grade $gradeEntity */
-        $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
-        if (!$gradeEntity) {
-            throw new Exception("Le grade spécifié est invalide.", 400);
-        }
-
-        // Vérification de la liaison corps_grade
-        if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
-            throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
-        }
-
         // Vérification du type de contrat
         /** @var TypeContrat $typeContratEntity */
         $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
         if (!$typeContratEntity) {
             throw new Exception("Le type de contrat spécifié est invalide.", 400);
+        }
+
+        $corpsEntity = null;
+        $gradeEntity = null;
+        $universiteRattachement = null;
+        $univRattachementEntity = null;
+
+        if ($typeContratEntity->getNom() !== "CDD") {
+
+            if ($corps === null) {
+                throw new Exception("Le corps est obligatoire.", 400);
+            } else if ($grade === null) {
+                throw new Exception("Le grade est obligatoire.", 400);
+            }
+
+            // Vérification du corps
+            /** @var Corps $corpsEntity */
+            $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
+            if (!$corpsEntity) {
+                throw new Exception("Le corps spécifié est invalide.", 400);
+            }
+
+            // Vérfication du grade
+            /** @var Grade $gradeEntity */
+            $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
+            if (!$gradeEntity) {
+                throw new Exception("Le grade spécifié est invalide.", 400);
+            }
+
+            // Vérification de la liaison corps_grade
+            if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
+                throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+            }
+        }
+
+        if ($doctorant) {
+            if ($universiteRattachement === null) {
+                $univRattachementEntity = null;
+            } else {
+                // Vérification de l'université de rattachement
+                $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
+                if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
+                    throw new Exception("L'université de rattachement spécifiée est invalide.", 400);
+                }
+            }
         }
 
         //* Création du User
@@ -142,6 +168,9 @@ class AgentService
         $user->setCorps($corpsEntity);
         $user->setGrade($gradeEntity);
         $user->setTypeContrat($typeContratEntity);
+        $user->setDoctorant($doctorant);
+        $user->setUniversiteRattachement($univRattachementEntity);
+        $user->setAttenteApprobationDU(true);
 
         $this->em->persist($user);
         $this->em->flush();

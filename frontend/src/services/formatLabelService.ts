@@ -22,7 +22,10 @@ export const formatEmployeurLabel = (employeur: Employeur | null | undefined) =>
     return str
 }
 
-export const typePersonnelLabel = (corps: string | null | undefined, typeContrat: string | null | undefined) => {
+export const typePersonnelLabel = (corps: string | null | undefined, typeContrat: string | null | undefined, doctorant: boolean | null | undefined) => {
+    if (doctorant) {
+        return "Doctorant"
+    }
     let label = ""
     const listeIt = ["IR", "IE", "AI", "T", "AJT"];
     const listeChercheur = ["DR", "PR", "CR", "PHYS", "PHYS-A", "ASTRO", "ASTRO-A"];

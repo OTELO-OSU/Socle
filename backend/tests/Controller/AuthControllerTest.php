@@ -62,6 +62,7 @@ class AuthControllerTest extends WebTestCase
         $entite->setCategorie($categorie);
         $entite->setEmployeur(false);
         $entite->setLaboratoire(true);
+        $entite->setUniversite(false);
         $this->em->persist($entite);
 
         $user = new Utilisateur();

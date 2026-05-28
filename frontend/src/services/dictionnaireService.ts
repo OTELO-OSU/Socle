@@ -90,6 +90,12 @@ export type MethodeDeterminationTarif = {
     nom: string;
 }
 
+export type Universite = {
+    id: number;
+    nom: string;
+    acronyme: string | null;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -164,6 +170,12 @@ export async function fetchTypesContratsMaintenance() {
 
 export async function fetchDeterminationTarifPlateforme() {
     const { data } = await symfony.get<MethodeDeterminationTarif[]>("/dictionnaire/determination_tarif");
+
+    return data;
+}
+
+export async function fetchUniversites() {
+    const { data } = await symfony.get<Universite[]>("/dictionnaire/universites");
 
     return data;
 }

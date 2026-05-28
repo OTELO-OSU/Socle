@@ -55,6 +55,7 @@ class AdminControllerTest extends WebTestCase
 
         $unite = new Entite();
         $unite->setNom('Test Unite');
+        $unite->setUniversite(false);
         $unite->setCategorie($categorie);
         $unite->setEmployeur(false);
         $unite->setLaboratoire(true);

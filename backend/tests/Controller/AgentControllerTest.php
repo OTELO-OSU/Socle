@@ -68,6 +68,7 @@ class AgentControllerTest extends WebTestCase
         $unite->setCategorie($categorie);
         $unite->setEmployeur(false);
         $unite->setLaboratoire(true);
+        $unite->setUniversite(false);
         $this->em->persist($unite);
 
         $unite2 = new Entite();
@@ -75,6 +76,7 @@ class AgentControllerTest extends WebTestCase
         $unite2->setCategorie($categorie);
         $unite2->setEmployeur(false);
         $unite2->setLaboratoire(true);
+        $unite2->setUniversite(false);
         $this->em->persist($unite2);
 
         $uar = new Entite();
@@ -83,6 +85,7 @@ class AgentControllerTest extends WebTestCase
         $uar->setCodeUnite("UAR123");
         $uar->setEmployeur(false);
         $uar->setLaboratoire(true);
+        $uar->setUniversite(false);
         $this->em->persist($uar);
 
         $employeur = new Entite();
@@ -90,6 +93,7 @@ class AgentControllerTest extends WebTestCase
         $employeur->setCategorie($categorie);
         $employeur->setEmployeur(true);
         $employeur->setLaboratoire(false);
+        $employeur->setUniversite(true);
         $this->em->persist($employeur);
 
         $user = new Utilisateur();
@@ -169,7 +173,7 @@ class AgentControllerTest extends WebTestCase
             'unite' => $this->unite->getId(),
             'corps' => $this->corps->getId(),
             'grade' => $this->grade->getId(),
-            'typeContrat' => $typeContrat->getId()
+            'type_contrat' => $typeContrat->getId()
         ];
     }
 

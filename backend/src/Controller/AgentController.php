@@ -32,18 +32,42 @@ final class AgentController extends AbstractController
     public function creationUtilisateurParResponsable(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["corps"]) || !isset($data["grade"]) || !isset($data["typeContrat"])) {
+        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["type_contrat"]) || !isset($data["unite"])) {
             return $this->json(['message' => 'Champs requis manquants'], 400);
         }
+
+        $corps = null;
+        $grade = null;
+        $universiteRattachement = null;
+        $doctorant = \false;
+
+        if (isset($data['corps'])) {
+            $corps = $data['corps'];
+        }
+
+        if (isset($data['grade'])) {
+            $grade = $data['grade'];
+        }
+
+        if (isset($data['universite_rattachement'])) {
+            $universiteRattachement = $data['universite_rattachement'];
+        }
+
+        if (isset($data['doctorant'])) {
+            $doctorant = $data['doctorant'];
+        }
+
         $utilisateur = $this->utilisateurService->creationUtilisateurParResponsable(
             $data['nom'],
             $data['prenom'],
             $data['email'],
             $data['employeur'],
             $data['unite'],
-            $data['corps'],
-            $data['grade'],
-            $data['typeContrat']
+            $corps,
+            $grade,
+            $data['type_contrat'],
+            $doctorant,
+            $universiteRattachement
         );
         return $this->json(['message' => 'Soumission envoyée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }

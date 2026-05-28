@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
-import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Ville } from '../services/dictionnaireService';
+import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
 import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
 
 export type SelectOption = {
@@ -28,6 +28,8 @@ export type DictionnaireType = {
     typeContratMaintenance: TypeContratMaintenance[];
     determinationTarifPlateforme: MethodeDeterminationTarif[];
     determinationTarifPlateformeOptions: SelectOption[];
+    universite: Universite[];
+    universiteOptions: SelectOption[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
@@ -50,6 +52,8 @@ const defaultDictionnaire: DictionnaireType = {
     typeContratMaintenance: [],
     determinationTarifPlateforme: [],
     determinationTarifPlateformeOptions: [],
+    universite: [],
+    universiteOptions: [],
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -78,6 +82,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 operationsResult,
                 typeContratMaintenanceResult,
                 determinationTarifPlateformeResult,
+                universiteResult
             ] = await Promise.allSettled([
                 fetchUnites(),
                 fetchVilles(),
@@ -92,6 +97,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 fetchOperations(),
                 fetchTypesContratsMaintenance(),
                 fetchDeterminationTarifPlateforme(),
+                fetchUniversites(),
             ]);
 
             const unite = getSettledValue(uniteResult, defaultDictionnaire.unite);
@@ -107,6 +113,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             const operations = getSettledValue(operationsResult, defaultDictionnaire.operations);
             const typeContratMaintenance = getSettledValue(typeContratMaintenanceResult, defaultDictionnaire.typeContratMaintenance);
             const determinationTarifPlateforme = getSettledValue(determinationTarifPlateformeResult, defaultDictionnaire.determinationTarifPlateforme);
+            const universite = getSettledValue(universiteResult, defaultDictionnaire.universite);
 
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
@@ -115,7 +122,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 const typeContratOptions = typeContrat.map((item) => ({ value: item.id, label: item.nom }));
                 const operationsOptions = operations.map((item) => ({ value: item.id, label: item.nom }));
                 const determinationTarifPlateformeOptions = determinationTarifPlateforme.map((item) => ({ value: item.id, label: item.nom }));
-
+                const universiteOptions = universite.map((item) => ({ value: item.id, label: formatEmployeurLabel(item) }));
                 setDictionnaire((current) => ({
                     ...current,
                     unite,
@@ -137,6 +144,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     typeContratMaintenance,
                     determinationTarifPlateforme,
                     determinationTarifPlateformeOptions,
+                    universite,
+                    universiteOptions,
                 }));
             }
         };

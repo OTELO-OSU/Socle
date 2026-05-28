@@ -64,6 +64,7 @@ class PlateformeControllerTest extends WebTestCase
         $unite->setEmployeur(true);
         $unite->setLaboratoire(false);
         $unite->setCategorie($labCat);
+        $unite->setUniversite(false);
         $this->em->persist($unite);
 
         $user = new Utilisateur();
@@ -104,6 +105,7 @@ class PlateformeControllerTest extends WebTestCase
         $entite1 = new Entite();
         $entite1->setNom("Entité 1");
         $entite1->setId(1);
+        $entite1->setUniversite(false);
         $entite1->setEmployeur(true);
         $entite1->setLaboratoire(true);
         $entite1->setCategorie($categorie);
@@ -112,6 +114,7 @@ class PlateformeControllerTest extends WebTestCase
         $entite2 = new Entite();
         $entite2->setId(2);
         $entite2->setNom("Entité 2");
+        $entite2->setUniversite(false);
         $entite2->setCategorie($categorie);
         $entite2->setEmployeur(true);
         $entite2->setLaboratoire(true);

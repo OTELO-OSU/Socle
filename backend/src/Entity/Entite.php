@@ -15,14 +15,14 @@ class Entite
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
     private ?int $id = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
@@ -88,6 +88,15 @@ class Entite
     #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'employeur')]
     private Collection $employe;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'universiteRattachement')]
+    private Collection $doctorants;
+
+    #[ORM\Column]
+    private ?bool $universite = null;
+
     public function __construct()
     {
         $this->plateformeHistoriques = new ArrayCollection();
@@ -97,6 +106,7 @@ class Entite
         $this->financementInstruments = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
         $this->employe = new ArrayCollection();
+        $this->doctorants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -413,6 +423,48 @@ class Entite
                 $employe->setEmployeur(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getDoctorants(): Collection
+    {
+        return $this->doctorants;
+    }
+
+    public function addDoctorant(Utilisateur $doctorant): static
+    {
+        if (!$this->doctorants->contains($doctorant)) {
+            $this->doctorants->add($doctorant);
+            $doctorant->setUniversiteRattachement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctorant(Utilisateur $doctorant): static
+    {
+        if ($this->doctorants->removeElement($doctorant)) {
+            // set the owning side to null (unless already changed)
+            if ($doctorant->getUniversiteRattachement() === $this) {
+                $doctorant->setUniversiteRattachement(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isUniversite(): ?bool
+    {
+        return $this->universite;
+    }
+
+    public function setUniversite(bool $universite): static
+    {
+        $this->universite = $universite;
 
         return $this;
     }

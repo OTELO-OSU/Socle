@@ -10,6 +10,7 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
@@ -123,7 +124,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    #[SerializedName("type_contrat")]
     private ?TypeContrat $typeContrat = null;
+
+    #[Groups(['utilisateur:list', "plateforme:detail"])]
+    #[ORM\Column(nullable: true)]
+    private ?bool $doctorant = null;
+
+    #[Groups(['utilisateur:list', "plateforme:detail"])]
+    #[SerializedName("universite_rattachement")]
+    #[ORM\ManyToOne(inversedBy: 'doctorants')]
+    private ?Entite $universiteRattachement = null;
 
     public function __construct()
     {
@@ -547,6 +558,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTypeContrat(?TypeContrat $typeContrat): static
     {
         $this->typeContrat = $typeContrat;
+
+        return $this;
+    }
+
+    public function isDoctorant(): ?bool
+    {
+        return $this->doctorant;
+    }
+
+    public function setDoctorant(bool $doctorant): static
+    {
+        $this->doctorant = $doctorant;
+
+        return $this;
+    }
+
+    public function getUniversiteRattachement(): ?Entite
+    {
+        return $this->universiteRattachement;
+    }
+
+    public function setUniversiteRattachement(?Entite $universiteRattachement): static
+    {
+        $this->universiteRattachement = $universiteRattachement;
 
         return $this;
     }

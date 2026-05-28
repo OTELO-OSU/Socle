@@ -108,6 +108,11 @@ class DictionnaireService
         return $this->em->getRepository(Entite::class)->findBy([], ["nom" => "ASC"]);
     }
 
+    function getUniversites(): array
+    {
+        return $this->em->getRepository(Entite::class)->findBy(["universite" => true], ["nom" => "ASC"]);
+    }
+
     function getOperations(): array
     {
         return $this->em->getRepository(Operation::class)->findBy([], ["nom" => "ASC"]);

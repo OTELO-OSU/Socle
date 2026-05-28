@@ -25,8 +25,10 @@ export type Agent = {
     employeur?: Employeur | null;
     corps?: Corps | null;
     grade?: Grade | null;
-    typeContrat?: typeContrat | null;
+    type_contrat?: typeContrat | null;
     unite?: number | null;
+    doctorant?: boolean | null;
+    universite_ratachement?: number | null;
 };
 
 export type RetourFetchAgentParPage = {
@@ -43,8 +45,10 @@ export type PayloadSoumettreAgentAuDu = {
     employeur: number | null;
     corps: number | null;
     grade: number | null;
-    typeContrat: number | null;
+    type_contrat: number | null;
     unite: number | null;
+    doctorant: boolean | null;
+    universite_ratachement: number | null;
 };
 
 export type RetourSoumettreAgentAuDu = {
