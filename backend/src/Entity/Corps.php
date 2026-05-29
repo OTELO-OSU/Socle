@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: CorpsRepository::class)]
 class Corps
@@ -44,6 +45,21 @@ class Corps
      */
     #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'corps')]
     private Collection $posteFuturs;
+
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
+    #[SerializedName("compatible_bap")]
+    #[ORM\Column]
+    private ?bool $compatibleBAP = null;
+
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
+    #[SerializedName("compatible_cnu")]
+    #[ORM\Column]
+    private ?bool $compatibleCNU = null;
+
+    #[Groups(['utilisateur:list', 'corps:list', "plateforme:detail"])]
+    #[SerializedName("compatible_section")]
+    #[ORM\Column]
+    private ?bool $compatibleSection = null;
 
     public function __construct()
     {
@@ -161,6 +177,42 @@ class Corps
                 $posteFutur->setCorps(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isCompatibleBAP(): ?bool
+    {
+        return $this->compatibleBAP;
+    }
+
+    public function setCompatibleBAP(bool $compatibleBAP): static
+    {
+        $this->compatibleBAP = $compatibleBAP;
+
+        return $this;
+    }
+
+    public function isCompatibleCNU(): ?bool
+    {
+        return $this->compatibleCNU;
+    }
+
+    public function setCompatibleCNU(bool $compatibleCNU): static
+    {
+        $this->compatibleCNU = $compatibleCNU;
+
+        return $this;
+    }
+
+    public function isCompatibleSection(): ?bool
+    {
+        return $this->compatibleSection;
+    }
+
+    public function setCompatibleSection(bool $compatibleSection): static
+    {
+        $this->compatibleSection = $compatibleSection;
 
         return $this;
     }

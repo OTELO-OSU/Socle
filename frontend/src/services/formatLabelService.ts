@@ -1,4 +1,4 @@
-import type { Employeur, Unite, Ville } from "./dictionnaireService";
+import type { Bap, Cnu, Employeur, SectionCnrs, Unite, Universite, Ville } from "./dictionnaireService";
 
 export const formatUniteLabel = (unite: Unite) => {
     let str = ""
@@ -15,11 +15,33 @@ export const formatVilleLabel = (ville: Ville) => {
     return str
 }
 
+export const formatUniversiteLabel = (universite: Universite | null | undefined) => {
+    let str = ""
+    if (universite?.acronyme) str += `${universite.acronyme} - `
+    str += universite?.nom || ""
+    return str
+}
+
 export const formatEmployeurLabel = (employeur: Employeur | null | undefined) => {
     let str = ""
     if (employeur?.acronyme) str += `${employeur.acronyme} - `
     str += employeur?.nom || ""
     return str
+}
+
+export const formatBapLabel = (bap: Bap | null | undefined) => {
+    if (!bap) return ""
+    return bap?.lettre
+}
+
+export const formatSectionCnrsLabel = (section: SectionCnrs | null | undefined) => {
+    if (!section) return ""
+    return String(section?.numero)
+}
+
+export const formatCnuLabel = (cnu: Cnu | null | undefined) => {
+    if (!cnu) return ""
+    return String(cnu?.numero)
 }
 
 export const typePersonnelLabel = (corps: string | null | undefined, typeContrat: string | null | undefined, doctorant: boolean | null | undefined) => {

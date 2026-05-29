@@ -12,6 +12,9 @@ export type Corps = {
     nom: string;
     acronyme: string | null;
     grades: Grade[] | null;
+    compatible_bap: boolean;
+    compatible_cnu: boolean;
+    compatible_section: boolean;
 }
 
 export type Grade = {
@@ -30,6 +33,7 @@ export type Employeur = {
     id: number;
     nom: string;
     acronyme: string | null;
+    epic: boolean;
 }
 
 export type Bap = {

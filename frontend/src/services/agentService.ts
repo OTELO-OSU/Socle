@@ -1,11 +1,5 @@
 import { symfony } from "../utils/axios";
-import type { Employeur } from "./dictionnaireService";
-
-export type Corps = {
-    id: number;
-    nom: string;
-    acronyme?: string | null;
-}
+import type { Cnu, Corps, Employeur, SectionCnrs } from "./dictionnaireService";
 
 export type Grade = {
     id: number;
@@ -28,7 +22,11 @@ export type Agent = {
     type_contrat?: typeContrat | null;
     unite?: number | null;
     doctorant?: boolean | null;
-    universite_ratachement?: number | null;
+    universite_rattachement?: number | null;
+    baps_ids?: number[];
+    emploi_types_ids?: number[];
+    section_cnrs?: SectionCnrs | null;
+    cnu?: Cnu | null;
 };
 
 export type RetourFetchAgentParPage = {
@@ -48,7 +46,11 @@ export type PayloadSoumettreAgentAuDu = {
     type_contrat: number | null;
     unite: number | null;
     doctorant: boolean | null;
-    universite_ratachement: number | null;
+    universite_rattachement: number | null;
+    baps_ids: number[];
+    emploi_types_ids: number[];
+    section_cnrs: number | null;
+    cnu: number | null;
 };
 
 export type RetourSoumettreAgentAuDu = {

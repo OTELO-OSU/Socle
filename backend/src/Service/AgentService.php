@@ -115,7 +115,6 @@ class AgentService
 
         $corpsEntity = null;
         $gradeEntity = null;
-        $universiteRattachement = null;
         $univRattachementEntity = null;
 
         if ($typeContratEntity->getNom() !== "CDD") {
@@ -151,6 +150,7 @@ class AgentService
                 $univRattachementEntity = null;
             } else {
                 // Vérification de l'université de rattachement
+                /** @var Entite $univRattachementEntity */
                 $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
                 if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
                     throw new Exception("L'université de rattachement spécifiée est invalide.", 400);

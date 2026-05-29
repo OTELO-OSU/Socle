@@ -3,13 +3,14 @@ import Account from '@mui/icons-material/AccountCircle';
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AgentAutocompleteField } from "../../AgentAutocompleteField";
-import { type Agent, type typeContrat, type Corps, type Grade, soumettreAgentAuDu } from "../../../services/agentService";
+import { type Agent, type Grade, type typeContrat, soumettreAgentAuDu } from "../../../services/agentService";
 import { typePersonnelLabel } from "../../../services/formatLabelService";
 import { RHFTextField } from "../../RHFTextField";
 import { RHFSelect } from "../../RHFTextSelect";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { SnackbarContext } from "../../../context/snackbarContext";
 import RadioTextFieldHint from "../../RadioTextFieldHint";
+import type { Cnu, Corps, SectionCnrs } from "../../../services/dictionnaireService";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
@@ -22,7 +23,11 @@ type PersonnelActuelFormValue = {
         grade: Grade | null;
         type_contrat: typeContrat | null;
         doctorant: boolean | null;
-        universite_ratachement: number | null;
+        universite_rattachement: number | null;
+        baps_ids: number[];
+        emploi_types_ids: number[];
+        section_cnrs: SectionCnrs | null;
+        cnu: Cnu | null;
     }
     quotite: number;
     responsable_scientifique: boolean;
@@ -86,7 +91,11 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
                 grade: agent.grade ?? null,
                 type_contrat: agent.type_contrat ?? null,
                 doctorant: agent.doctorant ?? null,
-                universite_ratachement: agent.universite_ratachement ?? null,
+                universite_rattachement: agent.universite_rattachement ?? null,
+                baps_ids: agent.baps_ids ?? [],
+                emploi_types_ids: agent.emploi_types_ids ?? [],
+                section_cnrs: agent.section_cnrs ?? null,
+                cnu: agent.cnu ?? null,
             },
             quotite: quotiteNumber,
             responsable_scientifique: false,
@@ -151,7 +160,11 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
         type_contrat: number | null;
         unite: number | null;
         doctorant: boolean | null;
-        universite_ratachement: number | null;
+        universite_rattachement: number | null;
+        baps_ids: number[];
+        emploi_types_ids: number[];
+        section_cnrs: number | null;
+        cnu: number | null;
     }>({
         defaultValues: {
             nom: "",
@@ -163,7 +176,11 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
             type_contrat: null,
             unite: null,
             doctorant: null,
-            universite_ratachement: null,
+            universite_rattachement: null,
+            baps_ids: [],
+            emploi_types_ids: [],
+            section_cnrs: null,
+            cnu: null,
         },
     });
 
@@ -171,7 +188,7 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
 
     const snackbar = useContext(SnackbarContext);
 
-    const { employeurOptions, corps, typeContratOptions, uniteOptions, typeContrat, universiteOptions } = useContext(DictionnaireContext);
+    const { employeurOptions, corps, typeContratOptions, uniteOptions, typeContrat, universiteOptions, bap, bapOptions, cnu, sectionCnrs, employeur } = useContext(DictionnaireContext);
     const selectedCorpsId = useWatch({ control, name: "corps" });
 
     const corpsOptions = useMemo(
@@ -199,7 +216,11 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
         type_contrat: number | null;
         unite: number | null;
         doctorant: boolean | null;
-        universite_ratachement: number | null;
+        universite_rattachement: number | null;
+        baps_ids: number[];
+        emploi_types_ids: number[];
+        section_cnrs: number | null;
+        cnu: number | null;
     }) => {
         try {
             const res = await soumettreAgentAuDu({
@@ -212,7 +233,11 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
                 type_contrat: data.type_contrat,
                 unite: data.unite,
                 doctorant: data.doctorant,
-                universite_ratachement: data.universite_ratachement,
+                universite_rattachement: data.universite_rattachement,
+                section_cnrs: data.section_cnrs,
+                cnu: data.cnu,
+                baps_ids: data.baps_ids,
+                emploi_types_ids: data.emploi_types_ids,
             });
 
             onUtilisateurCree({
@@ -226,7 +251,11 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
                 type_contrat: res.utilisateur.type_contrat,
                 unite: res.utilisateur.unite,
                 doctorant: res.utilisateur.doctorant,
-                universite_ratachement: res.utilisateur.universite_ratachement,
+                universite_rattachement: res.utilisateur.universite_rattachement,
+                section_cnrs: res.utilisateur.section_cnrs,
+                cnu: res.utilisateur.cnu,
+                baps_ids: res.utilisateur.baps_ids,
+                emploi_types_ids: res.utilisateur.emploi_types_ids,
             });
 
 
@@ -263,6 +292,105 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
     const estCDD = typeContrat.find((item) => item.id === contratActuel)?.nom === "CDD";
 
     const estDoctorant = useWatch({ control, name: "doctorant" });
+
+    const corpsActuel = useWatch({ control, name: "corps" });
+
+    const entiteCorpsActuel = useMemo(() => {
+        if (!corpsActuel) {
+            return null;
+        }
+
+        return corps.find((item) => item.id === corpsActuel) ?? null;
+    }, [corps, corpsActuel]);
+
+    const watchContrat = useWatch({ control, name: "type_contrat" });
+    const watchEmployeur = useWatch({ control, name: "employeur" });
+    const watchDoctorant = useWatch({ control, name: "doctorant" });
+    const watchCorps = useWatch({ control, name: "corps" });
+
+    const entiteEmployeur = useMemo(() => {
+        if (!watchEmployeur) {
+            return null;
+        }
+
+        return employeur.find((item) => item.id === watchEmployeur) ?? null;
+    }, [employeur, watchEmployeur]);
+
+    const epic = entiteEmployeur?.epic ?? false;
+
+    useEffect(() => {
+        localForm.setValue("doctorant", null);
+        localForm.setValue("universite_rattachement", null);
+        localForm.setValue("corps", null);
+        localForm.setValue("grade", null);
+        localForm.setValue("baps_ids", []);
+        localForm.setValue("emploi_types_ids", []);
+        localForm.setValue("section_cnrs", null);
+        localForm.setValue("cnu", null);
+    }, [watchContrat, localForm]);
+
+    useEffect(() => {
+        if (employeur) {
+            const employeurEntite = employeur.find((item) => item.id === watchEmployeur)
+            if (employeurEntite?.epic) {
+                localForm.setValue("baps_ids", []);
+                localForm.setValue("emploi_types_ids", []);
+                localForm.setValue("section_cnrs", null);
+                localForm.setValue("cnu", null);
+            }
+        }
+
+    }, [watchEmployeur, localForm, employeur]);
+
+    useEffect(() => {
+        localForm.setValue("corps", null);
+        localForm.setValue("grade", null);
+        localForm.setValue("baps_ids", []);
+        localForm.setValue("emploi_types_ids", []);
+        localForm.setValue("section_cnrs", null);
+        localForm.setValue("cnu", null);
+        localForm.setValue("universite_rattachement", null);
+    }, [watchDoctorant, localForm]);
+
+    useEffect(() => {
+        localForm.setValue("grade", null);
+        localForm.setValue("baps_ids", []);
+        localForm.setValue("emploi_types_ids", []);
+        localForm.setValue("section_cnrs", null);
+        localForm.setValue("cnu", null);
+    }, [watchCorps, localForm]);
+
+    const compatibleBap = entiteCorpsActuel?.compatible_bap ?? false;
+    const compatibleCnu = entiteCorpsActuel?.compatible_cnu ?? false;
+    const compatibleSection = entiteCorpsActuel?.compatible_section ?? false;
+
+    const cnuOptions = useMemo(
+        () => cnu.map((item) => ({ value: item.id, label: `${item.numero} - ${item.nom}` })),
+        [cnu],
+    );
+
+    const sectionCnrsOptions = useMemo(
+        () => sectionCnrs.map((item) => ({ value: item.id, label: `${item.numero} - ${item.nom}` })),
+        [sectionCnrs],
+    );
+
+    const baps_ids = useWatch({ control, name: "baps_ids" });
+
+    const emploiTypesOptions = useMemo(() => {
+        if (!baps_ids || baps_ids.length === 0) {
+            return [];
+        }
+
+        const bapsSelect = bap.filter((bapItem) => baps_ids.includes(bapItem.id));
+        const etDispo: { id: number; nom: string }[] = [];
+        bapsSelect.forEach((bapItem) => {
+            if (bapItem.emploiTypes) {
+                etDispo.push(...bapItem.emploiTypes);
+            }
+        });
+
+        return etDispo.map((item) => ({ value: item.id, label: item.nom }));
+    }, [baps_ids, bap]);
 
     return (
         <>
@@ -312,16 +440,31 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
                         <RHFSelect name="unite" label="Unité" control={control} items={uniteOptions} />
                         <RHFSelect name="type_contrat" label="Type de contrat" control={control} items={typeContratOptions} />
                         {contratActuel && !estCDD && (
-                            <Stack direction="row" spacing={2}>
-                                <RHFSelect name="corps" label="Corps" control={control} items={corpsOptions} />
-                                <RHFSelect name="grade" label="Grade" control={control} items={gradeOptions} disabled={!selectedCorpsId} />
-                            </Stack>
+                            <>
+                                <Stack direction="row" spacing={2}>
+                                    <RHFSelect name="corps" label="Corps" control={control} items={corpsOptions} />
+                                    <RHFSelect name="grade" label="Grade" control={control} items={gradeOptions} disabled={!selectedCorpsId} />
+                                </Stack>
+                                {(compatibleBap && !epic) && (
+                                    <Stack direction="row" spacing={2}>
+                                        <RHFSelect name="baps_ids" label="BAP" control={control} items={bapOptions} multiple />
+                                        <RHFSelect name="emploi_types_ids" label="Emploi Types" control={control} items={emploiTypesOptions} multiple />
+                                    </Stack>
+                                )}
+                                {(compatibleCnu && !epic) && (
+                                    <RHFSelect name="cnu" label="CNU" control={control} items={cnuOptions} />
+                                )}
+                                {(compatibleSection && !epic) && (
+                                    <RHFSelect name="section_cnrs" label="Section CNRS" control={control} items={sectionCnrsOptions} />
+                                )}
+                            </>
+
                         )}
                         {contratActuel && estCDD && (
                             <>
                                 <RadioTextFieldHint name="doctorant" label="Est-ce que le personnel est un doctorant" helperText="" />
                                 {estDoctorant === true && (
-                                    <RHFSelect name="universite_ratachement" label="Université de rattachement" control={control} items={universiteOptions} />
+                                    <RHFSelect name="universite_rattachement" label="Université de rattachement" control={control} items={universiteOptions} />
                                 )}
                                 {estDoctorant === false && (
                                     <Stack direction="row" spacing={2}>
@@ -329,6 +472,13 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
                                         <RHFSelect name="grade" label="Grade" control={control} items={gradeOptions} disabled={!selectedCorpsId} />
                                     </Stack>
                                 )}
+                                {(compatibleBap && !epic) && (
+                                    <Stack direction="row" spacing={2}>
+                                        <RHFSelect name="baps_ids" label="BAP" control={control} items={bapOptions} multiple />
+                                        <RHFSelect name="emploi_types_ids" label="Emploi Types" control={control} items={emploiTypesOptions} multiple />
+                                    </Stack>
+                                )}
+
                             </>)}
 
 

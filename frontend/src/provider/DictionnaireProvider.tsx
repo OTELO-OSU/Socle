@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DictionnaireContext } from '../context/dictionnaireContext';
 import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
-import { formatEmployeurLabel, formatUniteLabel, formatVilleLabel } from '../services/formatLabelService';
+import { formatBapLabel, formatCnuLabel, formatEmployeurLabel, formatSectionCnrsLabel, formatUniteLabel, formatUniversiteLabel, formatVilleLabel } from '../services/formatLabelService';
 
 export type SelectOption = {
     value: string | number;
@@ -14,10 +14,13 @@ export type DictionnaireType = {
     unite: Unite[];
     uniteOptions: SelectOption[],
     bap: Bap[];
+    bapOptions: SelectOption[],
     sectionCnrs: SectionCnrs[];
+    sectionCnrsOptions: SelectOption[];
     typeContrat: TypeContrat[];
     typeContratOptions: SelectOption[];
     cnu: Cnu[];
+    cnuOptions: SelectOption[];
     employeur: Employeur[];
     employeurOptions: SelectOption[];
     corps: Corps[];
@@ -38,10 +41,13 @@ const defaultDictionnaire: DictionnaireType = {
     unite: [],
     uniteOptions: [],
     bap: [],
+    bapOptions: [],
     sectionCnrs: [],
+    sectionCnrsOptions: [],
     typeContrat: [],
     typeContratOptions: [],
     cnu: [],
+    cnuOptions: [],
     employeur: [],
     employeurOptions: [],
     corps: [],
@@ -122,7 +128,10 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 const typeContratOptions = typeContrat.map((item) => ({ value: item.id, label: item.nom }));
                 const operationsOptions = operations.map((item) => ({ value: item.id, label: item.nom }));
                 const determinationTarifPlateformeOptions = determinationTarifPlateforme.map((item) => ({ value: item.id, label: item.nom }));
-                const universiteOptions = universite.map((item) => ({ value: item.id, label: formatEmployeurLabel(item) }));
+                const universiteOptions = universite.map((item) => ({ value: item.id, label: formatUniversiteLabel(item) }));
+                const bapOptions = bap.map((item) => ({ value: item.id, label: formatBapLabel(item) }));
+                const sectionCnrsOptions = sectionCnrs.map((item) => ({ value: item.id, label: formatSectionCnrsLabel(item) }));
+                const cnuOptions = cnu.map((item) => ({ value: item.id, label: formatCnuLabel(item) }));
                 setDictionnaire((current) => ({
                     ...current,
                     unite,
@@ -132,6 +141,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     employeurOptions,
                     corps,
                     bap,
+                    bapOptions,
                     sectionCnrs,
                     typeContrat,
                     cnu,
@@ -146,6 +156,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     determinationTarifPlateformeOptions,
                     universite,
                     universiteOptions,
+                    sectionCnrsOptions,
+                    cnuOptions,
                 }));
             }
         };

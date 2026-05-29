@@ -97,6 +97,10 @@ class Entite
     #[ORM\Column]
     private ?bool $universite = null;
 
+    #[Groups(['employeur:list', 'utilisateur:list'])]
+    #[ORM\Column]
+    private ?bool $epic = null;
+
     public function __construct()
     {
         $this->plateformeHistoriques = new ArrayCollection();
@@ -465,6 +469,18 @@ class Entite
     public function setUniversite(bool $universite): static
     {
         $this->universite = $universite;
+
+        return $this;
+    }
+
+    public function isEpic(): ?bool
+    {
+        return $this->epic;
+    }
+
+    public function setEpic(bool $epic): static
+    {
+        $this->epic = $epic;
 
         return $this;
     }
