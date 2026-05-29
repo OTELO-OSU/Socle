@@ -64,6 +64,7 @@ class AgentControllerTest extends WebTestCase
         $this->em->persist($categorie);
 
         $unite = new Entite();
+        $unite->setEpic(false);
         $unite->setNom('Test Unite');
         $unite->setCategorie($categorie);
         $unite->setEmployeur(false);
@@ -72,6 +73,7 @@ class AgentControllerTest extends WebTestCase
         $this->em->persist($unite);
 
         $unite2 = new Entite();
+        $unite2->setEpic(false);
         $unite2->setNom('Test Unite 2');
         $unite2->setCategorie($categorie);
         $unite2->setEmployeur(false);
@@ -80,6 +82,7 @@ class AgentControllerTest extends WebTestCase
         $this->em->persist($unite2);
 
         $uar = new Entite();
+        $uar->setEpic(false);
         $uar->setNom('Test Unite 2');
         $uar->setCategorie($categorie);
         $uar->setCodeUnite("UAR123");
@@ -89,6 +92,7 @@ class AgentControllerTest extends WebTestCase
         $this->em->persist($uar);
 
         $employeur = new Entite();
+        $employeur->setEpic(false);
         $employeur->setNom('Univlo');
         $employeur->setCategorie($categorie);
         $employeur->setEmployeur(true);
@@ -126,6 +130,9 @@ class AgentControllerTest extends WebTestCase
 
         $corps = new Corps();
         $corps->setNom('Test Corps');
+        $corps->setCompatibleCNU(true);
+        $corps->setCompatibleBAP(false);
+        $corps->setCompatibleSection(false);
         $corps->addGrade($grade);
         $this->em->persist($corps);
 

@@ -59,6 +59,7 @@ class AdminControllerTest extends WebTestCase
         $unite->setCategorie($categorie);
         $unite->setEmployeur(false);
         $unite->setLaboratoire(true);
+        $unite->setEpic(false);
         $this->em->persist($unite);
 
         $user = new Utilisateur();

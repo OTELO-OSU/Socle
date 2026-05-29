@@ -60,6 +60,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->em->persist($labCat);
 
         $unite = new Entite();
+        $unite->setEpic(false);
         $unite->setNom("Unité de test");
         $unite->setEmployeur(true);
         $unite->setLaboratoire(false);
@@ -103,6 +104,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->em->persist($operation);
 
         $entite1 = new Entite();
+        $entite1->setEpic(false);
         $entite1->setNom("Entité 1");
         $entite1->setId(1);
         $entite1->setUniversite(false);
@@ -112,6 +114,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->em->persist($entite1);
 
         $entite2 = new Entite();
+        $entite2->setEpic(false);
         $entite2->setId(2);
         $entite2->setNom("Entité 2");
         $entite2->setUniversite(false);
@@ -156,6 +159,9 @@ class PlateformeControllerTest extends WebTestCase
 
         $corps = new Corps();
         $corps->setNom("Corps 1");
+        $corps->setCompatibleCNU(true);
+        $corps->setCompatibleBAP(false);
+        $corps->setCompatibleSection(false);
         $this->em->persist($corps);
 
         $this->em->flush();
