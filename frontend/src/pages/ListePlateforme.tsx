@@ -3,6 +3,7 @@ import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/p
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { Done, Group, Save, Verified } from "@mui/icons-material";
+import { downloadSinglePlateforme } from "../services/exportService";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -93,6 +94,9 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
                 <CardActions>
                     <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
                         Voir les détails
+                    </Link>
+                    <Link component={Button} onClick={() => downloadSinglePlateforme(plateforme.id)}>
+                        Exporter
                     </Link>
                 </CardActions>
             </Card >

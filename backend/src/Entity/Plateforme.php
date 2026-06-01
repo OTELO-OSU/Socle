@@ -30,6 +30,18 @@ class Plateforme
         return $historiques[0] ?? null;
     }
 
+    function getLastHistoriqueEntity(): ?PlateformeHistorique
+    {
+        $historiques = $this->getPlateformeHistoriques();
+        $recent = null;
+        foreach ($historiques as $historique) {
+            if ($recent === null || $historique->getAnnee() > $recent->getAnnee()) {
+                $recent = $historique;
+            }
+        }
+        return $recent;
+    }
+
     /**
      * @var Collection<int, UtilisateurInscription>
      */
