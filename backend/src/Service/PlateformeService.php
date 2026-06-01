@@ -696,6 +696,12 @@ class PlateformeService
                         }
                     }
                     break;
+                case 'nombre_autres_etudiants':
+                    $plateformeHisto->setNombreAutresEtudiants($value);
+                    break;
+                case 'nombre_apprentis_alternants':
+                    $plateformeHisto->setNombreApprentisAlternants($value);
+                    break;
                 case 'postes_futurs':
                     if (!is_array($value)) {
                         break;

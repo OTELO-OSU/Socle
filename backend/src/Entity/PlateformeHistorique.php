@@ -350,6 +350,16 @@ class PlateformeHistorique
     #[SerializedName("publications")]
     private Collection $publications;
 
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("nombre_apprentis_alternants")]
+    #[ORM\Column(nullable: true)]
+    private ?int $nombreApprentisAlternants = null;
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName("nombre_autres_etudiants")]
+    #[ORM\Column(nullable: true)]
+    private ?int $nombreAutresEtudiants = null;
+
     public function __construct()
     {
         $this->plateformeHistoriqueTutelles = new ArrayCollection();
@@ -1302,6 +1312,30 @@ class PlateformeHistorique
                 $publication->setPlateformeHistorique(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNombreApprentisAlternants(): ?int
+    {
+        return $this->nombreApprentisAlternants;
+    }
+
+    public function setNombreApprentisAlternants(?int $nombreApprentisAlternants): static
+    {
+        $this->nombreApprentisAlternants = $nombreApprentisAlternants;
+
+        return $this;
+    }
+
+    public function getNombreAutresEtudiants(): ?int
+    {
+        return $this->nombreAutresEtudiants;
+    }
+
+    public function setNombreAutresEtudiants(?int $nombreAutresEtudiants): static
+    {
+        $this->nombreAutresEtudiants = $nombreAutresEtudiants;
 
         return $this;
     }

@@ -122,6 +122,8 @@ export type DernierHistorique = {
         responsable_technique: boolean;
         responsable_plateforme: boolean;
     }[];
+    nombre_autres_etudiants: number | null;
+    nombre_apprentis_alternants: number | null;
     postes_futurs: PosteFutur[];
     instruments: Instrument[];
     materiel_consommable: number | null;

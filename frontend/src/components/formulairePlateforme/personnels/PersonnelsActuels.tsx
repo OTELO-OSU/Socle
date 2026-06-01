@@ -11,6 +11,7 @@ import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { SnackbarContext } from "../../../context/snackbarContext";
 import RadioTextFieldHint from "../../RadioTextFieldHint";
 import type { Cnu, Corps, SectionCnrs } from "../../../services/dictionnaireService";
+import NombreTextFieldHint from "../../NombreTextFieldHint";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
@@ -604,6 +605,14 @@ export function PersonnelActuels() {
                     Aucun personnel actuel.
                 </Typography>
             )}
+            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
+                Autres étudiants en formation longue sur la plateforme
+            </Typography>
+            <NombreTextFieldHint helperText="" name="nombre_autres_etudiants" label="Combien d’étudiants sont actuellement en formation directe auprès de la plateforme (stage recherche, Licence, Master, M2,BTS, DUT...) ?" />
+            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
+                Apprentis/alternants
+            </Typography>
+            <NombreTextFieldHint helperText="" name="nombre_apprentis_alternants" label="Combien d’apprentis/alternants sont actuellement en formation directe auprès de la plateforme ?" />
         </Box>
     )
 }

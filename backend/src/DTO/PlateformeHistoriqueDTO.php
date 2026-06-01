@@ -91,6 +91,14 @@ class PlateformeHistoriqueDTO
     ])]
     public ?array $personnels = null;
 
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre d\'étudiants de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre d\'étudiants de la plateforme doit être supérieur ou égal à 0.')]
+    public ?int $nombre_autres_etudiants = null;
+
+    #[Assert\NotBlank(groups: ['validation'], message: 'Le nombre d\'apprentis alternants de la plateforme est requis.')]
+    #[Assert\PositiveOrZero(message: 'Le nombre d\'apprentis alternants de la plateforme doit être supérieur ou égal à 0.')]
+    public ?int $nombre_apprentis_alternants = null;
+
     #[Assert\All([
         new Assert\Collection(
             fields: [
