@@ -59,11 +59,11 @@ class PlateformeHistorique
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Entite $laboratoireOperateur = null;
 
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:list", "plateforme:detail"])]
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:list", "plateforme:detail"])]
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
