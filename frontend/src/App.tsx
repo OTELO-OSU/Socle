@@ -17,6 +17,7 @@ import { registerNavigator } from './bridge/navigationBridge'
 import ModificationPlateforme from './pages/ModificationPlateforme'
 import { ListePlateforme } from './pages/ListePlateforme'
 import AgentAdmin from './pages/AgentAdmin'
+import UniteAdmin from './pages/UniteAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -61,7 +62,8 @@ function App() {
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
                 <Route path="plateforme" element={<PlateformeAdmin />} />
-                <Route path="Agent" element={<AgentAdmin />} />
+                <Route path="agent" element={<AgentAdmin />} />
+                <Route path="unite" element={<UniteAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />

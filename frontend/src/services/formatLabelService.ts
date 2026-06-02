@@ -1,6 +1,7 @@
 import type { Bap, Cnu, Corps, Employeur, Grade, SectionCnrs, Unite, Universite, Ville } from "./dictionnaireService";
+import type { UniteDetail } from "./uniteService";
 
-export const formatUniteLabel = (unite: Unite) => {
+export const formatUniteLabel = (unite: Unite | UniteDetail) => {
     let str = ""
     if (unite.acronyme) str += `${unite.acronyme} - `
     str += unite.nom

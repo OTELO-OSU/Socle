@@ -2,7 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, Group } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -45,6 +45,21 @@ export default function AdminLayout() {
                                 <HomeWork />
                             </ListItemIcon>
                             <ListItemText primary="Plateforme" />
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem disablePadding>
+                        <ListItemButton sx={{
+                            '&.active': {
+                                bgcolor: 'action.selected',
+                                borderLeft: '3px solid',
+                                borderColor: 'primary.main',
+                            },
+                        }} component={NavLink} to="/admin/unite" end>
+                            <ListItemIcon>
+                                <Group />
+                            </ListItemIcon>
+                            <ListItemText primary="Unité" />
                         </ListItemButton>
                     </ListItem>
 

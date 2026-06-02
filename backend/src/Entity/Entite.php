@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: EntiteRepository::class)]
 class Entite
@@ -40,6 +41,7 @@ class Entite
     private ?Categorie $categorie = null;
 
     #[ORM\ManyToOne(inversedBy: 'entites')]
+    #[Groups(["utilisateur:list", "unite:detail"])]
     private ?Utilisateur $directeur = null;
 
     /**
@@ -195,6 +197,13 @@ class Entite
         $this->categorie = $categorie;
 
         return $this;
+    }
+
+    #[Groups(["unite:detail"])]
+    #[SerializedName("directeur_id")]
+    public function getDirecteurId(): ?int
+    {
+        return $this->directeur?->getId();
     }
 
     public function getDirecteur(): ?Utilisateur
