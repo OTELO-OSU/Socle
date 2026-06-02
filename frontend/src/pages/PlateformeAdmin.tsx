@@ -113,9 +113,9 @@ export default function PlateformeAdmin() {
         try {
             await patchResponsablePlateforme(
                 selectedPlateforme!.id,
-                responsablesScientifiques.map((a) => a.id),
-                responsablesTechniques.map((a) => a.id),
-                responsablesPlateforme.map((a) => a.id)
+                responsablesScientifiques.map((a) => a.id!),
+                responsablesTechniques.map((a) => a.id!),
+                responsablesPlateforme.map((a) => a.id!)
             );
 
             snackbar?.trigger({
