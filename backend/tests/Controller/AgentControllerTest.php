@@ -176,11 +176,16 @@ class AgentControllerTest extends WebTestCase
             'prenom' => 'Test',
             'nom' => 'User',
             'email' => 'mail@soumission.du',
-            'employeur' => $this->employeur->getId(),
-            'unite' => $this->unite->getId(),
-            'corps' => $this->corps->getId(),
-            'grade' => $this->grade->getId(),
-            'type_contrat' => $typeContrat->getId()
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'baps_ids' => [],
+            'emploi_types_ids' => [],
+            'cnu' => null,
+            'section' => null,
+            'doctorant' => false
         ];
     }
 

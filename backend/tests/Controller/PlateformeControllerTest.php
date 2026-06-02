@@ -350,6 +350,8 @@ class PlateformeControllerTest extends WebTestCase
                     "quotite" => 100
                 ]
             ],
+            "nombre_autres_etudiants" => 5,
+            "nombre_apprentis_alternants" => 3,
             "postes_futurs" => [
                 [
                     "employeur_id" => $this->em->getRepository(Entite::class)->findOneBy([])->getId(),
@@ -1483,6 +1485,126 @@ class PlateformeControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "Le rang (dénominateur) du poste futur est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansNombreAutresEtudiants(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["nombre_autres_etudiants"] = null;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme sauvegardée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre d'étudiants de la plateforme est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeSansNombreApprentisAlternants(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["nombre_apprentis_alternants"] = null;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme sauvegardée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre d'apprentis alternants de la plateforme est requis.",
             $data['messageArray'][0]
         );
 
