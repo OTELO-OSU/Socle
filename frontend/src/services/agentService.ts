@@ -1,5 +1,4 @@
 import { symfony } from "../utils/axios";
-import type { Cnu, Corps, Employeur, SectionCnrs } from "./dictionnaireService";
 
 export type Grade = {
     id: number;
@@ -12,21 +11,21 @@ export type typeContrat = {
 }
 
 export type Agent = {
-    id: number;
+    id?: number | null;
     nom: string;
     prenom: string;
     email: string;
-    employeur?: Employeur | null;
-    corps?: Corps | null;
-    grade?: Grade | null;
-    type_contrat?: typeContrat | null;
-    unite?: number | null;
+    employeur_id?: number | null;
+    corps_id?: number | null;
+    grade_id?: number | null;
+    type_contrat_id?: number | null;
+    unite_id?: number | null;
     doctorant?: boolean | null;
-    universite_rattachement?: number | null;
+    universite_rattachement_id?: number | null;
     baps_ids?: number[];
     emploi_types_ids?: number[];
-    section_cnrs?: SectionCnrs | null;
-    cnu?: Cnu | null;
+    section_cnrs_id?: number | null;
+    cnu_id?: number | null;
 };
 
 export type RetourFetchAgentParPage = {
@@ -40,17 +39,17 @@ export type PayloadSoumettreAgentAuDu = {
     nom: string;
     prenom: string;
     email: string;
-    employeur: number | null;
-    corps: number | null;
-    grade: number | null;
-    type_contrat: number | null;
-    unite: number | null;
+    employeur_id: number | null;
+    corps_id: number | null;
+    grade_id: number | null;
+    type_contrat_id: number | null;
+    unite_id: number | null;
     doctorant: boolean | null;
-    universite_rattachement: number | null;
+    universite_rattachement_id: number | null;
     baps_ids: number[];
     emploi_types_ids: number[];
-    section_cnrs: number | null;
-    cnu: number | null;
+    section_cnrs_id: number | null;
+    cnu_id: number | null;
 };
 
 export type RetourSoumettreAgentAuDu = {
@@ -58,10 +57,10 @@ export type RetourSoumettreAgentAuDu = {
     utilisateur: Agent;
 };
 
-export async function getAgentByPage(search: string) {
+export async function fetchAgentListeParPage(page: number, search: string) {
     const { data } = await symfony.get<RetourFetchAgentParPage>("/agent", {
         params: {
-            page: 1,
+            page,
             search,
         },
     });
@@ -69,8 +68,21 @@ export async function getAgentByPage(search: string) {
     return data;
 }
 
+export async function getAgentByPage(search: string) {
+    return fetchAgentListeParPage(1, search);
+}
+
 export async function soumettreAgentAuDu(payload: PayloadSoumettreAgentAuDu) {
     const { data } = await symfony.post<RetourSoumettreAgentAuDu>("/agent", {
+        ...payload
+    });
+
+    return data;
+}
+
+export async function modifierAgent(id: number, payload: PayloadSoumettreAgentAuDu) {
+    const { data } = await symfony.put<RetourSoumettreAgentAuDu>(`/agent`, {
+        utilisateur_id: id,
         ...payload
     });
 

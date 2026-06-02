@@ -43,8 +43,8 @@ export function AgentAutocompleteField({
 
     const mergeAgents = useCallback((agents: Agent[], selected: Agent[]) => {
         const map = new Map<number, Agent>();
-        for (const item of selected) map.set(item.id, item);
-        for (const item of agents) map.set(item.id, item);
+        for (const item of selected) map.set(item.id!, item);
+        for (const item of agents) map.set(item.id!, item);
         return Array.from(map.values());
     }, []);
 

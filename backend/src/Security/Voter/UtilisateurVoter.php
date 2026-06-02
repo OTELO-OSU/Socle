@@ -13,12 +13,13 @@ final class UtilisateurVoter extends Voter
     public const GERER_EN_ATTENTE_DE_VALIDATION_DU_DU = 'GERER_EN_ATTENTE_DE_VALIDATION_DU_DU';
     public const GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE = 'GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE';
     public const APPROUVER = 'APPROUVER';
+    public const MODIFIER = 'MODIFIER';
     public const SOUMETTRE_AU_DU = 'SOUMETTRE_AU_DU';
     public const SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE = 'SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $a = in_array($attribute, [self::APPROUVER])
+        $a = in_array($attribute, [self::APPROUVER, self::MODIFIER])
             && $subject instanceof \App\Entity\Utilisateur;
 
         $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE])
@@ -41,6 +42,16 @@ final class UtilisateurVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
+            case self::MODIFIER:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                /** @var Utilisateur $subject */
+                if ($user->getId() === $subject->getId()) {
+                    return true;
+                }
                 break;
             case self::GetEnAttenteDeValidation:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;

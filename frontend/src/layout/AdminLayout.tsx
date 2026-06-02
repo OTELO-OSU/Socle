@@ -2,6 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
+import { AccountCircle } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -54,8 +55,11 @@ export default function AdminLayout() {
                                 borderLeft: '3px solid',
                                 borderColor: 'primary.main',
                             },
-                        }} component={NavLink} to="/admin/settings">
-                            <ListItemText primary="Settings" />
+                        }} component={NavLink} to="/admin/agent">
+                            <ListItemIcon>
+                                <AccountCircle />
+                            </ListItemIcon>
+                            <ListItemText primary="Agent" />
                         </ListItemButton>
                     </ListItem>
                 </List>

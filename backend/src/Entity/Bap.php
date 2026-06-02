@@ -33,16 +33,9 @@ class Bap
     #[ORM\JoinTable(name: 'bap_emploi_type')]
     private Collection $emploiTypes;
 
-    /**
-     * @var Collection<int, UtilisateurBap>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurBap::class, mappedBy: 'bap')]
-    private Collection $utilisateurBaps;
-
     public function __construct()
     {
         $this->emploiTypes = new ArrayCollection();
-        $this->utilisateurBaps = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -98,36 +91,6 @@ class Bap
             // set the owning side to null (unless already changed)
             if ($emploiType->getBaps()->contains($this)) {
                 $emploiType->getBaps()->removeElement($this);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UtilisateurBap>
-     */
-    public function getUtilisateurBaps(): Collection
-    {
-        return $this->utilisateurBaps;
-    }
-
-    public function addUtilisateurBap(UtilisateurBap $utilisateurBap): static
-    {
-        if (!$this->utilisateurBaps->contains($utilisateurBap)) {
-            $this->utilisateurBaps->add($utilisateurBap);
-            $utilisateurBap->setBap($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurBap(UtilisateurBap $utilisateurBap): static
-    {
-        if ($this->utilisateurBaps->removeElement($utilisateurBap)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurBap->getBap() === $this) {
-                $utilisateurBap->setBap(null);
             }
         }
 

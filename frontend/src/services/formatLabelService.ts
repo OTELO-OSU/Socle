@@ -1,4 +1,4 @@
-import type { Bap, Cnu, Employeur, SectionCnrs, Unite, Universite, Ville } from "./dictionnaireService";
+import type { Bap, Cnu, Corps, Employeur, Grade, SectionCnrs, Unite, Universite, Ville } from "./dictionnaireService";
 
 export const formatUniteLabel = (unite: Unite) => {
     let str = ""
@@ -42,6 +42,19 @@ export const formatSectionCnrsLabel = (section: SectionCnrs | null | undefined) 
 export const formatCnuLabel = (cnu: Cnu | null | undefined) => {
     if (!cnu) return ""
     return String(cnu?.numero)
+}
+
+export const formatCorpsLabel = (corps: Corps | null | undefined) => {
+    if (!corps) return ""
+    let str = ""
+    if (corps.acronyme) str += `${corps.acronyme} - `
+    str += corps.nom
+    return str
+}
+
+export const formatGradeLabel = (grade: Grade | null | undefined) => {
+    if (!grade) return ""
+    return grade.nom
 }
 
 export const typePersonnelLabel = (corps: string | null | undefined, typeContrat: string | null | undefined, doctorant: boolean | null | undefined) => {

@@ -31,16 +31,9 @@ class EmploiType
     #[ORM\ManyToMany(targetEntity: Bap::class)]
     private Collection $baps;
 
-    /**
-     * @var Collection<int, UtilisateurEmploiType>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'emploiType')]
-    private Collection $utilisateurEmploiTypes;
-
     public function __construct()
     {
         $this->baps = new ArrayCollection();
-        $this->utilisateurEmploiTypes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -95,36 +88,6 @@ class EmploiType
             // set the owning side to null (unless already changed)
             if ($bap->getEmploiTypes()->contains($this)) {
                 $bap->getEmploiTypes()->removeElement($this);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UtilisateurEmploiType>
-     */
-    public function getUtilisateurEmploiTypes(): Collection
-    {
-        return $this->utilisateurEmploiTypes;
-    }
-
-    public function addUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
-    {
-        if (!$this->utilisateurEmploiTypes->contains($utilisateurEmploiType)) {
-            $this->utilisateurEmploiTypes->add($utilisateurEmploiType);
-            $utilisateurEmploiType->setEmploiType($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
-    {
-        if ($this->utilisateurEmploiTypes->removeElement($utilisateurEmploiType)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurEmploiType->getEmploiType() === $this) {
-                $utilisateurEmploiType->setEmploiType(null);
             }
         }
 

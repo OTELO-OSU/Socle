@@ -2,11 +2,16 @@
 
 namespace App\Service;
 
+use App\Entity\Bap;
+use App\Entity\Cnu;
 use App\Entity\Corps;
+use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\Grade;
+use App\Entity\SectionCnrs;
 use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
+use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -79,7 +84,7 @@ class AgentService
         ];
     }
 
-    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement): Utilisateur
+    function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section): Utilisateur
     {
         if (!$this->security->isGranted("SOUMETTRE_AU_DU", Utilisateur::class)) {
             throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
@@ -115,10 +120,13 @@ class AgentService
 
         $corpsEntity = null;
         $gradeEntity = null;
+        $bapsEntity = [];
+        $emploiTypesEntity = [];
+        $cnuEntity = null;
+        $sectionEntity = null;
         $univRattachementEntity = null;
 
-        if ($typeContratEntity->getNom() !== "CDD") {
-
+        if (!$doctorant) {
             if ($corps === null) {
                 throw new Exception("Le corps est obligatoire.", 400);
             } else if ($grade === null) {
@@ -143,9 +151,23 @@ class AgentService
             if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
                 throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
             }
-        }
 
-        if ($doctorant) {
+            foreach ($baps_ids ?? [] as $baps_id) {
+                $bapsEntity[] = $this->em->getRepository(Bap::class)->find($baps_id);
+            }
+
+            foreach ($emploi_types_ids ?? [] as $emploi_type_id) {
+                $emploiTypesEntity[] = $this->em->getRepository(EmploiType::class)->find($emploi_type_id);
+            }
+
+            if ($cnu !== null) {
+                $cnuEntity = $this->em->getRepository(Cnu::class)->find($cnu);
+            }
+
+            if ($section !== null) {
+                $sectionEntity = $this->em->getRepository(SectionCnrs::class)->find($section);
+            }
+        } else {
             if ($universiteRattachement === null) {
                 $univRattachementEntity = null;
             } else {
@@ -170,6 +192,14 @@ class AgentService
         $user->setTypeContrat($typeContratEntity);
         $user->setDoctorant($doctorant);
         $user->setUniversiteRattachement($univRattachementEntity);
+        foreach ($bapsEntity as $baps) {
+            $user->addBap($baps);
+        }
+        foreach ($emploiTypesEntity as $emploiType) {
+            $user->addEmploiType($emploiType);
+        }
+        $user->setCnu($cnuEntity);
+        $user->setSectionCnrs($sectionEntity);
         $user->setAttenteApprobationDU(true);
 
         $this->em->persist($user);
@@ -184,6 +214,125 @@ class AgentService
                 "Un responsable a soumis une demande de création d'utilisateur pour " . $user->getPrenom() . " " . $user->getNom() . ". Veuillez vous connecter à l'application pour approuver ou refuser cette demande."
             );
         }
+
+        return $user;
+    }
+
+    function modificationUtilisateur(int $utilisateurId, string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section): Utilisateur
+    {
+        /** @var Utilisateur $user */
+        $user = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
+        if (!$user) {
+            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+        }
+
+        if (!$this->security->isGranted(UtilisateurVoter::MODIFIER, $user)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        // On vérifie l'unité
+        $u = $this->em->getRepository(Entite::class)->find($unite);
+        if (!$u || !$u->isLaboratoire()) {
+            throw new Exception("L'unité spécifiée est invalide.", 400);
+        }
+
+        // Vérification de l'employeur
+        $employeurEntity = $this->em->getRepository(Entite::class)->find($employeur);
+        if (!$employeurEntity || !$employeurEntity->isEmployeur()) {
+            throw new Exception("L'employeur spécifié est invalide.", 400);
+        }
+
+        // Vérification du type de contrat
+        /** @var TypeContrat $typeContratEntity */
+        $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
+        if (!$typeContratEntity) {
+            throw new Exception("Le type de contrat spécifié est invalide.", 400);
+        }
+
+        $corpsEntity = null;
+        $gradeEntity = null;
+        $bapsEntity = [];
+        $emploiTypesEntity = [];
+        $cnuEntity = null;
+        $sectionEntity = null;
+        $univRattachementEntity = null;
+
+        if (!$doctorant) {
+            if ($corps === null) {
+                throw new Exception("Le corps est obligatoire.", 400);
+            } else if ($grade === null) {
+                throw new Exception("Le grade est obligatoire.", 400);
+            }
+
+            // Vérification du corps
+            /** @var Corps $corpsEntity */
+            $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
+            if (!$corpsEntity) {
+                throw new Exception("Le corps spécifié est invalide.", 400);
+            }
+
+            // Vérfication du grade
+            /** @var Grade $gradeEntity */
+            $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
+            if (!$gradeEntity) {
+                throw new Exception("Le grade spécifié est invalide.", 400);
+            }
+
+            // Vérification de la liaison corps_grade
+            if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
+                throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+            }
+
+            foreach ($baps_ids ?? [] as $baps_id) {
+                $bapsEntity[] = $this->em->getRepository(Bap::class)->find($baps_id);
+            }
+
+            foreach ($emploi_types_ids ?? [] as $emploi_type_id) {
+                $emploiTypesEntity[] = $this->em->getRepository(EmploiType::class)->find($emploi_type_id);
+            }
+
+            if ($cnu !== null) {
+                $cnuEntity = $this->em->getRepository(Cnu::class)->find($cnu);
+            }
+
+            if ($section !== null) {
+                $sectionEntity = $this->em->getRepository(SectionCnrs::class)->find($section);
+            }
+        } else {
+            if ($universiteRattachement === null) {
+                $univRattachementEntity = null;
+            } else {
+                // Vérification de l'université de rattachement
+                /** @var Entite $univRattachementEntity */
+                $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
+                if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
+                    throw new Exception("L'université de rattachement spécifiée est invalide.", 400);
+                }
+            }
+        }
+
+        $user->setNom($nom);
+        $user->setPrenom($prenom);
+        $user->setEmail($email);
+        $user->setEmployeur($employeurEntity);
+        $user->setUnite($u);
+        $user->setCorps($corpsEntity);
+        $user->setGrade($gradeEntity);
+        $user->setTypeContrat($typeContratEntity);
+        $user->setDoctorant($doctorant);
+        $user->setUniversiteRattachement($univRattachementEntity);
+        $user->getBaps()->clear();
+        foreach ($bapsEntity as $baps) {
+            $user->addBap($baps);
+        }
+        $user->getEmploiTypes()->clear();
+        foreach ($emploiTypesEntity as $emploiType) {
+            $user->addEmploiType($emploiType);
+        }
+        $user->setCnu($cnuEntity);
+        $user->setSectionCnrs($sectionEntity);
+        $this->em->persist($user);
+        $this->em->flush();
 
         return $user;
     }

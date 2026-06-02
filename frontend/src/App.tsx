@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { registerNavigator } from './bridge/navigationBridge'
 import ModificationPlateforme from './pages/ModificationPlateforme'
 import { ListePlateforme } from './pages/ListePlateforme'
+import AgentAdmin from './pages/AgentAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -60,6 +61,7 @@ function App() {
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
                 <Route path="plateforme" element={<PlateformeAdmin />} />
+                <Route path="Agent" element={<AgentAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />

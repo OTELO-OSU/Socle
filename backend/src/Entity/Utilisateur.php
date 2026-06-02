@@ -85,11 +85,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Entite::class, mappedBy: 'directeur')]
     private Collection $entites;
 
-    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Corps $corps = null;
 
-    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     private ?Grade $grade = null;
 
@@ -100,21 +98,20 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Cnu $cnu = null;
 
     /**
-     * @var Collection<int, UtilisateurBap>
+     * @var Collection<int, Bap>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurBap::class, mappedBy: 'utilisateur')]
-    private Collection $utilisateurBaps;
+    #[ORM\ManyToMany(targetEntity: Bap::class)]
+    private Collection $baps;
 
     /**
-     * @var Collection<int, UtilisateurEmploiType>
+     * @var Collection<int, EmploiType>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurEmploiType::class, mappedBy: 'utilisateur')]
-    private Collection $utilisateurEmploiTypes;
+    #[ORM\ManyToMany(targetEntity: EmploiType::class)]
+    private Collection $emploiTypes;
 
     #[ORM\Column]
     private bool $attenteApprobationDU = false;
 
-    #[Groups(['utilisateur:list'])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Entite $unite = null;
@@ -122,7 +119,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToOne(inversedBy: 'employe')]
     private ?Entite $employeur = null;
 
-    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[SerializedName("type_contrat")]
     private ?TypeContrat $typeContrat = null;
@@ -131,7 +127,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?bool $doctorant = null;
 
-    #[Groups(['utilisateur:list', "plateforme:detail"])]
     #[SerializedName("universite_rattachement")]
     #[ORM\ManyToOne(inversedBy: 'doctorants')]
     private ?Entite $universiteRattachement = null;
@@ -143,8 +138,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->refreshTokens = new ArrayCollection();
         $this->plateformeHistoriquePersonnels = new ArrayCollection();
         $this->entites = new ArrayCollection();
-        $this->utilisateurBaps = new ArrayCollection();
-        $this->utilisateurEmploiTypes = new ArrayCollection();
+        $this->baps = new ArrayCollection();
+        $this->emploiTypes = new ArrayCollection();
     }
 
     public function getUserIdentifier(): string
@@ -406,6 +401,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("corps_id")]
+    public function getCorpsId(): ?int
+    {
+        return $this->corps ? $this->corps->getId() : null;
+    }
+
     public function getCorps(): ?Corps
     {
         return $this->corps;
@@ -416,6 +418,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->corps = $corps;
 
         return $this;
+    }
+
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("grade_id")]
+    public function getGradeId(): ?int
+    {
+        return $this->grade ? $this->grade->getId() : null;
     }
 
     public function getGrade(): ?Grade
@@ -454,63 +463,64 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, UtilisateurBap>
-     */
-    public function getUtilisateurBaps(): Collection
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("baps_ids")]
+    public function getBapsIds(): array
     {
-        return $this->utilisateurBaps;
-    }
-
-    public function addUtilisateurBap(UtilisateurBap $utilisateurBap): static
-    {
-        if (!$this->utilisateurBaps->contains($utilisateurBap)) {
-            $this->utilisateurBaps->add($utilisateurBap);
-            $utilisateurBap->setUtilisateur($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurBap(UtilisateurBap $utilisateurBap): static
-    {
-        if ($this->utilisateurBaps->removeElement($utilisateurBap)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurBap->getUtilisateur() === $this) {
-                $utilisateurBap->setUtilisateur(null);
-            }
-        }
-
-        return $this;
+        return $this->baps->map(fn(Bap $bap) => $bap->getId())->toArray();
     }
 
     /**
-     * @return Collection<int, UtilisateurEmploiType>
+     * @return Collection<int, Bap>
      */
-    public function getUtilisateurEmploiTypes(): Collection
+    public function getBaps(): Collection
     {
-        return $this->utilisateurEmploiTypes;
+        return $this->baps;
     }
 
-    public function addUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
+    public function addBap(Bap $bap): static
     {
-        if (!$this->utilisateurEmploiTypes->contains($utilisateurEmploiType)) {
-            $this->utilisateurEmploiTypes->add($utilisateurEmploiType);
-            $utilisateurEmploiType->setUtilisateur($this);
+        if (!$this->baps->contains($bap)) {
+            $this->baps->add($bap);
         }
 
         return $this;
     }
 
-    public function removeUtilisateurEmploiType(UtilisateurEmploiType $utilisateurEmploiType): static
+    public function removeBap(Bap $bap): static
     {
-        if ($this->utilisateurEmploiTypes->removeElement($utilisateurEmploiType)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurEmploiType->getUtilisateur() === $this) {
-                $utilisateurEmploiType->setUtilisateur(null);
-            }
+        $this->baps->removeElement($bap);
+        return $this;
+    }
+
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("emploi_types_ids")]
+    public function getEmploiTypesIds(): array
+    {
+        return $this->emploiTypes->map(fn(EmploiType $emploiType) => $emploiType->getId())->toArray();
+    }
+
+
+    /**
+     * @return Collection<int, EmploiType>
+     */
+    public function getEmploiTypes(): Collection
+    {
+        return $this->emploiTypes;
+    }
+
+    public function addEmploiType(EmploiType $emploiType): static
+    {
+        if (!$this->emploiTypes->contains($emploiType)) {
+            $this->emploiTypes->add($emploiType);
         }
 
+        return $this;
+    }
+
+    public function removeEmploiType(EmploiType $emploiType): static
+    {
+        $this->emploiTypes->removeElement($emploiType);
         return $this;
     }
 
@@ -526,6 +536,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("unite_id")]
+    public function getUniteId(): ?int
+    {
+        return $this->unite ? $this->unite->getId() : null;
+    }
+
     public function getUnite(): ?Entite
     {
         return $this->unite;
@@ -538,6 +555,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("employeur_id")]
+    public function getEmployeurId(): ?int
+    {
+        return $this->employeur ? $this->employeur->getId() : null;
+    }
+
     public function getEmployeur(): ?Entite
     {
         return $this->employeur;
@@ -548,6 +572,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->employeur = $employeur;
 
         return $this;
+    }
+
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("type_contrat_id")]
+    public function getTypeContratId(): ?int
+    {
+        return $this->typeContrat ? $this->typeContrat->getId() : null;
     }
 
     public function getTypeContrat(): ?TypeContrat
@@ -572,6 +603,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->doctorant = $doctorant;
 
         return $this;
+    }
+
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    #[SerializedName("universite_rattachement_id")]
+    public function getUniversiteRattachementId(): ?int
+    {
+        return $this->universiteRattachement ? $this->universiteRattachement->getId() : null;
     }
 
     public function getUniversiteRattachement(): ?Entite

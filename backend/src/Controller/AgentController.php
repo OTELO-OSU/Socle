@@ -32,42 +32,62 @@ final class AgentController extends AbstractController
     public function creationUtilisateurParResponsable(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur']) || !isset($data["type_contrat"]) || !isset($data["unite"])) {
+        if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data["type_contrat_id"]) || !isset($data["unite_id"])) {
             return $this->json(['message' => 'Champs requis manquants'], 400);
         }
 
         $corps = null;
         $grade = null;
         $universiteRattachement = null;
-        $doctorant = \false;
+        $doctorant = false;
 
-        if (isset($data['corps'])) {
-            $corps = $data['corps'];
+        if (isset($data['corps_id'])) {
+            $corps = $data['corps_id'];
         }
 
-        if (isset($data['grade'])) {
-            $grade = $data['grade'];
+        if (isset($data['grade_id'])) {
+            $grade = $data['grade_id'];
         }
 
-        if (isset($data['universite_rattachement'])) {
-            $universiteRattachement = $data['universite_rattachement'];
+        if (isset($data['universite_rattachement_id'])) {
+            $universiteRattachement = $data['universite_rattachement_id'];
         }
 
         if (isset($data['doctorant'])) {
             $doctorant = $data['doctorant'];
         }
 
+        if (isset($data['baps_ids'])) {
+            $bapsIds = $data['baps_ids'];
+        }
+
+        if (isset($data['emploi_types_ids'])) {
+            $emploiTypesIds = $data['emploi_types_ids'];
+        }
+
+        if (isset($data['cnu'])) {
+            $cnu = $data['cnu'];
+        }
+
+        if (isset($data['section'])) {
+            $section = $data['section'];
+        }
+
         $utilisateur = $this->utilisateurService->creationUtilisateurParResponsable(
             $data['nom'],
             $data['prenom'],
             $data['email'],
-            $data['employeur'],
-            $data['unite'],
+            $data['employeur_id'],
+            $data['unite_id'],
             $corps,
             $grade,
-            $data['type_contrat'],
+            $data['type_contrat_id'],
             $doctorant,
-            $universiteRattachement
+            $universiteRattachement,
+            $bapsIds ?? null,
+            $emploiTypesIds ?? null,
+            $cnu ?? null,
+            $section ?? null
         );
         return $this->json(['message' => 'Soumission envoyée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }
@@ -93,5 +113,76 @@ final class AgentController extends AbstractController
             $this->utilisateurService->refusUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
             return $this->json(['message' => 'L\'utilisateur à bien été refusé',], 200);
         }
+    }
+
+    #[Route('/agent', methods: ['PUT'])]
+    public function modifierAgent(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['utilisateur_id']) || !isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data['type_contrat_id']) || !isset($data['unite_id'])) {
+            return $this->json(['message' => 'Champs requis manquants'], 400);
+        }
+
+        $corps = null;
+        $grade = null;
+        $universiteRattachement = null;
+        $doctorant = false;
+        $bapsIds = [];
+        $emploiTypesIds = [];
+        $cnu = null;
+        $section = null;
+        $doctorant = false;
+
+        if (isset($data['corps_id'])) {
+            $corps = $data['corps_id'];
+        }
+
+        if (isset($data['grade_id'])) {
+            $grade = $data['grade_id'];
+        }
+
+        if (isset($data['universite_rattachement_id'])) {
+            $universiteRattachement = $data['universite_rattachement_id'];
+        }
+
+        if (isset($data['doctorant'])) {
+            $doctorant = $data['doctorant'];
+        }
+
+        if (isset($data['baps_ids'])) {
+            $bapsIds = $data['baps_ids'];
+        }
+
+        if (isset($data['emploi_types_ids'])) {
+            $emploiTypesIds = $data['emploi_types_ids'];
+        }
+
+        if (isset($data['cnu'])) {
+            $cnu = $data['cnu'];
+        }
+
+        if (isset($data['section'])) {
+            $section = $data['section'];
+        }
+
+        $utilisateur = $this->utilisateurService->modificationUtilisateur(
+            $data['utilisateur_id'],
+            $data['nom'],
+            $data['prenom'],
+            $data['email'],
+            $data['employeur_id'],
+            $data['unite_id'],
+            $corps,
+            $grade,
+            $data['type_contrat_id'],
+            $doctorant,
+            $universiteRattachement,
+            $bapsIds,
+            $emploiTypesIds,
+            $cnu,
+            $section
+        );
+
+        return $this->json(['message' => 'Modification effectuée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }
 }
