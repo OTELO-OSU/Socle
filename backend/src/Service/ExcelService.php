@@ -635,8 +635,8 @@ class ExcelService
             $personnels = $plat->getPlateformeHistoriquePersonnels();
 
             foreach ($personnels as $pers) {
-                $baps = $pers->getUtilisateur()->getUtilisateurBaps();
-                $emploiTypes = $pers->getUtilisateur()->getUtilisateurEmploiTypes();
+                $baps = $pers->getUtilisateur()->getBaps();
+                $emploiTypes = $pers->getUtilisateur()->getEmploiTypes();
                 $sheet5Array[] = [
                     $plat->getId(),
                     $this->formatContratPersonnel($pers->getUtilisateur()->getTypeContrat()),
@@ -651,10 +651,10 @@ class ExcelService
                     $this->formatFinanceur($pers->getUtilisateur()->getUniversiteRattachement()),
                     $this->formatCorps($pers->getUtilisateur()->getCorps()),
                     $this->formatGrade($pers->getUtilisateur()->getGrade()),
-                    $baps[0] ? $this->formatBap($baps[0]->getBap()) : '',
-                    $baps[1] ? $this->formatBap($baps[1]->getBap()) : '',
-                    $emploiTypes[0] ? $this->formatEmploiType($emploiTypes[0]->getEmploiType()) : '',
-                    $emploiTypes[1] ? $this->formatEmploiType($emploiTypes[1]->getEmploiType()) : '',
+                    $baps[0] ? $this->formatBap($baps[0]) : '',
+                    $baps[1] ? $this->formatBap($baps[1]) : '',
+                    $emploiTypes[0] ? $this->formatEmploiType($emploiTypes[0]) : '',
+                    $emploiTypes[1] ? $this->formatEmploiType($emploiTypes[1]) : '',
                     $this->formatCNU($pers->getUtilisateur()->getCnu()),
                     $this->formatSection($pers->getUtilisateur()->getSectionCnrs()),
                     $pers->getQuotite() ?? '',
