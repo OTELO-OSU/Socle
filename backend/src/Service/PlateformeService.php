@@ -26,6 +26,7 @@ use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
 use App\Entity\Ville;
 use App\Security\Voter\PlateformeVoter;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -47,19 +48,167 @@ class PlateformeService
         return (int) $anneeSaisieEnCours->getValeur();
     }
 
-    function dupliquerPlateformeHistorique($plateformeHisto): PlateformeHistorique
+    function dupliquerPlateformeHistorique(PlateformeHistorique $plateformeHisto): PlateformeHistorique
     {
         $anneeSaisieEnCours = $this->getAnneeDeSaisieEnCours();
-        $plateformeHisto = $this->em->getRepository(PlateformeHistorique::class)->findOneBy(['annee' => $anneeSaisieEnCours]);
-        if (!$plateformeHisto) throw new Exception("Aucun historique de plateforme trouvé pour l'année de saisie en cours.", 404);
 
         $recordDuplique = clone $plateformeHisto;
-        $recordDuplique->setAnnee($anneeSaisieEnCours);
         $recordDuplique->setId(null);
+        $recordDuplique->setAnnee($anneeSaisieEnCours);
+
+        $this->reinitialiserCollectionsPlateformeHistorique($recordDuplique);
+        $this->dupliquerRelationsPlateformeHistorique($plateformeHisto, $recordDuplique);
+
         $this->em->persist($recordDuplique);
         $this->em->flush();
 
         return $recordDuplique;
+    }
+
+    private function reinitialiserCollectionsPlateformeHistorique(PlateformeHistorique $plateformeHistorique): void
+    {
+        $propertyNames = [
+            'plateformeHistoriqueTutelles',
+            'plateformeHistoriquePersonnels',
+            'posteFuturs',
+            'contributionTutelles',
+            'instruments',
+            'publications',
+        ];
+
+        foreach ($propertyNames as $propertyName) {
+            $property = new \ReflectionProperty(PlateformeHistorique::class, $propertyName);
+            $property->setAccessible(true);
+            $property->setValue($plateformeHistorique, new ArrayCollection());
+        }
+    }
+
+    private function dupliquerRelationsPlateformeHistorique(PlateformeHistorique $source, PlateformeHistorique $target): void
+    {
+        foreach ($source->getPlateformeHistoriqueTutelles() as $plateformeHistoriqueTutelle) {
+            $newRecord = new PlateformeHistoriqueTutelle();
+            $newRecord->setPlateformeHistorique($target);
+            $newRecord->setTutelle($plateformeHistoriqueTutelle->getTutelle());
+            $newRecord->setPrincipale($plateformeHistoriqueTutelle->isPrincipale());
+            $target->addPlateformeHistoriqueTutelle($newRecord);
+            $this->em->persist($newRecord);
+        }
+
+        foreach ($source->getPlateformeHistoriquePersonnels() as $plateformeHistoriquePersonnel) {
+            $newRecord = new PlateformeHistoriquePersonnel();
+            $newRecord->setPlateformeHistorique($target);
+            $newRecord->setUtilisateur($plateformeHistoriquePersonnel->getUtilisateur());
+            $newRecord->setResponsableScientifique((bool) $plateformeHistoriquePersonnel->isResponsableScientifique());
+            $newRecord->setResponsableTechnique((bool) $plateformeHistoriquePersonnel->isResponsableTechnique());
+            $newRecord->setResponsablePlateforme((bool) $plateformeHistoriquePersonnel->isResponsablePlateforme());
+            $newRecord->setQuotite((int) $plateformeHistoriquePersonnel->getQuotite());
+            $target->addPlateformeHistoriquePersonnel($newRecord);
+            $this->em->persist($newRecord);
+        }
+
+        foreach ($source->getPosteFuturs() as $posteFutur) {
+            $newRecord = new PosteFutur();
+            $newRecord->setPlateformeHistorique($target);
+            $newRecord->setRangNumerateur((int) $posteFutur->getRangNumerateur());
+            $newRecord->setRangDenominateur((int) $posteFutur->getRangDenominateur());
+            $newRecord->setCorps($posteFutur->getCorps());
+            $newRecord->setEmployeur($posteFutur->getEmployeur());
+            $newRecord->setQuotite((int) $posteFutur->getQuotite());
+
+            foreach ($posteFutur->getBaps() as $bap) {
+                $newRecord->addBap($bap);
+            }
+
+            foreach ($posteFutur->getEmploiTypes() as $emploiType) {
+                $newRecord->addEmploiType($emploiType);
+            }
+
+            $target->addPosteFutur($newRecord);
+            $this->em->persist($newRecord);
+        }
+
+        foreach ($source->getContributionTutelles() as $contributionTutelle) {
+            $newRecord = new ContributionTutelle();
+            $newRecord->setPlateformeHistorique($target);
+            $newRecord->setFinanceur($contributionTutelle->getFinanceur());
+            $newRecord->setTaux((int) $contributionTutelle->getTaux());
+            $target->addContributionTutelle($newRecord);
+            $this->em->persist($newRecord);
+        }
+
+        $instrumentsMap = [];
+        foreach ($source->getInstruments() as $instrument) {
+            $newInstrument = $this->dupliquerInstrument($instrument, $target);
+            $target->addInstrument($newInstrument);
+            $this->em->persist($newInstrument);
+
+            if ($instrument->getId() !== null) {
+                $instrumentsMap[$instrument->getId()] = $newInstrument;
+            }
+        }
+
+        foreach ($source->getInstruments() as $instrument) {
+            $newInstrument = $instrument->getId() !== null ? ($instrumentsMap[$instrument->getId()] ?? null) : null;
+            if ($newInstrument === null) {
+                continue;
+            }
+
+            foreach ($instrument->getInstrumentMutualisations() as $mutualisation) {
+                $newMutualisation = new \App\Entity\InstrumentMutualisation();
+                $newMutualisation->setInstrumentSource($newInstrument);
+
+                $instrumentCible = $mutualisation->getInstrumentCible();
+                if ($instrumentCible !== null && $instrumentCible->getId() !== null && isset($instrumentsMap[$instrumentCible->getId()])) {
+                    $newMutualisation->setInstrumentCible($instrumentsMap[$instrumentCible->getId()]);
+                } else {
+                    $newMutualisation->setInstrumentCible($instrumentCible);
+                }
+
+                $this->em->persist($newMutualisation);
+            }
+
+            foreach ($instrument->getFinancementInstruments() as $financementInstrument) {
+                $newFinancement = new \App\Entity\FinancementInstrument();
+                $newFinancement->setInstrument($newInstrument);
+                $newFinancement->setFinanceur($financementInstrument->getFinanceur());
+                $newFinancement->setTaux((int) $financementInstrument->getTaux());
+                $this->em->persist($newFinancement);
+            }
+        }
+
+        foreach ($source->getPublications() as $publication) {
+            $newRecord = new Publications();
+            $newRecord->setPlateformeHistorique($target);
+            $newRecord->setNumero($publication->getNumero());
+            $newRecord->setDoi($publication->getDoi());
+            $target->addPublication($newRecord);
+            $this->em->persist($newRecord);
+        }
+    }
+
+    private function dupliquerInstrument(Instrument $instrument, PlateformeHistorique $plateformeHistorique): Instrument
+    {
+        $newInstrument = new Instrument();
+        $newInstrument->setPlateformeHistorique($plateformeHistorique);
+        $newInstrument->setNom($instrument->getNom());
+        $newInstrument->setMarque($instrument->getMarque());
+        $newInstrument->setModele($instrument->getModele());
+        $newInstrument->setAnneeAcquisition($instrument->getAnneeAcquisition());
+        $newInstrument->setCout($instrument->getCout());
+        $newInstrument->setValeurRemplacement($instrument->getValeurRemplacement());
+        $newInstrument->setDureeUtilisation($instrument->getDureeUtilisation());
+        $newInstrument->setOperation($instrument->getOperation());
+        $newInstrument->setAnneeAchatEnvisagee($instrument->getAnneeAchatEnvisagee());
+        $newInstrument->setFutur((bool) $instrument->isFutur());
+        $newInstrument->setContratMaintenance($instrument->getContratMaintenance());
+        $newInstrument->setCommentaireNatureContrat($instrument->getCommentaireNatureContrat());
+        $newInstrument->setFournisseurContrat($instrument->getFournisseurContrat());
+        $newInstrument->setMutualiseAutreInstrument((bool) $instrument->isMutualiseAutreInstrument());
+        $newInstrument->setMutualiseSite((bool) $instrument->isMutualiseSite());
+        $newInstrument->setMutualiseUmrOsu((bool) $instrument->isMutualiseUmrOsu());
+        $newInstrument->setCoutMaintenance($instrument->getCoutMaintenance());
+
+        return $newInstrument;
     }
 
     function creerPlateforme(string $nom)

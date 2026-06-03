@@ -19,6 +19,7 @@ import { ListePlateforme } from './pages/ListePlateforme'
 import AgentAdmin from './pages/AgentAdmin'
 import UniteAdmin from './pages/UniteAdmin'
 import OsuAdmin from './pages/OsuAdmin'
+import SaisieAdmin from './pages/SaisieAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -66,6 +67,7 @@ function App() {
                 <Route path="agent" element={<AgentAdmin />} />
                 <Route path="unite" element={<UniteAdmin />} />
                 <Route path="osu" element={<OsuAdmin />} />
+                <Route path="saisie" element={<SaisieAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />
