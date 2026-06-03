@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             deconnexion,
             isAuthLoading,
             estConnecte: Boolean(token),
-            estAdmin: decodedToken?.roles?.includes('ROLE_ADMIN') || false,
+            estAdmin: decodedToken?.roles?.includes('ROLE_ADMIN') || decodedToken?.roles?.includes('ROLE_DIR_OSU') || decodedToken?.roles?.includes('ROLE_DIR_OSU_DELEGUE') || false,
             id: decodedToken?.id || null,
             email: decodedToken?.email || null,
             prenom: decodedToken?.prenom || null,

@@ -65,7 +65,7 @@ class OsuService
 
     public function switchDirOsu(?int $idNewDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DU, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DO, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
 
         $newDirOsu = null;
 
@@ -116,7 +116,8 @@ class OsuService
         $delegueDirOsu = $this->em->getRepository(Utilisateur::class)->find($idDelegueDirOsu);
         if (!$delegueDirOsu) throw new Exception("Utilisateur non trouvé.", 404);
 
-        $delegueDirOsu->setRoles(array_diff($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU']));
+        if (in_array('ROLE_DIR_OSU', $delegueDirOsu->getRoles())) throw new Exception("Cet utilisateur est déjà directeur de l'OSU.", 400);
+
         $delegueDirOsu->setRoles(array_merge($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU_DELEGUE']));
         $this->em->persist($delegueDirOsu);
         $this->em->flush();

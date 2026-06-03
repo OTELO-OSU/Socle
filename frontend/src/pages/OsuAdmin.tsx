@@ -5,6 +5,7 @@ import type { Agent } from "../services/agentService.ts";
 import { fetchOsuAdmin, patchDelegueDirecteurOsu, patchDirecteurOsu } from "../services/osuService.ts";
 import { AgentAutocompleteField } from "../components/AgentAutocompleteField.tsx";
 import { SnackbarContext } from "../context/snackbarContext.ts";
+import type { AxiosError } from "axios";
 
 export default function OsuAdmin() {
     const [dirOsu, setDirOsu] = useState<Agent | null>(null);
@@ -49,8 +50,9 @@ export default function OsuAdmin() {
             setIsDialogOpen(false);
             fetchOsu();
         } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
             console.error("Erreur lors de la mise à jour du directeur de l'OSU :", error);
-            snackbarContext?.trigger({ message: "Erreur lors de la mise à jour du directeur de l'OSU", couleur: "error" });
+            snackbarContext?.trigger({ message: axiosError.response?.data.message || "Erreur lors de la mise à jour du directeur de l'OSU", couleur: "error" });
         } finally {
             setIsSaving(false);
         }
@@ -70,8 +72,9 @@ export default function OsuAdmin() {
             setNewDelegue(null);
             await fetchOsu();
         } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
             console.error("Erreur lors de l'ajout du délégué :", error);
-            snackbarContext?.trigger({ message: "Erreur lors de l'ajout du délégué", couleur: "error" });
+            snackbarContext?.trigger({ message: axiosError.response?.data.message || "Erreur lors de l'ajout du délégué", couleur: "error" });
         } finally {
             setIsSavingDelegue(false);
         }
@@ -84,8 +87,9 @@ export default function OsuAdmin() {
             snackbarContext?.trigger({ message, couleur: "success" });
             await fetchOsu();
         } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
             console.error("Erreur lors de la suppression du délégué :", error);
-            snackbarContext?.trigger({ message: "Erreur lors de la suppression du délégué", couleur: "error" });
+            snackbarContext?.trigger({ message: axiosError.response?.data.message || "Erreur lors de la suppression du délégué", couleur: "error" });
         } finally {
             setRemovingDelegueId(null);
         }
