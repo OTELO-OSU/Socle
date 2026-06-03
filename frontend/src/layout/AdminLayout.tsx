@@ -2,7 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
-import { AccountCircle, Group } from '@mui/icons-material';
+import { AccountCircle, Group, Hub } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -30,6 +30,21 @@ export default function AdminLayout() {
                                 <HowToRegIcon />
                             </ListItemIcon>
                             <ListItemText primary="Demande d'adhesion" />
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem disablePadding>
+                        <ListItemButton sx={{
+                            '&.active': {
+                                bgcolor: 'action.selected',
+                                borderLeft: '3px solid',
+                                borderColor: 'primary.main',
+                            },
+                        }} component={NavLink} to="/admin/osu" end>
+                            <ListItemIcon>
+                                <Hub />
+                            </ListItemIcon>
+                            <ListItemText primary="OSU" />
                         </ListItemButton>
                     </ListItem>
 
