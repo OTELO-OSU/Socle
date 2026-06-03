@@ -43,6 +43,11 @@ final class OsuController extends AbstractController
         $message = null;
 
         $id = $json['delegue_directeur_osu_id'] ?? null;
+
+        if (!$id) {
+            return $this->json(['message' => "L'ID de l'utilisateur est requis."], 400);
+        }
+
         if ($operation === 'add') {
             $this->os->ajouterDelegue($id);
             $message = "Le délégué du directeur de l'OSU a été ajouté.";
