@@ -313,7 +313,11 @@ class AgentService
 
         $user->setNom($nom);
         $user->setPrenom($prenom);
-        $user->setEmail($email);
+
+        if ($this->security->isGranted(UtilisateurVoter::MODIFIER_EMAIL, $user)) {
+            $user->setEmail($email);
+        }
+
         $user->setEmployeur($employeurEntity);
         $user->setUnite($u);
         $user->setCorps($corpsEntity);

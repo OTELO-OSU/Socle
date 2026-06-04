@@ -8,6 +8,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { SnackbarContext } from '../context/snackbarContext';
+import { AccountCircle } from '@mui/icons-material';
 export default function HeaderAppBar() {
 
     const authContext = useContext(AuthContext)
@@ -34,6 +35,11 @@ export default function HeaderAppBar() {
                     {authContext?.estConnecte &&
                         <Button component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>
                             Plateformes
+                        </Button>
+                    }
+                    {authContext?.estConnecte &&
+                        <Button component={Link} to="/compte" color='inherit' startIcon={<AccountCircle />}>
+                            {authContext.prenom} {authContext.nom}
                         </Button>
                     }
                     {authContext?.estAdmin &&

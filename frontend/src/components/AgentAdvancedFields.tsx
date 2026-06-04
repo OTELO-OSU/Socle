@@ -21,6 +21,7 @@ type AgentAdvancedFieldsProps = {
     value: Agent;
     onChange: (next: Agent) => void;
     disabled?: boolean;
+    emailReadOnly?: boolean;
 };
 
 function toNumberList(value: string | number | Array<string | number>) {
@@ -35,7 +36,7 @@ function toNumberList(value: string | number | Array<string | number>) {
     return [Number(value)];
 }
 
-export function AgentAdvancedFields({ value, onChange, disabled = false }: AgentAdvancedFieldsProps) {
+export function AgentAdvancedFields({ value, onChange, disabled = false, emailReadOnly = false }: AgentAdvancedFieldsProps) {
     const dictionnaire = useContext(DictionnaireContext);
 
     const estCDD = isCDD(value.type_contrat_id ?? null, dictionnaire.typeContrat);
@@ -95,7 +96,7 @@ export function AgentAdvancedFields({ value, onChange, disabled = false }: Agent
                         email: event.target.value,
                     })
                 }
-                disabled={disabled}
+                disabled={disabled || emailReadOnly}
                 fullWidth
             />
 

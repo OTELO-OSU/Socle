@@ -20,6 +20,7 @@ import AgentAdmin from './pages/AgentAdmin'
 import UniteAdmin from './pages/UniteAdmin'
 import OsuAdmin from './pages/OsuAdmin'
 import SaisieAdmin from './pages/SaisieAdmin'
+import MonCompte from './pages/MonCompte'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -60,6 +61,7 @@ function App() {
               <Route path="/inscription" element={<Inscription />} />
               <Route path="/orcid" element={<OrcidCallback />} />
               <Route path="/verification-email" element={<VerificationMailCallback />} />
+              <Route path="/compte" element={<MonCompte />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
