@@ -3,6 +3,7 @@ import { API_URL } from "./constante";
 import { showSnackbar } from "../bridge/snackbarBridge";
 import { navigateOutside } from "../bridge/navigationBridge";
 import { getAuthBridge } from "../bridge/tokenBridge";
+import { decodeToken } from "./jwt";
 
 type RetriableRequestConfig = {
     _retry?: boolean;
@@ -19,6 +20,17 @@ export const symfony = axios.create({
 })
 
 let refreshPromise: Promise<string | null> | null = null;
+
+const isTokenExpired = (token: string) => {
+    const decoded = decodeToken(token);
+    if (!decoded?.exp) {
+        return false;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    // Small safety window to refresh slightly before actual expiry.
+    return decoded.exp <= nowInSeconds + 5;
+};
 
 export const refreshAccessToken = async () => {
     if (!refreshPromise) {
@@ -107,8 +119,23 @@ symfony.interceptors.response.use(
 
 // Interceptor pour mettre le bearer token dans les headers de chaque requete
 symfony.interceptors.request.use(
-    config => {
-        const token = getAuthBridge().getToken?.();
+    async config => {
+        const url = config.url ?? "";
+        const isRefreshRequest = url.includes('/refresh');
+        const isAuthEndpoint =
+            url.includes('/connexion') ||
+            url.includes('/inscription');
+
+        let token = getAuthBridge().getToken?.();
+
+        if (token && !isRefreshRequest && !isAuthEndpoint && isTokenExpired(token)) {
+            try {
+                token = await refreshAccessToken();
+            } catch {
+                token = null;
+            }
+        }
+
         if (token) {
             config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${token}`;

@@ -6,6 +6,7 @@ export type JwtPayload = {
   prenom?: string;
   nom?: string;
   roles?: string[];
+  exp?: number;
 };
 
 export function decodeToken(token: string | null): JwtPayload | null {
