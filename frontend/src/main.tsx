@@ -14,13 +14,13 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <DictionnaireProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <DictionnaireProvider>
             <SnackbarProvider>
               <App />
             </SnackbarProvider>
-          </AuthProvider>
-        </DictionnaireProvider>
+          </DictionnaireProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>
   </StrictMode>,

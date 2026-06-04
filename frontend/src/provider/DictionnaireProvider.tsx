@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { AuthContext } from '../context/authContext';
 import { DictionnaireContext } from '../context/dictionnaireContext';
 import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
 import { formatBapLabel, formatCnuLabel, formatEmployeurLabel, formatSectionCnrsLabel, formatUniteLabel, formatUniversiteLabel, formatVilleLabel } from '../services/formatLabelService';
@@ -64,9 +65,14 @@ const defaultDictionnaire: DictionnaireType = {
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
     const [dictionnaire, setDictionnaire] = useState<DictionnaireType>(defaultDictionnaire);
+    const authContext = useContext(AuthContext);
 
     useEffect(() => {
         let isMounted = true;
+
+        if (authContext?.isAuthLoading) {
+            return;
+        }
 
         const getSettledValue = <T,>(
             result: PromiseSettledResult<T>,
@@ -167,7 +173,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [authContext?.isAuthLoading]);
 
     return <DictionnaireContext.Provider value={dictionnaire}>{children}</DictionnaireContext.Provider>
 }
