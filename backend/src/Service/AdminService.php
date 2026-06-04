@@ -95,15 +95,14 @@ class AdminService
 
     function changeResponsable(int $plateformeId, ?array $responsableScientifiquesIds, ?array $responsableTechniquesIds, ?array $responsablePlateformesIds)
     {
-        // Vérification des permissions de l'utilisateur
-        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, Plateforme::class)) throw new Exception("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.", 403);
-
-        // Est-ce que la plateforme existe ?
         /** @var Plateforme $plateforme */
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
             throw new Exception("La plateforme n'existe pas.", 404);
         }
+
+        // Vérification des permissions de l'utilisateur
+        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, $plateforme)) throw new Exception("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.", 403);
 
         $plateforme = $plateforme->getLastHistorique();
         if (!$plateforme) {

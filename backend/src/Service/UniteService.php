@@ -54,4 +54,48 @@ class UniteService
         $this->em->persist($unite);
         $this->em->flush();
     }
+
+    function ajouterDelegue(int $utilisateurId, int $uniteId)
+    {
+        /** @var Entite|null $uniteEntity */
+        $uniteEntity = $this->em->getRepository(Entite::class)->find($uniteId);
+        if (!$uniteEntity || !$uniteEntity->isLaboratoire()) {
+            throw new Exception("L'unité spécifiée est invalide.", 400);
+        }
+
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DU, $uniteEntity)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        /** @var Utilisateur|null $utilisateur */
+        $utilisateur = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
+        if (!$utilisateur) {
+            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+        }
+
+        $uniteEntity->addDelegueDirecteur($utilisateur);
+        $this->em->flush();
+    }
+
+    function supprimerDelegue(int $utilisateurId, int $uniteId)
+    {
+        /** @var Entite|null $uniteEntity */
+        $uniteEntity = $this->em->getRepository(Entite::class)->find($uniteId);
+        if (!$uniteEntity || !$uniteEntity->isLaboratoire()) {
+            throw new Exception("L'unité spécifiée est invalide.", 400);
+        }
+
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DU, $uniteEntity)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
+        /** @var Utilisateur|null $utilisateur */
+        $utilisateur = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
+        if (!$utilisateur) {
+            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+        }
+
+        $uniteEntity->removeDelegueDirecteur($utilisateur);
+        $this->em->flush();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Security\Voter;
 
+use App\Entity\Entite;
 use App\Entity\Utilisateur;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -17,6 +18,7 @@ final class UtilisateurVoter extends Voter
     public const MODIFIER_EMAIL = 'MODIFIER_EMAIL';
     public const GERER_ANNEE_SAISIE = 'GERER_ANNEE_SAISIE';
     public const CHANGER_DU = 'CHANGER_DU';
+    public const CHANGER_DELEGUE_DU = 'CHANGER_DELEGUE_DU';
     public const GET_ADMIN_OSU = 'GET_ADMIN_OSU';
     public const CHANGER_DO = 'CHANGER_DO';
     public const CHANGER_DELEGUE_DO = 'CHANGER_DELEGUE_DO';
@@ -31,7 +33,10 @@ final class UtilisateurVoter extends Voter
         $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE])
             && $subject === Utilisateur::class;
 
-        return $a || $b;
+        $c = in_array($attribute, [self::CHANGER_DELEGUE_DU])
+            && $subject instanceof Entite;
+
+        return $a || $b || $c;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -58,6 +63,15 @@ final class UtilisateurVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
+            case self::CHANGER_DELEGUE_DU:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                /** @var Entite $subject */
+                if ($subject->getDirecteur() === $user) {
+                    return true;
+                }
                 break;
             case self::GET_ADMIN_OSU:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;

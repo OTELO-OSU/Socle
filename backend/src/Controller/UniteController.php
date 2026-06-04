@@ -29,4 +29,37 @@ final class UniteController extends AbstractController
         $this->us->modifierDirecteurUnite($data['unite_id'], $data['utilisateur_id']);
         return $this->json(['message' => 'Directeur de l\'unité modifié avec succès'], 200);
     }
+
+    #[Route('/unite/directeur/delegue', methods: ['PATCH'])]
+    public function switchDelegueDirOsu(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+        $operation = $json['operation'] ?? null;
+        if (!in_array($operation, ['add', 'remove'])) {
+            return $this->json(['message' => "Opération invalide. L'opération doit être 'add' ou 'remove'."], 400);
+        }
+
+        $uniteId = $json['unite_id'] ?? null;
+        if (!$uniteId) {
+            return $this->json(['message' => "L'ID de l'unité est requis."], 400);
+        }
+
+        $message = null;
+
+        $id = $json['delegue_directeur_unite_id'] ?? null;
+
+        if (!$id) {
+            return $this->json(['message' => "L'ID de l'utilisateur est requis."], 400);
+        }
+
+        if ($operation === 'add') {
+            $this->us->ajouterDelegue($id, $uniteId);
+            $message = "Le délégué du directeur de l'OSU a été ajouté.";
+        } else {
+            $this->us->supprimerDelegue($id, $uniteId);
+            $message = "Le délégué du directeur de l'OSU a été retiré.";
+        }
+
+        return $this->json(['message' => $message], 200);
+    }
 }

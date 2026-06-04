@@ -11,15 +11,16 @@ final class PlateformeVoter extends Voter
 {
     public const CREER = 'CREER';
     public const AFFILIER = 'AFFILIER';
+    public const LIRE = 'LIRE';
     public const SAUVEGARDER = 'SAUVEGARDER';
     public const EXPORTER = 'EXPORTER';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $testA = in_array($attribute, [self::CREER, self::AFFILIER])
+        $testA = in_array($attribute, [self::CREER])
             && $subject === Plateforme::class;
 
-        $testB = in_array($attribute, [self::SAUVEGARDER, self::EXPORTER])
+        $testB = in_array($attribute, [self::LIRE, self::SAUVEGARDER, self::EXPORTER, self::AFFILIER])
             && $subject instanceof Plateforme;
         return $testA || $testB;
     }
@@ -38,17 +39,68 @@ final class PlateformeVoter extends Voter
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
                 break;
-            case self::AFFILIER:
+            case self::LIRE:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                /** @var Plateforme $subject */
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
+                $historiquePersonnel = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
+                foreach ($historiquePersonnel as $personnel) {
+                    if ($personnel->getUtilisateur() === $user) {
+                        if ($personnel->isResponsablePlateforme() || $personnel->isResponsableScientifique() || $personnel->isResponsableTechnique()) {
+                            return true;
+                        }
+                    }
+                }
                 break;
-            case self::SAUVEGARDER:
+            case self::AFFILIER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
 
                 /** @var Plateforme $subject */
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+            case self::SAUVEGARDER:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                /** @var Plateforme $subject */
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
                 $historiquePersonnel = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
                 foreach ($historiquePersonnel as $personnel) {
                     if ($personnel->getUtilisateur() === $user) {
@@ -62,8 +114,21 @@ final class PlateformeVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                $subject = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
-                foreach ($subject as $personnel) {
+                /** @var Plateforme $subject */
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
+                $historiquePersonnel = $subject->getLastHistorique()->getPlateformeHistoriquePersonnels();
+                foreach ($historiquePersonnel as $personnel) {
                     if ($personnel->getUtilisateur() === $user) {
                         if ($personnel->isResponsablePlateforme() || $personnel->isResponsableScientifique() || $personnel->isResponsableTechnique()) {
                             return true;

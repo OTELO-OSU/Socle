@@ -8,9 +8,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: FinancementInstrumentRepository::class)]
-#[ORM\Table(name: 'financement_instrument', uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uniq_financement_instrument_financeur', columns: ['instrument_id', 'financeur_id'])
-])]
+#[ORM\Table(name: 'financement_instrument')]
+#[ORM\UniqueConstraint(name: 'uniq_financement_instrument_financeur', columns: ['instrument_id', 'financeur_id'])]
 class FinancementInstrument
 {
     #[ORM\Id]

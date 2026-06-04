@@ -103,6 +103,12 @@ class Entite
     #[ORM\Column]
     private ?bool $epic = null;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
+    private Collection $delegueDirecteur;
+
     public function __construct()
     {
         $this->plateformeHistoriques = new ArrayCollection();
@@ -113,6 +119,7 @@ class Entite
         $this->utilisateurs = new ArrayCollection();
         $this->employe = new ArrayCollection();
         $this->doctorants = new ArrayCollection();
+        $this->delegueDirecteur = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -490,6 +497,30 @@ class Entite
     public function setEpic(bool $epic): static
     {
         $this->epic = $epic;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getDelegueDirecteur(): Collection
+    {
+        return $this->delegueDirecteur;
+    }
+
+    public function addDelegueDirecteur(Utilisateur $delegueDirecteur): static
+    {
+        if (!$this->delegueDirecteur->contains($delegueDirecteur)) {
+            $this->delegueDirecteur->add($delegueDirecteur);
+        }
+
+        return $this;
+    }
+
+    public function removeDelegueDirecteur(Utilisateur $delegueDirecteur): static
+    {
+        $this->delegueDirecteur->removeElement($delegueDirecteur);
 
         return $this;
     }

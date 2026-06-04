@@ -276,15 +276,9 @@ class PlateformeService
 
         $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
 
-        $estAdmin = $this->security->isGranted('ROLE_ADMIN');
-        $estDirOSU = $this->security->isGranted('ROLE_DIR_OSU');
-        $permSuperUser = $estAdmin || $estDirOSU;
-
-        $userId = $this->security->getUser()->getUserIdentifier();
-
         $conn = $this->em->getConnection();
 
-        // 1) Paginer sur des IDs uniques, triés par nom officiel.
+        // 1) Récupérer les IDs candidats selon la recherche (sans filtrage d'autorisation).
         $idsQb = $conn->createQueryBuilder();
         $idsQb
             ->select('p.id AS plateforme_id', 'ph.nom_officiel AS tri_nom_officiel')
@@ -313,70 +307,34 @@ class PlateformeService
             $idsQb->setParameter('search', '%' . $search . '%');
         }
 
-        if (!$permSuperUser) {
-            $idsQb->andWhere('u.id = :userId')
-                ->andWhere('(pp.responsable_scientifique = true OR pp.responsable_technique = true)')
-                ->setParameter('userId', $userId);
-        }
-
         $idsQb
             ->groupBy('p.id, ph.nom_officiel')
-            ->orderBy('ph.nom_officiel', 'ASC')
-            ->setFirstResult($offset)
-            ->setMaxResults(self::PLATEFORME_PAR_PAGE);
+            ->orderBy('ph.nom_officiel', 'ASC');
 
         $idRows = $idsQb->executeQuery()->fetchAllAssociative();
         $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
 
-        $plateformes = [];
+        // 2) Charger les entités candidates puis appliquer le voter LIRE.
+        $plateformesAutorisees = [];
         if ($plateformeIds !== []) {
-            // 2) Charger les entités pour que les groupes de sérialisation s'appliquent.
-            $plateformes = $this->em->getRepository(Plateforme::class)->findBy(['id' => $plateformeIds]);
+            $plateformesCandidates = $this->em->getRepository(Plateforme::class)->findBy(['id' => $plateformeIds]);
 
-            // Conserver l'ordre de pagination défini par la requête IDs.
+            // Conserver l'ordre défini par la requête IDs.
             $ordreParId = array_flip($plateformeIds);
             usort(
-                $plateformes,
+                $plateformesCandidates,
                 static fn(Plateforme $a, Plateforme $b): int => ($ordreParId[$a->getId()] ?? PHP_INT_MAX) <=> ($ordreParId[$b->getId()] ?? PHP_INT_MAX)
             );
+
+            $plateformesAutorisees = array_values(array_filter(
+                $plateformesCandidates,
+                fn(Plateforme $plateforme): bool => $this->security->isGranted(PlateformeVoter::LIRE, $plateforme)
+            ));
         }
 
-        // 3) Total pour la pagination.
-        $countQb = $conn->createQueryBuilder();
-        $countQb
-            ->select('COUNT(DISTINCT p.id)')
-            ->from('plateforme', 'p')
-            ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
-            ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
-            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id_id')
-            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
-
-        if ($search) {
-            $countQb->andWhere('(
-                ph.nom_officiel ILIKE :search
-                OR ph.forme_developpee_nom_officiel ILIKE :search
-                OR (
-                    (
-                        u.prenom ILIKE :search
-                        OR u.nom ILIKE :search
-                        OR u.email ILIKE :search
-                    )
-                    AND (
-                        pp.responsable_scientifique = true
-                        OR pp.responsable_technique = true
-                    )
-                )
-            )');
-            $countQb->setParameter('search', '%' . $search . '%');
-        }
-
-        if (!$permSuperUser) {
-            $countQb->andWhere('u.id = :userId')
-                ->andWhere('(pp.responsable_scientifique = true OR pp.responsable_technique = true)')
-                ->setParameter('userId', $userId);
-        }
-
-        $total = (int) $countQb->executeQuery()->fetchOne();
+        // 3) Paginer après application des autorisations pour garder un total cohérent.
+        $total = count($plateformesAutorisees);
+        $plateformes = array_slice($plateformesAutorisees, $offset, self::PLATEFORME_PAR_PAGE);
 
         return [
             'plateformes' => $plateformes,
@@ -397,7 +355,7 @@ class PlateformeService
             throw new Exception("Plateforme non trouvée.", 404);
         }
 
-        if (!$this->security->isGranted(PlateformeVoter::SAUVEGARDER, $plateforme)) {
+        if (!$this->security->isGranted(PlateformeVoter::LIRE, $plateforme)) {
             throw new Exception("Vous n'avez pas les droits pour consulter cette plateforme", 403);
         }
 

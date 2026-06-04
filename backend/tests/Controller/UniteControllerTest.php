@@ -269,4 +269,209 @@ class UniteControllerTest extends WebTestCase
 
         self::assertEmailCount(0);
     }
+
+    // --- Tests pour PATCH /unite/directeur/delegue ---
+
+    public function testSwitchDelegueOperationInvalide(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'invalid',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Opération invalide. L'opération doit être 'add' ou 'remove'.",
+            $data['message']
+        );
+    }
+
+    public function testSwitchDelegueSansUniteId(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("L'ID de l'unité est requis.", $data['message']);
+    }
+
+    public function testSwitchDelegueSansDelegueId(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => $this->unite->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("L'ID de l'utilisateur est requis.", $data['message']);
+    }
+
+    public function testSwitchDelegueInterdit(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("Vous n'avez pas les droits nécessaires.", $data['message']);
+    }
+
+    public function testSwitchDelegueUniteInconnue(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => -1,
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("L'unité spécifiée est invalide.", $data['message']);
+    }
+
+    public function testSwitchDelegueUserInconnu(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => -1,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("L'utilisateur spécifié est invalide.", $data['message']);
+    }
+
+    public function testSwitchDelegueAjouterSucces(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("Le délégué du directeur de l'OSU a été ajouté.", $data['message']);
+    }
+
+    public function testSwitchDelegueRetirerSucces(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'operation' => 'remove',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("Le délégué du directeur de l'OSU a été retiré.", $data['message']);
+    }
+
+    public function testSwitchDelegueDirecteurPeutAjouter(): void
+    {
+        // Le directeur de l'unité est aussi autorisé via CHANGER_DELEGUE_DU.
+        $this->unite->setDirecteur($this->user);
+        $this->em->flush();
+
+        $client = $this->client;
+
+        $client->request(
+            'PATCH',
+            '/api/unite/directeur/delegue',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode([
+                'operation' => 'add',
+                'unite_id' => $this->unite->getId(),
+                'delegue_directeur_unite_id' => $this->user->getId(),
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals("Le délégué du directeur de l'OSU a été ajouté.", $data['message']);
+    }
 }
