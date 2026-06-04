@@ -20,7 +20,7 @@ export const symfony = axios.create({
 
 let refreshPromise: Promise<string | null> | null = null;
 
-const refreshAccessToken = async () => {
+export const refreshAccessToken = async () => {
     if (!refreshPromise) {
         refreshPromise = axios
             .post(`${API_URL}/refresh`, {}, { withCredentials: true })

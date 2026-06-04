@@ -14,9 +14,11 @@ export default function HeaderAppBar() {
     const authContext = useContext(AuthContext)
     const snackbarContext = useContext(SnackbarContext)
     const navigate = useNavigate();
+    const token = authContext?.token ?? null;
+    const isConnected = token !== null;
 
-    function handleDeconnexion() {
-        authContext?.deconnexion()
+    async function handleDeconnexion() {
+        await authContext?.deconnexion()
         snackbarContext?.trigger({
             message: "Déconnexion réussie",
             couleur: "success",
@@ -32,14 +34,14 @@ export default function HeaderAppBar() {
                         POE
                     </Typography>
 
-                    {authContext?.estConnecte &&
+                    {isConnected &&
                         <Button component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>
                             Plateformes
                         </Button>
                     }
-                    {authContext?.estConnecte &&
-                        <Button component={Link} to="/compte" color='inherit' startIcon={<AccountCircle />}>
-                            {authContext.prenom} {authContext.nom}
+                    {isConnected &&
+                        <Button key={token} component={Link} to="/compte" color='inherit' startIcon={<AccountCircle />}>
+                            {authContext?.prenom} {authContext?.nom}
                         </Button>
                     }
                     {authContext?.estAdmin &&
@@ -47,8 +49,8 @@ export default function HeaderAppBar() {
                             Admin
                         </Button>
                     }
-                    {authContext?.estConnecte ?
-                        <Button color='inherit' startIcon={<DeconnexionIcon />} onClick={handleDeconnexion}>
+                    {isConnected ?
+                        <Button color='inherit' startIcon={<DeconnexionIcon />} onClick={() => void handleDeconnexion()}>
                             Déconnexion
                         </Button> :
                         <>

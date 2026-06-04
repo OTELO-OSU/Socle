@@ -61,9 +61,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [setToken]);
 
     const deconnexion = useCallback(async () => {
-        if (!token) return;
-        await authService.deconnexion(token);
+        if (!token) {
+            clearToken();
+            return;
+        }
+
+        // Clear local auth state first so UI reacts immediately.
         clearToken();
+        try {
+            await authService.deconnexion(token);
+        } catch {
+            // Ignore backend logout errors because local session is already cleared.
+        }
     }, [token, clearToken]);
 
     const contextValue = useMemo(
