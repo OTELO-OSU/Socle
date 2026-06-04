@@ -167,7 +167,16 @@ class PlateformeService
                 $this->em->persist($newMutualisation);
             }
 
+            $financeursTraites = [];
             foreach ($instrument->getFinancementInstruments() as $financementInstrument) {
+                $financeurId = $financementInstrument->getFinanceur()?->getId();
+                if ($financeurId !== null) {
+                    if (isset($financeursTraites[$financeurId])) {
+                        continue;
+                    }
+                    $financeursTraites[$financeurId] = true;
+                }
+
                 $newFinancement = new \App\Entity\FinancementInstrument();
                 $newFinancement->setInstrument($newInstrument);
                 $newFinancement->setFinanceur($financementInstrument->getFinanceur());
@@ -553,41 +562,64 @@ class PlateformeService
         }
     }
 
-    private function synchroniserFinancementInstrument(Instrument $instrumentEntity, array $sourcesFinancement): void
+    private function normaliserSourcesFinancement(array $sourcesFinancement): array
     {
-        $financementExistant = $instrumentEntity->getFinancementInstruments();
-        foreach ($financementExistant as $financement) {
-            $financeurId = $financement->getFinanceur()->getId();
-            $financementExiste = false;
-            foreach ($sourcesFinancement as $financeur) {
-                if ($financeur["financeur_id"] == $financeurId) {
-                    $financementExiste = true;
-                    $financement->setTaux($financeur["taux"]);
-                    break;
-                }
+        $sourcesParFinanceur = [];
+        foreach ($sourcesFinancement as $financeur) {
+            if (!is_array($financeur) || !array_key_exists("financeur_id", $financeur)) {
+                continue;
             }
 
-            if (!$financementExiste) {
+            $financeurId = (int) $financeur["financeur_id"];
+            if ($financeurId <= 0) {
+                continue;
+            }
+
+            $sourcesParFinanceur[$financeurId] = [
+                "financeur_id" => $financeurId,
+                "taux" => $financeur["taux"] ?? 0,
+            ];
+        }
+
+        return $sourcesParFinanceur;
+    }
+
+    private function synchroniserFinancementInstrument(Instrument $instrumentEntity, array $sourcesFinancement): void
+    {
+        $sourcesParFinanceur = $this->normaliserSourcesFinancement($sourcesFinancement);
+
+        $financementExistant = $instrumentEntity->getFinancementInstruments();
+        $financeursExistants = [];
+        $financeursTraites = [];
+        foreach ($financementExistant as $financement) {
+            $financeurId = $financement->getFinanceur()->getId();
+
+            // Un seul financement par financeur et par instrument: supprimer les doublons historiques.
+            if (isset($financeursTraites[$financeurId])) {
+                $this->em->remove($financement);
+                continue;
+            }
+
+            $financeursTraites[$financeurId] = true;
+            $financeursExistants[$financeurId] = true;
+            $financementExiste = array_key_exists($financeurId, $sourcesParFinanceur);
+
+            if ($financementExiste) {
+                $financement->setTaux((int) $sourcesParFinanceur[$financeurId]["taux"]);
+            } else {
                 $this->em->remove($financement);
             }
         }
 
-        foreach ($sourcesFinancement as $financeur) {
-            $financeurExiste = false;
-            foreach ($instrumentEntity->getFinancementInstruments() as $financement) {
-                if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
-                    $financeurExiste = true;
-                    break;
-                }
-            }
-
-            if (!$financeurExiste) {
-                $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
+        foreach ($sourcesParFinanceur as $financeurId => $financeur) {
+            if (!isset($financeursExistants[$financeurId])) {
+                $newFinanceur = $this->em->getReference(Entite::class, $financeurId);
                 $newFinancement = new FinancementInstrument();
                 $newFinancement->setFinanceur($newFinanceur);
                 $newFinancement->setInstrument($instrumentEntity);
-                $newFinancement->setTaux($financeur["taux"]);
+                $newFinancement->setTaux((int) $financeur["taux"]);
                 $this->em->persist($newFinancement);
+                $financeursExistants[$financeurId] = true;
             }
         }
     }
@@ -616,43 +648,7 @@ class PlateformeService
                     $instrumentExistant->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
                     $instrumentExistant->setFutur(true);
 
-                    $financementExistant = $instrumentExistant->getFinancementInstruments();
-                    $sourcesFinancement = $instrument["source_financement"] ?? [];
-                    foreach ($financementExistant as $financement) {
-                        $financeurId = $financement->getFinanceur()->getId();
-                        $financementExiste = false;
-                        foreach ($sourcesFinancement as $financeur) {
-                            if ($financeur["financeur_id"] == $financeurId) {
-                                $financementExiste = true;
-
-                                // Overrider les champs du financement
-                                $financement->setTaux($financeur["taux"]);
-                                break;
-                            }
-                        }
-                        if (!$financementExiste) {
-                            $this->em->remove($financement);
-                        }
-                    }
-
-                    // Ajouter les nouveaux financements
-                    foreach ($sourcesFinancement as $financeur) {
-                        $financeurExiste = false;
-                        foreach ($instrumentExistant->getFinancementInstruments() as $financement) {
-                            if ($financement->getFinanceur()->getId() == $financeur["financeur_id"]) {
-                                $financeurExiste = true;
-                                break;
-                            }
-                        }
-                        if (!$financeurExiste) {
-                            $newFinanceur = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                            $newFinancement = new FinancementInstrument();
-                            $newFinancement->setFinanceur($newFinanceur);
-                            $newFinancement->setInstrument($instrumentExistant);
-                            $newFinancement->setTaux($financeur["taux"]);
-                            $this->em->persist($newFinancement);
-                        }
-                    }
+                    $this->synchroniserFinancementInstrument($instrumentExistant, $instrument["source_financement"] ?? []);
                 }
             }
             if (!$existeDeja) {
@@ -678,14 +674,7 @@ class PlateformeService
                 $plateformeHisto->addInstrument($newInstrument);
                 $this->em->persist($newInstrument);
 
-                foreach (($instrument["source_financement"] ?? []) as $financeur) {
-                    $financeurEntite = $this->em->getReference(Entite::class, $financeur["financeur_id"]);
-                    $newFinancement = new \App\Entity\FinancementInstrument();
-                    $newFinancement->setFinanceur($financeurEntite);
-                    $newFinancement->setInstrument($newInstrument);
-                    $newFinancement->setTaux($financeur["taux"]);
-                    $this->em->persist($newFinancement);
-                }
+                $this->synchroniserFinancementInstrument($newInstrument, $instrument["source_financement"] ?? []);
             }
         }
     }

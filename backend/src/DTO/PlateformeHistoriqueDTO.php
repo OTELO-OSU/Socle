@@ -274,6 +274,41 @@ class PlateformeHistoriqueDTO
         }
     }
 
+    #[Assert\Callback(groups: ['validation', 'brouillon', 'post_validation'])]
+    public function verifierAbsenceDoublonFinanceurParInstrument(ExecutionContextInterface $context): void
+    {
+        if ($this->instruments === null) {
+            return;
+        }
+
+        foreach ($this->instruments as $indexInstrument => $instrument) {
+            if (!is_array($instrument) || !isset($instrument['source_financement']) || !is_array($instrument['source_financement'])) {
+                continue;
+            }
+
+            $financeursVus = [];
+            foreach ($instrument['source_financement'] as $indexSource => $source) {
+                if (!is_array($source) || !array_key_exists('financeur_id', $source)) {
+                    continue;
+                }
+
+                $financeurId = (int) $source['financeur_id'];
+                if ($financeurId <= 0) {
+                    continue;
+                }
+
+                if (isset($financeursVus[$financeurId])) {
+                    $context->buildViolation('Un même financeur ne peut apparaître qu\'une seule fois pour un instrument.')
+                        ->atPath("instruments[$indexInstrument].source_financement[$indexSource].financeur_id")
+                        ->addViolation();
+                    continue;
+                }
+
+                $financeursVus[$financeurId] = true;
+            }
+        }
+    }
+
     #[Assert\Callback(groups: ['validation'])]
     public function validerChampsInstrumentsSelonTemporalite(ExecutionContextInterface $context): void
     {
