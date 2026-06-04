@@ -129,6 +129,21 @@ class AdminControllerTest extends WebTestCase
         return json_decode($client->getResponse()->getContent(), true)['token'];
     }
 
+    private function getDelegueDuAccessToken(string $email)
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode($email . ':password')]
+        );
+
+        return json_decode($client->getResponse()->getContent(), true)['token'];
+    }
+
     protected function tearDown(): void
     {
         $this->cleanupDatabase();
@@ -497,6 +512,213 @@ class AdminControllerTest extends WebTestCase
         self::assertEmailCount(1);
         $message = self::getMailerMessage(0);
         $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
+    }
+
+    public function testAffiliationPlateformeDelegueDuLaboCorrespondantSuccess(): void
+    {
+        $client = $this->client;
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $delegueDu = new Utilisateur();
+        $delegueDu->setNom('Delegue');
+        $delegueDu->setPrenom('DU');
+        $delegueDu->setEmail('delegue.du@example.com');
+        $delegueDu->setMdp($hasher->hashPassword($delegueDu, 'password'));
+        $delegueDu->setAdmis(true);
+        $delegueDu->setEmailValide(true);
+        $delegueDu->setUnite($this->unite);
+        $this->em->persist($delegueDu);
+
+        $this->unite->addDelegueDirecteur($delegueDu);
+        $this->plateformeHisto->setLaboratoireOperateur($this->unite);
+        $this->em->persist($this->unite);
+        $this->em->persist($this->plateformeHisto);
+        $this->em->flush();
+
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
+
+        $client->request(
+            'PATCH',
+            '/api/plateforme/responsables',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getDelegueDuAccessToken('delegue.du@example.com')],
+            \json_encode([
+                'responsableScientifiquesIds' => [$this->user->getId()],
+                'responsableTechniquesIds' => [$this->user->getId()],
+                'plateformeId' => $plateformeId,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Responsables de la plateforme mis à jour avec succès.",
+            $data['message']
+        );
+
+        $refreshedPlateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+        $personnels = $refreshedPlateforme->getLastHistorique()->getPlateformeHistoriquePersonnels();
+
+        $personnelUser = $personnels->filter(fn($personnel) => $personnel->getUtilisateur()?->getId() === $this->user->getId())->first();
+        $this->assertNotFalse($personnelUser);
+        $this->assertTrue($personnelUser->isResponsableScientifique());
+        $this->assertTrue($personnelUser->isResponsableTechnique());
+
+        self::assertEmailCount(2);
+    }
+
+    public function testAffiliationPlateformeDelegueDuLaboNonCorrespondantRefuse(): void
+    {
+        $client = $this->client;
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $autreLabo = new Entite();
+        $autreLabo->setNom('Autre Unite');
+        $autreLabo->setUniversite(false);
+        $autreLabo->setCategorie($this->em->getRepository(Categorie::class)->findOneBy(['nom' => 'Test Categorie']));
+        $autreLabo->setEmployeur(false);
+        $autreLabo->setLaboratoire(true);
+        $autreLabo->setEpic(false);
+        $this->em->persist($autreLabo);
+
+        $delegueDu = new Utilisateur();
+        $delegueDu->setNom('Delegue');
+        $delegueDu->setPrenom('DU');
+        $delegueDu->setEmail('delegue.du2@example.com');
+        $delegueDu->setMdp($hasher->hashPassword($delegueDu, 'password'));
+        $delegueDu->setAdmis(true);
+        $delegueDu->setEmailValide(true);
+        $delegueDu->setUnite($this->unite);
+        $this->em->persist($delegueDu);
+
+        $this->unite->addDelegueDirecteur($delegueDu);
+        $this->plateformeHisto->setLaboratoireOperateur($autreLabo);
+        $this->em->persist($this->unite);
+        $this->em->persist($this->plateformeHisto);
+        $this->em->flush();
+
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
+
+        $client->request(
+            'PATCH',
+            '/api/plateforme/responsables',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getDelegueDuAccessToken('delegue.du2@example.com')],
+            \json_encode([
+                'responsableScientifiquesIds' => [$this->user->getId()],
+                'plateformeId' => $plateformeId,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testAffiliationPlateformeDirecteurDuLaboCorrespondantSuccess(): void
+    {
+        $client = $this->client;
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $directeurDu = new Utilisateur();
+        $directeurDu->setNom('Directeur');
+        $directeurDu->setPrenom('DU');
+        $directeurDu->setEmail('directeur.du@example.com');
+        $directeurDu->setMdp($hasher->hashPassword($directeurDu, 'password'));
+        $directeurDu->setAdmis(true);
+        $directeurDu->setEmailValide(true);
+        $directeurDu->setUnite($this->unite);
+        $this->em->persist($directeurDu);
+
+        $this->unite->setDirecteur($directeurDu);
+        $this->plateformeHisto->setLaboratoireOperateur($this->unite);
+        $this->em->persist($this->unite);
+        $this->em->persist($this->plateformeHisto);
+        $this->em->flush();
+
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
+
+        $client->request(
+            'PATCH',
+            '/api/plateforme/responsables',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getDelegueDuAccessToken('directeur.du@example.com')],
+            \json_encode([
+                'responsableScientifiquesIds' => [$this->user->getId()],
+                'plateformeId' => $plateformeId,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Responsables de la plateforme mis à jour avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(1);
+    }
+
+    public function testAffiliationPlateformeDirecteurDuLaboNonCorrespondantRefuse(): void
+    {
+        $client = $this->client;
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $autreLabo = new Entite();
+        $autreLabo->setNom('Autre Unite Directeur');
+        $autreLabo->setUniversite(false);
+        $autreLabo->setCategorie($this->em->getRepository(Categorie::class)->findOneBy(['nom' => 'Test Categorie']));
+        $autreLabo->setEmployeur(false);
+        $autreLabo->setLaboratoire(true);
+        $autreLabo->setEpic(false);
+        $this->em->persist($autreLabo);
+
+        $directeurDu = new Utilisateur();
+        $directeurDu->setNom('Directeur');
+        $directeurDu->setPrenom('DU');
+        $directeurDu->setEmail('directeur.du2@example.com');
+        $directeurDu->setMdp($hasher->hashPassword($directeurDu, 'password'));
+        $directeurDu->setAdmis(true);
+        $directeurDu->setEmailValide(true);
+        $directeurDu->setUnite($this->unite);
+        $this->em->persist($directeurDu);
+
+        $this->unite->setDirecteur($directeurDu);
+        $this->plateformeHisto->setLaboratoireOperateur($autreLabo);
+        $this->em->persist($this->unite);
+        $this->em->persist($this->plateformeHisto);
+        $this->em->flush();
+
+        $plateformeId = $this->plateformeHisto->getPlateforme()->getId();
+
+        $client->request(
+            'PATCH',
+            '/api/plateforme/responsables',
+            [],
+            [],
+            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getDelegueDuAccessToken('directeur.du2@example.com')],
+            \json_encode([
+                'responsableTechniquesIds' => [$this->user->getId()],
+                'plateformeId' => $plateformeId,
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
     }
 
     public function testGetUtilisateurEnAttenteDeValidationError(): void
