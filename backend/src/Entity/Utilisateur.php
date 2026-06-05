@@ -143,6 +143,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->entites = new ArrayCollection();
         $this->baps = new ArrayCollection();
         $this->emploiTypes = new ArrayCollection();
+        $this->deleguesDirecteur = new ArrayCollection();
     }
 
     public function getUserIdentifier(): string

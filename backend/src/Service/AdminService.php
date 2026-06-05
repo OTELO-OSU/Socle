@@ -7,6 +7,7 @@ use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\Utilisateur;
 use App\Security\Voter\PlateformeVoter;
+use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -41,7 +42,7 @@ class AdminService
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
-        if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour approuver cet utilisateur", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new Exception("Vous n'avez pas les droits pour approuver cet utilisateur", 403);
 
         $user->setAdmis(true);
 
@@ -81,7 +82,7 @@ class AdminService
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new Exception("Utilisateur non trouvé.", 404);
 
-        if (!$this->security->isGranted('APPROUVER', $user)) throw new Exception("Vous n'avez pas les droits pour refuser cet utilisateur", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new Exception("Vous n'avez pas les droits pour refuser cet utilisateur", 403);
 
         $this->mailerService->sendEmailToUser(
             $user->getEmail(),
