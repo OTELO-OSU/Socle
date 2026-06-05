@@ -109,10 +109,9 @@ final class UtilisateurVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-                $du = $user->getEntites()->filter(function ($e) {
-                    return $e->isLaboratoire();
-                })->first();
-                if ($du) {
+                $du = $user->getEntites()->count();
+                $duDelegue = $user->getDeleguesDirecteur()->count();
+                if ($du > 0 || $duDelegue > 0) {
                     return true;
                 }
                 break;

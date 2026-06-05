@@ -106,7 +106,7 @@ class Entite
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'deleguesDirecteur')]
     private Collection $delegueDirecteur;
 
     public function __construct()

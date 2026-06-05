@@ -10,7 +10,7 @@ export default function AdhesionAdmin() {
     const snackbarStore = useContext(SnackbarContext);
     const queryClient = useQueryClient();
     const { data: utilisateurs } = useQuery({
-        queryKey: ['utilisateurs', 'en-attente'],
+        queryKey: ['utilisateurs', 'en-attente', 'admin'],
         queryFn: fetchUtilisateurEnAttente
     });
 
@@ -21,7 +21,7 @@ export default function AdhesionAdmin() {
                 message: _.message,
                 couleur: "success",
             });
-            queryClient.setQueryData<UtilisateurEnAttente[]>(["utilisateurs", "en-attente"], (old = []) =>
+            queryClient.setQueryData<UtilisateurEnAttente[]>(["utilisateurs", "en-attente", "admin"], (old = []) =>
                 old.filter((u) => u.email !== email)
             );
         },
@@ -34,7 +34,7 @@ export default function AdhesionAdmin() {
                 message: _.message,
                 couleur: "success",
             });
-            queryClient.setQueryData<UtilisateurEnAttente[]>(["utilisateurs", "en-attente"], (old = []) =>
+            queryClient.setQueryData<UtilisateurEnAttente[]>(["utilisateurs", "en-attente", "admin"], (old = []) =>
                 old.filter((u) => u.email !== email)
             );
         },

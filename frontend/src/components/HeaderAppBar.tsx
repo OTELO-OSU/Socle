@@ -44,7 +44,7 @@ export default function HeaderAppBar() {
                             {authContext?.prenom} {authContext?.nom}
                         </Button>
                     }
-                    {authContext?.estAdmin &&
+                    {(authContext?.estAdmin || authContext?.estDu) &&
                         <Button component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
                             Admin
                         </Button>

@@ -238,12 +238,20 @@ class AuthService
 
     private function genererTokenCookieAvecRefreshToken(Utilisateur $user)
     {
+        $locRoles = $user->getRoles();
+        $du = $user->getEntites()->count();
+        $duDelegue = $user->getDeleguesDirecteur()->count();
+        if ($du > 0) {
+            $locRoles[] = "ROLE_DIRECTEUR_UNITE";
+        } else if ($duDelegue > 0) {
+            $locRoles[] = "ROLE_DIRECTEUR_UNITE_DELEGUE";
+        }
         $token = $this->tokenManager->createFromPayload($user, [
             "id" => $user->getId(),
             "email" => $user->getEmail(),
             "prenom" => $user->getPrenom(),
             "nom" => $user->getNom(),
-            "roles" => $user->getRoles()
+            "roles" => $locRoles
         ]);
 
         // Création d'un token

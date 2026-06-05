@@ -76,7 +76,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
     #[Ignore]
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'utilisateur')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private Collection $plateformeHistoriquePersonnels;
 
     /**
@@ -130,6 +130,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[SerializedName("universite_rattachement")]
     #[ORM\ManyToOne(inversedBy: 'doctorants')]
     private ?Entite $universiteRattachement = null;
+
+    #[ORM\ManyToMany(targetEntity: Entite::class, mappedBy: 'delegueDirecteur')]
+    private Collection $deleguesDirecteur;
 
     public function __construct()
     {
@@ -622,5 +625,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->universiteRattachement = $universiteRattachement;
 
         return $this;
+    }
+
+    public function getDeleguesDirecteur(): Collection
+    {
+        return $this->deleguesDirecteur;
     }
 }

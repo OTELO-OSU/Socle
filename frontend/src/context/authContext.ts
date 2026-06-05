@@ -10,6 +10,7 @@ export type AuthContextType = {
   isAuthLoading: boolean
   estConnecte: boolean
   estAdmin: boolean
+  estDu: boolean
   id: number | null
   email: string | null
   prenom: string | null

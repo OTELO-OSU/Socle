@@ -86,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isAuthLoading,
             estConnecte: Boolean(token),
             estAdmin: decodedToken?.roles?.includes('ROLE_ADMIN') || decodedToken?.roles?.includes('ROLE_DIR_OSU') || decodedToken?.roles?.includes('ROLE_DIR_OSU_DELEGUE') || false,
+            estDu: decodedToken?.roles?.includes('ROLE_DIRECTEUR_UNITE') || decodedToken?.roles?.includes('ROLE_DIRECTEUR_UNITE_DELEGUE') || false,
             id: decodedToken?.id || null,
             email: decodedToken?.email || null,
             prenom: decodedToken?.prenom || null,

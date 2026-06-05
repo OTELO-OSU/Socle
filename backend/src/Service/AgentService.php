@@ -343,7 +343,7 @@ class AgentService
 
     function getUtilisateurEnAttenteDeValidationDuDu(): array
     {
-        if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, Utilisateur::class)) {
             throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
         }
 
