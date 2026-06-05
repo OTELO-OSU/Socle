@@ -68,22 +68,28 @@ export default function AdminLayout() {
                                     <ListItemText primary="OSU" />
                                 </ListItemButton>
                             </ListItem>
+                        </>
+                    )}
 
-                            <ListItem disablePadding>
-                                <ListItemButton sx={{
-                                    '&.active': {
-                                        bgcolor: 'action.selected',
-                                        borderLeft: '3px solid',
-                                        borderColor: 'primary.main',
-                                    },
-                                }} component={NavLink} to="/admin/plateforme" end>
-                                    <ListItemIcon>
-                                        <HomeWork />
-                                    </ListItemIcon>
-                                    <ListItemText primary="Plateforme" />
-                                </ListItemButton>
-                            </ListItem>
+                    {(authContext?.estAdmin || authContext?.estDu) && (
+                        <ListItem disablePadding>
+                            <ListItemButton sx={{
+                                '&.active': {
+                                    bgcolor: 'action.selected',
+                                    borderLeft: '3px solid',
+                                    borderColor: 'primary.main',
+                                },
+                            }} component={NavLink} to="/admin/plateforme" end>
+                                <ListItemIcon>
+                                    <HomeWork />
+                                </ListItemIcon>
+                                <ListItemText primary="Plateforme" />
+                            </ListItemButton>
+                        </ListItem>
+                    )}
 
+                    {authContext?.estAdmin && (
+                        <>
                             <ListItem disablePadding>
                                 <ListItemButton sx={{
                                     '&.active': {
@@ -145,6 +151,6 @@ export default function AdminLayout() {
                 <Outlet />
             </Box>
 
-        </Box>
+        </Box >
     );
 }

@@ -44,10 +44,13 @@ export default function HeaderAppBar() {
                             {authContext?.prenom} {authContext?.nom}
                         </Button>
                     }
-                    {(authContext?.estAdmin || authContext?.estDu) &&
+                    {authContext?.estAdmin ?
                         <Button component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
                             Admin
-                        </Button>
+                        </Button> : authContext?.estDu ?
+                            <Button component={Link} to="/admin/soumission-du" color='inherit' startIcon={<AdminIcon />}>
+                                Admin
+                            </Button> : <></>
                     }
                     {isConnected ?
                         <Button color='inherit' startIcon={<DeconnexionIcon />} onClick={() => void handleDeconnexion()}>
