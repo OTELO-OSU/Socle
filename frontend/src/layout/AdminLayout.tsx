@@ -88,7 +88,7 @@ export default function AdminLayout() {
                         </ListItem>
                     )}
 
-                    {authContext?.estAdmin && (
+                    {(authContext?.estAdmin || authContext?.estDu) && (
                         <>
                             <ListItem disablePadding>
                                 <ListItemButton sx={{
@@ -104,7 +104,11 @@ export default function AdminLayout() {
                                     <ListItemText primary="Unité" />
                                 </ListItemButton>
                             </ListItem>
+                        </>
+                    )}
 
+                    {authContext?.estAdmin && (
+                        <>
                             <ListItem disablePadding>
                                 <ListItemButton sx={{
                                     '&.active': {

@@ -17,6 +17,7 @@ final class UtilisateurVoter extends Voter
     public const MODIFIER = 'MODIFIER';
     public const MODIFIER_EMAIL = 'MODIFIER_EMAIL';
     public const GERER_ANNEE_SAISIE = 'GERER_ANNEE_SAISIE';
+    public const GET_TOUTE_UNITE = 'GET_TOUTE_UNITE';
     public const CHANGER_DU = 'CHANGER_DU';
     public const CHANGER_DELEGUE_DU = 'CHANGER_DELEGUE_DU';
     public const GET_ADMIN_OSU = 'GET_ADMIN_OSU';
@@ -30,7 +31,7 @@ final class UtilisateurVoter extends Voter
         $a = in_array($attribute, [self::APPROUVER, self::MODIFIER, self::MODIFIER_EMAIL])
             && $subject instanceof \App\Entity\Utilisateur;
 
-        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE])
+        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE, self::GET_TOUTE_UNITE])
             && $subject === Utilisateur::class;
 
         $c = in_array($attribute, [self::CHANGER_DELEGUE_DU])
@@ -72,6 +73,11 @@ final class UtilisateurVoter extends Voter
                 if ($subject->getDirecteur() === $user) {
                     return true;
                 }
+                break;
+            case self::GET_TOUTE_UNITE:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
                 break;
             case self::GET_ADMIN_OSU:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;

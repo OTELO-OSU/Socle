@@ -20,11 +20,35 @@ class UniteService
 
     function getUnites(): array
     {
-        if ($this->security->getUser() === null) {
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->security->getUser();
+        if ($user === null) {
             throw new Exception("Vous devez être authentifié.", 401);
         }
 
-        $unites = $this->em->getRepository(Entite::class)->findBy(['laboratoire' => true]);
+        if ($this->security->isGranted(UtilisateurVoter::GET_TOUTE_UNITE, Utilisateur::class)) {
+            $unites = $this->em->getRepository(Entite::class)->findBy(['laboratoire' => true]);
+        } else {
+            $array = [];
+            // Si DU
+            foreach ($user->getEntites() as $e) {
+                $array[] = $e;
+            }
+            // Si delegue
+            foreach ($user->getDeleguesDirecteur() as $d) {
+                /** @var Entite $d */
+                // Vérifier que l'unité n'est pas déjà dans l'array
+                if (!in_array($d, $array)) {
+                    $array[] = $d;
+                }
+            }
+
+            if (empty($array)) {
+                throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            }
+
+            $unites = $array;
+        }
 
         return $unites;
     }

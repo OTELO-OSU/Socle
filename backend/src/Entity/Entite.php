@@ -106,6 +106,8 @@ class Entite
     /**
      * @var Collection<int, Utilisateur>
      */
+    #[SerializedName("delegues")]
+    #[Groups(['unite:detail'])]
     #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'deleguesDirecteur')]
     private Collection $delegueDirecteur;
 
