@@ -75,7 +75,8 @@ symfony.interceptors.response.use(
         const isRefreshRequest = originalRequest?.url?.includes('/refresh');
         const isAuthEndpoint =
             originalRequest?.url?.includes('/connexion') ||
-            originalRequest?.url?.includes('/inscription');
+            originalRequest?.url?.includes('/inscription') ||
+            originalRequest?.url?.includes('/deconnexion');
         const shouldTryRefresh = status === 401 || status === 403;
 
         if (shouldTryRefresh && originalRequest && !originalRequest._retry && !isRefreshRequest && !isAuthEndpoint) {
@@ -124,7 +125,8 @@ symfony.interceptors.request.use(
         const isRefreshRequest = url.includes('/refresh');
         const isAuthEndpoint =
             url.includes('/connexion') ||
-            url.includes('/inscription');
+            url.includes('/inscription') ||
+            url.includes('/deconnexion');
 
         let token = getAuthBridge().getToken?.();
 

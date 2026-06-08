@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthContext } from '../context/authContext'
 import { decodeToken } from '../utils/jwt'
 import * as authService from '../services/authService';
@@ -8,6 +8,7 @@ import { loadToken, saveToken } from '../utils/sessionStorageToken';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setTokenState] = useState<string | null>(() => loadToken());
     const [isAuthLoading, setIsAuthLoading] = useState(true)
+    const logoutInProgressRef = useRef(false);
 
     const setToken = useCallback((value: string | null) => {
         setTokenState(value)
@@ -19,6 +20,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         let isMounted = true;
+
+        if (logoutInProgressRef.current) {
+            setIsAuthLoading(false);
+            return;
+        }
 
         if (token) {
             setIsAuthLoading(false);
@@ -66,12 +72,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
         }
 
+        logoutInProgressRef.current = true;
         // Clear local auth state first so UI reacts immediately.
         clearToken();
         try {
             await authService.deconnexion(token);
         } catch {
             // Ignore backend logout errors because local session is already cleared.
+        } finally {
+            logoutInProgressRef.current = false;
         }
     }, [token, clearToken]);
 
