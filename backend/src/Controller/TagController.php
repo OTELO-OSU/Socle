@@ -20,6 +20,14 @@ final class TagController extends AbstractController
         return $this->json($tags, 200);
     }
 
+    #[Route('/admin/tags', methods: ['GET'])]
+    public function getTagsAdmin(): Response
+    {
+        $tags = $this->ts->getTagsAdmin();
+
+        return $this->json($tags, 200, [], ['groups' => 'utilisateur:list']);
+    }
+
     #[Route('/plateforme/tags', methods: ['GET'])]
     public function getPlateformeTags(Request $request): Response
     {

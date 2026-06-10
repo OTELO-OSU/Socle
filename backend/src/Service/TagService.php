@@ -53,6 +53,33 @@ class TagService
         return $tags;
     }
 
+    public function getTagsAdmin(): array
+    {
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        $tags = $this->getTags();
+
+        $tagsAvecAffiliationArray = [];
+        $tagsAvecAffiliation = $this->em->getRepository(UtilisateurTags::class)->findAll();
+        foreach ($tagsAvecAffiliation as $tagAvecAffiliation) {
+            if (array_key_exists($tagAvecAffiliation->getTagId(), $tagsAvecAffiliationArray)) {
+                $tagsAvecAffiliationArray[$tagAvecAffiliation->getTagId()]["utilisateurs"][] = $tagAvecAffiliation->getUtilisateur();
+            } else {
+                $resoudreTag = array_values(array_filter($tags, fn($tag) => $tag['id'] === $tagAvecAffiliation->getTagId()));
+                if (count($resoudreTag) === 0) {
+                    continue;
+                }
+                $tagsAvecAffiliationArray[$tagAvecAffiliation->getTagId()] = ["id" => $tagAvecAffiliation->getTagId(), "nom" => $resoudreTag[0]['nom'], "utilisateurs" => [$tagAvecAffiliation->getUtilisateur()]];
+            }
+        }
+
+        $finalArray = [];
+        foreach ($tagsAvecAffiliationArray as $tag) {
+            $finalArray[] = $tag;
+        }
+
+        return $finalArray;
+    }
+
     public function getPlateformeTags(int $plateformeId): array
     {
         /** @var Plateforme $plateforme */

@@ -205,6 +205,46 @@ class TagControllerTest extends WebTestCase
         $this->assertStringContainsString('Impossible de joindre le service central des tags', $data['message']);
     }
 
+    public function testGetTagsAdminSuccess(): void
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $admin = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'admin@example.com']);
+
+        $this->em->persist(new UtilisateurTags($user, 2));
+        $this->em->persist(new UtilisateurTags($admin, 2));
+        $this->em->flush();
+
+        $this->client->request(
+            'GET',
+            '/api/admin/tags',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertCount(1, $data);
+        $this->assertSame(2, $data[0]['id']);
+        $this->assertSame('TAG B', $data[0]['nom']);
+        $this->assertCount(2, $data[0]['utilisateurs']);
+    }
+
+    public function testGetTagsAdminRefuseUtilisateurNonAutorise(): void
+    {
+        $this->client->request(
+            'GET',
+            '/api/admin/tags',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()]
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame('Accès refusé.', $data['message']);
+    }
+
     public function testGetPlateformeTagsSuccessAdmin(): void
     {
         $this->em->persist(new PlateformeTags($this->plateforme, 1));
