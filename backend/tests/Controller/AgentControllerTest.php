@@ -774,4 +774,344 @@ class AgentControllerTest extends WebTestCase
 
         self::assertEmailCount(0);
     }
+
+    public function testModifierAgentSoiMemeSucces(): void
+    {
+        $client = $this->client;
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => $this->user->getEmail(),
+            'nom' => 'Test Modifié',
+            'prenom' => 'User Modifié',
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => (new TypeContrat())->setNom('Test')->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload['type_contrat_id'] = $typeContrat->getId();
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame('Test Modifié', $data['utilisateur']['nom']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentSoiMemeEmailChange(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => 'newemail@example.com',
+            'nom' => $this->user->getNom(),
+            'prenom' => $this->user->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame('test@example.com', $data['utilisateur']['email']);
+
+        $userRefreshed = $this->em->find(Utilisateur::class, $this->user->getId());
+        $this->assertSame('test@example.com', $userRefreshed->getEmail());
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentAutreUtilisateurSansPerm(): void
+    {
+        $client = $this->client;
+
+        $autreUser = new Utilisateur();
+        $autreUser->setNom('Autre');
+        $autreUser->setPrenom('User');
+        $autreUser->setEmail('autre@example.com');
+        $autreUser->setMdp('password');
+        $autreUser->setAdmis(true);
+        $autreUser->setEmailValide(true);
+        $autreUser->setUnite($this->unite);
+        $this->em->persist($autreUser);
+        $this->em->flush();
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $autreUser->getId(),
+            'email' => $autreUser->getEmail(),
+            'nom' => 'Modifié',
+            'prenom' => 'User',
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertStringContainsString('droits', strtolower($data['message']));
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentAdminChangeEmail(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => 'newemail@example.com',
+            'nom' => $this->user->getNom(),
+            'prenom' => $this->user->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame('newemail@example.com', $data['utilisateur']['email']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentChampsManquants(): void
+    {
+        $client = $this->client;
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => $this->user->getEmail(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Champs requis manquants', $data['message']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentUtilisateurIntrouvable(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => 999999,
+            'email' => 'test@example.com',
+            'nom' => 'Test',
+            'prenom' => 'User',
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertStringContainsString('utilisateur', strtolower($data['message']));
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentUniteInvalide(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => $this->user->getEmail(),
+            'nom' => $this->user->getNom(),
+            'prenom' => $this->user->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => 999999,
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertStringContainsString('unité', strtolower($data['message']));
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentCorpsManquantPourNonDoctorant(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => $this->user->getEmail(),
+            'nom' => $this->user->getNom(),
+            'prenom' => $this->user->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'doctorant' => false,
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertStringContainsString('corps', strtolower($data['message']));
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAgentDoctorantSucces(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->user->getId(),
+            'email' => $this->user->getEmail(),
+            'nom' => $this->user->getNom(),
+            'prenom' => $this->user->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'doctorant' => true,
+            'universite_rattachement_id' => $this->employeur->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertTrue($data['utilisateur']['doctorant']);
+
+        self::assertEmailCount(0);
+    }
 }
