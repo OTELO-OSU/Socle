@@ -4,7 +4,10 @@ namespace App\Service;
 
 use App\Entity\Plateforme;
 use App\Entity\PlateformeTags;
+use App\Entity\Utilisateur;
+use App\Entity\UtilisateurTags;
 use App\Security\Voter\PlateformeVoter;
+use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -101,6 +104,8 @@ class TagService
             throw new Exception("Plateforme non trouvée.");
         }
 
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new Exception("Accès refusé.", 403);
+
         $currentTags = $plateforme->getPlateformeTags();
         foreach ($currentTags as $currentTag) {
             if (!in_array($currentTag->getTagId(), $tagIds)) {
@@ -108,7 +113,13 @@ class TagService
             }
         }
 
+        $tagsCentral = $this->getTags();
+        $validTagIds = array_map(fn($tag) => $tag['id'], $tagsCentral);
+
         foreach ($tagIds as $tagId) {
+            if (!in_array($tagId, $validTagIds)) {
+                throw new Exception("Tag avec l'ID $tagId est invalide.");
+            }
             $existingTag = $this->em->getRepository(PlateformeTags::class)->findOneBy([
                 'plateforme' => $plateforme,
                 'tagId' => $tagId,
@@ -125,21 +136,44 @@ class TagService
         $this->em->flush();
     }
 
-    public function untagPlateforme(int $plateformeId, int $tagId): void
+    public function tagUtilisateur(int $userId, int $tagId): void
     {
-        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
-        if (!$plateforme) {
-            throw new Exception("Plateforme non trouvée.");
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
+        if (!$utilisateur) {
+            throw new Exception("Utilisateur non trouvé.");
         }
 
-        $existingTag = $this->em->getRepository(PlateformeTags::class)->findOneBy([
-            'plateforme' => $plateforme,
+        $tagsCentral = $this->getTags();
+        $validTagIds = array_map(fn($tag) => $tag['id'], $tagsCentral);
+
+        if (!in_array($tagId, $validTagIds)) {
+            throw new Exception("Tag avec l'ID $tagId est invalide.");
+        }
+
+        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new Exception("L'utilisateur a déjà ce tag.");
+
+        $userTag = new UtilisateurTags($utilisateur, $tagId);
+        $this->em->persist($userTag);
+        $this->em->flush();
+    }
+
+    public function untagUtilisateur(int $userId, int $tagId): void
+    {
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
+        if (!$utilisateur) {
+            throw new Exception("Utilisateur non trouvé.");
+        }
+
+        $tag = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
+            'utilisateur' => $utilisateur,
             'tagId' => $tagId,
-        ]);
+        ]) or throw new Exception("L'utilisateur n'a pas ce tag.", 404);
 
-        if ($existingTag) {
-            $this->em->remove($existingTag);
-            $this->em->flush();
-        }
+        $this->em->remove($tag);
+        $this->em->flush();
     }
 }

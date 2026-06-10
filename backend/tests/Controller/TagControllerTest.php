@@ -8,6 +8,7 @@ use App\Entity\Plateforme;
 use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
+use App\Entity\UtilisateurTags;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -28,6 +29,7 @@ class TagControllerTest extends WebTestCase
     {
         $conn = $this->em->getConnection();
         $platform = $conn->getDatabasePlatform();
+        $conn->executeStatement($platform->getTruncateTableSQL('utilisateur_tags', true));
         $conn->executeStatement($platform->getTruncateTableSQL('plateforme_tags', true));
         $conn->executeStatement($platform->getTruncateTableSQL('plateforme_historique_personnel', true));
         $conn->executeStatement($platform->getTruncateTableSQL('plateforme_historique', true));
@@ -255,6 +257,15 @@ class TagControllerTest extends WebTestCase
         $this->assertSame('Plateforme non trouvée.', $data['message']);
     }
 
+    public function testGetPlateformeTagsRetourneErreurSiIdAbsent(): void
+    {
+        $this->client->request('GET', '/api/plateforme/tags');
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID de la plateforme est requis.", $data['message']);
+    }
+
     public function testPatchPlateformeTagsSuccessAjouteEtSupprime(): void
     {
         $plateformeId = $this->plateforme->getId();
@@ -269,7 +280,7 @@ class TagControllerTest extends WebTestCase
             '/api/plateforme/tags',
             [],
             [],
-            ['CONTENT_TYPE' => 'application/json'],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
             json_encode([
                 'id' => $plateformeId,
                 'tagIds' => [3, 4],
@@ -320,6 +331,170 @@ class TagControllerTest extends WebTestCase
             ], JSON_THROW_ON_ERROR)
         );
 
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID de la plateforme est requis.", $data['message']);
+    }
+
+    public function testPatchPlateformeTagsAvecTagIdsNullVideLesTags(): void
+    {
+        $plateformeId = $this->plateforme->getId();
+
+        $this->em->persist(new PlateformeTags($this->plateforme, 1));
+        $this->em->persist(new PlateformeTags($this->plateforme, 3));
+        $this->em->flush();
+
+        $this->client->request(
+            'PATCH',
+            '/api/plateforme/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'id' => $plateformeId,
+                'tagIds' => null,
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame('Tags modifiés avec succès.', $data['message']);
+
+        $this->em->clear();
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+        $saved = $this->em->getRepository(PlateformeTags::class)->findBy(['plateforme' => $plateforme]);
+        $this->assertCount(0, $saved);
+    }
+
+    public function testPostUtilisateurTagsSuccessAdmin(): void
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+
+        $this->client->request(
+            'POST',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'id' => $user->getId(),
+                'tagId' => 2,
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame('Tag ajouté avec succès.', $data['message']);
+
+        $saved = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
+            'utilisateur' => $user,
+            'tagId' => 2,
+        ]);
+        $this->assertNotNull($saved);
+    }
+
+    public function testPostUtilisateurTagsRetourneErreurSiIdAbsent(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'tagId' => 2,
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID de l'utilisateur est requis.", $data['message']);
+    }
+
+    public function testPostUtilisateurTagsRetourneErreurSiTagIdAbsent(): void
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+
+        $this->client->request(
+            'POST',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'id' => $user->getId(),
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID du tag est requis.", $data['message']);
+    }
+
+    public function testDeleteUtilisateurTagsSuccessAdmin(): void
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $this->em->persist(new UtilisateurTags($user, 3));
+        $this->em->flush();
+
+        $this->client->request(
+            'DELETE',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'id' => $user->getId(),
+                'tagId' => 3,
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame('Tag supprimé avec succès.', $data['message']);
+
+        $saved = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
+            'utilisateur' => $user,
+            'tagId' => 3,
+        ]);
+        $this->assertNull($saved);
+    }
+
+    public function testDeleteUtilisateurTagsRetourneErreurSiIdAbsent(): void
+    {
+        $this->client->request(
+            'DELETE',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'tagId' => 3,
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID de l'utilisateur est requis.", $data['message']);
+    }
+
+    public function testDeleteUtilisateurTagsRetourneErreurSiTagIdAbsent(): void
+    {
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+
+        $this->client->request(
+            'DELETE',
+            '/api/utilisateur/tags',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            json_encode([
+                'id' => $user->getId(),
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertSame("L'ID du tag est requis.", $data['message']);
     }
 }

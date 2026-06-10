@@ -134,6 +134,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Entite::class, mappedBy: 'delegueDirecteur')]
     private Collection $deleguesDirecteur;
 
+    #[ORM\OneToMany(targetEntity: UtilisateurTags::class, mappedBy: 'utilisateur')]
+    private Collection $utilisateurTags;
+
     public function __construct()
     {
         $this->emailValide = false;
@@ -144,6 +147,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->baps = new ArrayCollection();
         $this->emploiTypes = new ArrayCollection();
         $this->deleguesDirecteur = new ArrayCollection();
+        $this->utilisateurTags = new ArrayCollection();
     }
 
     public function getUserIdentifier(): string
@@ -631,5 +635,25 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getDeleguesDirecteur(): Collection
     {
         return $this->deleguesDirecteur;
+    }
+
+    public function getUtilisateurTags(): Collection
+    {
+        return $this->utilisateurTags;
+    }
+
+    public function addUtilisateurTag(UtilisateurTags $utilisateurTag): static
+    {
+        if (!$this->utilisateurTags->contains($utilisateurTag)) {
+            $this->utilisateurTags->add($utilisateurTag);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisateurTag(UtilisateurTags $utilisateurTag): static
+    {
+        $this->utilisateurTags->removeElement($utilisateurTag);
+        return $this;
     }
 }
