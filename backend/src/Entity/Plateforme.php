@@ -59,10 +59,14 @@ class Plateforme
     #[Groups(['plateforme:list', "plateforme:detail"])]
     private bool $instrumentNational = false;
 
+    #[ORM\OneToMany(mappedBy: "plateforme", targetEntity: PlateformeTags::class, cascade: ["remove"], orphanRemoval: true)]
+    private Collection $plateformeTags;
+
     public function __construct()
     {
         $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
+        $this->plateformeTags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,6 +154,33 @@ class Plateforme
     public function setInstrumentNational(bool $instrumentNational): static
     {
         $this->instrumentNational = $instrumentNational;
+
+        return $this;
+    }
+
+    public function getPlateformeTags(): Collection
+    {
+        return $this->plateformeTags;
+    }
+
+    public function addPlateformeTag(PlateformeTags $PlateformeTags): static
+    {
+        if (!$this->plateformeTags->contains($PlateformeTags)) {
+            $this->plateformeTags->add($PlateformeTags);
+            $PlateformeTags->setPlateforme($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlateformeTag(PlateformeTags $PlateformeTags): static
+    {
+        if ($this->plateformeTags->removeElement($PlateformeTags)) {
+            // set the owning side to null (unless already changed)
+            if ($PlateformeTags->getPlateforme() === $this) {
+                $PlateformeTags->setPlateforme(null);
+            }
+        }
 
         return $this;
     }

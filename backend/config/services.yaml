@@ -14,6 +14,7 @@ parameters:
     orcid_redirect_uri: "%env(ORCID_REDIRECT_URI)%"
     email_logo: "%env(EMAIL_LOGO)%"
     noreply: "%env(NOREPLY_EMAIL)%"
+    central_tag: "%env(CENTRAL_TAG)%"
 services:
     # Appel de notre listener d'exception pour formater les réponses d'erreur
     App\EventListener\ExceptionListener:

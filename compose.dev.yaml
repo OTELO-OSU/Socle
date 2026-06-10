@@ -17,6 +17,7 @@ services:
       DATABASE_URL: postgresql://root:root@database:5432/poe?serverVersion=16&charset=utf8
       MAILER_DSN: smtp://mailer:1025
       NOREPLY_EMAIL: noreply@ul.fr
+      CENTRAL_TAG: http://central
     volumes:
       - ./backend:/var/www/backend:rw
     depends_on:
@@ -25,6 +26,8 @@ services:
   ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:16-alpine
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: poe
       POSTGRES_PASSWORD: root
