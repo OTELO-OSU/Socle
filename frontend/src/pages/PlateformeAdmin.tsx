@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, Container, Dialog, Divider, FormControl, FormLabel, Link, Menu, MenuItem, Pagination, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Dialog, Divider, FormControl, FormLabel, Link, Menu, MenuItem, Pagination, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { creerPlateforme, fetchPlateformeListeParPage, patchResponsablePlateforme, type PlateformeLight } from "../services/plateformeService";
 import { SnackbarContext } from "../context/snackbarContext";
@@ -8,6 +8,7 @@ import type { Agent } from "../services/agentService";
 import type { AxiosError } from "axios";
 import type { ApiError } from "../utils/axios";
 import { AgentAutocompleteField } from "../components/AgentAutocompleteField.tsx";
+import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
 
 export default function PlateformeAdmin() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
@@ -135,8 +136,15 @@ export default function PlateformeAdmin() {
     }
 
     return (
-        <Container sx={{ py: 4 }}>
-            <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
+        <AdminPageShell
+            title="Gestion des plateformes"
+            subtitle="Administre les responsables et l'édition des plateformes."
+            action={
+                <Button variant="contained" color="primary" onClick={() => setDialogOpen(true)}>
+                    Créer une nouvelle plateforme
+                </Button>
+            }
+        >
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                 <Box component={"form"} sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }} onSubmit={handleSubmitCreatePlateforme}>
                     <Typography variant="h4" component="h2">Créer une Plateforme</Typography>
@@ -182,76 +190,75 @@ export default function PlateformeAdmin() {
                     </Stack>
                 </Box>
             </Dialog>
-            <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                <TextField
-                    type="text"
-                    placeholder="Rechercher une plateforme..."
-                    value={recherche}
-                    onChange={(e) => setRecherche(e.target.value)}
-                    sx={{ width: '35%' }}
-                />
-                <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_, newPage) => setPage(newPage)}
-                    sx={{ width: '35%' }}
-                />
-                <Button variant="contained" color="primary" onClick={() => setDialogOpen(true)}>
-                    Créer une nouvelle plateforme
-                </Button>
-            </Stack>
+            <AdminSurface>
+                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 0, alignItems: "center" }}>
+                    <TextField
+                        type="text"
+                        placeholder="Rechercher une plateforme..."
+                        value={recherche}
+                        onChange={(e) => setRecherche(e.target.value)}
+                        sx={{ width: '35%' }}
+                    />
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={(_, newPage) => setPage(newPage)}
+                        sx={{ width: '35%' }}
+                    />
+                </Stack>
 
-            {isLoading ? (
-                <Typography component={'p'} variant="h6">Chargement...</Typography>
-            ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {plateformes.map((plateforme) => (
-                        <Card key={plateforme.id}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-                                    <Box>
-                                        <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Année : {plateforme.lastHistorique.annee}
-                                        </Typography>
+                {isLoading ? (
+                    <Typography component={'p'} variant="h6" sx={{ mt: 2 }}>Chargement...</Typography>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        {plateformes.map((plateforme) => (
+                            <Card key={plateforme.id} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+                                        <Box>
+                                            <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Année : {plateforme.lastHistorique.annee}
+                                            </Typography>
+                                        </Box>
+                                        <Button
+                                            color="inherit"
+                                            aria-label="plus"
+                                            aria-controls={menu ? 'menu' : undefined}
+                                            aria-haspopup="true"
+                                            onClick={(event) => handleClick(event, plateforme)}
+                                        >
+                                            <MoreVert />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            open={menu}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem onClick={handleModifyPlateforme}>Modifier</MenuItem>
+                                            <MenuItem onClick={handleCloseMenu}>Supprimer</MenuItem>
+                                        </Menu>
                                     </Box>
-                                    <Button
-                                        color="inherit"
-                                        aria-label="plus"
-                                        aria-controls={menu ? 'menu' : undefined}
-                                        aria-haspopup="true"
-                                        onClick={(event) => handleClick(event, plateforme)}
-                                    >
-                                        <MoreVert />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        open={menu}
-                                        onClose={handleCloseMenu}
-                                    >
-                                        <MenuItem onClick={handleModifyPlateforme}>Modifier</MenuItem>
-                                        <MenuItem onClick={handleCloseMenu}>Supprimer</MenuItem>
-                                    </Menu>
-                                </Box>
-                            </CardContent>
-                            <CardActions>
-                                <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.lastHistorique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
-                                    Voir les détails
-                                </Link>
-
-
-                            </CardActions>
-                        </Card>
-                    ))}
-                </Box>
-            )}
-            <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
-                Précédent
-            </Button>
-            <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
-            <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
-                Suivant
-            </Button>
-        </Container>
+                                </CardContent>
+                                <CardActions>
+                                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.lastHistorique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                                        Voir les détails
+                                    </Link>
+                                </CardActions>
+                            </Card>
+                        ))}
+                    </Box>
+                )}
+                <Stack direction="row" spacing={1} sx={{ mt: 2, alignItems: "center" }}>
+                    <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+                        Précédent
+                    </Button>
+                    <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
+                    <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
+                        Suivant
+                    </Button>
+                </Stack>
+            </AdminSurface>
+        </AdminPageShell>
     )
 }

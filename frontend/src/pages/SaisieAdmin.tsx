@@ -1,7 +1,8 @@
-import { Alert, Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { fetchAnneeDeSaisie, setAnneeDeSaisie } from "../services/saisieService.ts";
 import { Add, Send } from "@mui/icons-material";
+import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
 
 export default function SaisieAdmin() {
     const [annee, setAnnee] = useState<number | null>(null);
@@ -42,7 +43,10 @@ export default function SaisieAdmin() {
     }, [annee, fetchAnnee]);
 
     return (
-        <Container sx={{ py: 4 }}>
+        <AdminPageShell
+            title="Année de saisie"
+            subtitle="Pilote l'année active utilisée pour l'historisation des plateformes."
+        >
             <Dialog open={isConfirmDialogOpen} onClose={() => setIsConfirmDialogOpen(false)} fullWidth maxWidth="sm">
                 <DialogTitle sx={{ color: 'error.main' }}>Confirmer l'incrémentation</DialogTitle>
                 <DialogContent>
@@ -68,65 +72,62 @@ export default function SaisieAdmin() {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Typography variant="h5" component={"h1"} sx={{ mb: 2 }}>Année de Saisie</Typography>
-            <Typography component={'p'} variant="body1">La définition d'une année de saisie permet aux plateformes d'être associées à une année spécifique afin de pouvoir en historiser les données. Sans date de saisie définie, il n'est pas possible de procéder à la saisie de données dans les plateformes.</Typography>
-            <Typography component={'p'} color="error" variant="body1" sx={{ fontWeight: 'bold', mt: 1 }}>Il est difficilement possible de revenir en arrière une fois l'année de saisie incrémentée.</Typography>
-            <Typography component={'p'} color="error" variant="body1" sx={{ fontWeight: 'bold' }}>
-                Soyez donc prudent dans votre choix.
-            </Typography>
+            <AdminSurface>
+                <Typography component={'p'} variant="body1">La définition d'une année de saisie permet aux plateformes d'être associées à une année spécifique afin de pouvoir en historiser les données. Sans date de saisie définie, il n'est pas possible de procéder à la saisie de données dans les plateformes.</Typography>
+                <Typography component={'p'} color="error" variant="body1" sx={{ fontWeight: 'bold', mt: 1 }}>Il est difficilement possible de revenir en arrière une fois l'année de saisie incrémentée.</Typography>
+                <Typography component={'p'} color="error" variant="body1" sx={{ fontWeight: 'bold' }}>
+                    Soyez donc prudent dans votre choix.
+                </Typography>
 
-            {isLoading ? (
-                <Typography component={'p'} variant="h6">Chargement...</Typography>
-            ) : annee !== null ? (
-                <Card sx={{ mt: 3, maxWidth: 560 }}>
-                    <CardContent>
-                        <Typography component={'p'} variant="overline" color="text.secondary">
-                            Année de saisie actuelle
-                        </Typography>
-                        <Typography component={'p'} variant="h4" sx={{ mb: 2 }}>
-                            {annee}
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            color="error"
-                            onClick={() => setIsConfirmDialogOpen(true)}
-                            disabled={isSubmitting}
-                        >
-                            Incrémenter l'année
-                        </Button>
-                    </CardContent>
-                </Card>
-            ) : (
-                <Box sx={{ mt: 2 }}>
-                    <Alert severity="error">Aucune date de saisie n'est déclarée, choissisez une année de saisie.
-                        <Box sx={{ display: 'flex', mt: 2 }} component={"form"} onSubmit={async (e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
+                {isLoading ? (
+                    <Typography component={'p'} variant="h6">Chargement...</Typography>
+                ) : annee !== null ? (
+                    <Card sx={{ mt: 3, maxWidth: 560 }}>
+                        <CardContent>
+                            <Typography component={'p'} variant="overline" color="text.secondary">
+                                Année de saisie actuelle
+                            </Typography>
+                            <Typography component={'p'} variant="h4" sx={{ mb: 2 }}>
+                                {annee}
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                startIcon={<Add />}
+                                color="error"
+                                onClick={() => setIsConfirmDialogOpen(true)}
+                                disabled={isSubmitting}
+                            >
+                                Incrémenter l'année
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Box sx={{ mt: 2 }}>
+                        <Alert severity="error">Aucune date de saisie n'est déclarée, choissisez une année de saisie.
+                            <Box sx={{ display: 'flex', mt: 2 }} component={"form"} onSubmit={async (e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
 
-                            // Récuperer annee
-                            const annee = e.currentTarget.annee.value as number
-                            setIsSubmitting(true)
-                            await setAnneeDeSaisie(annee)
-                            await fetchAnnee()
-                            setIsSubmitting(false)
-                        }}>
-                            <FormControl >
-                                <TextField
-                                    name="annee"
-                                    type="number"
-                                    placeholder="YYYY"
-                                    value={annee || undefined}
-                                />
-                            </FormControl>
-                            <IconButton type="submit" disabled={isSubmitting}><Send /></IconButton>
-                        </Box>
-                    </Alert>
-                </Box>
-
-
-            )
-            }
-        </Container >
+                                const annee = e.currentTarget.annee.value as number
+                                setIsSubmitting(true)
+                                await setAnneeDeSaisie(annee)
+                                await fetchAnnee()
+                                setIsSubmitting(false)
+                            }}>
+                                <FormControl >
+                                    <TextField
+                                        name="annee"
+                                        type="number"
+                                        placeholder="YYYY"
+                                        value={annee || undefined}
+                                    />
+                                </FormControl>
+                                <IconButton type="submit" disabled={isSubmitting}><Send /></IconButton>
+                            </Box>
+                        </Alert>
+                    </Box>
+                )}
+            </AdminSurface>
+        </AdminPageShell>
     )
 }

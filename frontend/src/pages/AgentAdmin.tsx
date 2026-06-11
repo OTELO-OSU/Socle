@@ -2,7 +2,6 @@ import { MoreVert } from "@mui/icons-material";
 import {
     Box,
     Button,
-    Container,
     Dialog,
     DialogActions,
     DialogContent,
@@ -27,6 +26,7 @@ import { AgentAdvancedFields } from "../components/AgentAdvancedFields";
 import { SnackbarContext } from "../context/snackbarContext";
 import { fetchAgentListeParPage, modifierAgent, type Agent } from "../services/agentService.ts";
 import type { ApiError } from "../utils/axios.ts";
+import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
 
 export default function AgentAdmin() {
     const snackbar = useContext(SnackbarContext);
@@ -131,70 +131,71 @@ export default function AgentAdmin() {
     }
 
     return (
-        <Container sx={{ py: 4 }}>
-            <Typography variant="h5" component="h1">
-                Liste des agents
-            </Typography>
+        <AdminPageShell
+            title="Gestion des agents"
+            subtitle="Recherche, consulte et modifie les informations des agents."
+        >
+            <AdminSurface>
+                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 0, alignItems: "center" }}>
+                    <TextField
+                        type="text"
+                        placeholder="Rechercher un agent..."
+                        value={recherche}
+                        onChange={(e) => {
+                            setRecherche(e.target.value);
+                            setPage(1);
+                        }}
+                        sx={{ width: "100%" }}
+                    />
+                    <Pagination count={totalPages} page={page} onChange={(_, newPage) => setPage(newPage)} sx={{ flexShrink: 0 }} />
+                </Stack>
 
-            <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                <TextField
-                    type="text"
-                    placeholder="Rechercher un agent..."
-                    value={recherche}
-                    onChange={(e) => {
-                        setRecherche(e.target.value);
-                        setPage(1);
-                    }}
-                    sx={{ width: "100%" }}
-                />
-                <Pagination count={totalPages} page={page} onChange={(_, newPage) => setPage(newPage)} sx={{ flexShrink: 0 }} />
-            </Stack>
-
-            {isLoading ? (
-                <Typography component="p" variant="h6">
-                    Chargement...
-                </Typography>
-            ) : agents.length === 0 ? (
-                <Typography variant="body1">Aucun agent trouvé.</Typography>
-            ) : (
-                <Box sx={{ overflowX: "auto" }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Prénom</TableCell>
-                                <TableCell>Nom</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell align="right">Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {agents.map((agent) => (
-                                <TableRow key={agent.id} hover>
-                                    <TableCell>{agent.prenom}</TableCell>
-                                    <TableCell>{agent.nom}</TableCell>
-                                    <TableCell>{agent.email}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton
-                                            aria-label="actions"
-                                            aria-controls={menuOpen ? "agent-actions-menu" : undefined}
-                                            aria-haspopup="true"
-                                            onClick={(event) => handleOpenMenu(event, agent)}
-                                        >
-                                            <MoreVert />
-                                        </IconButton>
-                                    </TableCell>
+                {isLoading ? (
+                    <Typography component="p" variant="h6" sx={{ mt: 2 }}>
+                        Chargement...
+                    </Typography>
+                ) : agents.length === 0 ? (
+                    <Typography variant="body1" sx={{ mt: 2 }}>Aucun agent trouvé.</Typography>
+                ) : (
+                    <Box sx={{ overflowX: "auto", mt: 2 }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Prénom</TableCell>
+                                    <TableCell>Nom</TableCell>
+                                    <TableCell>Email</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Box>
-            )}
+                            </TableHead>
+                            <TableBody>
+                                {agents.map((agent) => (
+                                    <TableRow key={agent.id} hover>
+                                        <TableCell>{agent.prenom}</TableCell>
+                                        <TableCell>{agent.nom}</TableCell>
+                                        <TableCell>{agent.email}</TableCell>
+                                        <TableCell align="right">
+                                            <IconButton
+                                                aria-label="actions"
+                                                aria-controls={menuOpen ? "agent-actions-menu" : undefined}
+                                                aria-haspopup="true"
+                                                onClick={(event) => handleOpenMenu(event, agent)}
+                                            >
+                                                <MoreVert />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Box>
+                )}
 
-            <Stack direction="row" spacing={2} sx={{ mt: 2, alignItems: "center", justifyContent: "center" }}>
-                <Typography variant="body2" component="span">
-                    Page {page} sur {totalPages}
-                </Typography>
-            </Stack>
+                <Stack direction="row" spacing={2} sx={{ mt: 2, alignItems: "center", justifyContent: "center" }}>
+                    <Typography variant="body2" component="span">
+                        Page {page} sur {totalPages}
+                    </Typography>
+                </Stack>
+            </AdminSurface>
 
             <Menu id="agent-actions-menu" anchorEl={anchorEl} open={menuOpen} onClose={handleCloseMenu}>
                 <MenuItem onClick={handleOpenEditDialog}>Éditer</MenuItem>
@@ -229,6 +230,6 @@ export default function AgentAdmin() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Container>
+        </AdminPageShell>
     );
 }

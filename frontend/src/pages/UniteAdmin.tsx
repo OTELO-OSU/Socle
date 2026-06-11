@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchUnite, patchDirecteurUnite, switchDelegueDirOsu, type UniteDetail } from "../services/uniteService.ts";
 import { formatUniteLabel } from "../services/formatLabelService.ts";
@@ -7,6 +7,7 @@ import { AgentAutocompleteField } from "../components/AgentAutocompleteField.tsx
 import type { Agent } from "../services/agentService.ts";
 import { SnackbarContext } from "../context/snackbarContext.ts";
 import type { AxiosError } from "axios";
+import { AdminPageShell } from "../components/admin/AdminPageShell";
 
 type UniteCardProps = {
     unite: UniteDetail;
@@ -202,8 +203,10 @@ export default function UniteAdmin() {
     }, [fetchUnites]);
 
     return (
-        <Container sx={{ py: 4 }}>
-            <Typography variant="h5" component={"h1"} sx={{ mb: 2 }}>Liste des unités</Typography>
+        <AdminPageShell
+            title="Gestion des unités"
+            subtitle="Configure les directeurs et délégués pour chaque unité."
+        >
 
             {isLoading ? (
                 <Typography component={'p'} variant="h6">Chargement...</Typography>
@@ -214,6 +217,6 @@ export default function UniteAdmin() {
                     ))}
                 </Box>
             )}
-        </Container>
+        </AdminPageShell>
     )
 }

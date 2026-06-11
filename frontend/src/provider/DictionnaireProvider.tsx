@@ -3,6 +3,7 @@ import { AuthContext } from '../context/authContext';
 import { DictionnaireContext } from '../context/dictionnaireContext';
 import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
 import { formatBapLabel, formatCnuLabel, formatEmployeurLabel, formatSectionCnrsLabel, formatUniteLabel, formatUniversiteLabel, formatVilleLabel } from '../services/formatLabelService';
+import { fetchTags, type Tag } from '../services/tagsService';
 
 export type SelectOption = {
     value: string | number;
@@ -34,6 +35,8 @@ export type DictionnaireType = {
     determinationTarifPlateformeOptions: SelectOption[];
     universite: Universite[];
     universiteOptions: SelectOption[];
+    tags: Tag[];
+    tagsOptions: SelectOption[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
@@ -61,6 +64,8 @@ const defaultDictionnaire: DictionnaireType = {
     determinationTarifPlateformeOptions: [],
     universite: [],
     universiteOptions: [],
+    tags: [],
+    tagsOptions: []
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -94,7 +99,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 operationsResult,
                 typeContratMaintenanceResult,
                 determinationTarifPlateformeResult,
-                universiteResult
+                universiteResult,
+                tagsResult
             ] = await Promise.allSettled([
                 fetchUnites(),
                 fetchVilles(),
@@ -110,6 +116,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 fetchTypesContratsMaintenance(),
                 fetchDeterminationTarifPlateforme(),
                 fetchUniversites(),
+                fetchTags()
             ]);
 
             const unite = getSettledValue(uniteResult, defaultDictionnaire.unite);
@@ -126,7 +133,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             const typeContratMaintenance = getSettledValue(typeContratMaintenanceResult, defaultDictionnaire.typeContratMaintenance);
             const determinationTarifPlateforme = getSettledValue(determinationTarifPlateformeResult, defaultDictionnaire.determinationTarifPlateforme);
             const universite = getSettledValue(universiteResult, defaultDictionnaire.universite);
-
+            const tags = getSettledValue(tagsResult, defaultDictionnaire.tags);
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
@@ -138,6 +145,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 const bapOptions = bap.map((item) => ({ value: item.id, label: formatBapLabel(item) }));
                 const sectionCnrsOptions = sectionCnrs.map((item) => ({ value: item.id, label: formatSectionCnrsLabel(item) }));
                 const cnuOptions = cnu.map((item) => ({ value: item.id, label: formatCnuLabel(item) }));
+                const tagsOptions = tags.map((item) => ({ value: item.id, label: item.nom }));
                 setDictionnaire((current) => ({
                     ...current,
                     unite,
@@ -164,6 +172,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     universiteOptions,
                     sectionCnrsOptions,
                     cnuOptions,
+                    tags,
+                    tagsOptions
                 }));
             }
         };

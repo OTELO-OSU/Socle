@@ -22,6 +22,7 @@ import OsuAdmin from './pages/OsuAdmin'
 import SaisieAdmin from './pages/SaisieAdmin'
 import MonCompte from './pages/MonCompte'
 import SoumissionDUAdmin from './pages/SoumissionDUAdmin'
+import TagsAdmin from './pages/TagsAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -72,6 +73,7 @@ function App() {
                 <Route path="osu" element={<OsuAdmin />} />
                 <Route path="saisie" element={<SaisieAdmin />} />
                 <Route path="soumission-du" element={<SoumissionDUAdmin />} />
+                <Route path="tags" element={<TagsAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />

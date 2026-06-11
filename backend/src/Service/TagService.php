@@ -179,7 +179,7 @@ class TagService
             throw new Exception("Tag avec l'ID $tagId est invalide.");
         }
 
-        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new Exception("L'utilisateur a déjà ce tag.");
+        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new Exception("L'utilisateur a déjà ce tag.", 400);
 
         $userTag = new UtilisateurTags($utilisateur, $tagId);
         $this->em->persist($userTag);

@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AccountCircle, Add, Delete, Edit } from "@mui/icons-material";
 import type { Agent } from "../services/agentService.ts";
@@ -6,6 +6,7 @@ import { fetchOsuAdmin, patchDelegueDirecteurOsu, patchDirecteurOsu } from "../s
 import { AgentAutocompleteField } from "../components/AgentAutocompleteField.tsx";
 import { SnackbarContext } from "../context/snackbarContext.ts";
 import type { AxiosError } from "axios";
+import { AdminPageShell } from "../components/admin/AdminPageShell";
 
 export default function OsuAdmin() {
     const [dirOsu, setDirOsu] = useState<Agent | null>(null);
@@ -96,7 +97,10 @@ export default function OsuAdmin() {
     }, [fetchOsu, snackbarContext]);
 
     return (
-        <Container sx={{ mt: 4 }}>
+        <AdminPageShell
+            title="Administration de l'OSU"
+            subtitle="Gère le directeur et les délégués de direction OSU."
+        >
             <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="sm">
                 <DialogTitle>Modifier le directeur de l'OSU</DialogTitle>
                 <DialogContent>
@@ -135,9 +139,6 @@ export default function OsuAdmin() {
                     <Button variant="contained" onClick={() => void handleAddDelegue()} disabled={isSavingDelegue}>Ajouter</Button>
                 </DialogActions>
             </Dialog>
-            <Typography variant="h4" gutterBottom>
-                Administration de l'OSU
-            </Typography>
             {isLoading ? (
                 <Typography>Chargement en cours...</Typography>
             ) : (
@@ -220,6 +221,6 @@ export default function OsuAdmin() {
                     )}
                 </Box>
             )}
-        </Container>
+        </AdminPageShell>
     );
 }
