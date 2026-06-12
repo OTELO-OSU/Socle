@@ -247,7 +247,7 @@ export default function TagsAdmin() {
     return (
         <AdminPageShell
             title="Gestion des tags"
-            subtitle="Organise rapidement les utilisateurs par thématique."
+            subtitle="Octroie aux utilisateurs la permission d'accéder à certaines plateformes en fonction des tags qui leur sont associés."
             action={
                 <Button startIcon={<Add />} variant="contained" color="primary" onClick={() => setIsAjouterTagDialogOpen(true)}>
                     Ajouter un tag

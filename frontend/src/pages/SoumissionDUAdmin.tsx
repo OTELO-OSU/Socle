@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUtilisateurEnAttenteDuDU, gererUtilisateurEnAttenteDU, type UtilisateurEnAttente } from "../services/adminService";
-import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useContext } from "react";
@@ -47,31 +47,29 @@ export default function SoumissionDUAdmin() {
             subtitle="Gère les demandes en attente de validation par direction d'unité."
         >
             <AdminSurface>
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Nom</TableCell>
-                                <TableCell>Prénom</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell sx={{ textAlign: 'center' }}>Action</TableCell>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Nom</TableCell>
+                            <TableCell>Prénom</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell sx={{ textAlign: 'center' }}>Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {utilisateurs?.map((utilisateur) => (
+                            <TableRow key={utilisateur.email}>
+                                <TableCell>{utilisateur.nom}</TableCell>
+                                <TableCell>{utilisateur.prenom}</TableCell>
+                                <TableCell>{utilisateur.email}</TableCell>
+                                <TableCell sx={{ textAlign: 'center' }}>
+                                    <IconButton onClick={() => approveMutation.mutate(utilisateur.id)}><CheckIcon color="success" /></IconButton>
+                                    <IconButton onClick={() => rejectMutation.mutate(utilisateur.id)}><ClearIcon color="error" /></IconButton>
+                                </TableCell>
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {utilisateurs?.map((utilisateur) => (
-                                <TableRow key={utilisateur.email}>
-                                    <TableCell>{utilisateur.nom}</TableCell>
-                                    <TableCell>{utilisateur.prenom}</TableCell>
-                                    <TableCell>{utilisateur.email}</TableCell>
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        <IconButton onClick={() => approveMutation.mutate(utilisateur.id)}><CheckIcon color="success" /></IconButton>
-                                        <IconButton onClick={() => rejectMutation.mutate(utilisateur.id)}><ClearIcon color="error" /></IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                        ))}
+                    </TableBody>
+                </Table>
             </AdminSurface>
         </AdminPageShell>
     )
