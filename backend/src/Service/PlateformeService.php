@@ -38,6 +38,7 @@ class PlateformeService
 
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly TagService $tagService,
         private readonly Security $security
     ) {}
 
@@ -1150,6 +1151,9 @@ class PlateformeService
                         $plateformeHisto->addPublication($newPublication);
                         $this->em->persist($newPublication);
                     }
+                    break;
+                case "tags_ids":
+                    $this->tagService->tagPlateforme($plateformeHisto->getPlateforme()->getId(), $value ?? []);
                     break;
             }
         }

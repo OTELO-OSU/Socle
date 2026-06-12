@@ -9,7 +9,7 @@ import NombreTextField from "../NombreTextField";
 export function Presentation() {
     const { control } = useFormContext();
 
-    const { villeOptions, uniteOptions, employeurOptions } = useContext(DictionnaireContext);
+    const { villeOptions, uniteOptions, employeurOptions, tagsOptions } = useContext(DictionnaireContext);
 
     return (
         <>
@@ -56,6 +56,17 @@ export function Presentation() {
                         control={control}
                         label="Autre type de labellisation"
                     />
+                </Grid>
+            </Grid>
+            <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid size={{ xs: 1, md: 3 }}>
+                    <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
+                        Tags
+                    </Typography>
+                </Grid>
+                <Grid size="grow">
+                    <RHFSelect name="tags_ids" multiple control={control} label="Tags" items={tagsOptions} />
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />

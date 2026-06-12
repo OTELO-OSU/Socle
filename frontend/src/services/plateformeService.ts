@@ -102,6 +102,7 @@ export type DernierHistorique = {
     ville_id: number | null;
     logo_url: string | null;
     autre_type_labellisation: string | null;
+    tags_ids: number[];
     laboratoire_operateur_id: number | null;
     tutelles_principales_ids: number[];
     tutelles_secondaires_ids: number[];

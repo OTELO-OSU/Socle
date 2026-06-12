@@ -1339,4 +1339,16 @@ class PlateformeHistorique
 
         return $this;
     }
+
+    #[Groups(['plateforme:detail'])]
+    #[SerializedName('tags_ids')]
+    public function getTagsIds(): array
+    {
+        $ids = [];
+        /** @var PlateformeTags $tag */
+        foreach ($this->getPlateforme()->getPlateformeTags() as $tag) {
+            $ids[] = $tag->getTagId();
+        }
+        return $ids;
+    }
 }

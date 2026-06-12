@@ -40,6 +40,11 @@ class PlateformeHistoriqueDTO
 
     public ?string $autre_type_labellisation = null;
 
+    #[Assert\All([
+        new Assert\Type('integer')
+    ])]
+    public ?array $tags_ids = null;
+
     ## Appartenance
     #[Assert\NotBlank(groups: ['validation'], message: 'Le laboratoire opérateur de la plateforme est requis.')]
     #[EntityExists(entity: 'App\Entity\Entite')]
