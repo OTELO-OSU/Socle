@@ -59,7 +59,7 @@ function UniteCard({ unite, onUpdated }: UniteCardProps) {
             await onUpdated();
         } catch (error) {
             const axiosError = error as AxiosError<{ message: string }>;
-            console.error("Erreur lors de l'ajout du délégué de l'unité :", error);
+            console.error("Erreur lors de l'ajout du délégué du DU :", error);
             snackbarContext?.trigger({ message: axiosError.response?.data.message || "Erreur lors de l'ajout du délégué", couleur: "error" });
         } finally {
             setIsSavingDelegue(false);
@@ -74,7 +74,7 @@ function UniteCard({ unite, onUpdated }: UniteCardProps) {
             await onUpdated();
         } catch (error) {
             const axiosError = error as AxiosError<{ message: string }>;
-            console.error("Erreur lors de la suppression du délégué de l'unité :", error);
+            console.error("Erreur lors de la suppression du délégué du DU :", error);
             snackbarContext?.trigger({ message: axiosError.response?.data.message || "Erreur lors de la suppression du délégué", couleur: "error" });
         } finally {
             setRemovingDelegueId(null);
@@ -99,7 +99,7 @@ function UniteCard({ unite, onUpdated }: UniteCardProps) {
                 </DialogActions>
             </Dialog>
             <Dialog open={isDelegueDialogOpen} onClose={() => setIsDelegueDialogOpen(false)} fullWidth maxWidth="sm">
-                <DialogTitle>Ajouter un délégué de l'unité</DialogTitle>
+                <DialogTitle>Ajouter un délégué du DU</DialogTitle>
                 <DialogContent>
                     <Typography sx={{ mb: 2 }}>
                         Sélectionnez un agent à ajouter comme délégué du directeur de l'unité.
@@ -134,7 +134,7 @@ function UniteCard({ unite, onUpdated }: UniteCardProps) {
                     ) : (<Alert severity="warning">Aucun directeur assigné</Alert>)}
                     <Box sx={{ mt: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 1 }}>
-                            <Typography variant="subtitle1">Délégués de l'unité</Typography>
+                            <Typography variant="subtitle1">Délégués du DU</Typography>
                             <Button size="small" variant="contained" startIcon={<Add />} onClick={() => setIsDelegueDialogOpen(true)}>
                                 Ajouter un délégué
                             </Button>
