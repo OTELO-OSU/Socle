@@ -93,12 +93,12 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
     return (
         <>
             <Button variant="contained" color="primary" size="small" onClick={handleClickOpen}>
-                Ajouter un personnel
+                Modifier les personnels actuels
             </Button>
             <Dialog open={open} onClose={handleClose}>
                 <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h6" component="h2">
-                        Ajouter un personnel
+                        Modifier les personnels actuels
                     </Typography>
                     <AgentAutocompleteField label="Agent" value={agent} onChange={handleAgentChange} />
                     <TextField
