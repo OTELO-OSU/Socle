@@ -59,8 +59,9 @@ class TagService
         $tags = $this->getTags();
 
         $tagsAvecAffiliationArray = [];
-        $tagsAvecAffiliation = $this->em->getRepository(UtilisateurTags::class)->findAll();
-        foreach ($tagsAvecAffiliation as $tagAvecAffiliation) {
+        $tagsAvecAffiliationPlateforme = $this->em->getRepository(PlateformeTags::class)->findAll();
+        $tagsAvecAffiliationUser = $this->em->getRepository(UtilisateurTags::class)->findAll();
+        foreach ($tagsAvecAffiliationUser as $tagAvecAffiliation) {
             if (array_key_exists($tagAvecAffiliation->getTagId(), $tagsAvecAffiliationArray)) {
                 $tagsAvecAffiliationArray[$tagAvecAffiliation->getTagId()]["utilisateurs"][] = $tagAvecAffiliation->getUtilisateur();
             } else {
@@ -69,6 +70,16 @@ class TagService
                     continue;
                 }
                 $tagsAvecAffiliationArray[$tagAvecAffiliation->getTagId()] = ["id" => $tagAvecAffiliation->getTagId(), "nom" => $resoudreTag[0]['nom'], "utilisateurs" => [$tagAvecAffiliation->getUtilisateur()]];
+            }
+        }
+
+        foreach ($tagsAvecAffiliationPlateforme as $tagAvecAffiliation) {
+            if (!array_key_exists($tagAvecAffiliation->getTagId(), $tagsAvecAffiliationArray)) {
+                $resoudreTag = array_values(array_filter($tags, fn($tag) => $tag['id'] === $tagAvecAffiliation->getTagId()));
+                if (count($resoudreTag) === 0) {
+                    continue;
+                }
+                $tagsAvecAffiliationArray[$tagAvecAffiliation->getTagId()] = ["id" => $tagAvecAffiliation->getTagId(), "nom" => $resoudreTag[0]['nom'], "utilisateurs" => []];
             }
         }
 
