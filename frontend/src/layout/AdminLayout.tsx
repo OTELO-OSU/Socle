@@ -6,16 +6,16 @@ import { AccountCircle, CalendarMonth, Group, Hub, LocalOffer } from '@mui/icons
 import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 
-const drawerWidth = 240;
+const drawerWidth = 340;
 
 export default function AdminLayout() {
     const authContext = useContext(AuthContext);
     return (
-        <Box sx={{ display: 'flex', height: '100%', background: 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)' }}>
+        <Box sx={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)' }}>
             {/* Drawer */}
             <Box
                 sx={{
-                    height: "100%",
+                    minHeight: "100vh",
                     width: drawerWidth,
                     px: 1.5,
                     py: 2,
@@ -178,6 +178,7 @@ export default function AdminLayout() {
             <Box
                 sx={{
                     flexGrow: 1,
+                    minHeight: '100vh',
                     p: { xs: 2, md: 3 },
                 }}
             >
