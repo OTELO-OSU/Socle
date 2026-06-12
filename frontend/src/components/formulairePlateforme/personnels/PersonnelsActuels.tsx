@@ -429,7 +429,8 @@ export function PersonnelActuels() {
         // On modifie la personne si elle existe déjà
         if (existingPersonnelIndex >= 0) {
             const updated = [...currentPersonnels];
-            updated[existingPersonnelIndex] = personnel;
+            const persMerge = { ...personnel, responsable_plateforme: currentPersonnels[existingPersonnelIndex].responsable_plateforme, responsable_scientifique: currentPersonnels[existingPersonnelIndex].responsable_scientifique, responsable_technique: currentPersonnels[existingPersonnelIndex].responsable_technique };
+            updated[existingPersonnelIndex] = persMerge;
             setValue(PERSONNELS_FIELD_NAME, updated, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
             return;
         } else {
