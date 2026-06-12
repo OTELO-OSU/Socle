@@ -3,6 +3,7 @@
 namespace App\Security\Voter;
 
 use App\Entity\Plateforme;
+use App\Entity\Utilisateur;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -64,6 +65,13 @@ final class PlateformeVoter extends Voter
                             return true;
                         }
                     }
+                }
+
+                /** @var Utilisateur $user */
+                $tagsPlateforme = $subject->getPlateformeTags()->map(fn($pt) => $pt->getTagId())->toArray();
+                $tagsUtilisateur = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+                if (count(array_intersect($tagsPlateforme, $tagsUtilisateur)) > 0) {
+                    return true;
                 }
                 break;
             case self::TAG:
@@ -136,6 +144,13 @@ final class PlateformeVoter extends Voter
                         }
                     }
                 }
+
+                /** @var Utilisateur $user */
+                $tagsPlateforme = $subject->getPlateformeTags()->map(fn($pt) => $pt->getTagId())->toArray();
+                $tagsUtilisateur = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+                if (count(array_intersect($tagsPlateforme, $tagsUtilisateur)) > 0) {
+                    return true;
+                }
                 break;
             case self::EXPORTER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
@@ -161,6 +176,13 @@ final class PlateformeVoter extends Voter
                             return true;
                         }
                     }
+                }
+
+                /** @var Utilisateur $user */
+                $tagsPlateforme = $subject->getPlateformeTags()->map(fn($pt) => $pt->getTagId())->toArray();
+                $tagsUtilisateur = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+                if (count(array_intersect($tagsPlateforme, $tagsUtilisateur)) > 0) {
+                    return true;
                 }
                 break;
         }
