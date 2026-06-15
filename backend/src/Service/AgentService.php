@@ -53,6 +53,7 @@ class AgentService
 
         $qb
             ->orderBy('u.nom', 'ASC')
+            ->andWhere('NOT EXISTS (SELECT 1 FROM utilisateur_machine um WHERE um.utilisateur_id = u.id)')
             ->setFirstResult($offset)
             ->setMaxResults(self::AGENT_PAR_PAGE);
 
@@ -63,10 +64,11 @@ class AgentService
         $countQb = $conn->createQueryBuilder();
         $countQb
             ->select('COUNT(DISTINCT u.id)')
-            ->from('utilisateur', 'u');
+            ->from('utilisateur', 'u')
+            ->andWhere('NOT EXISTS (SELECT 1 FROM utilisateur_machine um WHERE um.utilisateur_id = u.id)');
 
         if ($search) {
-            $countQb->where('(
+            $countQb->andWhere('(
                 u.prenom ILIKE :search
                 OR u.nom ILIKE :search
                 OR u.email ILIKE :search

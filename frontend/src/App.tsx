@@ -23,6 +23,7 @@ import SaisieAdmin from './pages/SaisieAdmin'
 import MonCompte from './pages/MonCompte'
 import SoumissionDUAdmin from './pages/SoumissionDUAdmin'
 import TagsAdmin from './pages/TagsAdmin'
+import HarvesterAdmin from './pages/HarvesterAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -74,6 +75,7 @@ function App() {
                 <Route path="saisie" element={<SaisieAdmin />} />
                 <Route path="soumission-du" element={<SoumissionDUAdmin />} />
                 <Route path="tags" element={<TagsAdmin />} />
+                <Route path="harvester" element={<HarvesterAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />

@@ -18,6 +18,7 @@ use App\Entity\Plateforme;
 use App\Entity\PlateformeHistorique;
 use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\PlateformeHistoriqueTutelle;
+use App\Entity\PlateformeTags;
 use App\Entity\PosteFutur;
 use App\Entity\PosteFuturBap;
 use App\Entity\PosteFuturEmploiType;
@@ -345,10 +346,17 @@ class PlateformeService
         ];
     }
 
-    function getPlateformeAvecDernierHistorique(int $plateformeId): array
+    function getPlateformeAuxTags(array $tagsIds)
     {
-        if ($this->security->getUser() === null) {
-            throw new Exception("Vous devez être authentifié.", 401);
+        return $this->em->getRepository(PlateformeTags::class)->findBy(["tagId" => $tagsIds]);
+    }
+
+    function getPlateformeAvecDernierHistorique(int $plateformeId, bool $byPassSecurity = false): array
+    {
+        if (!$byPassSecurity) {
+            if ($this->security->getUser() === null) {
+                throw new Exception("Vous devez être authentifié.", 401);
+            }
         }
 
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
@@ -356,8 +364,10 @@ class PlateformeService
             throw new Exception("Plateforme non trouvée.", 404);
         }
 
-        if (!$this->security->isGranted(PlateformeVoter::LIRE, $plateforme)) {
-            throw new Exception("Vous n'avez pas les droits pour consulter cette plateforme", 403);
+        if (!$byPassSecurity) {
+            if (!$this->security->isGranted(PlateformeVoter::LIRE, $plateforme)) {
+                throw new Exception("Vous n'avez pas les droits pour consulter cette plateforme", 403);
+            }
         }
 
         $dernierHistorique = $this->em->getRepository(PlateformeHistorique::class)->findOneBy(

@@ -26,13 +26,14 @@ final class UtilisateurVoter extends Voter
     public const SOUMETTRE_AU_DU = 'SOUMETTRE_AU_DU';
     public const SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE = 'SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE';
     public const TAG_UTILISATEUR = 'TAG_UTILISATEUR';
+    public const GERER_HMT = 'GERER_HMT';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         $a = in_array($attribute, [self::APPROUVER, self::MODIFIER, self::MODIFIER_EMAIL])
             && $subject instanceof \App\Entity\Utilisateur;
 
-        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::TAG_UTILISATEUR, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE, self::GET_TOUTE_UNITE])
+        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GERER_HMT, self::TAG_UTILISATEUR, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE, self::GET_TOUTE_UNITE])
             && $subject === Utilisateur::class;
 
         $c = in_array($attribute, [self::CHANGER_DELEGUE_DU])
@@ -52,6 +53,11 @@ final class UtilisateurVoter extends Voter
 
         switch ($attribute) {
             case self::APPROUVER:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
+            case self::GERER_HMT:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;

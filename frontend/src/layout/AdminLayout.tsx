@@ -2,7 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
-import { AccountCircle, CalendarMonth, Group, Hub, LocalOffer } from '@mui/icons-material';
+import { AccountCircle, CalendarMonth, CellTower, Group, Hub, LocalOffer } from '@mui/icons-material';
 import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 
@@ -149,6 +149,22 @@ export default function AdminLayout() {
                                         <AccountCircle />
                                     </ListItemIcon>
                                     <ListItemText primary="Agent" />
+                                </ListItemButton>
+                            </ListItem>
+
+                            <ListItem disablePadding>
+                                <ListItemButton sx={{
+                                    borderRadius: 2,
+                                    '&.active': {
+                                        bgcolor: 'action.selected',
+                                        borderLeft: '3px solid',
+                                        borderColor: 'primary.main',
+                                    },
+                                }} component={NavLink} to="/admin/harvester">
+                                    <ListItemIcon>
+                                        <CellTower />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Harvester" />
                                 </ListItemButton>
                             </ListItem>
 

@@ -21,15 +21,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['plateforme:list', 'utilisateur:list'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
     #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
     private ?string $email = null;
 
@@ -113,7 +113,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $attenteApprobationDU = false;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Entite $unite = null;
 
     #[ORM\ManyToOne(inversedBy: 'employe')]
@@ -134,7 +134,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Entite::class, mappedBy: 'delegueDirecteur')]
     private Collection $deleguesDirecteur;
 
-    #[ORM\OneToMany(targetEntity: UtilisateurTags::class, mappedBy: 'utilisateur')]
+    #[ORM\OneToMany(targetEntity: UtilisateurTags::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
     private Collection $utilisateurTags;
 
     public function __construct()
