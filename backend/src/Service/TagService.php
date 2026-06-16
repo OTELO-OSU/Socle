@@ -30,25 +30,34 @@ class TagService
         $centralUrl = $this->params->get('central_tag');
 
         try {
-            // Requete HTTP vers le service central pour recuperer les tags.
             $response = $this->httpClient->request('GET', $centralUrl, [
                 'timeout' => 5,
                 'headers' => [
                     'Accept' => 'application/json',
                 ],
             ]);
-        } catch (ServerExceptionInterface) {
-            throw new Exception("La connexion au service central des tags a échoué.", 503);
-        }
 
-        if ($response->getStatusCode() >= 400) {
-            throw new Exception("Le service central des tags a retourne une erreur HTTP " . $response->getStatusCode() . ".");
-        }
+            $statusCode = $response->getStatusCode();
 
-        $tags = $response->toArray(false);
+            if ($statusCode >= 400) {
+                throw new Exception(
+                    "Le service central des tags a retourné une erreur HTTP $statusCode."
+                );
+            }
+
+            $tags = $response->toArray(false);
+        } catch (TransportExceptionInterface $e) {
+            throw new Exception(
+                "La connexion au service central des tags a échoué.",
+                503,
+                $e
+            );
+        }
 
         if (!is_array($tags)) {
-            throw new Exception("La réponse de l'URL centrale n'est pas un JSON valide.");
+            throw new Exception(
+                "La réponse de l'URL centrale n'est pas un JSON valide."
+            );
         }
 
         return $tags;
