@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -36,8 +37,8 @@ class TagService
                     'Accept' => 'application/json',
                 ],
             ]);
-        } catch (TransportExceptionInterface $e) {
-            throw new Exception("Impossible de joindre le service central des tags ($centralUrl): " . $e->getMessage(), 0, $e);
+        } catch (ServerExceptionInterface) {
+            throw new Exception("La connexion au service central des tags a échoué.", 503);
         }
 
         if ($response->getStatusCode() >= 400) {
