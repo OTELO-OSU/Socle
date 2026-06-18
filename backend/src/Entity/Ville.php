@@ -25,7 +25,7 @@ class Ville
     #[Groups(['ville:list'])]
     #[SerializedName("numero_departement")]
     #[ORM\Column]
-    private ?int $numeroDepartement = null;
+    private ?string $numeroDepartement = null;
 
     #[Groups(['ville:list'])]
     #[ORM\Column(length: 255)]
@@ -59,12 +59,12 @@ class Ville
         return $this;
     }
 
-    public function getNumeroDepartement(): ?int
+    public function getNumeroDepartement(): ?string
     {
         return $this->numeroDepartement;
     }
 
-    public function setNumeroDepartement(int $numeroDepartement): static
+    public function setNumeroDepartement(string $numeroDepartement): static
     {
         $this->numeroDepartement = $numeroDepartement;
 
