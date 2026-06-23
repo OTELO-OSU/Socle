@@ -287,7 +287,7 @@ class PlateformeService
             ->from('plateforme', 'p')
             ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
             ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
-            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id_id')
+            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id')
             ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
 
         if ($search) {

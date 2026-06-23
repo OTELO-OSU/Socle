@@ -23,7 +23,7 @@ class PlateformeHistoriquePersonnel
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
     #[Groups(['plateforme:list', "plateforme:detail"])]
-    #[ORM\JoinColumn(name: 'utilisateur_id_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
     #[Groups(['plateforme:list', "plateforme:detail"])]
