@@ -21,8 +21,9 @@ variables:
 test:
   stage: test
   before_script:
-    - apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git
-    - docker-php-ext-install pdo pdo_pgsql intl zip
+    - apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev
+    - docker-php-ext-configure gd --with-freetype --with-jpeg
+    - docker-php-ext-install gd pdo pdo_pgsql intl zip
     - cd backend
     - composer install --no-interaction --prefer-dist --no-progress
   script:
