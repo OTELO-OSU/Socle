@@ -24,7 +24,7 @@ class AdminService
     {
         if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour voir les utilisateurs en attente de validation", 403);
 
-        $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false, "emailValide" => true]);
+        $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false, "emailValide" => true, "attenteApprobationDU" => false]);
         return array_map(function (Utilisateur $user) {
             return [
                 "email" => $user->getEmail(),
