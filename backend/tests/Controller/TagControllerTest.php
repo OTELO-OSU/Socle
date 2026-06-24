@@ -191,7 +191,7 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(500);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Le service central des tags a retourne une erreur HTTP 500.', $data['message']);
+        $this->assertSame('Le service central des tags a retourné une erreur HTTP 500.', $data['message']);
     }
 
     public function testGetTagsRetourneErreurQuandCentralInjoignable(): void
@@ -200,7 +200,7 @@ class TagControllerTest extends WebTestCase
 
         $this->client->request('GET', '/api/tags');
 
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseStatusCodeSame(503);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertStringContainsString('Impossible de joindre le service central des tags', $data['message']);
     }
