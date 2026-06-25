@@ -612,7 +612,9 @@ class PlateformeService
                     $instrumentExistant->setNom($instrument["nom"]);
                     $instrumentExistant->setMarque($instrument["marque"]);
                     $instrumentExistant->setModele($instrument["modele"]);
-                    $instrumentExistant->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                    if (array_key_exists("operation_id", $instrument) && $instrument["operation_id"] !== null) {
+                        $instrumentExistant->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                    }
                     $instrumentExistant->setCout($instrument["cout"]);
                     $instrumentExistant->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
                     $instrumentExistant->setFutur(true);
@@ -635,7 +637,9 @@ class PlateformeService
                 $newInstrument->setNom($instrument["nom"]);
                 $newInstrument->setMarque($instrument["marque"]);
                 $newInstrument->setModele($instrument["modele"]);
-                $newInstrument->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                if (array_key_exists("operation_id", $instrument) && $instrument["operation_id"] !== null) {
+                    $newInstrument->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
+                }
                 $newInstrument->setCout($instrument["cout"]);
                 $newInstrument->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
                 $newInstrument->setFutur(true);
