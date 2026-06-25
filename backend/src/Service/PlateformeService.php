@@ -1164,7 +1164,11 @@ class PlateformeService
                     break;
                 case "tags_ids":
                     if ($this->security->isGranted(PlateformeVoter::TAG, $plateformeHisto->getPlateforme())) {
-                        $this->tagService->tagPlateforme($plateformeHisto->getPlateforme()->getId(), $value ?? []);
+                        try {
+                            $this->tagService->tagPlateforme($plateformeHisto->getPlateforme()->getId(), $value ?? []);
+                        } catch (Exception $e) {
+                            // Erreur siliencieuse
+                        }
                     }
                     break;
             }

@@ -202,7 +202,7 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(503);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('Impossible de joindre le service central des tags', $data['message']);
+        $this->assertStringContainsString('La connexion au service central des tags a échoué.', $data['message']);
     }
 
     public function testGetTagsAdminSuccess(): void
