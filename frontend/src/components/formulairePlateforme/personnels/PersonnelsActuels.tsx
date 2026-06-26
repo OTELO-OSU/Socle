@@ -13,7 +13,7 @@ import { DictionnaireContext } from "../../../context/dictionnaireContext";
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
     utilisateur: Agent;
-    quotite: number;
+    quotite: number | null;
     responsable_scientifique: boolean;
     responsable_technique: boolean;
     responsable_plateforme: boolean;
@@ -28,7 +28,7 @@ type DialogAjoutPersonnelProps = {
 function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
     const [open, setOpen] = useState(false);
     const [agent, setAgent] = useState<Agent | null>(null);
-    const [quotite, setQuotite] = useState("");
+    const [quotite, setQuotite] = useState<number | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleAgentChange = (value: Agent | null) => {
@@ -43,7 +43,7 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
     const handleClose = () => {
         setOpen(false);
         setAgent(null);
-        setQuotite("");
+        setQuotite(null);
         setErrorMessage(null);
     };
 
@@ -53,15 +53,20 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
             return;
         }
 
-        console.log(agent);
+        let quotiteNumber = null;
+        if (!agent.doctorant) {
+            if (quotite === null || quotite === undefined) {
+                setErrorMessage("Veuillez saisir la quotité de travail.");
+                return;
+            }
+            quotiteNumber = Number(quotite);
 
+            const isQuotiteInvalid = quotiteNumber < 0 || quotiteNumber > 100;
 
-        const quotiteNumber = Number(quotite);
-        const isQuotiteInvalid = Number.isNaN(quotiteNumber) || quotiteNumber < 0 || quotiteNumber > 100;
-
-        if (isQuotiteInvalid) {
-            setErrorMessage("La quotité doit être un nombre entre 0 et 100.");
-            return;
+            if (isQuotiteInvalid) {
+                setErrorMessage("La quotité doit être un nombre entre 0 et 100.");
+                return;
+            }
         }
 
         onAdd({
@@ -101,17 +106,19 @@ function DialogAjoutPersonnel({ onAdd }: DialogAjoutPersonnelProps) {
                         Modifier les personnels actuels
                     </Typography>
                     <AgentAutocompleteField label="Agent" value={agent} onChange={handleAgentChange} />
-                    <TextField
-                        label="Quotité de travail (%)"
-                        placeholder="50"
-                        type="number"
-                        value={quotite}
-                        onChange={(event) => {
-                            setQuotite(event.target.value);
-                            setErrorMessage(null);
-                        }}
-                        slotProps={{ htmlInput: { min: 0, max: 100 } }}
-                    />
+                    {agent && !agent.doctorant && (
+                        <TextField
+                            label="Quotité de travail (%)"
+                            placeholder="50"
+                            type="number"
+                            value={quotite}
+                            onChange={(event) => {
+                                setQuotite(event.target.value ? Number(event.target.value) : null);
+                                setErrorMessage(null);
+                            }}
+                            slotProps={{ htmlInput: { min: 0, max: 100 } }}
+                        />
+                    )}
                     {errorMessage && (
                         <Typography color="error" variant="body2">
                             {errorMessage}
@@ -393,7 +400,9 @@ function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
                 <Typography>{personnel.utilisateur.nom}</Typography>
                 <Typography>{personnel.utilisateur.prenom}</Typography>
                 <Typography>{personnel.utilisateur.email}</Typography>
-                <Chip label={`${personnel.quotite}%`} size="small" />
+                {
+                    personnel.quotite !== null && <Chip label={`${personnel.quotite}%`} size="small" />
+                }
                 {(personnel.utilisateur.type_contrat_id || personnel.utilisateur.corps_id) && <Chip color="info" label={typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant)} size="small" />}
                 {estResponsableScientifique && <Chip color="secondary" label="Responsable scientifique" size="small" />}
                 {estResponsableTechnique && <Chip color="secondary" label="Responsable technique" size="small" />}

@@ -85,8 +85,7 @@ class PlateformeHistoriqueDTO
                     new Assert\Type('integer'),
                 ]),
                 'quotite' =>
-                new Assert\Required([
-                    new Assert\NotNull(message: 'La quotité du personnel est requise.'),
+                new Assert\Optional([
                     new Assert\Type('integer'),
                     new Assert\Range(min: 0, max: 100),
                 ])
