@@ -36,7 +36,7 @@ class PlateformeHistoriquePersonnel
     #[ORM\Column(name: 'responsable_technique')]
     private ?bool $responsableTechnique = false;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['plateforme:list', "plateforme:detail"])]
     private ?int $quotite = 0;
 
@@ -110,7 +110,7 @@ class PlateformeHistoriquePersonnel
         return $this->quotite;
     }
 
-    public function setQuotite(int $quotite): static
+    public function setQuotite(?int $quotite): static
     {
         $this->quotite = $quotite;
 
