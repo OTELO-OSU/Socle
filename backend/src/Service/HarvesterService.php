@@ -152,7 +152,7 @@ class HarvesterService
             }
 
             foreach ($plateformes as $plateforme) {
-                $plateformesArray[$host] = $plateforme;
+                $plateformesArray[$host][] = $plateforme;
             }
         }
 

@@ -109,7 +109,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
-    const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
+    const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -194,9 +194,24 @@ export function ListePlateforme() {
                 {isLoadingHarvestees ? (
                     <Typography component={'p'} variant="h6">Chargement...</Typography>
                 ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {Object.entries(plateformesHarvestees).map(([host, plateforme]) => (
-                            <PlateformeCard harvester={true} key={host + '/' + plateforme.id} host={host} plateforme={plateforme} />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(plateformesHarvestees).map(([host, plateformes]) => (
+                            <Box key={host}>
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    {host}
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {plateformes.map((plateforme) => (
+                                        <PlateformeCard
+                                            key={`${host}/${plateforme.id}`}
+                                            harvester={true}
+                                            host={host}
+                                            plateforme={plateforme}
+                                        />
+                                    ))}
+                                </Box>
+                            </Box>
                         ))}
                     </Box>
                 )}

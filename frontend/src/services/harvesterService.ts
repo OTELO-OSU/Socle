@@ -49,7 +49,7 @@ export async function supprHarvester(harvesterId: number) {
 }
 
 export async function fetchPlateformeHarveste() {
-    const { data } = await symfony.get<PlateformeLight[]>('/harvester/plateformes');
+    const { data } = await symfony.get<Record<string, PlateformeLight[]>>('/harvester/plateformes');
 
     return data;
 }
