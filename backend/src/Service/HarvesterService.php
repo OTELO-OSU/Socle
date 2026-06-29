@@ -126,13 +126,16 @@ class HarvesterService
         foreach ($harvesters as $harvester) {
             $host = $harvester->getHost();
             try {
-                $response = $this->httpClient->request('GET', "https://$host/api/harvester/plateformes", [
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes?clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
                     'timeout' => 10,
                     'headers' => [
                         'Accept' => 'application/json',
                     ],
                 ]);
+
+                \dump($response->getContent());
             } catch (TransportExceptionInterface $e) {
+                \dump($e);
                 continue;
             }
 

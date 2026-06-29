@@ -46,3 +46,9 @@ export async function supprHarvester(harvesterId: number) {
 
     return data;
 }
+
+export async function fetchPlateformeHarveste() {
+    const { data } = await symfony.get<{ plateformes: any[] }>('/harvester/plateformes');
+
+    return data;
+}

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { Done, Group, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
+import { allyProps } from "../components/formulairePlateforme/allyProps";
+import { CustomTabPanel } from "../components/CustomTabPanel";
+import { fetchPlateformeHarveste } from "../services/harvesterService";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -106,10 +109,13 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
+    const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
+    const [tabs, setTabs] = useState(0);
 
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
@@ -124,44 +130,65 @@ export function ListePlateforme() {
         }
     }, [page, recherche]);
 
+    const fetchPlateformesHarveste = useCallback(async () => {
+        setIsLoadingHarvestees(true);
+        try {
+            const { plateformes } = await fetchPlateformeHarveste();
+            setPlateformesHarvestees(plateformes);
+        } catch (error) {
+            console.error("Erreur lors du chargement des plateformes :", error);
+        } finally {
+            setIsLoadingHarvestees(false);
+        }
+    }, []);
+
     useEffect(() => {
         fetchPlateformes();
+        fetchPlateformeHarveste();
     }, [fetchPlateformes]);
 
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
-            <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                <TextField
-                    type="text"
-                    placeholder="Rechercher une plateforme..."
-                    value={recherche}
-                    onChange={(e) => setRecherche(e.target.value)}
-                    sx={{ width: '55%' }}
-                />
-                <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_, newPage) => setPage(newPage)}
-                />
-            </Stack>
+            <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
+                <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
+                    <Tab label="Locales" {...allyProps(0)} />
+                    <Tab label="Moissonnées" {...allyProps(1)} />
+                </Tabs>
+            </Box>
+            <CustomTabPanel value={tabs} index={0}>
+                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
+                    <TextField
+                        type="text"
+                        placeholder="Rechercher une plateforme..."
+                        value={recherche}
+                        onChange={(e) => setRecherche(e.target.value)}
+                        sx={{ width: '55%' }}
+                    />
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={(_, newPage) => setPage(newPage)}
+                    />
+                </Stack>
 
-            {isLoading ? (
-                <Typography component={'p'} variant="h6">Chargement...</Typography>
-            ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {plateformes.map((plateforme) => (
-                        <PlateformeCard key={plateforme.id} plateforme={plateforme} />
-                    ))}
-                </Box>
-            )}
-            <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
-                Précédent
-            </Button>
-            <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
-            <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
-                Suivant
-            </Button>
+                {isLoading ? (
+                    <Typography component={'p'} variant="h6">Chargement...</Typography>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {plateformes.map((plateforme) => (
+                            <PlateformeCard key={plateforme.id} plateforme={plateforme} />
+                        ))}
+                    </Box>
+                )}
+                <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+                    Précédent
+                </Button>
+                <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
+                <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
+                    Suivant
+                </Button>
+            </CustomTabPanel>
         </Container>
     );
 }
