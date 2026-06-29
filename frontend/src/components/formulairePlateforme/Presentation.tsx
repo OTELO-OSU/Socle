@@ -1,10 +1,74 @@
 import { Divider, Grid, Stack, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { DictionnaireContext } from "../../context/dictionnaireContext";
 import { RHFTextField } from "../RHFTextField";
 import { RHFSelect } from "../RHFTextSelect";
 import NombreTextField from "../NombreTextField";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { useMap, useMapEvents } from "react-leaflet/hooks";
+
+type MapPoint = {
+    latitude: number;
+    longitude: number;
+};
+
+function FitMapToPoints({ point }: { point: MapPoint }) {
+    const map = useMap();
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        if (initialized.current) return;
+
+        if (point.latitude === undefined || point.longitude === undefined) {
+            return;
+        }
+
+        initialized.current = true;
+        map.setView([point.latitude, point.longitude], 12);
+    }, [map, point.latitude, point.longitude]);
+
+    return null;
+}
+
+function PreviewMap() {
+    const { watch, setValue } = useFormContext();
+    const point = {
+        latitude: watch("latitude"),
+        longitude: watch("longitude"),
+    }
+
+    function MapClickHandler() {
+        useMapEvents({
+            click(e) {
+                setValue("latitude", e.latlng.lat);
+                setValue("longitude", e.latlng.lng);
+            },
+        });
+
+        return null;
+    }
+
+    return (
+        <>
+            <MapContainer style={{ cursor: "crosshair" }} className="h-full w-full" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
+            [85, 180],
+            ]} scrollWheelZoom={true} maxBoundsViscosity={1.0}
+                worldCopyJump={true}
+            >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <FitMapToPoints point={point} />
+                <MapClickHandler />
+                {point.latitude !== undefined && point.longitude !== undefined && (
+                    <Marker position={[point.latitude, point.longitude]} />
+                )}
+            </MapContainer>
+        </>
+    )
+}
 
 export function Presentation() {
     const { control } = useFormContext();
@@ -91,9 +155,8 @@ export function Presentation() {
                         Localisation
                     </Typography>
                 </Grid>
-                <Grid size="grow">
-                    <NombreTextField name="latitude" size="medium" label="Latitude" placeholder="48.65609" />
-                    <NombreTextField name="longitude" size="medium" label="Longitude" placeholder="6.15496" sx={{ mt: 2 }} />
+                <Grid size="grow" sx={{ height: 400 }}>
+                    <PreviewMap />
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />

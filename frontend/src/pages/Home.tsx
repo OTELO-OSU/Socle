@@ -7,28 +7,6 @@ import MarkerClusterGroup from "react-leaflet-cluster";
 import { useMap } from "react-leaflet/hooks";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import 'leaflet/dist/leaflet.css';
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import markerIcon2xUrl from "leaflet/dist/images/marker-icon-2x.png";
-import markerIconUrl from "leaflet/dist/images/marker-icon.png";
-import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
-
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2xUrl,
-    iconUrl: markerIconUrl,
-    shadowUrl: markerShadowUrl,
-});
-
-const plateformeMarkerIcon = L.icon({
-    iconRetinaUrl: markerIcon2xUrl,
-    iconUrl: markerIconUrl,
-    shadowUrl: markerShadowUrl,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-});
 
 type PlateformeMapPoint = {
     id: number;
@@ -126,7 +104,6 @@ export default function Home() {
                         <Marker
                             key={point.id}
                             position={[point.latitude, point.longitude]}
-                            icon={plateformeMarkerIcon}
                             eventHandlers={{
                                 click: () => {
                                     setSelectedPoint(point);
