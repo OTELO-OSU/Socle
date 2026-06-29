@@ -16,7 +16,7 @@ function IconeTitre({ brouillon }: { brouillon: boolean }) {
     }
 }
 
-function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
+function PlateformeCard({ plateforme, harvester, host }: { plateforme: PlateformeLight; harvester: boolean; host?: string }) {
     const personnel = plateforme.lastHistorique.personnels
 
     const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
@@ -95,7 +95,7 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
                     </Box>
                 </CardContent>
                 <CardActions>
-                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
                         Voir les détails
                     </Link>
                     <Link component={Button} onClick={() => downloadSinglePlateforme(plateforme.id)}>
@@ -109,12 +109,12 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
-    // const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
+    const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    // const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
+    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
 
     const fetchPlateformes = useCallback(async () => {
@@ -130,22 +130,22 @@ export function ListePlateforme() {
         }
     }, [page, recherche]);
 
-    // const fetchPlateformesHarveste = useCallback(async () => {
-    //     setIsLoadingHarvestees(true);
-    //     try {
-    //         const { plateformes } = await fetchPlateformeHarveste();
-    //         setPlateformesHarvestees(plateformes);
-    //     } catch (error) {
-    //         console.error("Erreur lors du chargement des plateformes :", error);
-    //     } finally {
-    //         setIsLoadingHarvestees(false);
-    //     }
-    // }, []);
+    const fetchPlateformesHarveste = useCallback(async () => {
+        setIsLoadingHarvestees(true);
+        try {
+            const data = await fetchPlateformeHarveste();
+            setPlateformesHarvestees(data);
+        } catch (error) {
+            console.error("Erreur lors du chargement des plateformes :", error);
+        } finally {
+            setIsLoadingHarvestees(false);
+        }
+    }, []);
 
     useEffect(() => {
         fetchPlateformes();
-        fetchPlateformeHarveste();
-    }, [fetchPlateformes]);
+        fetchPlateformesHarveste();
+    }, [fetchPlateformes, fetchPlateformesHarveste]);
 
     return (
         <Container sx={{ py: 4 }}>
@@ -177,7 +177,7 @@ export function ListePlateforme() {
                 ) : (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {plateformes.map((plateforme) => (
-                            <PlateformeCard key={plateforme.id} plateforme={plateforme} />
+                            <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
                         ))}
                     </Box>
                 )}
@@ -188,6 +188,18 @@ export function ListePlateforme() {
                 <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
                     Suivant
                 </Button>
+            </CustomTabPanel>
+
+            <CustomTabPanel value={tabs} index={1}>
+                {isLoadingHarvestees ? (
+                    <Typography component={'p'} variant="h6">Chargement...</Typography>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {Object.entries(plateformesHarvestees).map(([host, plateforme]) => (
+                            <PlateformeCard harvester={true} key={host + '/' + plateforme.id} host={host} plateforme={plateforme} />
+                        ))}
+                    </Box>
+                )}
             </CustomTabPanel>
         </Container>
     );

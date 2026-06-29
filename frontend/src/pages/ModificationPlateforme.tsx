@@ -16,6 +16,7 @@ import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SnackbarContext } from "../context/snackbarContext";
 import { isAxiosError } from "axios";
+import { fetchDetailPlateformeHarvestee } from "../services/harvesterService";
 
 export default function ModificationPlateforme() {
     const [errorsArray, setErrorsArray] = useState<string[]>([]);
@@ -131,8 +132,13 @@ export default function ModificationPlateforme() {
         // Récupérer l'id de la plateforme à partir de l'URL
         const searchParams = new URLSearchParams(window.location.search);
         const id = searchParams.get('id');
+        const harvester = searchParams.get('harvester');
+        const host = searchParams.get('host');
 
-        if (id) {
+        if (id && harvester) {
+            if (!host) window.location.href = "/plateformes";
+            fetchDetailPlateformeHarvestee({ id: parseInt(id), host: host! })
+        } else if (id && !harvester) {
             fetchPlateformeDetails(parseInt(id))
                 .then((data) => {
                     setIdPlateforme(parseInt(id));

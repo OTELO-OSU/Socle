@@ -22,7 +22,6 @@ class HarvesterService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
-        private readonly ParameterBagInterface $params,
         private readonly Security $security,
         private readonly PlateformeService $plateformeService
     ) {}
@@ -87,7 +86,13 @@ class HarvesterService
         foreach ($tagsUserMachine as $tag) {
             $arrayIds[] = $tag->getTagId();
         }
-        return $this->plateformeService->getPlateformeAuxTags($arrayIds);
+        $plateformesTags = $this->plateformeService->getPlateformeAuxTags($arrayIds);
+        $plateformes = [];
+        foreach ($plateformesTags as $plateformeTag) {
+            $plateformes[] = $plateformeTag->getPlateforme();
+        }
+
+        return $plateformes;
     }
 
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): array
@@ -132,10 +137,7 @@ class HarvesterService
                         'Accept' => 'application/json',
                     ],
                 ]);
-
-                \dump($response->getContent());
             } catch (TransportExceptionInterface $e) {
-                \dump($e);
                 continue;
             }
 
@@ -150,11 +152,39 @@ class HarvesterService
             }
 
             foreach ($plateformes as $plateforme) {
-                $plateformesArray[] = $plateforme;
+                $plateformesArray[$host] = $plateforme;
             }
         }
 
         return $plateformesArray;
+    }
+
+    public function getDetailPlateformeHarvester(int $id, string $hosts): array
+    {
+        $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
+
+        if (!$harvester) {
+            throw new Exception("Harvester non trouvé.", 404);
+        }
+
+        try {
+            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id&clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+                'timeout' => 10,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+        } catch (Exception $e) {
+            throw new Exception("Erreur lors de la requête HTTP.", 500);
+        }
+
+        $plateforme = $response->toArray(false);
+
+        if (!is_array($plateforme)) {
+            throw new Exception("Erreur lors de la requête HTTP.", 500);
+        }
+
+        return $plateforme;
     }
 
     function supprimerHMT(int $id): void
