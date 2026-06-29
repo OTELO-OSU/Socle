@@ -109,12 +109,12 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
-    const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
+    // const [plateformesHarvestees, setPlateformesHarvestees] = useState<PlateformeLight[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
+    // const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
 
     const fetchPlateformes = useCallback(async () => {
@@ -130,17 +130,17 @@ export function ListePlateforme() {
         }
     }, [page, recherche]);
 
-    const fetchPlateformesHarveste = useCallback(async () => {
-        setIsLoadingHarvestees(true);
-        try {
-            const { plateformes } = await fetchPlateformeHarveste();
-            setPlateformesHarvestees(plateformes);
-        } catch (error) {
-            console.error("Erreur lors du chargement des plateformes :", error);
-        } finally {
-            setIsLoadingHarvestees(false);
-        }
-    }, []);
+    // const fetchPlateformesHarveste = useCallback(async () => {
+    //     setIsLoadingHarvestees(true);
+    //     try {
+    //         const { plateformes } = await fetchPlateformeHarveste();
+    //         setPlateformesHarvestees(plateformes);
+    //     } catch (error) {
+    //         console.error("Erreur lors du chargement des plateformes :", error);
+    //     } finally {
+    //         setIsLoadingHarvestees(false);
+    //     }
+    // }, []);
 
     useEffect(() => {
         fetchPlateformes();
