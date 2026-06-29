@@ -1,5 +1,5 @@
 import { symfony } from "../utils/axios";
-import type { PlateformeLight } from "./plateformeService";
+import type { plateformeDetails, PlateformeLight } from "./plateformeService";
 
 export type HarvesterAdmin = {
     harvesters: Harvester[];
@@ -55,9 +55,9 @@ export async function fetchPlateformeHarveste() {
 }
 
 export async function fetchDetailPlateformeHarvestee({ id, host }: { id: number, host: string }) {
-    const { data } = await symfony.get<PlateformeLight[]>('/harvester/plateforme', {
+    const { data } = await symfony.get<plateformeDetails>('/harvester/plateforme', {
         params: {
-            id,
+            plateformeId: id,
             host
         }
     });

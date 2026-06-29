@@ -107,7 +107,7 @@ final class HarvesterController extends AbstractController
         }
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 
-        return $this->json($plateforme, 200);
+        return $this->json($plateforme, 200, [], ['groups' => ['plateforme:detail']]);
     }
 
     #[Route('/admin/harvesters', methods: ['GET'])]
