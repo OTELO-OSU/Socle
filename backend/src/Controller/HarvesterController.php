@@ -76,7 +76,7 @@ final class HarvesterController extends AbstractController
     #[Route('/harvester/plateforme', methods: ['GET'])]
     public function getDetailPlateformeHarvester(Request $request): Response
     {
-        $idPlateforme = $request->query->get('id', null);
+        $idPlateforme = $request->query->get('plateformeId', null);
         $host = $request->query->get('host', null);
         $plateformes = $this->hs->getDetailPlateformeHarvester($idPlateforme, $host);
 
@@ -99,7 +99,7 @@ final class HarvesterController extends AbstractController
     #[Route('/hmt/plateforme', methods: ['GET'])]
     public function getDetailPlateformeHarvesterHMT(Request $request): Response
     {
-        $plateformeId = $request->query->get('id', null);
+        $plateformeId = $request->query->get('plateformeId', null);
         $clientId = $request->query->get('clientId', null);
         $clientSecret = $request->query->get('clientSecret', null);
         if ($plateformeId === null || $clientId === null || $clientSecret === null) {
