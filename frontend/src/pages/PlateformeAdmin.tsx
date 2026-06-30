@@ -84,17 +84,17 @@ export default function PlateformeAdmin() {
         }
 
         setResponsablesScientifiques(
-            selectedPlateforme.lastHistorique.personnels
+            selectedPlateforme.dernier_historique.personnels
                 .filter((personnel) => personnel.responsable_scientifique)
                 .map((personnel) => personnel.utilisateur)
         );
         setResponsablesTechniques(
-            selectedPlateforme.lastHistorique.personnels
+            selectedPlateforme.dernier_historique.personnels
                 .filter((personnel) => personnel.responsable_technique)
                 .map((personnel) => personnel.utilisateur)
         );
         setResponsablesPlateforme(
-            selectedPlateforme.lastHistorique.personnels
+            selectedPlateforme.dernier_historique.personnels
                 .filter((personnel) => personnel.responsable_plateforme)
                 .map((personnel) => personnel.utilisateur)
         );
@@ -161,7 +161,7 @@ export default function PlateformeAdmin() {
                 <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography variant="h4" component="h2">Modifier les responsables</Typography>
                     <Typography variant="body1">
-                        Responsables de la plateforme : {selectedPlateforme?.lastHistorique.nom_officiel ?? "N/A"}
+                        Responsables de la plateforme : {selectedPlateforme?.dernier_historique.nom_officiel ?? "N/A"}
                     </Typography>
                     <AgentAutocompleteField
                         multiple={true}
@@ -216,9 +216,9 @@ export default function PlateformeAdmin() {
                                 <CardContent>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
                                         <Box>
-                                            <Typography variant="h6">{plateforme.lastHistorique.nom_officiel}</Typography>
+                                            <Typography variant="h6">{plateforme.dernier_historique.nom_officiel}</Typography>
                                             <Typography variant="body2" color="textSecondary">
-                                                Année : {plateforme.lastHistorique.annee}
+                                                Année : {plateforme.dernier_historique.annee}
                                             </Typography>
                                         </Box>
                                         <Button
@@ -241,7 +241,7 @@ export default function PlateformeAdmin() {
                                     </Box>
                                 </CardContent>
                                 <CardActions>
-                                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.lastHistorique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.dernier_historique.id}`} color="primary" sx={{ cursor: 'pointer' }}>
                                         Voir les détails
                                     </Link>
                                 </CardActions>
