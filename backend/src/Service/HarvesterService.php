@@ -247,16 +247,10 @@ class HarvesterService
         return false;
     }
 
-    function getPlateformeHarvesteEntite(int $plateformeId, string $hosts): PlateformeHistorique
+    function getPlateformeHarvesteJson(int $plateformeId, string $hosts): string
     {
         $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
-
-        $entite = $this->serializerInterface->deserialize(
-            json_encode($plt),
-            Plateforme::class,
-            'json'
-        );
-
-        return $entite->getLastHistorique();
+        $json = $this->serializerInterface->serialize($plt, 'json', ['groups' => ['plateforme:detail']]);
+        return $json;
     }
 }

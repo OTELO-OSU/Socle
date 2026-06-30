@@ -24,6 +24,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class ExcelService
 {
@@ -32,6 +33,7 @@ class ExcelService
         private EntityManagerInterface $em,
         private PlateformeService $platformeService,
         private Security $security,
+        private SerializerInterface $serializerInterface
     ) {}
 
     function convertNameArrayToString($obj)
@@ -119,9 +121,9 @@ class ExcelService
             throw new Exception("Accès refusé", 403);
         }
 
-        $lastHistorique = $platform->getLastHistorique();
+        $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);
 
-        return $this->exportPlatformeArrayEnExcel([$lastHistorique]);
+        return $this->exportPlatformeArrayEnExcel([$json]);
     }
 
     // function exportAllPlatformFromNetworkToExcel($networkName)
@@ -252,14 +254,18 @@ class ExcelService
     //     return $this->exportPlatformsToExcel($array);
     // }
 
-    private function formatVille(?Ville $ville): string
+    private function formatVille(?int $villeId): string
     {
+        if (!$villeId) return '';
+        $ville = $this->em->getRepository(Ville::class)->find($villeId);
         if (!$ville) return '';
         return $ville->getNom() . " (" . $ville->getNumeroDepartement() . " " . $ville->getDepartement() . ")";
     }
 
-    private function formatLabo(?Entite $labo): string
+    private function formatLabo(?int $laboId): string
     {
+        if (!$laboId) return '';
+        $labo = $this->em->getRepository(Entite::class)->find($laboId);
         if (!$labo) return '';
         $chain = "";
         if ($labo->getAcronyme()) {
@@ -273,8 +279,10 @@ class ExcelService
         return $chain;
     }
 
-    private function formatFinanceur(?Entite $financeur): string
+    private function formatFinanceur(?int $financeurId): string
     {
+        if (!$financeurId) return '';
+        $financeur = $this->em->getRepository(Entite::class)->find($financeurId);
         if (!$financeur) return '';
         $chain = "";
         if ($financeur->getAcronyme()) {
@@ -288,20 +296,26 @@ class ExcelService
         return $chain;
     }
 
-    private function formatContratPersonnel(?TypeContrat $contrat): string
+    private function formatContratPersonnel(?int $contratId): string
     {
+        if (!$contratId) return '';
+        $contrat = $this->em->getRepository(TypeContrat::class)->find($contratId);
         if (!$contrat) return '';
         return $contrat->getNom();
     }
 
-    private function formatContratMaintenance(?ContratMaintenance $contrat): string
+    private function formatContratMaintenance(?int $contratId): string
     {
+        if (!$contratId) return '';
+        $contrat = $this->em->getRepository(ContratMaintenance::class)->find($contratId);
         if (!$contrat) return '';
         return $contrat->getNom();
     }
 
-    private function formatCorps(?Corps $corps): string
+    private function formatCorps(?int $corpsId): string
     {
+        if (!$corpsId) return '';
+        $corps = $this->em->getRepository(Corps::class)->find($corpsId);
         if (!$corps) return '';
         $chain = "";
         if ($corps->getAcronyme()) {
@@ -311,20 +325,26 @@ class ExcelService
         return $chain;
     }
 
-    private function formatGrade(?Grade $grade): string
+    private function formatGrade(?int $gradeId): string
     {
+        if (!$gradeId) return '';
+        $grade = $this->em->getRepository(Grade::class)->find($gradeId);
         if (!$grade) return '';
         return $grade->getNom();
     }
 
-    private function formatBap(?Bap $bap): string
+    private function formatBap(?int $bapId): string
     {
+        if (!$bapId) return '';
+        $bap = $this->em->getRepository(Bap::class)->find($bapId);
         if (!$bap) return '';
         return $bap->getLettre();
     }
 
-    private function formatEmploiType(?EmploiType $emploiType): string
+    private function formatEmploiType(?int $emploiTypeId): string
     {
+        if (!$emploiTypeId) return '';
+        $emploiType = $this->em->getRepository(EmploiType::class)->find($emploiTypeId);
         if (!$emploiType) return '';
         $chain = "";
         if ($emploiType->getAcronyme()) {
@@ -334,29 +354,34 @@ class ExcelService
         return $chain;
     }
 
-    private function formatCNU(?Cnu $cnu): string
+    private function formatCNU(?int $cnuId): string
     {
+        if (!$cnuId) return '';
+        $cnu = $this->em->getRepository(Cnu::class)->find($cnuId);
         if (!$cnu) return '';
         return $cnu->getNumero();
     }
 
-    private function formatContratMutaliseType(?Instrument $instrument): string
+    private function formatContratMutaliseType(array $instrument): string
     {
-        if (!$instrument) return '';
-        if ($instrument->isMutualiseSite()) return "Site";
-        if ($instrument->isMutualiseUmrOsu()) return "UMR/OSU";
-        if ($instrument->isMutualiseAutreInstrument()) return "Autre Instrument";
+        if ($instrument["mutualise_site"]) return "Site";
+        if ($instrument["mutualise_umr_osu"]) return "UMR/OSU";
+        if ($instrument["mutualise_autre_instrument"]) return "Autre Instrument";
         return "";
     }
 
-    private function formatSection(?SectionCnrs $section): string
+    private function formatSection(?int $sectionId): string
     {
+        if (!$sectionId) return '';
+        $section = $this->em->getRepository(SectionCnrs::class)->find($sectionId);
         if (!$section) return '';
         return $section->getNumero();
     }
 
-    private function formatDeterminationTarif(?DeterminationTarifMethode $dtm): string
+    private function formatDeterminationTarif(?int $dtmId): string
     {
+        if (!$dtmId) return '';
+        $dtm = $this->em->getRepository(DeterminationTarifMethode::class)->find($dtmId);
         if (!$dtm) return '';
         return $dtm->getNom();
     }
@@ -367,9 +392,6 @@ class ExcelService
         return $rangNumerateur . '/' . $rangDenominateur;
     }
 
-    /**
-     * @param PlateformeHistorique[] $platforms
-     */
     public function exportPlatformeArrayEnExcel(array $platforms)
     {
         $sheet1Array = [];
@@ -586,24 +608,26 @@ class ExcelService
             "DOI"
         ];
 
-        /** @var PlateformeHistorique $plat */
         foreach ($platforms as $plat) {
+            $plat = \json_decode($plat, true);
+            $dernierHistorique = $plat["dernier_historique"];
             $sheet1Array[] = [
-                $plat->getId(),
-                $plat->getNomOfficiel(),
-                $plat->getFormeDeveloppeeNomOfficiel(),
-                $plat->getPlateforme()->isInstrumentNational() ? 'Oui' : 'Non',
-                $plat->getAutreTypeLabellisation() ?? '',
-                $plat->getSiteWeb() ?? '',
-                $this->formatVille($plat->getVille()),
-                $plat->getLogoUrl() ?? '',
+                $plat["id"],
+                $dernierHistorique["nom_officiel"],
+                $dernierHistorique["forme_developpee_nom_officiel"],
+                $plat["instrument_national"] ? 'Oui' : 'Non',
+                $dernierHistorique["autre_type_labellisation"] ?? '',
+                $dernierHistorique["site_web"] ?? '',
+                $this->formatVille($dernierHistorique["ville_id"]),
+                $dernierHistorique["logo_url"] ?? '',
             ];
 
             $prenomDirLab = '';
             $nomDirLab = '';
             $emailDirLab = '';
-            $laboOperateur = $plat->getLaboratoireOperateur();
-            if ($laboOperateur) {
+            $laboOperateurId = $dernierHistorique["laboratoire_operateur_id"] ?? null;
+            if ($laboOperateurId) {
+                $laboOperateur = $this->em->getRepository(Entite::class)->find($laboOperateurId);
                 $dir = $laboOperateur->getDirecteur();
                 if ($dir) {
                     $prenomDirLab = $dir->getPrenom() ?? '';
@@ -613,57 +637,66 @@ class ExcelService
             }
 
             $sheet3Array[] = [
-                $plat->getId(),
-                $this->formatLabo($plat->getLaboratoireOperateur()),
+                $plat["id"],
+                $this->formatLabo($dernierHistorique["laboratoire_operateur_id"]),
                 $nomDirLab,
                 $prenomDirLab,
                 $emailDirLab,
-                $plat->getLatitude() ?? '',
-                $plat->getLongitude() ?? '',
+                $dernierHistorique["latitude"] ?? '',
+                $dernierHistorique["longitude"] ?? '',
             ];
 
-            $tutelles = $plat->getPlateformeHistoriqueTutelles();
+            $tutellesPrincipales = $dernierHistorique["tutelles_principales_ids"] ?? [];
 
-            foreach ($tutelles as $tutelle) {
+            foreach ($tutellesPrincipales as $tutelleId) {
                 $sheet4Array[] = [
-                    $plat->getId(),
-                    $tutelle->isPrincipale() ? 'Principale' : 'Secondaire',
-                    $this->formatFinanceur($tutelle->getTutelle()),
+                    $plat["id"],
+                    'Principale',
+                    $this->formatFinanceur($tutelleId),
                 ];
             }
 
-            $personnels = $plat->getPlateformeHistoriquePersonnels();
+            $tutellesSecondaires = $dernierHistorique["tutelles_secondaires_ids"] ?? [];
+
+            foreach ($tutellesSecondaires as $tutelleId) {
+                $sheet4Array[] = [
+                    $plat["id"],
+                    'Secondaire',
+                    $this->formatFinanceur($tutelleId),
+                ];
+            }
+
+            $personnels = $dernierHistorique["personnels"] ?? [];
+
 
             foreach ($personnels as $pers) {
-                $baps = $pers->getUtilisateur()->getBaps();
-                $emploiTypes = $pers->getUtilisateur()->getEmploiTypes();
                 $sheet5Array[] = [
-                    $plat->getId(),
-                    $this->formatContratPersonnel($pers->getUtilisateur()->getTypeContrat()),
-                    $pers->isResponsableScientifique() ? 'Oui' : 'Non',
-                    $pers->isResponsableTechnique() ? 'Oui' : 'Non',
-                    $pers->isResponsablePlateforme() ? 'Oui' : 'Non',
-                    $pers->getUtilisateur()->isDoctorant() ? 'Oui' : 'Non',
-                    $pers->getUtilisateur()->getNom() ?? '',
-                    $pers->getUtilisateur()->getPrenom() ?? '',
-                    $pers->getUtilisateur()->getEmail() ?? '',
-                    $this->formatFinanceur($pers->getUtilisateur()->getEmployeur()),
-                    $this->formatFinanceur($pers->getUtilisateur()->getUniversiteRattachement()),
-                    $this->formatCorps($pers->getUtilisateur()->getCorps()),
-                    $this->formatGrade($pers->getUtilisateur()->getGrade()),
-                    $baps[0] ? $this->formatBap($baps[0]) : '',
-                    $baps[1] ? $this->formatBap($baps[1]) : '',
-                    $emploiTypes[0] ? $this->formatEmploiType($emploiTypes[0]) : '',
-                    $emploiTypes[1] ? $this->formatEmploiType($emploiTypes[1]) : '',
-                    $this->formatCNU($pers->getUtilisateur()->getCnu()),
-                    $this->formatSection($pers->getUtilisateur()->getSectionCnrs()),
-                    $pers->getQuotite() ?? '',
+                    $plat["id"],
+                    $this->formatContratPersonnel($pers["utilisateur"]["type_contrat_id"] ?? null),
+                    $pers["responsable_scientifique"] ? 'Oui' : 'Non',
+                    $pers["responsable_technique"] ? 'Oui' : 'Non',
+                    $pers["responsable_plateforme"] ? 'Oui' : 'Non',
+                    $pers["utilisateur"]["doctorant"] ? 'Oui' : 'Non',
+                    $pers["utilisateur"]["nom"] ?? '',
+                    $pers["utilisateur"]["prenom"] ?? '',
+                    $pers["utilisateur"]["email"] ?? '',
+                    $this->formatFinanceur($pers["utilisateur"]["employeur_id"]),
+                    $this->formatFinanceur($pers["utilisateur"]["universite_rattachement_id"]),
+                    $this->formatCorps($pers["utilisateur"]["corps_id"]),
+                    $this->formatGrade($pers["utilisateur"]["grade_id"]),
+                    array_key_exists(0, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][0]) : '',
+                    array_key_exists(1, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][1]) : '',
+                    array_key_exists(0, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][0]) : '',
+                    array_key_exists(1, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][1]) : '',
+                    $this->formatCNU($pers["utilisateur"]["cnu_id"]),
+                    $this->formatSection($pers["utilisateur"]["section_cnrs_id"]),
+                    $pers["quotite"] ?? '',
                     '',
                 ];
             }
 
             $sheet5Array[] = [
-                $plat->getId(),
+                $plat["id"],
                 "Autres Etudiants",
                 "",
                 "",
@@ -683,12 +716,12 @@ class ExcelService
                 "",
                 "",
                 "",
-                $plat->getNombreAutresEtudiants() ?? '',
+                $dernierHistorique["nombre_autres_etudiants"] ?? '',
             ];
 
             $sheet5Array[] = [
-                $plat->getId(),
-                "Autres Etudiants",
+                $plat["id"],
+                "Apprentis / Alternants",
                 "",
                 "",
                 "",
@@ -707,13 +740,13 @@ class ExcelService
                 "",
                 "",
                 "",
-                $plat->getNombreApprentisAlternants() ?? '',
+                $dernierHistorique["nombre_apprentis_alternants"] ?? '',
             ];
 
-            $posteFuturs = $plat->getPosteFuturs();
+            $posteFuturs = $dernierHistorique["postes_futurs"] ?? [];
             foreach ($posteFuturs as $pf) {
                 $bapChaine = "";
-                foreach ($pf->getBaps() as $bap) {
+                foreach ($pf["baps_ids"] as $bap) {
                     if (!empty($bapChaine)) {
                         $bapChaine .= " ; ";
                     }
@@ -722,7 +755,7 @@ class ExcelService
                 }
 
                 $emploiTypeChaine = "";
-                foreach ($pf->getEmploiTypes() as $emploiType) {
+                foreach ($pf["emploi_types_ids"] as $emploiType) {
                     if (!empty($emploiTypeChaine)) {
                         $emploiTypeChaine .= " ; ";
                     }
@@ -732,176 +765,173 @@ class ExcelService
 
 
                 $sheet6Array[] = [
-                    $plat->getId(),
-                    $this->formatFinanceur($pf->getEmployeur()),
-                    $this->formatCorps($pf->getCorps()),
+                    $plat["id"],
+                    $this->formatFinanceur($pf["employeur_id"]),
+                    $this->formatCorps($pf["corps_id"]),
                     $bapChaine,
                     $emploiTypeChaine,
-                    $pf->getQuotite() ?? '',
-                    $this->formatRang($pf->getRangNumerateur(), $pf->getRangDenominateur()),
+                    $pf["quotite"] ?? '',
+                    $this->formatRang($pf["rang_numerateur"] ?? '', $pf["rang_denominateur"] ?? ''),
                 ];
             }
 
-            foreach ($plat->getInstruments() as $instrument) {
-                if (!$instrument->isFutur()) {
+            foreach ($dernierHistorique["instruments"] ?? [] as $instrument) {
+                if (!$instrument["futur"]) {
                     $sheet7Array[] = [
-                        $plat->getId(),
-                        $instrument->getId() ?? '',
-                        $instrument->getNom() ?? '',
-                        $instrument->getMarque() ?? '',
-                        $instrument->getModele() ?? '',
-                        $instrument->getAnneeAcquisition() ?? '',
-                        $instrument->getCout() ?? '',
-                        $instrument->getValeurRemplacement() ?? '',
-                        $instrument->getDureeUtilisation() ?? '',
+                        $plat["id"],
+                        $instrument["id"] ?? '',
+                        $instrument["nom"] ?? '',
+                        $instrument["marque"] ?? '',
+                        $instrument["modele"] ?? '',
+                        $instrument["annee_acquisition"] ?? '',
+                        $instrument["cout"] ?? '',
+                        $instrument["valeur_remplacement"] ?? '',
+                        $instrument["duree_utilisation"] ?? '',
                     ];
 
-                    foreach ($instrument->getFinancementInstruments() as $financement) {
+                    foreach ($instrument["source_financement"] ?? [] as $financement) {
                         $sheet8Array[] = [
-                            $plat->getId(),
-                            $instrument->getId() ?? '',
-                            $this->formatFinanceur($financement->getFinanceur()),
-                            $financement->getTaux() ?? '',
+                            $plat["id"] ?? '',
+                            $instrument["id"] ?? '',
+                            $this->formatFinanceur($financement["financeur_id"]),
+                            $financement["taux"] ?? '',
                         ];
                     }
 
                     $sheet8BisBisArray[] = [
-                        $plat->getId(),
-                        $instrument->getId() ?? '',
-                        $this->formatContratMaintenance($instrument->getContratMaintenance()),
-                        $instrument->getCommentaireNatureContrat() ?? '',
-                        $instrument->getFournisseurContrat() ?? '',
+                        $plat["id"] ?? '',
+                        $instrument["id"] ?? '',
+                        $this->formatContratMaintenance($instrument["contrat_maintenance_id"] ?? null),
+                        $instrument["commentaire_nature_contrat"] ?? '',
+                        $instrument["fournisseur_contrat"] ?? '',
                         $this->formatContratMutaliseType($instrument),
-                        $instrument->getCoutMaintenance() ?? '',
+                        $instrument["cout_maintenance"] ?? '',
                     ];
 
-                    foreach ($instrument->getInstrumentMutualisationsIds() as $mutualisation) {
+                    foreach ($instrument["mutualise_autre_instrument_ids"] ?? [] as $mutualisation) {
                         $sheet8BisArray[] = [
-                            $plat->getId(),
-                            $instrument->getId() ?? '',
+                            $plat["id"] ?? '',
+                            $instrument["id"] ?? '',
                             $mutualisation
                         ];
                     }
                 } else {
                     $sheet9Array[] = [
-                        $plat->getId(),
-                        $instrument->getId() ?? '',
-                        $instrument->getNom() ?? '',
-                        $instrument->getMarque() ?? '',
-                        $instrument->getModele() ?? '',
-                        $instrument->getAnneeAchatEnvisagee() ?? '',
-                        $instrument->getCout() ?? '',
+                        $plat["id"] ?? '',
+                        $instrument["id"] ?? '',
+                        $instrument["nom"] ?? '',
+                        $instrument["marque"] ?? '',
+                        $instrument["modele"] ?? '',
+                        $instrument["annee_acquisition"] ?? '',
+                        $instrument["cout"] ?? '',
                     ];
 
-                    foreach ($instrument->getFinancementInstruments() as $financement) {
+                    foreach ($instrument["source_financement"] ?? [] as $financement) {
                         $sheet10Array[] = [
-                            $plat->getId(),
-                            $instrument->getId() ?? '',
-                            $this->formatFinanceur($financement->getFinanceur()),
-                            $financement->getTaux() ?? '',
+                            $plat["id"] ?? '',
+                            $instrument["id"] ?? '',
+                            $this->formatFinanceur($financement["financeur_id"]),
+                            $financement["taux"] ?? '',
                         ];
                     }
                 }
             }
 
             $total = 0;
-            if ($plat->getMaterielConsommable()) $total += $plat->getMaterielConsommable();
-            if ($plat->getContratEntretien()) $total += $plat->getContratEntretien();
-            if ($plat->getEtudePrestation()) $total += $plat->getEtudePrestation();
-            if ($plat->getFluideEnergie()) $total += $plat->getFluideEnergie();
-            if ($plat->getMissionFraisGeneraux()) $total += $plat->getMissionFraisGeneraux();
+            if ($dernierHistorique["materiel_consommable"]) $total += $dernierHistorique["materiel_consommable"];
+            if ($dernierHistorique["contrat_entretien"]) $total += $dernierHistorique["contrat_entretien"];
+            if ($dernierHistorique["etude_prestation"]) $total += $dernierHistorique["etude_prestation"];
+            if ($dernierHistorique["fluide_energie"]) $total += $dernierHistorique["fluide_energie"];
+            if ($dernierHistorique["mission_frais_generaux"]) $total += $dernierHistorique["mission_frais_generaux"];
 
             $sheet11Array[] = [
-                $plat->getId(),
-                $plat->getMaterielConsommable() ?? '',
-                $plat->getContratEntretien() ?? '',
-                $plat->getEtudePrestation() ?? '',
-                $plat->getFluideEnergie() ?? '',
-                $plat->getMissionFraisGeneraux() ?? '',
+                $plat["id"] ?? '',
+                $dernierHistorique["materiel_consommable"] ?? '',
+                $dernierHistorique["contrat_entretien"] ?? '',
+                $dernierHistorique["etude_prestation"] ?? '',
+                $dernierHistorique["fluide_energie"] ?? '',
+                $dernierHistorique["mission_frais_generaux"] ?? '',
                 $total,
             ];
 
             $sheet12Array[] = [
-                $plat->getId(),
-                $plat->getEspaceBureau() ?? '',
-                $plat->getEspaceLaboratoire() ?? '',
+                $plat["id"] ?? '',
+                $dernierHistorique["espace_bureau"] ?? '',
+                $dernierHistorique["espace_laboratoire"] ?? '',
             ];
 
             $sheet13Array[] = [
-                $plat->getId(),
-                $plat->getContributionTutelleTaux() ?? '',
-                $plat->getContributionFondPublicTaux() ?? '',
-                $plat->getContributionFondPriveTaux() ?? '',
-                $plat->getContributionCreditTaux() ?? '',
-                $plat->getContributionProjetRechercheTaux() ?? '',
-                $plat->getContributionStructurePiaTaux() ?? '',
-                $plat->getDotationInstrumentNational() ?? '',
+                $plat["id"] ?? '',
+                $dernierHistorique["contribution_tutelle_taux"] ?? '',
+                $dernierHistorique["contribution_fond_public_taux"] ?? '',
+                $dernierHistorique["contribution_fond_prive_taux"] ?? '',
+                $dernierHistorique["contribution_credit_taux"] ?? '',
+                $dernierHistorique["contribution_projet_recherche_taux"] ?? '',
+                $dernierHistorique["contribution_structure_pia_taux"] ?? '',
+                $dernierHistorique["dotation_instrument_national"] ?? '',
             ];
 
-            foreach ($plat->getContributionTutelles() as $contribTutelle) {
+            foreach ($dernierHistorique["contribution_tutelles"] ?? [] as $contribTutelle) {
                 $sheet14Array[] = [
-                    $plat->getId(),
-                    $this->formatFinanceur($contribTutelle->getFinanceur()),
-                    $contribTutelle->getTaux() ?? '',
+                    $plat["id"] ?? '',
+                    $this->formatFinanceur($contribTutelle["financeur_id"]),
+                    $contribTutelle["taux"] ?? '',
                 ];
             }
 
             $sheet15Array[] = [
-                $plat->getId(),
-                $this->formatDeterminationTarif($plat->getDeterminationTarifPlateforme()),
-                $plat->isLabellisationQualite() ? "Oui" : "Non",
-                $plat->getNomLabellisationQualite() ?? '',
-                $plat->isProcedureTransparentePrestationExterieure() ? "Oui" : "Non",
-                $plat->isProcedureTransparenteTous() ? "Oui" : "Non",
-                $plat->getModele772424Taux(),
-                $plat->getModele771224Taux(),
-                $plat->getModele572424Taux(),
-                $plat->getModele571224Taux(),
-                $plat->getUtilisationFonctionnementTaux() ?? '',
-                $plat->getUtilisationMaintenanceTaux() ?? '',
-                $plat->getUtilisationDeveloppementTaux() ?? '',
-                $plat->getUtilisationPanneTaux() ?? '',
-                $plat->getUtilisationTempsMortTaux() ?? '',
-                $plat->getUtilisationEquipeOperanteTaux() ?? '',
-                $plat->getPublicationCollaborationInterne() ?? '',
-                $plat->getPublicationCollaborationExterne() ?? '',
-                $plat->getUtilisationPrestationServiceTaux() ?? '',
-                $plat->getAccueilInternationalTaux() ?? '',
+                $plat["id"] ?? '',
+                $this->formatDeterminationTarif($dernierHistorique["determination_tarif_plateforme_id"]),
+                $dernierHistorique["labellisation_qualite"] ? "Oui" : "Non",
+                $dernierHistorique["nom_labellisation_qualite"] ?? '',
+                $dernierHistorique["procedure_transparente_prestation_exterieure"] ? "Oui" : "Non",
+                $dernierHistorique["procedure_transparente_tous"] ? "Oui" : "Non",
+                $dernierHistorique["modele772424_taux"] ?? '',
+                $dernierHistorique["modele771224_taux"] ?? '',
+                $dernierHistorique["modele572424_taux"] ?? '',
+                $dernierHistorique["modele571224_taux"] ?? '',
+                $dernierHistorique["utilisation_fonctionnement_taux"] ?? '',
+                $dernierHistorique["utilisation_maintenance_taux"] ?? '',
+                $dernierHistorique["utilisation_developpement_taux"] ?? '',
+                $dernierHistorique["utilisation_panne_taux"] ?? '',
+                $dernierHistorique["utilisation_temps_mort_taux"] ?? '',
+                $dernierHistorique["utilisation_equipe_operante_taux"] ?? '',
+                $dernierHistorique["publication_collaboration_interne"] ?? '',
+                $dernierHistorique["publication_collaboration_externe"] ?? '',
+                $dernierHistorique["utilisation_prestation_service_taux"] ?? '',
+                $dernierHistorique["accueil_international_taux"] ?? '',
             ];
 
             $sheet16Array[] = [
-                $plat->getId(),
-                $plat->isBgesRealise() ? "Oui" : "Non",
-                $plat->getBgesDomicileTravail() ?? '',
-                $plat->getBgesMission() ?? '',
-                $plat->getBgesMissionExt() ?? '',
-                $plat->getBgesConsommable() ?? '',
-                $plat->getBgesEquipement() ?? '',
-                $plat->getBgesEnvoiEchantillon() ?? '',
-                $plat->getBgesBatiment() ?? '',
-                $plat->getBgesDechet() ?? '',
+                $plat["id"] ?? '',
+                $dernierHistorique["bges_realise"] ? "Oui" : "Non",
+                $dernierHistorique["bges_domicile_travail"] ?? '',
+                $dernierHistorique["bges_mission"] ?? '',
+                $dernierHistorique["bges_mission_ext"] ?? '',
+                $dernierHistorique["bges_consommable"] ?? '',
+                $dernierHistorique["bges_equipement"] ?? '',
+                $dernierHistorique["bges_envoi_echantillon"] ?? '',
+                $dernierHistorique["bges_batiment"] ?? '',
+                $dernierHistorique["bges_dechet"] ?? '',
             ];
 
             $sheet17Array[] = [
-                $plat->getId(),
-                $plat->getPublicationEquipeOperante() ?? '',
-                $plat->getPublicationCollaborationInterne() ?? '',
-                $plat->getPublicationCollaborationExterne() ?? '',
-                $plat->getPublicationAutreType() ?? '',
-                $plat->getPublicationThese() ?? '',
+                $plat["id"] ?? '',
+                $dernierHistorique["publication_equipe_operante"] ?? '',
+                $dernierHistorique["publication_collaboration_interne"] ?? '',
+                $dernierHistorique["publication_collaboration_externe"] ?? '',
+                $dernierHistorique["publication_autre_type"] ?? '',
+                $dernierHistorique["publication_these"] ?? '',
             ];
 
-            foreach ($plat->getPublications() as $publication) {
+            foreach ($plat["publications"] ?? [] as $publication) {
                 $sheet18Array[] = [
-                    $plat->getId(),
-                    $publication->getNumero() ?? '',
-                    $publication->getDoi() ?? '',
+                    $plat["id"] ?? '',
+                    $publication["numero"] ?? '',
+                    $publication["doi"] ?? '',
                 ];
             }
         }
-
-
-
 
         $spreadsheet = new Spreadsheet();
         $sheet1 = $spreadsheet->getActiveSheet();
@@ -941,7 +971,7 @@ class ExcelService
         }
 
         $sheet5 = $spreadsheet->createSheet();
-        $sheet5->setTitle('Responsables_de_Plateforme');
+        $sheet5->setTitle('Personnels_de_la_Plateforme');
         $sheet5->getStyle('1')->getFont()->setBold(true);
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet5Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {

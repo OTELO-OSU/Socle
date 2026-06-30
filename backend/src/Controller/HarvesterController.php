@@ -123,7 +123,7 @@ final class HarvesterController extends AbstractController
     {
         $id = $request->query->get('id');
         $host = $request->query->get('host');
-        $entite = $this->hs->getPlateformeHarvesteEntite($id, $host);
+        $entite = $this->hs->getPlateformeHarvesteJson($id, $host);
         $content = $this->es->exportPlatformeArrayEnExcel([$entite]);
 
         return new Response($content, 200, [

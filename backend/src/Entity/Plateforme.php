@@ -22,16 +22,10 @@ class Plateforme
     #[Groups(['plateforme:list', 'plateforme:detail'])]
     private ?string $pseudoId = null;
 
-    private ?PlateformeHistorique $dernierHistorique = null;
-
     #[Groups(['plateforme:list', 'plateforme:detail'])]
     #[SerializedName('dernier_historique')]
     public function getLastHistorique(): ?PlateformeHistorique
     {
-        if ($this->dernierHistorique !== null) {
-            return $this->dernierHistorique;
-        }
-
         $historiques = $this->getPlateformeHistoriques()->toArray();
 
         usort(
@@ -41,18 +35,6 @@ class Plateforme
         );
 
         return $historiques[0] ?? null;
-    }
-
-    #[SerializedName('dernier_historique')]
-    public function setLastHistorique(?PlateformeHistorique $historique): static
-    {
-        $this->dernierHistorique = $historique;
-
-        if ($historique !== null) {
-            $this->addPlateformeHistorique($historique);
-        }
-
-        return $this;
     }
 
     /**

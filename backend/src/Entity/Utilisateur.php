@@ -452,6 +452,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->sectionCnrs;
     }
 
+    #[SerializedName("section_cnrs_id")]
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    public function getSectionCnrsId(): ?int
+    {
+        return $this->sectionCnrs ? $this->sectionCnrs->getId() : null;
+    }
+
     public function setSectionCnrs(?SectionCnrs $sectionCnrs): static
     {
         $this->sectionCnrs = $sectionCnrs;
@@ -462,6 +469,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCnu(): ?Cnu
     {
         return $this->cnu;
+    }
+
+    #[SerializedName("cnu_id")]
+    #[Groups(['utilisateur:list', 'plateforme:detail'])]
+    public function getCnuId(): ?int
+    {
+        return $this->cnu ? $this->cnu->getId() : null;
     }
 
     public function setCnu(?Cnu $cnu): static
