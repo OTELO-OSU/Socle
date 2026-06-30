@@ -17,7 +17,7 @@ function IconeTitre({ brouillon }: { brouillon: boolean }) {
 }
 
 function PlateformeCard({ plateforme, harvester, host }: { plateforme: PlateformeLight; harvester: boolean; host?: string }) {
-    const personnel = plateforme.lastHistorique.personnels
+    const personnel = plateforme.dernier_historique.personnels
 
     const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
     const responsableTechnique = personnel.filter(p => p.responsable_technique);
@@ -31,7 +31,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
-                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.lastHistorique.brouillon} />{plateforme.lastHistorique.nom_officiel}</Typography>
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
                             {plateforme.instrument_national && (
                                 <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
                                     <Verified fontSize="small" />
@@ -87,9 +87,9 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                     </Box>
                                 </>)}
                         </Box>
-                        {plateforme.lastHistorique.logo_url &&
+                        {plateforme.dernier_historique.logo_url &&
                             <Box>
-                                <img src={plateforme.lastHistorique.logo_url} alt={`${plateforme.lastHistorique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
+                                <img src={plateforme.dernier_historique.logo_url} alt={`${plateforme.dernier_historique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
                             </Box>
                         }
                     </Box>
@@ -98,7 +98,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                     <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
                         Voir les détails
                     </Link>
-                    <Link component={Button} onClick={() => downloadSinglePlateforme(plateforme.id)}>
+                    <Link component={Button} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
                         Exporter
                     </Link>
                 </CardActions>

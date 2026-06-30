@@ -15,31 +15,36 @@ class Plateforme
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'plateforme:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['plateforme:list'])]
+    #[Groups(['plateforme:list', 'plateforme:detail'])]
     private ?string $pseudoId = null;
 
-    #[Groups(['plateforme:list'])]
-    function getLastHistorique(): ?PlateformeHistorique
+    #[Groups(['plateforme:list', 'plateforme:detail'])]
+    #[SerializedName('dernier_historique')]
+    public function getLastHistorique(): ?PlateformeHistorique
     {
         $historiques = $this->getPlateformeHistoriques()->toArray();
-        usort($historiques, fn(PlateformeHistorique $a, PlateformeHistorique $b) => $b->getAnnee() <=> $a->getAnnee());
+
+        usort(
+            $historiques,
+            fn(PlateformeHistorique $a, PlateformeHistorique $b)
+            => $b->getAnnee() <=> $a->getAnnee()
+        );
+
         return $historiques[0] ?? null;
     }
 
-    function getLastHistoriqueEntity(): ?PlateformeHistorique
+    #[SerializedName('dernier_historique')]
+    public function setLastHistorique(?PlateformeHistorique $historique): static
     {
-        $historiques = $this->getPlateformeHistoriques();
-        $recent = null;
-        foreach ($historiques as $historique) {
-            if ($recent === null || $historique->getAnnee() > $recent->getAnnee()) {
-                $recent = $historique;
-            }
+        if ($historique !== null) {
+            $this->addPlateformeHistorique($historique);
         }
-        return $recent;
+
+        return $this;
     }
 
     /**

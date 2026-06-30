@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\Harvester;
 use App\Entity\Plateforme;
+use App\Entity\PlateformeHistorique;
+use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurMachine;
@@ -14,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -23,6 +26,7 @@ class HarvesterService
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
         private readonly Security $security,
+        private readonly SerializerInterface $serializerInterface,
         private readonly PlateformeService $plateformeService
     ) {}
 
@@ -95,10 +99,10 @@ class HarvesterService
         return $plateformes;
     }
 
-    public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): array
+    public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
         $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new Exception("Harvester non trouvé.", 404);
-        $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
+        $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
@@ -106,9 +110,6 @@ class HarvesterService
             $arrayIds[] = $tag->getTagId();
         }
 
-        $plateformeMereId = $plateforme["id"];
-        /** @var Plateforme $plateformeMere */
-        $plateformeMere = $this->em->getRepository(Plateforme::class)->find($plateformeMereId);
         $plateformeTags = $plateformeMere->getPlateformeTags();
         $arrayTags = [];
         foreach ($plateformeTags as $PlateformeTags) {
@@ -118,7 +119,7 @@ class HarvesterService
         if (empty(array_intersect($arrayIds, $arrayTags))) {
             throw new Exception("Accès refusé.", 403);
         } else {
-            return $plateforme;
+            return $plateformeMere;
         }
     }
 
@@ -244,5 +245,18 @@ class HarvesterService
             }
         }
         return false;
+    }
+
+    function getPlateformeHarvesteEntite(int $plateformeId, string $hosts): PlateformeHistorique
+    {
+        $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
+
+        $entite = $this->serializerInterface->deserialize(
+            json_encode($plt),
+            Plateforme::class,
+            'json'
+        );
+
+        return $entite->getLastHistorique();
     }
 }

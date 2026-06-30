@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\ExcelService;
 use App\Service\HarvesterService;
-use App\Service\TagService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HarvesterController extends AbstractController
 {
-    public function __construct(private readonly HarvesterService $hs) {}
+    public function __construct(private readonly HarvesterService $hs, private readonly ExcelService $es) {}
 
     #[Route('/harvester/hmt', methods: ['GET'])]
     public function gethmt(Request $request): Response
@@ -116,5 +116,19 @@ final class HarvesterController extends AbstractController
         $harvesters = $this->hs->getHarvesters();
         $hmt = $this->hs->getHMT();
         return $this->json(['harvesters' => $harvesters, 'hmt' => $hmt], 200, [], ['groups' => ['harvester:admin', 'hmt:admin']]);
+    }
+
+    #[Route('/harvester/export/plateforme', methods: ['GET'])]
+    public function exportPlateforme(Request $request): Response
+    {
+        $id = $request->query->get('id');
+        $host = $request->query->get('host');
+        $entite = $this->hs->getPlateformeHarvesteEntite($id, $host);
+        $content = $this->es->exportPlatformeArrayEnExcel([$entite]);
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plateforme_' . $id . '.xlsx"',
+        ]);
     }
 }

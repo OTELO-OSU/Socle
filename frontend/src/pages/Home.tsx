@@ -58,17 +58,17 @@ async function getPlateformeMapPoints(): Promise<PlateformeMapPoint[]> {
 
     return allPlateformes
         .filter((plateforme) => {
-            const latitude = plateforme.lastHistorique.latitude;
-            const longitude = plateforme.lastHistorique.longitude;
+            const latitude = plateforme.dernier_historique.latitude;
+            const longitude = plateforme.dernier_historique.longitude;
             return typeof latitude === "number" && typeof longitude === "number";
         })
         .map((plateforme) => ({
             id: plateforme.id,
-            nom: plateforme.lastHistorique.nom_officiel,
-            siteWeb: plateforme.lastHistorique.site_web,
-            villeId: plateforme.lastHistorique.ville_id,
-            latitude: plateforme.lastHistorique.latitude as number,
-            longitude: plateforme.lastHistorique.longitude as number,
+            nom: plateforme.dernier_historique.nom_officiel,
+            siteWeb: plateforme.dernier_historique.site_web,
+            villeId: plateforme.dernier_historique.ville_id,
+            latitude: plateforme.dernier_historique.latitude as number,
+            longitude: plateforme.dernier_historique.longitude as number,
         }));
 }
 

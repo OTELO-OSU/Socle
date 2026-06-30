@@ -36,12 +36,7 @@ final class PlateformeController extends AbstractController
             200,
             [],
             [
-                'groups' => ['plateforme:detail', 'instrument:mutualisation'],
-                AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
-                AbstractNormalizer::IGNORED_ATTRIBUTES => ['plateforme'],
-                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => static function (object $object): mixed {
-                    return method_exists($object, 'getId') ? $object->getId() : spl_object_id($object);
-                }
+                'groups' => ['plateforme:detail', 'instrument:mutualisation']
             ]
         );
     }
