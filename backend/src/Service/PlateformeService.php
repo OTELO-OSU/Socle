@@ -383,6 +383,7 @@ class PlateformeService
             'id' => $plateforme->getId(),
             'pseudo_id' => $plateforme->getPseudoId(),
             'instrument_national' => $plateforme->isInstrumentNational(),
+            'tags_ids' => array_map(fn(PlateformeTags $tag) => $tag->getTagId(), $plateforme->getPlateformeTags()->toArray()),
             'dernier_historique' => $dernierHistorique,
         ];
     }
