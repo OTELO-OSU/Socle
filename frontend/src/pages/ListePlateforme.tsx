@@ -179,6 +179,11 @@ export function ListePlateforme() {
                         {plateformes.map((plateforme) => (
                             <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
                         ))}
+                        {plateformes.length === 0 && (
+                            <Typography variant="body1" sx={{ mb: 2 }}>
+                                Aucune plateforme locale trouvée.
+                            </Typography>
+                        )}
                     </Box>
                 )}
                 <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
@@ -213,6 +218,11 @@ export function ListePlateforme() {
                                 </Box>
                             </Box>
                         ))}
+                        {Object.entries(plateformesHarvestees).length === 0 && (
+                            <Typography variant="body1">
+                                Aucune plateforme moissonnée trouvée.
+                            </Typography>
+                        )}
                     </Box>
                 )}
             </CustomTabPanel>
