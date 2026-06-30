@@ -16,13 +16,16 @@ import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SnackbarContext } from "../context/snackbarContext";
 import { isAxiosError } from "axios";
+import { fetchDetailPlateformeHarvestee } from "../services/harvesterService";
 
 export default function ModificationPlateforme() {
     const [errorsArray, setErrorsArray] = useState<string[]>([]);
+    const searchParams = new URLSearchParams(window.location.search);
     const methods = useForm<DernierHistorique>({
         defaultValues: {
             publications: []
-        }
+        },
+        disabled: searchParams.get('harvester') === 'true',
     });
 
     const {
@@ -131,8 +134,29 @@ export default function ModificationPlateforme() {
         // Récupérer l'id de la plateforme à partir de l'URL
         const searchParams = new URLSearchParams(window.location.search);
         const id = searchParams.get('id');
+        const harvester = searchParams.get('harvester');
+        const host = searchParams.get('host');
 
-        if (id) {
+        if (id && harvester == "true") {
+            if (!host) window.location.href = "/plateformes";
+            fetchDetailPlateformeHarvestee({ id: parseInt(id), host: host! })
+                .then((data) => {
+                    setIdPlateforme(parseInt(id));
+                    // Mettre à jour les valeurs du formulaire avec les données récupérées
+                    methods.reset(data.dernier_historique);
+                    methods.setValue("annee", undefined);
+                    setInstrumentNational(data.instrument_national);
+                    if (data.instrument_national) {
+                        if (methods.getValues("dotation_instrument_national") === undefined) {
+                            methods.setValue("dotation_instrument_national", null);
+                        }
+                    } else {
+                        methods.setValue("dotation_instrument_national", undefined);
+                    }
+                }).catch((error) => {
+                    console.error("Erreur lors du chargement des détails de la plateforme :", error);
+                });
+        } else if (id && harvester !== "true") {
             fetchPlateformeDetails(parseInt(id))
                 .then((data) => {
                     setIdPlateforme(parseInt(id));
@@ -210,20 +234,24 @@ export default function ModificationPlateforme() {
                         </Box>
                     )}
 
-                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                        <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit" onClick={sauvegarder} disabled={!boutonActif}>
-                            <SendIcon sx={{ mr: 1 }} />
-                            Valider
-                        </Button>
-                        <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme}>
-                            <RefreshIcon sx={{ mr: 1 }} />
-                            Tester
-                        </Button>
-                        <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon}>
-                            <SaveIcon sx={{ mr: 1 }} />
-                            Enregistrer au brouillon
-                        </Button>
-                    </Box>
+                    {
+                        searchParams.get('harvester') !== 'true' && (
+                            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                                <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit" onClick={sauvegarder} disabled={!boutonActif}>
+                                    <SendIcon sx={{ mr: 1 }} />
+                                    Valider
+                                </Button>
+                                <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme}>
+                                    <RefreshIcon sx={{ mr: 1 }} />
+                                    Tester
+                                </Button>
+                                <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon}>
+                                    <SaveIcon sx={{ mr: 1 }} />
+                                    Enregistrer au brouillon
+                                </Button>
+                            </Box>
+                        )
+                    }
                 </form>
                 <ul>
                     {Object.entries(errors).map(([field, error]) => {

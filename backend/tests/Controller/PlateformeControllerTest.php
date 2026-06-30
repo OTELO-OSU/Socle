@@ -1041,11 +1041,11 @@ class PlateformeControllerTest extends WebTestCase
             \json_encode($plateformeData)
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "La quotité du personnel est requise.",
-            $data['messageArray'][0]
+            "Plateforme sauvegardée avec succès.",
+            $data['message']
         );
 
         self::assertEmailCount(0);
@@ -1061,11 +1061,11 @@ class PlateformeControllerTest extends WebTestCase
             \json_encode($plateformeData)
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "La quotité du personnel est requise.",
-            $data['messageArray'][0]
+            "Plateforme sauvegardée avec succès.",
+            $data['message']
         );
 
         self::assertEmailCount(0);

@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\ExcelService;
 use App\Service\HarvesterService;
-use App\Service\TagService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HarvesterController extends AbstractController
 {
-    public function __construct(private readonly HarvesterService $hs) {}
+    public function __construct(private readonly HarvesterService $hs, private readonly ExcelService $es) {}
 
     #[Route('/harvester/hmt', methods: ['GET'])]
     public function gethmt(Request $request): Response
@@ -68,6 +68,24 @@ final class HarvesterController extends AbstractController
     #[Route('/harvester/plateformes', methods: ['GET'])]
     public function getListePlateformeHarvester(Request $request): Response
     {
+        $plateformes = $this->hs->getListePlateformeHarveste();
+
+        return $this->json($plateformes, 200);
+    }
+
+    #[Route('/harvester/plateforme', methods: ['GET'])]
+    public function getDetailPlateformeHarvester(Request $request): Response
+    {
+        $idPlateforme = $request->query->get('plateformeId', null);
+        $host = $request->query->get('host', null);
+        $plateformes = $this->hs->getDetailPlateformeHarvester($idPlateforme, $host);
+
+        return $this->json($plateformes, 200);
+    }
+
+    #[Route('/hmt/plateformes', methods: ['GET'])]
+    public function getListePlateformeHarvesterHMT(Request $request): Response
+    {
         $clientId = $request->query->get('clientId', null);
         $clientSecret = $request->query->get('clientSecret', null);
         if ($clientId === null || $clientSecret === null) {
@@ -78,10 +96,10 @@ final class HarvesterController extends AbstractController
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
     }
 
-    #[Route('/harvester/plateforme', methods: ['GET'])]
-    public function getDetailPlateformeHarvester(Request $request): Response
+    #[Route('/hmt/plateforme', methods: ['GET'])]
+    public function getDetailPlateformeHarvesterHMT(Request $request): Response
     {
-        $plateformeId = $request->query->get('id', null);
+        $plateformeId = $request->query->get('plateformeId', null);
         $clientId = $request->query->get('clientId', null);
         $clientSecret = $request->query->get('clientSecret', null);
         if ($plateformeId === null || $clientId === null || $clientSecret === null) {
@@ -89,7 +107,7 @@ final class HarvesterController extends AbstractController
         }
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 
-        return $this->json($plateforme, 200);
+        return $this->json($plateforme, 200, [], ['groups' => ['plateforme:detail']]);
     }
 
     #[Route('/admin/harvesters', methods: ['GET'])]
@@ -98,5 +116,19 @@ final class HarvesterController extends AbstractController
         $harvesters = $this->hs->getHarvesters();
         $hmt = $this->hs->getHMT();
         return $this->json(['harvesters' => $harvesters, 'hmt' => $hmt], 200, [], ['groups' => ['harvester:admin', 'hmt:admin']]);
+    }
+
+    #[Route('/harvester/export/plateforme', methods: ['GET'])]
+    public function exportPlateforme(Request $request): Response
+    {
+        $id = $request->query->get('id');
+        $host = $request->query->get('host');
+        $entite = $this->hs->getPlateformeHarvesteJson($id, $host);
+        $content = $this->es->exportPlatformeArrayEnExcel([$entite]);
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plateforme_' . $id . '.xlsx"',
+        ]);
     }
 }

@@ -11,7 +11,7 @@ export type PlateformeLight = {
     id: number;
     pseudo_id: string;
     instrument_national: boolean;
-    lastHistorique: DernierHistorique & {
+    dernier_historique: DernierHistorique & {
         brouillon: boolean;
     };
 }

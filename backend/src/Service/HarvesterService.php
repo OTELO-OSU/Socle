@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\Harvester;
 use App\Entity\Plateforme;
+use App\Entity\PlateformeHistorique;
+use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurMachine;
@@ -14,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -22,8 +25,8 @@ class HarvesterService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
-        private readonly ParameterBagInterface $params,
         private readonly Security $security,
+        private readonly SerializerInterface $serializerInterface,
         private readonly PlateformeService $plateformeService
     ) {}
 
@@ -87,13 +90,19 @@ class HarvesterService
         foreach ($tagsUserMachine as $tag) {
             $arrayIds[] = $tag->getTagId();
         }
-        return $this->plateformeService->getPlateformeAuxTags($arrayIds);
+        $plateformesTags = $this->plateformeService->getPlateformeAuxTags($arrayIds);
+        $plateformes = [];
+        foreach ($plateformesTags as $plateformeTag) {
+            $plateformes[] = $plateformeTag->getPlateforme();
+        }
+
+        return $plateformes;
     }
 
-    public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): array
+    public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
         $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new Exception("Harvester non trouvé.", 404);
-        $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
+        $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
@@ -101,9 +110,6 @@ class HarvesterService
             $arrayIds[] = $tag->getTagId();
         }
 
-        $plateformeMereId = $plateforme["id"];
-        /** @var Plateforme $plateformeMere */
-        $plateformeMere = $this->em->getRepository(Plateforme::class)->find($plateformeMereId);
         $plateformeTags = $plateformeMere->getPlateformeTags();
         $arrayTags = [];
         foreach ($plateformeTags as $PlateformeTags) {
@@ -113,7 +119,7 @@ class HarvesterService
         if (empty(array_intersect($arrayIds, $arrayTags))) {
             throw new Exception("Accès refusé.", 403);
         } else {
-            return $plateforme;
+            return $plateformeMere;
         }
     }
 
@@ -126,7 +132,7 @@ class HarvesterService
         foreach ($harvesters as $harvester) {
             $host = $harvester->getHost();
             try {
-                $response = $this->httpClient->request('GET', "https://$host/api/harvester/plateformes", [
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes?clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
                     'timeout' => 10,
                     'headers' => [
                         'Accept' => 'application/json',
@@ -147,11 +153,49 @@ class HarvesterService
             }
 
             foreach ($plateformes as $plateforme) {
-                $plateformesArray[] = $plateforme;
+                $tagsPlateforme = $plateforme['tags_ids'] ?? [];
+                $bool = $this->verifPermission($tagsPlateforme);
+                if ($bool) {
+                    $plateformesArray[$host][] = $plateforme;
+                }
             }
         }
 
         return $plateformesArray;
+    }
+
+    public function getDetailPlateformeHarvester(int $id, string $hosts): array
+    {
+        $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
+
+        if (!$harvester) {
+            throw new Exception("Harvester non trouvé.", 404);
+        }
+
+        try {
+            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id&clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+                'timeout' => 10,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+        } catch (Exception $e) {
+            throw new Exception("Erreur lors de la requête HTTP.", 500);
+        }
+
+        $plateforme = $response->toArray(false);
+
+        if (!is_array($plateforme)) {
+            throw new Exception("Erreur lors de la requête HTTP.", 500);
+        }
+
+        $tagsPlateforme = $plateforme['tags_ids'] ?? [];
+        $bool = $this->verifPermission($tagsPlateforme);
+        if (!$bool) {
+            throw new Exception("Accès refusé.", 403);
+        }
+
+        return $plateforme;
     }
 
     function supprimerHMT(int $id): void
@@ -184,5 +228,29 @@ class HarvesterService
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un harvester.", 403);
         return $this->em->getRepository(UtilisateurMachine::class)->findAll();
+    }
+
+    function verifPermission(array $tagsArray)
+    {
+        /** @var Utilisateur $user */
+        $user = $this->security->getUser();
+        if (\in_array('ROLE_ADMIN', $user->getRoles())) return true;
+        if (\in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+        if (\in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+        $userTags = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+        foreach ($tagsArray as $tagId) {
+            if (\in_array($tagId, $userTags)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getPlateformeHarvesteJson(int $plateformeId, string $hosts): string
+    {
+        $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
+        $json = $this->serializerInterface->serialize($plt, 'json', ['groups' => ['plateforme:detail']]);
+        return $json;
     }
 }

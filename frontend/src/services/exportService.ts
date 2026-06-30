@@ -27,8 +27,29 @@ function requestSinglePlateformeExport(plateformeId: number) {
     });
 }
 
-export async function downloadSinglePlateforme(plateformeId: number): Promise<void> {
-    const response = await requestSinglePlateformeExport(plateformeId);
+function requestSingleHarvesterPlateformeExport(plateformeId: number, host: string) {
+    return symfony.get("/harvester/export/plateforme", {
+        params: {
+            id: plateformeId,
+            host: host
+        },
+        responseType: "blob"
+    });
+}
+
+export async function downloadSinglePlateforme({ plateformeId, harvester, host }: { plateformeId: number, harvester: boolean, host: string }): Promise<void> {
+    let response;
+    if (harvester) {
+        if (host) {
+            response = await requestSingleHarvesterPlateformeExport(plateformeId, host);
+        }
+    } else {
+        response = await requestSinglePlateformeExport(plateformeId);
+    }
+
+    if (!response) {
+        return;
+    }
 
     const blob = response.data as Blob;
     const filename =

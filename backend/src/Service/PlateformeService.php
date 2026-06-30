@@ -351,7 +351,7 @@ class PlateformeService
         return $this->em->getRepository(PlateformeTags::class)->findBy(["tagId" => $tagsIds]);
     }
 
-    function getPlateformeAvecDernierHistorique(int $plateformeId, bool $byPassSecurity = false): array
+    function getPlateformeAvecDernierHistorique(int $plateformeId, bool $byPassSecurity = false): Plateforme
     {
         if (!$byPassSecurity) {
             if ($this->security->getUser() === null) {
@@ -379,12 +379,7 @@ class PlateformeService
             throw new Exception("Aucun historique trouvé pour cette plateforme.", 404);
         }
 
-        return [
-            'id' => $plateforme->getId(),
-            'pseudo_id' => $plateforme->getPseudoId(),
-            'instrument_national' => $plateforme->isInstrumentNational(),
-            'dernier_historique' => $dernierHistorique,
-        ];
+        return $dernierHistorique->getPlateforme();
     }
 
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void

@@ -1,4 +1,5 @@
 import { symfony } from "../utils/axios";
+import type { plateformeDetails, PlateformeLight } from "./plateformeService";
 
 export type HarvesterAdmin = {
     harvesters: Harvester[];
@@ -44,5 +45,22 @@ export async function supprHMT(clientId: number) {
 export async function supprHarvester(harvesterId: number) {
     const { data } = await symfony.delete<{ harvester: string }>('/harvester', { data: { harvesterId } });
 
+    return data;
+}
+
+export async function fetchPlateformeHarveste() {
+    const { data } = await symfony.get<Record<string, PlateformeLight[]>>('/harvester/plateformes');
+
+    return data;
+}
+
+export async function fetchDetailPlateformeHarvestee({ id, host }: { id: number, host: string }) {
+    const { data } = await symfony.get<plateformeDetails>('/harvester/plateforme', {
+        params: {
+            plateformeId: id,
+            host
+        }
+    });
+    console.log("data", data);
     return data;
 }

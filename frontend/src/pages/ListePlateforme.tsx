@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { Done, Group, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
+import { allyProps } from "../components/formulairePlateforme/allyProps";
+import { CustomTabPanel } from "../components/CustomTabPanel";
+import { fetchPlateformeHarveste } from "../services/harvesterService";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -13,8 +16,8 @@ function IconeTitre({ brouillon }: { brouillon: boolean }) {
     }
 }
 
-function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
-    const personnel = plateforme.lastHistorique.personnels
+function PlateformeCard({ plateforme, harvester, host }: { plateforme: PlateformeLight; harvester: boolean; host?: string }) {
+    const personnel = plateforme.dernier_historique.personnels
 
     const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
     const responsableTechnique = personnel.filter(p => p.responsable_technique);
@@ -28,7 +31,7 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
-                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.lastHistorique.brouillon} />{plateforme.lastHistorique.nom_officiel}</Typography>
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
                             {plateforme.instrument_national && (
                                 <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
                                     <Verified fontSize="small" />
@@ -84,18 +87,18 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
                                     </Box>
                                 </>)}
                         </Box>
-                        {plateforme.lastHistorique.logo_url &&
+                        {plateforme.dernier_historique.logo_url &&
                             <Box>
-                                <img src={plateforme.lastHistorique.logo_url} alt={`${plateforme.lastHistorique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
+                                <img src={plateforme.dernier_historique.logo_url} alt={`${plateforme.dernier_historique.nom_officiel} logo`} style={{ maxHeight: 126 }} />
                             </Box>
                         }
                     </Box>
                 </CardContent>
                 <CardActions>
-                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
                         Voir les détails
                     </Link>
-                    <Link component={Button} onClick={() => downloadSinglePlateforme(plateforme.id)}>
+                    <Link component={Button} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
                         Exporter
                     </Link>
                 </CardActions>
@@ -106,10 +109,13 @@ function PlateformeCard({ plateforme }: { plateforme: PlateformeLight }) {
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
+    const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
+    const [tabs, setTabs] = useState(0);
 
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
@@ -124,44 +130,102 @@ export function ListePlateforme() {
         }
     }, [page, recherche]);
 
+    const fetchPlateformesHarveste = useCallback(async () => {
+        setIsLoadingHarvestees(true);
+        try {
+            const data = await fetchPlateformeHarveste();
+            setPlateformesHarvestees(data);
+        } catch (error) {
+            console.error("Erreur lors du chargement des plateformes :", error);
+        } finally {
+            setIsLoadingHarvestees(false);
+        }
+    }, []);
+
     useEffect(() => {
         fetchPlateformes();
-    }, [fetchPlateformes]);
+        fetchPlateformesHarveste();
+    }, [fetchPlateformes, fetchPlateformesHarveste]);
 
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
-            <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                <TextField
-                    type="text"
-                    placeholder="Rechercher une plateforme..."
-                    value={recherche}
-                    onChange={(e) => setRecherche(e.target.value)}
-                    sx={{ width: '55%' }}
-                />
-                <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_, newPage) => setPage(newPage)}
-                />
-            </Stack>
+            <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
+                <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
+                    <Tab label="Locales" {...allyProps(0)} />
+                    <Tab label="Moissonnées" {...allyProps(1)} />
+                </Tabs>
+            </Box>
+            <CustomTabPanel value={tabs} index={0}>
+                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
+                    <TextField
+                        type="text"
+                        placeholder="Rechercher une plateforme..."
+                        value={recherche}
+                        onChange={(e) => setRecherche(e.target.value)}
+                        sx={{ width: '55%' }}
+                    />
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={(_, newPage) => setPage(newPage)}
+                    />
+                </Stack>
 
-            {isLoading ? (
-                <Typography component={'p'} variant="h6">Chargement...</Typography>
-            ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {plateformes.map((plateforme) => (
-                        <PlateformeCard key={plateforme.id} plateforme={plateforme} />
-                    ))}
-                </Box>
-            )}
-            <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
-                Précédent
-            </Button>
-            <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
-            <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
-                Suivant
-            </Button>
+                {isLoading ? (
+                    <Typography component={'p'} variant="h6">Chargement...</Typography>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {plateformes.map((plateforme) => (
+                            <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
+                        ))}
+                        {plateformes.length === 0 && (
+                            <Typography variant="body1" sx={{ mb: 2 }}>
+                                Aucune plateforme locale trouvée.
+                            </Typography>
+                        )}
+                    </Box>
+                )}
+                <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+                    Précédent
+                </Button>
+                <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
+                <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
+                    Suivant
+                </Button>
+            </CustomTabPanel>
+
+            <CustomTabPanel value={tabs} index={1}>
+                {isLoadingHarvestees ? (
+                    <Typography component={'p'} variant="h6">Chargement...</Typography>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(plateformesHarvestees).map(([host, plateformes]) => (
+                            <Box key={host}>
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    {host}
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {plateformes.map((plateforme) => (
+                                        <PlateformeCard
+                                            key={`${host}/${plateforme.id}`}
+                                            harvester={true}
+                                            host={host}
+                                            plateforme={plateforme}
+                                        />
+                                    ))}
+                                </Box>
+                            </Box>
+                        ))}
+                        {Object.entries(plateformesHarvestees).length === 0 && (
+                            <Typography variant="body1">
+                                Aucune plateforme moissonnée trouvée.
+                            </Typography>
+                        )}
+                    </Box>
+                )}
+            </CustomTabPanel>
         </Container>
     );
 }
