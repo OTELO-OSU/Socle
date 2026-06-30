@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use App\Entity\Plateforme;
 use App\Service\HarvesterService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -84,7 +85,7 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetListePlateformeHarvesterRetourne400QuandParametresManquants(): void
     {
-        $this->client->request('GET', '/api/harvester/plateformes?clientId=test-client');
+        $this->client->request('GET', '/api/hmt/plateformes?clientId=test-client');
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -107,7 +108,7 @@ class HarvesterControllerTest extends WebTestCase
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
-        $this->client->request('GET', '/api/harvester/plateformes?clientId=client-123&clientSecret=secret-456');
+        $this->client->request('GET', '/api/hmt/plateformes?clientId=client-123&clientSecret=secret-456');
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -118,7 +119,7 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetDetailPlateformeHarvesterRetourne400QuandParametresManquants(): void
     {
-        $this->client->request('GET', '/api/harvester/plateforme?id=1&clientId=client-123');
+        $this->client->request('GET', '/api/hmt/plateforme?id=1&clientId=client-123');
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -127,22 +128,24 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetDetailPlateformeHarvesterRetourne200AvecDetail(): void
     {
-        $detail = ['id' => 1, 'nomOfficiel' => 'Plateforme A'];
+        $plateforme = new Plateforme();
+        $plateforme->setPseudoId("ptf_1");
+        $plateforme->addPlateformeHistorique((new \App\Entity\PlateformeHistorique())->setNomOfficiel('Plateforme A'));
 
         $harvesterService = $this->createMock(HarvesterService::class);
         $harvesterService
             ->expects($this->once())
             ->method('getPlateformeDetailPourMachine')
             ->with('client-123', 'secret-456', 1)
-            ->willReturn($detail);
+            ->willReturn($plateforme);
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
-        $this->client->request('GET', '/api/harvester/plateforme?id=1&clientId=client-123&clientSecret=secret-456');
+        $this->client->request('GET', '/api/hmt/plateforme?plateformeId=1&clientId=client-123&clientSecret=secret-456');
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(1, $data['id']);
-        $this->assertSame('Plateforme A', $data['nomOfficiel']);
+        $this->assertSame("ptf_1", $data['pseudoId']);
+        $this->assertSame('Plateforme A', $data['dernier_historique']['nom_officiel']);
     }
 }
