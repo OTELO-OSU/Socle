@@ -158,6 +158,18 @@ class Plateforme
         return $this;
     }
 
+    #[SerializedName("tags_ids")]
+    #[Groups(['plateforme:list', "plateforme:detail"])]
+    public function getPlateformeTagsId(): array
+    {
+        $tagsId = [];
+        foreach ($this->plateformeTags as $plateformeTag) {
+            $tagsId[] = $plateformeTag->getTagId();
+        }
+
+        return $tagsId;
+    }
+
     public function getPlateformeTags(): Collection
     {
         return $this->plateformeTags;

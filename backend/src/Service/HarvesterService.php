@@ -152,7 +152,11 @@ class HarvesterService
             }
 
             foreach ($plateformes as $plateforme) {
-                $plateformesArray[$host][] = $plateforme;
+                $tagsPlateforme = $plateforme['tags_ids'] ?? [];
+                $bool = $this->verifPermission($tagsPlateforme);
+                if ($bool) {
+                    $plateformesArray[$host][] = $plateforme;
+                }
             }
         }
 
@@ -182,6 +186,12 @@ class HarvesterService
 
         if (!is_array($plateforme)) {
             throw new Exception("Erreur lors de la requête HTTP.", 500);
+        }
+
+        $tagsPlateforme = $plateforme['tags_ids'] ?? [];
+        $bool = $this->verifPermission($tagsPlateforme);
+        if (!$bool) {
+            throw new Exception("Accès refusé.", 403);
         }
 
         return $plateforme;
@@ -217,5 +227,22 @@ class HarvesterService
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un harvester.", 403);
         return $this->em->getRepository(UtilisateurMachine::class)->findAll();
+    }
+
+    function verifPermission(array $tagsArray)
+    {
+        /** @var Utilisateur $user */
+        $user = $this->security->getUser();
+        if (\in_array('ROLE_ADMIN', $user->getRoles())) return true;
+        if (\in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+        if (\in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+        $userTags = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+        foreach ($tagsArray as $tagId) {
+            if (\in_array($tagId, $userTags)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
