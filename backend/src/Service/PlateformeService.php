@@ -12,6 +12,7 @@ use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\FinancementInstrument;
 use App\Entity\Instrument;
+use App\Entity\ModaliteRecrutement;
 use App\Entity\Operation;
 use App\Entity\Parametre;
 use App\Entity\Plateforme;
@@ -836,6 +837,7 @@ class PlateformeService
                         // Overrider les champs du poste futur
                         $posteFuturExistant->setCorps($this->em->getReference(Corps::class, $poste["corps_id"]));
                         $posteFuturExistant->setEmployeur($this->em->getReference(Entite::class, $poste["employeur_id"]));
+                        $posteFuturExistant->setModaliteRecrutement($this->em->getReference(ModaliteRecrutement::class, $poste["modalite_recrutement_id"]));
                         $posteFuturExistant->setQuotite($poste["quotite"]);
 
                         // Supprimer les baps en trop
@@ -911,6 +913,7 @@ class PlateformeService
                         $newPosteFutur->setRangDenominateur($poste["rang_denominateur"]);
                         $newPosteFutur->setCorps($this->em->getReference(Corps::class, $poste["corps_id"]));
                         $newPosteFutur->setEmployeur($this->em->getReference(Entite::class, $poste["employeur_id"]));
+                        $newPosteFutur->setModaliteRecrutement($this->em->getReference(ModaliteRecrutement::class, $poste["modalite_recrutement_id"]));
                         $newPosteFutur->setQuotite($poste["quotite"]);
 
                         foreach (($poste["baps_ids"] ?? []) as $bap) {
