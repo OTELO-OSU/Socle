@@ -11,6 +11,7 @@ use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\Grade;
 use App\Entity\Instrument;
+use App\Entity\ModaliteRecrutement;
 use App\Entity\Plateforme;
 use App\Entity\PlateformeHistorique;
 use App\Entity\SectionCnrs;
@@ -296,6 +297,14 @@ class ExcelService
         return $chain;
     }
 
+    private function formatModaliteRecrutement(?int $modaliteId): string
+    {
+        if (!$modaliteId) return '';
+        $modalite = $this->em->getRepository(ModaliteRecrutement::class)->find($modaliteId);
+        if (!$modalite) return '';
+        return $modalite->getNom();
+    }
+
     private function formatContratPersonnel(?int $contratId): string
     {
         if (!$contratId) return '';
@@ -453,6 +462,7 @@ class ExcelService
         $sheet6Array[] = [
             "ID_Plateforme",
             "Employeur",
+            "Modalité_Recrutement",
             "Corps",
             "BAP",
             "Emploi_Type",
@@ -767,6 +777,7 @@ class ExcelService
                 $sheet6Array[] = [
                     $plat["id"],
                     $this->formatFinanceur($pf["employeur_id"]),
+                    $this->formatModaliteRecrutement($pf["modalite_recrutement_id"]),
                     $this->formatCorps($pf["corps_id"]),
                     $bapChaine,
                     $emploiTypeChaine,
