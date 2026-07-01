@@ -91,7 +91,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                 >
                     {bap.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
-                            {option.nom}
+                            {option.lettre} - {option.nom}
                         </MenuItem>
                     ))}
                 </Select>
@@ -110,7 +110,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                 >
                     {emploiTypeDisponible?.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
-                            {option.nom}
+                            {option.acronyme} - {option.nom}
                         </MenuItem>
                     ))}
                 </Select>
