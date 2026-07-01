@@ -100,6 +100,11 @@ export type Universite = {
     acronyme: string | null;
 }
 
+export type ModaliteRecrutement = {
+    id: number;
+    nom: string;
+}
+
 export async function fetchUnites() {
     const { data } = await symfony.get<Unite[]>("/dictionnaire/unites");
 
@@ -120,6 +125,12 @@ export async function fetchVilles() {
 
 export async function fetchEmployeurs() {
     const { data } = await symfony.get<Employeur[]>("/dictionnaire/employeurs");
+
+    return data;
+}
+
+export async function fetchModalitesRecrutement() {
+    const { data } = await symfony.get<ModaliteRecrutement[]>("/dictionnaire/modalites_recrutement");
 
     return data;
 }

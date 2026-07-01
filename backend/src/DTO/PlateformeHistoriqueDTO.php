@@ -111,6 +111,11 @@ class PlateformeHistoriqueDTO
                     new Assert\NotBlank(message: 'L\'employeur du poste futur est requis.'),
                     new Assert\Type('integer'),
                 ]),
+                'modalite_recrutement_id' =>
+                new Assert\Required([
+                    new Assert\NotBlank(message: 'La modalité de recrutement du poste futur est requise.'),
+                    new Assert\Type('integer'),
+                ]),
                 'corps_id' =>
                 new Assert\Required([
                     new Assert\NotBlank(message: 'Le corps du poste futur est requis.'),

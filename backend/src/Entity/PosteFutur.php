@@ -66,6 +66,9 @@ class PosteFutur
     #[ORM\ManyToMany(targetEntity: EmploiType::class, cascade: ['remove'])]
     private Collection $emploiTypes;
 
+    #[ORM\ManyToOne(inversedBy: 'posteFuturs')]
+    private ?ModaliteRecrutement $modaliteRecrutement = null;
+
     public function __construct()
     {
         $this->baps = new ArrayCollection();
@@ -216,6 +219,25 @@ class PosteFutur
     public function removeEmploiType(EmploiType $posteFuturEmploiType): static
     {
         $this->emploiTypes->removeElement($posteFuturEmploiType);
+        return $this;
+    }
+
+    #[Groups(["plateforme:detail"])]
+    #[SerializedName('modalite_recrutement_id')]
+    public function getModaliteRecrutementId(): ?int
+    {
+        return $this->modaliteRecrutement ? $this->modaliteRecrutement->getId() : null;
+    }
+
+    public function getModaliteRecrutement(): ?ModaliteRecrutement
+    {
+        return $this->modaliteRecrutement;
+    }
+
+    public function setModaliteRecrutement(?ModaliteRecrutement $modaliteRecrutement): static
+    {
+        $this->modaliteRecrutement = $modaliteRecrutement;
+
         return $this;
     }
 }

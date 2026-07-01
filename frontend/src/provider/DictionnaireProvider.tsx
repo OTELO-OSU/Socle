@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../context/authContext';
 import { DictionnaireContext } from '../context/dictionnaireContext';
-import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
+import { fetchBaps, fetchCnus, fetchCorps, fetchDeterminationTarifPlateforme, fetchEmployeurs, fetchModalitesRecrutement, fetchOperations, fetchSectionCnrs, fetchSourcesFinancement, fetchTreeViewFinancement, fetchTypeContrats, fetchTypesContratsMaintenance, fetchUnites, fetchUniversites, fetchVilles, type Bap, type Cnu, type Corps, type Employeur, type MethodeDeterminationTarif, type ModaliteRecrutement, type Operation, type SectionCnrs, type SourceFinancement, type TreeNode, type TypeContrat, type TypeContratMaintenance, type Unite, type Universite, type Ville } from '../services/dictionnaireService';
 import { formatBapLabel, formatCnuLabel, formatEmployeurLabel, formatSectionCnrsLabel, formatUniteLabel, formatUniversiteLabel, formatVilleLabel } from '../services/formatLabelService';
 import { fetchTags, type Tag } from '../services/tagsService';
 
@@ -37,6 +37,7 @@ export type DictionnaireType = {
     universiteOptions: SelectOption[];
     tags: Tag[];
     tagsOptions: SelectOption[];
+    modalitesRecrutement: ModaliteRecrutement[];
 }
 
 const defaultDictionnaire: DictionnaireType = {
@@ -65,7 +66,8 @@ const defaultDictionnaire: DictionnaireType = {
     universite: [],
     universiteOptions: [],
     tags: [],
-    tagsOptions: []
+    tagsOptions: [],
+    modalitesRecrutement: []
 };
 
 export function DictionnaireProvider({ children }: { children: React.ReactNode }) {
@@ -100,7 +102,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 typeContratMaintenanceResult,
                 determinationTarifPlateformeResult,
                 universiteResult,
-                tagsResult
+                tagsResult,
+                modalitesRecrutementResult
             ] = await Promise.allSettled([
                 fetchUnites(),
                 fetchVilles(),
@@ -116,7 +119,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                 fetchTypesContratsMaintenance(),
                 fetchDeterminationTarifPlateforme(),
                 fetchUniversites(),
-                fetchTags()
+                fetchTags(),
+                fetchModalitesRecrutement()
             ]);
 
             const unite = getSettledValue(uniteResult, defaultDictionnaire.unite);
@@ -134,6 +138,7 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
             const determinationTarifPlateforme = getSettledValue(determinationTarifPlateformeResult, defaultDictionnaire.determinationTarifPlateforme);
             const universite = getSettledValue(universiteResult, defaultDictionnaire.universite);
             const tags = getSettledValue(tagsResult, defaultDictionnaire.tags);
+            const modalitesRecrutement = getSettledValue(modalitesRecrutementResult, []);
             if (isMounted) {
                 const villeOptions = ville.map((item) => ({ value: item.id, label: formatVilleLabel(item) }));
                 const uniteOptions = unite.map((item) => ({ value: item.id, label: formatUniteLabel(item) }));
@@ -173,7 +178,8 @@ export function DictionnaireProvider({ children }: { children: React.ReactNode }
                     sectionCnrsOptions,
                     cnuOptions,
                     tags,
-                    tagsOptions
+                    tagsOptions,
+                    modalitesRecrutement
                 }));
             }
         };

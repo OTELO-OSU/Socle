@@ -9,6 +9,7 @@ use App\Entity\Corps;
 use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
+use App\Entity\ModaliteRecrutement;
 use App\Entity\Operation;
 use App\Entity\Parametre;
 use App\Entity\TypeContrat;
@@ -38,6 +39,7 @@ class PlateformeControllerTest extends WebTestCase
         $conn->executeStatement($platform->getTruncateTableSQL('emploi_type', true));
         $conn->executeStatement($platform->getTruncateTableSQL('operation', true));
         $conn->executeStatement($platform->getTruncateTableSQL('ville', true));
+        $conn->executeStatement($platform->getTruncateTableSQL('modalite_recrutement', true));
     }
 
     protected function setUp(): void
@@ -163,6 +165,10 @@ class PlateformeControllerTest extends WebTestCase
         $corps->setCompatibleBAP(false);
         $corps->setCompatibleSection(false);
         $this->em->persist($corps);
+
+        $modaliteRecrutement = new ModaliteRecrutement();
+        $modaliteRecrutement->setNom("Modalité de recrutement 1");
+        $this->em->persist($modaliteRecrutement);
 
         $this->em->flush();
     }
@@ -356,6 +362,7 @@ class PlateformeControllerTest extends WebTestCase
                 [
                     "employeur_id" => $this->em->getRepository(Entite::class)->findOneBy([])->getId(),
                     "corps_id" => $this->em->getRepository(Corps::class)->findOneBy([])->getId(),
+                    "modalite_recrutement_id" => $this->em->getRepository(ModaliteRecrutement::class)->findOneBy([])->getId(),
                     "baps_ids" => $bapArray,
                     "emploi_types_ids" => $emploiTypeArray,
                     "quotite" => 50,
@@ -1125,6 +1132,66 @@ class PlateformeControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "L'employeur du poste futur est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformePosteFuturSansModaliteDeRecrutement(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["postes_futurs"][0]["modalite_recrutement_id"] = null;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "La modalité de recrutement du poste futur est requise.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "La modalité de recrutement du poste futur est requise.",
             $data['messageArray'][0]
         );
 
