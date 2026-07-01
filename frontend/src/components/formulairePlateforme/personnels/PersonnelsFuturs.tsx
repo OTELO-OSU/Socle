@@ -23,7 +23,7 @@ function ChampPosteFutur({ children, label }: { children: React.ReactNode; label
 }
 
 function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void }) {
-    const { employeurOptions, corps, bap } = useContext(DictionnaireContext);
+    const { employeurOptions, corps, bap, modalitesRecrutement } = useContext(DictionnaireContext);
 
     const emploiTypeDisponible: EmploiType[] = []
     poste.baps_ids.forEach((bapId) => {
@@ -46,6 +46,20 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                     {employeurOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                             {option.label}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </ChampPosteFutur>
+            <ChampPosteFutur label="Modalité de recrutement">
+                <Select
+                    fullWidth
+                    value={poste.modalite_recrutement_id ?? ""}
+                    onChange={(e) => onChange?.({ ...poste, modalite_recrutement_id: e.target.value as number })}
+                    displayEmpty
+                >
+                    {modalitesRecrutement.map((option) => (
+                        <MenuItem key={option.id} value={option.id}>
+                            {option.nom}
                         </MenuItem>
                     ))}
                 </Select>
@@ -184,6 +198,7 @@ export function PersonnelFuturs() {
             // Ajouter des postes vides
             const postesToAdd = Array.from({ length: nombre - currentPostes.length }, () => ({
                 employeur_id: null,
+                modalite_recrutement_id: null,
                 corps_id: null,
                 baps_ids: [],
                 emploi_types_ids: [],

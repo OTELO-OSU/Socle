@@ -115,4 +115,11 @@ final class DictionnaireController extends AbstractController
         $determinationTarif = $this->ds->getDeterminationTarif();
         return $this->json($determinationTarif, 200, [], ['groups' => 'determination_tarif:list']);
     }
+
+    #[Route('/dictionnaire/modalites_recrutement', methods: ['GET'])]
+    public function getModalitesRecrutement(): Response
+    {
+        $modalites = $this->ds->getModaliteRecrutement();
+        return $this->json($modalites, 200, [], ['groups' => 'modalite_recrutement:list']);
+    }
 }

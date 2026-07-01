@@ -9,6 +9,7 @@ use App\Entity\ContratMaintenance;
 use App\Entity\Corps;
 use App\Entity\DeterminationTarifMethode;
 use App\Entity\Entite;
+use App\Entity\ModaliteRecrutement;
 use App\Entity\Operation;
 use App\Entity\SectionCnrs;
 use App\Entity\TypeContrat;
@@ -121,5 +122,10 @@ class DictionnaireService
     function getDeterminationTarif(): array
     {
         return $this->em->getRepository(DeterminationTarifMethode::class)->findBy([], ["nom" => "ASC"]);
+    }
+
+    function getModaliteRecrutement(): array
+    {
+        return $this->em->getRepository(ModaliteRecrutement::class)->findBy([], ["nom" => "ASC"]);
     }
 }

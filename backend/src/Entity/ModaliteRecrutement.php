@@ -6,16 +6,19 @@ use App\Repository\ModaliteRecrutementRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ModaliteRecrutementRepository::class)]
 class ModaliteRecrutement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(["modalite_recrutement:list"])]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["modalite_recrutement:list"])]
     private ?string $nom = null;
 
     /**
