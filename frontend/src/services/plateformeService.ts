@@ -56,6 +56,7 @@ export type SourceFinancement = {
 
 export type PosteFutur = {
     employeur_id: number | null;
+    modalite_recrutement_id: number | null;
     corps_id: number | null;
     baps_ids: number[];
     emploi_types_ids: number[];
