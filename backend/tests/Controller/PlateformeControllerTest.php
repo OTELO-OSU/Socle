@@ -372,6 +372,7 @@ class PlateformeControllerTest extends WebTestCase
             ],
             "instruments" => [
                 [
+                    "id" => "griejgeroi",
                     "futur" => false,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
@@ -399,6 +400,7 @@ class PlateformeControllerTest extends WebTestCase
                     "cout_maintenance" => 10000.2,
                 ],
                 [
+                    "id" => "UUUUUUUUUUUUU",
                     "futur" => true,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",

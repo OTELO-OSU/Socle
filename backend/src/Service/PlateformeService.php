@@ -109,27 +109,6 @@ class PlateformeService
             $this->em->persist($newRecord);
         }
 
-        foreach ($source->getPosteFuturs() as $posteFutur) {
-            $newRecord = new PosteFutur();
-            $newRecord->setPlateformeHistorique($target);
-            $newRecord->setRangNumerateur((int) $posteFutur->getRangNumerateur());
-            $newRecord->setRangDenominateur((int) $posteFutur->getRangDenominateur());
-            $newRecord->setCorps($posteFutur->getCorps());
-            $newRecord->setEmployeur($posteFutur->getEmployeur());
-            $newRecord->setQuotite((int) $posteFutur->getQuotite());
-
-            foreach ($posteFutur->getBaps() as $bap) {
-                $newRecord->addBap($bap);
-            }
-
-            foreach ($posteFutur->getEmploiTypes() as $emploiType) {
-                $newRecord->addEmploiType($emploiType);
-            }
-
-            $target->addPosteFutur($newRecord);
-            $this->em->persist($newRecord);
-        }
-
         foreach ($source->getContributionTutelles() as $contributionTutelle) {
             $newRecord = new ContributionTutelle();
             $newRecord->setPlateformeHistorique($target);
@@ -158,7 +137,6 @@ class PlateformeService
 
             foreach ($instrument->getInstrumentMutualisations() as $mutualisation) {
                 $newMutualisation = new \App\Entity\InstrumentMutualisation();
-                $newMutualisation->setInstrumentSource($newInstrument);
 
                 $instrumentCible = $mutualisation->getInstrumentCible();
                 if ($instrumentCible !== null && $instrumentCible->getId() !== null && isset($instrumentsMap[$instrumentCible->getId()])) {
@@ -167,6 +145,7 @@ class PlateformeService
                     $newMutualisation->setInstrumentCible($instrumentCible);
                 }
 
+                $newInstrument->addInstrumentMutualisation($newMutualisation);
                 $this->em->persist($newMutualisation);
             }
 
@@ -181,9 +160,9 @@ class PlateformeService
                 }
 
                 $newFinancement = new \App\Entity\FinancementInstrument();
-                $newFinancement->setInstrument($newInstrument);
                 $newFinancement->setFinanceur($financementInstrument->getFinanceur());
                 $newFinancement->setTaux((int) $financementInstrument->getTaux());
+                $newInstrument->addFinancementInstrument($newFinancement);
                 $this->em->persist($newFinancement);
             }
         }
@@ -385,67 +364,128 @@ class PlateformeService
 
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
     {
-        $payloadParNom = [];
+        $payloadParId = [];
         foreach ($value as $instrument) {
-            if ($instrument["nom"] === null) {
+            if ($instrument["id"] === null) {
                 continue;
             }
 
-            $payloadParNom[$instrument["nom"]] = $instrument;
+            $payloadParId[$instrument["id"]] = $instrument;
         }
 
-        $this->supprimerInstrumentsActuels($plateformeHisto, $payloadParNom);
-        $this->modifierInstrumentsActuels($plateformeHisto, $payloadParNom);
-        $this->ajouterInstrumentsActuels($plateformeHisto, $payloadParNom);
+        $this->supprimerInstruments($plateformeHisto, $payloadParId, false);
+        $this->modifierInstrumentsActuels($plateformeHisto, $payloadParId);
+        $this->ajouterInstrumentsActuels($plateformeHisto, $payloadParId);
     }
 
-    private function supprimerInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    private function synchroniserInstrumentsFuturs(PlateformeHistorique $plateformeHisto, array $value): void
     {
-        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
-            if ($instrumentExistant->isFutur()) {
+        $payloadParId = [];
+        foreach ($value as $instrument) {
+            if ($instrument["id"] === null) {
                 continue;
             }
 
-            if ($instrumentExistant->getNom() === null || !isset($payloadParNom[$instrumentExistant->getNom()])) {
-                $plateformeHisto->removeInstrument($instrumentExistant);
+            $payloadParId[$instrument["id"]] = $instrument;
+        }
+
+        $this->supprimerInstruments($plateformeHisto, $payloadParId, true);
+        $this->modifierInstrumentsFuturs($plateformeHisto, $payloadParId);
+        $this->ajouterInstrumentsFuturs($plateformeHisto, $payloadParId);
+    }
+
+    private function supprimerInstruments(PlateformeHistorique $plateformeHisto, array $payloadParId, bool $futur): void
+    {
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
+            if ($instrumentExistant->isFutur() !== $futur) {
+                continue;
+            }
+
+            if ($instrumentExistant->getId() === null || !isset($payloadParId[$instrumentExistant->getId()])) {
+                $this->supprimerDependancesInstrument($instrumentExistant);
+                $plateformeHisto->getInstruments()->removeElement($instrumentExistant);
                 $this->em->remove($instrumentExistant);
             }
         }
     }
 
-    private function modifierInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    private function supprimerDependancesInstrument(Instrument $instrument): void
+    {
+        $financements = $this->em->getRepository(FinancementInstrument::class)->findBy([
+            'instrument' => $instrument,
+        ]);
+
+        foreach ($financements as $financementInstrument) {
+            $this->em->remove($financementInstrument);
+        }
+
+        $mutualisationsSortantes = $this->em->getRepository(\App\Entity\InstrumentMutualisation::class)->findBy([
+            'instrumentSource' => $instrument,
+        ]);
+
+        foreach ($mutualisationsSortantes as $mutualisation) {
+            $this->em->remove($mutualisation);
+        }
+
+        $mutualisationsEntrantes = $this->em->getRepository(\App\Entity\InstrumentMutualisation::class)->findBy([
+            'instrumentCible' => $instrument,
+        ]);
+
+        foreach ($mutualisationsEntrantes as $mutualisationEntrante) {
+            $this->em->remove($mutualisationEntrante);
+        }
+    }
+
+    private function modifierInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParId): void
     {
         foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
             if ($instrumentExistant->isFutur()) {
                 continue;
             }
 
-            if ($instrumentExistant->getNom() === null || !isset($payloadParNom[$instrumentExistant->getNom()])) {
+            if ($instrumentExistant->getId() === null || !isset($payloadParId[$instrumentExistant->getId()])) {
                 continue;
             }
 
-            $payload = $payloadParNom[$instrumentExistant->getNom()];
+            $payload = $payloadParId[$instrumentExistant->getId()];
             $this->appliquerChampsInstrumentActuel($instrumentExistant, $payload);
             $this->synchroniserMutualisationsInstrumentActuel($instrumentExistant, $payload["mutualise_autre_instrument_ids"] ?? []);
             $this->synchroniserFinancementInstrument($instrumentExistant, $payload["source_financement"] ?? []);
         }
     }
 
-    private function ajouterInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParNom): void
+    private function modifierInstrumentsFuturs(PlateformeHistorique $plateformeHisto, array $payloadParId): void
     {
-        $nomsExistants = [];
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
+            if (!$instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            if ($instrumentExistant->getId() === null || !isset($payloadParId[$instrumentExistant->getId()])) {
+                continue;
+            }
+
+            $payload = $payloadParId[$instrumentExistant->getId()];
+            $this->appliquerChampsInstrumentFutur($instrumentExistant, $payload);
+            $this->synchroniserFinancementInstrument($instrumentExistant, $payload["source_financement"] ?? []);
+        }
+    }
+
+    private function ajouterInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $payloadParId): void
+    {
+        $idsExistants = [];
         foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
             if ($instrumentExistant->isFutur()) {
                 continue;
             }
 
-            if ($instrumentExistant->getNom() !== null) {
-                $nomsExistants[$instrumentExistant->getNom()] = true;
+            if ($instrumentExistant->getId() !== null) {
+                $idsExistants[$instrumentExistant->getId()] = true;
             }
         }
 
-        foreach ($payloadParNom as $nomNormalise => $instrument) {
-            if (isset($nomsExistants[$nomNormalise])) {
+        foreach ($payloadParId as $id => $instrument) {
+            if (isset($idsExistants[$id])) {
                 continue;
             }
 
@@ -460,7 +500,39 @@ class PlateformeService
             $this->synchroniserMutualisationsInstrumentActuel($newInstrument, $instrument["mutualise_autre_instrument_ids"] ?? []);
             $this->synchroniserFinancementInstrument($newInstrument, $instrument["source_financement"] ?? []);
 
-            $nomsExistants[$nomNormalise] = true;
+            $idsExistants[$id] = true;
+        }
+    }
+
+    private function ajouterInstrumentsFuturs(PlateformeHistorique $plateformeHisto, array $payloadParId): void
+    {
+        $idsExistants = [];
+        foreach ($plateformeHisto->getInstruments() as $instrumentExistant) {
+            if (!$instrumentExistant->isFutur()) {
+                continue;
+            }
+
+            if ($instrumentExistant->getId() !== null) {
+                $idsExistants[$instrumentExistant->getId()] = true;
+            }
+        }
+
+        foreach ($payloadParId as $id => $instrument) {
+            if (isset($idsExistants[$id])) {
+                continue;
+            }
+
+            $newInstrument = new Instrument();
+            $newInstrument->setPlateformeHistorique($plateformeHisto);
+
+            $this->appliquerChampsInstrumentFutur($newInstrument, $instrument);
+
+            $plateformeHisto->addInstrument($newInstrument);
+            $this->em->persist($newInstrument);
+
+            $this->synchroniserFinancementInstrument($newInstrument, $instrument["source_financement"] ?? []);
+
+            $idsExistants[$id] = true;
         }
     }
 
@@ -491,6 +563,18 @@ class PlateformeService
         $instrumentEntity->setCoutMaintenance($instrument["cout_maintenance"] ?? null);
     }
 
+    private function appliquerChampsInstrumentFutur(Instrument $instrumentEntity, array $instrument): void
+    {
+        $instrumentEntity->setNom($instrument["nom"]);
+        $instrumentEntity->setMarque($instrument["marque"]);
+        $instrumentEntity->setModele($instrument["modele"]);
+
+        $instrumentEntity->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"] ?? null);
+        $instrumentEntity->setCout($instrument["cout"]);
+        $instrumentEntity->setOperation($instrument["operation_id"] ? $this->em->getReference(Operation::class, $instrument["operation_id"]) : null);
+        $instrumentEntity->setFutur(true);
+    }
+
     private function synchroniserMutualisationsInstrumentActuel(Instrument $instrumentEntity, array $mutualisations): void
     {
         foreach ($instrumentEntity->getInstrumentMutualisations() as $record) {
@@ -519,9 +603,9 @@ class PlateformeService
 
             if (!$detailExiste) {
                 $newRecord = new \App\Entity\InstrumentMutualisation();
-                $newRecord->setInstrumentSource($instrumentEntity);
                 $instrumentCible = $this->em->getReference(\App\Entity\Instrument::class, $instrumentMutualisationId);
                 $newRecord->setInstrumentCible($instrumentCible);
+                $instrumentEntity->addInstrumentMutualisation($newRecord);
                 $this->em->persist($newRecord);
             }
         }
@@ -581,69 +665,10 @@ class PlateformeService
                 $newFinanceur = $this->em->getReference(Entite::class, $financeurId);
                 $newFinancement = new FinancementInstrument();
                 $newFinancement->setFinanceur($newFinanceur);
-                $newFinancement->setInstrument($instrumentEntity);
                 $newFinancement->setTaux((int) $financeur["taux"]);
+                $instrumentEntity->addFinancementInstrument($newFinancement);
                 $this->em->persist($newFinancement);
                 $financeursExistants[$financeurId] = true;
-            }
-        }
-    }
-
-    private function synchroniserInstrumentsFuturs(PlateformeHistorique $plateformeHisto, array $value): void
-    {
-        $instrumentsActuels = $plateformeHisto->getInstruments();
-        foreach ($instrumentsActuels as $instrumentExistant) {
-            // Ne traiter ici que les instruments futurs.
-            if (!$instrumentExistant->isFutur()) {
-                continue;
-            }
-
-            $instrumentId = $instrumentExistant->getId();
-            $existeDeja = false;
-            foreach ($value as $instrument) {
-                if (!array_key_exists("id", $instrument) || $instrument["id"] === null) continue;
-                if ($instrument["id"] == $instrumentId) {
-                    $existeDeja = true;
-                    // Overrider les champs de l'instrument
-                    $instrumentExistant->setNom($instrument["nom"]);
-                    $instrumentExistant->setMarque($instrument["marque"]);
-                    $instrumentExistant->setModele($instrument["modele"]);
-                    if (array_key_exists("operation_id", $instrument) && $instrument["operation_id"] !== null) {
-                        $instrumentExistant->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
-                    }
-                    $instrumentExistant->setCout($instrument["cout"]);
-                    $instrumentExistant->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
-                    $instrumentExistant->setFutur(true);
-
-                    $this->synchroniserFinancementInstrument($instrumentExistant, $instrument["source_financement"] ?? []);
-                }
-            }
-            if (!$existeDeja) {
-                // L'instrument n'existe plus, il doit être supprimé
-                $plateformeHisto->removeInstrument($instrumentExistant);
-                $this->em->remove($instrumentExistant);
-            }
-        }
-
-        // Ajouter les nouveaux instruments
-        foreach ($value as $instrument) {
-            if (!array_key_exists("id", $instrument) || $instrument["id"] === null) {
-                $newInstrument = new \App\Entity\Instrument();
-                $newInstrument->setPlateformeHistorique($plateformeHisto);
-                $newInstrument->setNom($instrument["nom"]);
-                $newInstrument->setMarque($instrument["marque"]);
-                $newInstrument->setModele($instrument["modele"]);
-                if (array_key_exists("operation_id", $instrument) && $instrument["operation_id"] !== null) {
-                    $newInstrument->setOperation($this->em->getReference(Operation::class, $instrument["operation_id"]));
-                }
-                $newInstrument->setCout($instrument["cout"]);
-                $newInstrument->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"]);
-                $newInstrument->setFutur(true);
-
-                $plateformeHisto->addInstrument($newInstrument);
-                $this->em->persist($newInstrument);
-
-                $this->synchroniserFinancementInstrument($newInstrument, $instrument["source_financement"] ?? []);
             }
         }
     }
@@ -944,7 +969,6 @@ class PlateformeService
                         $value,
                         static fn(array $instrument): bool => ($instrument["futur"] ?? false) === true
                     ));
-
                     $this->synchroniserInstrumentsActuels($plateformeHisto, $instrumentsActuels);
                     $this->synchroniserInstrumentsFuturs($plateformeHisto, $instrumentsFuturs);
                     break;
