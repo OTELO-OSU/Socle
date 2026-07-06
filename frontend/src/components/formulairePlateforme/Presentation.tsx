@@ -9,9 +9,23 @@ import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import { useMap, useMapEvents } from "react-leaflet/hooks";
 
 type MapPoint = {
-    latitude: number;
-    longitude: number;
+    latitude: number | null;
+    longitude: number | null;
 };
+
+function toNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === "") {
+        return null;
+    }
+
+    const parsed = typeof value === "number" ? value : Number(value);
+
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function hasValidCoordinates(point: MapPoint): point is { latitude: number; longitude: number } {
+    return point.latitude !== null && point.longitude !== null;
+}
 
 function FitMapToPoints({ point }: { point: MapPoint }) {
     const map = useMap();
@@ -20,13 +34,13 @@ function FitMapToPoints({ point }: { point: MapPoint }) {
     useEffect(() => {
         if (initialized.current) return;
 
-        if (point.latitude === undefined || point.longitude === undefined) {
+        if (!hasValidCoordinates(point)) {
             return;
         }
 
         initialized.current = true;
         map.setView([point.latitude, point.longitude], 12);
-    }, [map, point.latitude, point.longitude]);
+    }, [map, point]);
 
     return null;
 }
@@ -34,8 +48,8 @@ function FitMapToPoints({ point }: { point: MapPoint }) {
 function PreviewMap() {
     const { watch, setValue } = useFormContext();
     const point = {
-        latitude: watch("latitude"),
-        longitude: watch("longitude"),
+        latitude: toNullableNumber(watch("latitude")),
+        longitude: toNullableNumber(watch("longitude")),
     }
 
     function MapClickHandler() {
@@ -43,7 +57,7 @@ function PreviewMap() {
             click(e) {
                 setValue("latitude", e.latlng.lat);
                 setValue("longitude", e.latlng.lng);
-            },
+            }
         });
 
         return null;
@@ -62,7 +76,7 @@ function PreviewMap() {
                 />
                 <FitMapToPoints point={point} />
                 <MapClickHandler />
-                {point.latitude !== undefined && point.longitude !== undefined && (
+                {hasValidCoordinates(point) && (
                     <Marker position={[point.latitude, point.longitude]} />
                 )}
             </MapContainer>
