@@ -1,4 +1,4 @@
-import { Divider, Grid, Stack, Typography } from "@mui/material";
+import { Alert, Divider, Grid, Stack, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { useContext, useEffect, useRef } from "react";
 import { DictionnaireContext } from "../../context/dictionnaireContext";
@@ -144,7 +144,13 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFSelect name="tags_ids" multiple control={control} label="Tags" items={tagsOptions} />
+                    {tagsOptions.length === 0 ? (
+                        <Typography variant="body1" component="p">
+                            <Alert severity="error">Le service central de tag est actuellement indisponible. Veuillez envoyer un mail à otelo-si@univ-lorraine.fr</Alert>
+                        </Typography>
+                    ) : (
+                        <RHFSelect name="tags_ids" multiple control={control} label="Tags" items={tagsOptions} />
+                    )}
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
