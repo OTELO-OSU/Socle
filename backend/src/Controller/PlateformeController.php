@@ -26,6 +26,13 @@ final class PlateformeController extends AbstractController
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
     }
 
+    #[Route('/plateforme/publique', methods: ['GET'])]
+    public function getPlateformePublique(): Response
+    {
+        $plateformes = $this->plateformeService->getPlateformePublique();
+        return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list:publique']]);
+    }
+
     #[Route('/plateforme/{id}', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function getPlateformeDetail(int $id): Response
     {

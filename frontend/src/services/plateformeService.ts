@@ -16,9 +16,33 @@ export type PlateformeLight = {
     };
 }
 
+export type PlateformeLightPublique = {
+    id: number;
+    pseudo_id: string;
+    instrument_national: boolean;
+    dernier_historique: {
+        id: number;
+        nom_officiel: string;
+        forme_developpee_nom_officiel: string | null;
+        site_web: string | null;
+        ville_id: number | null;
+        logo_url: string | null;
+        autre_type_labellisation: string | null;
+        longitude: number | null;
+        latitude: number | null;
+    }
+}
+
 export type PlateformeCree = {
     message: string;
     plateforme_id: number;
+}
+
+export async function fetchPlateformePublique(): Promise<PlateformeLight[]> {
+    const { data } = await symfony.get<{ plateformes: PlateformeLight[] }>('/plateforme/publique', {
+    });
+
+    return data.plateformes;
 }
 
 export async function fetchPlateformeListeParPage(page: number, recherche: string) {

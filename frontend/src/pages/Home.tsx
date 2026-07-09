@@ -6,7 +6,7 @@ import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { useMap } from "react-leaflet/hooks";
 import { DictionnaireContext } from "../context/dictionnaireContext";
-import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
+import { fetchPlateformePublique } from "../services/plateformeService";
 
 type PlateformeMapPoint = {
     id: number;
@@ -41,20 +41,7 @@ function normalizeWebsiteUrl(siteWeb: string): string {
 }
 
 async function getPlateformeMapPoints(): Promise<PlateformeMapPoint[]> {
-    const firstPage = await fetchPlateformeListeParPage(1, "");
-    const allPlateformes: PlateformeLight[] = [...firstPage.plateformes];
-
-    if (firstPage.pages_total > 1) {
-        const otherPageResponses = await Promise.all(
-            Array.from({ length: firstPage.pages_total - 1 }, (_, index) =>
-                fetchPlateformeListeParPage(index + 2, "")
-            )
-        );
-
-        otherPageResponses.forEach(({ plateformes }) => {
-            allPlateformes.push(...plateformes);
-        });
-    }
+    const allPlateformes = await fetchPlateformePublique();
 
     return allPlateformes
         .filter((plateforme) => {

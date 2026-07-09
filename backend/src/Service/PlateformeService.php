@@ -250,6 +250,47 @@ class PlateformeService
         $this->em->flush();
     }
 
+    function getPlateformePublique(): array
+    {
+        $conn = $this->em->getConnection();
+
+        // 1) Récupérer les IDs candidats selon la recherche (sans filtrage d'autorisation).
+        $idsQb = $conn->createQueryBuilder();
+        $idsQb
+            ->select('p.id AS plateforme_id', 'ph.nom_officiel AS tri_nom_officiel')
+            ->from('plateforme', 'p')
+            ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
+            ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
+            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id')
+            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
+
+        $idsQb
+            ->groupBy('p.id, ph.nom_officiel')
+            ->orderBy('ph.nom_officiel', 'ASC');
+
+        $idRows = $idsQb->executeQuery()->fetchAllAssociative();
+        $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
+
+        // 2) Charger les entités candidates puis appliquer le voter LIRE.
+        $plateformes = [];
+        if ($plateformeIds !== []) {
+            $plateformesCandidates = $this->em->getRepository(Plateforme::class)->findBy(['id' => $plateformeIds]);
+
+            // Conserver l'ordre défini par la requête IDs.
+            $ordreParId = array_flip($plateformeIds);
+            usort(
+                $plateformesCandidates,
+                static fn(Plateforme $a, Plateforme $b): int => ($ordreParId[$a->getId()] ?? PHP_INT_MAX) <=> ($ordreParId[$b->getId()] ?? PHP_INT_MAX)
+            );
+
+            $plateformes = $plateformesCandidates;
+        }
+
+        return [
+            'plateformes' => $plateformes,
+        ];
+    }
+
     function getPlateformeParPage(int $page, ?string $search): array
     {
         if ($this->security->getUser() === null) {
