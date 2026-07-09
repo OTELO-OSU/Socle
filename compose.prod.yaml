@@ -22,6 +22,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MAILER_DSN: ${MAILER_DSN}
       NOREPLY_EMAIL: ${NOREPLY_EMAIL}
+      CENTRAL_TAG: ${CENTRAL_TAG}
     volumes:
       - ./backend:/var/www/backend:rw
     depends_on:
