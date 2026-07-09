@@ -15,7 +15,7 @@ class PlateformeHistorique
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
@@ -28,42 +28,41 @@ class PlateformeHistorique
 
     #[ORM\Column(length: 255)]
     #[SerializedName("nom_officiel")]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
     private ?string $nomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[SerializedName("forme_developpee_nom_officiel")]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
     private ?string $formeDeveloppeeNomOfficiel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[SerializedName("site_web")]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
     private ?string $siteWeb = null;
 
-    #[Groups(['plateforme:list'])]
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Ville $ville = null;
 
     #[ORM\Column(length: 500, nullable: true)]
     #[SerializedName("logo_url")]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
     private ?string $logoUrl = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[SerializedName("autre_type_labellisation")]
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", 'plateforme:list:publique'])]
     private ?string $autreTypeLabellisation = null;
 
     #[SerializedName("laboratoire_operateur")]
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriques')]
     private ?Entite $laboratoireOperateur = null;
 
-    #[Groups(["plateforme:list", "plateforme:detail"])]
+    #[Groups(["plateforme:list", "plateforme:detail", 'plateforme:list:publique'])]
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
-    #[Groups(["plateforme:list", "plateforme:detail"])]
+    #[Groups(["plateforme:list", "plateforme:detail", 'plateforme:list:publique'])]
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
@@ -441,7 +440,7 @@ class PlateformeHistorique
         return $this;
     }
 
-    #[Groups(['plateforme:detail'])]
+    #[Groups(['plateforme:detail', 'plateforme:list:publique', 'plateforme:list'])]
     #[SerializedName('ville_id')]
     public function getVilleId(): ?int
     {
