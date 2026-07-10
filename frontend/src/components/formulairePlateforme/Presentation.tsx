@@ -39,7 +39,13 @@ function FitMapToPoints({ point }: { point: MapPoint }) {
         }
 
         initialized.current = true;
-        map.setView([point.latitude, point.longitude], 12);
+
+        // Current zoom level
+        const currentZoom = map.getZoom();
+
+        const zoom = currentZoom < 12 ? 12 : currentZoom;
+
+        map.setView([point.latitude, point.longitude], zoom);
     }, [map, point]);
 
     return null;
