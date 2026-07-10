@@ -180,6 +180,9 @@ export function Presentation() {
                     <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
                         Localisation
                     </Typography>
+                    <Typography variant="subtitle2" color="textSecondary" component="h3">
+                        (Cliquez sur la carte pour positionner la plateforme)
+                    </Typography>
                 </Grid>
                 <Grid size="grow" sx={{ height: 400 }}>
                     <PreviewMap />
