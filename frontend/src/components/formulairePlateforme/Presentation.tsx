@@ -39,7 +39,13 @@ function FitMapToPoints({ point }: { point: MapPoint }) {
         }
 
         initialized.current = true;
-        map.setView([point.latitude, point.longitude], 12);
+
+        // Current zoom level
+        const currentZoom = map.getZoom();
+
+        const zoom = currentZoom < 12 ? 12 : currentZoom;
+
+        map.setView([point.latitude, point.longitude], zoom);
     }, [map, point]);
 
     return null;
@@ -173,6 +179,9 @@ export function Presentation() {
                 <Grid size={{ xs: 1, md: 3 }}>
                     <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
                         Localisation
+                    </Typography>
+                    <Typography variant="subtitle2" color="textSecondary" component="h3">
+                        (Cliquez sur la carte pour positionner la plateforme)
                     </Typography>
                 </Grid>
                 <Grid size="grow" sx={{ height: 400 }}>
