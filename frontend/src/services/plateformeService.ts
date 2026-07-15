@@ -14,6 +14,7 @@ export type PlateformeLight = {
     dernier_historique: DernierHistorique & {
         brouillon: boolean;
     };
+    pourcentage_remplissage?: number | null;
 }
 
 export type PlateformeLightPublique = {
