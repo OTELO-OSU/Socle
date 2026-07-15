@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { BarChart, Done, Group, Save, Verified } from "@mui/icons-material";
+import { BarChart, Details, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -102,12 +102,14 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                     </Box>
                 </CardContent>
                 <CardActions>
-                    <Link component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Button component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
+                        <Launch fontSize="small" sx={{ mr: 0.5 }} />
                         Voir les détails
-                    </Link>
-                    <Link component={Button} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
+                    </Button>
+                    <Button component={Link} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
+                        <Download fontSize="small" sx={{ mr: 0.5 }} />
                         Exporter
-                    </Link>
+                    </Button>
                 </CardActions>
             </Card >
         </>
