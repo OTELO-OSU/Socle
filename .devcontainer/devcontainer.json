@@ -1,0 +1,9 @@
+{
+  "name": "POE",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "./docker-compose.override.yml"
+  ],
+  "service": "workspace",
+  "workspaceFolder": "/workspace"
+}

@@ -1,0 +1,66 @@
+services:
+  central:
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:125:80"
+    volumes:
+      - ./docker/central/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/central/html:/usr/share/nginx/html:ro
+
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: poe
+      POSTGRES_PASSWORD: poe
+      POSTGRES_USER: poe
+
+  php:
+    environment:
+      DATABASE_URL: postgresql://poe:poe@database:5432/poe?serverVersion=16&charset=utf8
+      MAILER_DSN: smtp://mailer:1025
+      NOREPLY_EMAIL: noreply@ul.fr
+      CENTRAL_TAG: http://central
+
+  frontend:
+    image: node:22
+    working_dir: /frontend
+    volumes:
+      - ./frontend:/frontend
+    command: npm run dev -- --host 0.0.0.0
+    ports:
+      - "5173"
+    environment:
+      NODE_ENV: development
+
+  nginx:
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/conf.d.dev:/etc/nginx/conf.d:ro
+      - ./backend:/var/www/backend:ro
+    depends_on:
+      - php
+      - frontend
+
+  workspace:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    volumes:
+      - .:/workspace
+    command: sleep infinity
