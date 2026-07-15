@@ -37,6 +37,10 @@ class Plateforme
         return $historiques[0] ?? null;
     }
 
+    #[Groups(["plateforme:list"])]
+    #[SerializedName("pourcentage_remplissage")]
+    private ?float $pourcentageRemplissage = null;
+
     /**
      * @var Collection<int, UtilisateurInscription>
      */
@@ -188,6 +192,18 @@ class Plateforme
                 $PlateformeTags->setPlateforme(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPourcentageRemplissage(): ?float
+    {
+        return $this->pourcentageRemplissage;
+    }
+
+    public function setPourcentageRemplissage(?float $pourcentageRemplissage): static
+    {
+        $this->pourcentageRemplissage = $pourcentageRemplissage;
 
         return $this;
     }

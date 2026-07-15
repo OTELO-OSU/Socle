@@ -250,6 +250,83 @@ class PlateformeService
         $this->em->flush();
     }
 
+    function getPlateformePourcentage(PlateformeHistorique $plateformeHisto): float
+    {
+        $moyenne = [];
+
+        $moyenne[] = \is_null($plateformeHisto->getNomOfficiel()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getSiteWeb()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getLaboratoireOperateur()) ? 0 : 1;
+        $moyenne[] = empty($plateformeHisto->getTutellesPrincipalesIds()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getLatitude()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getLongitude()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getEspaceBureau()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getEspaceLaboratoire()) ? 0 : 1;
+        $moyenne[] = empty($plateformeHisto->getPlateformeHistoriquePersonnels()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getNombreAutresEtudiants()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getNombreApprentisAlternants()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getMaterielConsommable()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContratEntretien()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getEtudePrestation()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getFluideEnergie()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getMissionFraisGeneraux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getDeterminationTarifPlateforme()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionTutelleTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionFondPublicTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionFondPriveTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionCreditTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionProjetRechercheTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getContributionStructurePiaTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->isLabellisationQualite()) ? 0 : 1;
+        if ($plateformeHisto->isLabellisationQualite()) {
+            $moyenne[] = \is_null($plateformeHisto->getNomLabellisationQualite()) ? 0 : 1;
+        }
+        $moyenne[] = \is_null($plateformeHisto->isProcedureTransparentePrestationExterieure()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->isProcedureTransparenteTous()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getModele772424Taux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getModele771224Taux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getModele572424Taux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getModele571224Taux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationFonctionnementTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationMaintenanceTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationDeveloppementTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationPanneTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationTempsMortTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationEquipeOperanteTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationCollaborationInterneTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationCollaborationExterneTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getUtilisationPrestationServiceTaux()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->isBgesRealise()) ? 0 : 1;
+        if ($plateformeHisto->isBgesRealise()) {
+            $moyenne[] = \is_null($plateformeHisto->getBgesDomicileTravail()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesMission()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesMissionExt()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesConsommable()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesEquipement()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesEnvoiEchantillon()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesBatiment()) ? 0 : 1;
+            $moyenne[] = \is_null($plateformeHisto->getBgesDechet()) ? 0 : 1;
+        }
+
+        $moyenne[] = \is_null($plateformeHisto->getPublicationEquipeOperante()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getPublicationCollaborationInterne()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getPublicationCollaborationExterne()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getPublicationAutreType()) ? 0 : 1;
+        $moyenne[] = \is_null($plateformeHisto->getPublicationThese()) ? 0 : 1;
+        $moyenne[] = empty($plateformeHisto->getPublications()) ? 0 : 1;
+
+
+
+        $totalChamps = count($moyenne);
+        $champsRemplis = array_sum($moyenne);
+        $pourcentage = $totalChamps > 0 ? ($champsRemplis / $totalChamps) * 100 : 0;
+
+        // Fixer à 2 décimal
+        $pourcentage = round($pourcentage, 2);
+
+        return $pourcentage;
+    }
+
     function getPlateformePublique(): array
     {
         $conn = $this->em->getConnection();
@@ -358,6 +435,10 @@ class PlateformeService
         // 3) Paginer après application des autorisations pour garder un total cohérent.
         $total = count($plateformesAutorisees);
         $plateformes = array_slice($plateformesAutorisees, $offset, self::PLATEFORME_PAR_PAGE);
+
+        foreach ($plateformes as $plateforme) {
+            $plateforme->setPourcentageRemplissage($this->getPlateformePourcentage($plateforme->getLastHistorique()));
+        }
 
         return [
             'plateformes' => $plateformes,

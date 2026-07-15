@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { Done, Group, Save, Verified } from "@mui/icons-material";
+import { BarChart, Done, Group, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -86,6 +86,13 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                         </List>
                                     </Box>
                                 </>)}
+                            <Box sx={{ mt: 2 }}>
+                                <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
+                                    <BarChart />
+                                    Taux de remplissage : {plateforme.pourcentage_remplissage ?? 0}%
+                                </Typography>
+                                <LinearProgress variant="determinate" value={plateforme.pourcentage_remplissage ?? 0} sx={{ height: 10, width: "500px", mt: 2, borderRadius: 5 }} />
+                            </Box>
                         </Box>
                         {plateforme.dernier_historique.logo_url &&
                             <Box>
