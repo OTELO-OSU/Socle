@@ -61,6 +61,10 @@ class AuthService
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
 
+        if (!$user->isEmailValide()) {
+            $this->envoyerEmailVerification($user);
+            throw new UtilisateurMailNonValideException();
+        }
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
@@ -167,6 +171,7 @@ class AuthService
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
             if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
             $user->setEmail($inscriptionOAuth->getEmail());
+            $user->setEmailValide(true);
         } else {
             // Vérifier si le mail n'est pas déjà utilisé
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
@@ -204,7 +209,12 @@ class AuthService
         $this->em->remove($inscriptionOAuth);
         $this->em->flush();
 
-        $this->envoyerEmailVerification($user);
+        if (!$user->isEmailValide()) {
+            $this->envoyerEmailVerification($user);
+            return false;
+        }
+
+        return true;
     }
 
     function checkRefreshToken(string $refreshToken)

@@ -89,7 +89,10 @@ final class AuthController extends AbstractController
         }
 
         if ($ssmdp) {
-            $this->authService->validationInscriptionOAuth($dto);
+            $emailValide = $this->authService->validationInscriptionOAuth($dto);
+            if ($emailValide) {
+                return $this->json(['message' => 'Inscription réussie. Un email vous sera envoyé quand votre compte sera activé.'], 201);
+            }
         } else {
             $this->authService->inscriptionBasic($dto);
         }
