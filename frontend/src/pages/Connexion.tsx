@@ -158,7 +158,7 @@ export default function Connexion() {
                     <Button
                         fullWidth
                         variant="outlined"
-                        onClick={() => alert('Sign in with ORCID')}
+                        onClick={() => window.location.href = "/loginCAS"}
                         startIcon={<AccountBalance />}
                     >
                         Se connecter avec votre établissement
