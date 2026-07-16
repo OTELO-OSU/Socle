@@ -24,6 +24,13 @@ export default function FedeCallback() {
             });
             navigate('/', { replace: true });
             return;
+        } else if (status === "nonAdmis") {
+            snackbarContext?.trigger({
+                message: "Votre compte n'a pas encore été admis. Un email vous sera envoyé une fois votre compte activé.",
+                couleur: "warning",
+            });
+            navigate('/connexion', { replace: true });
+            return;
         } else {
             snackbarContext?.trigger({
                 message: "Une erreur est survenue lors de la connexion via le fédérateur d'identité",

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\UtilisateurInscriptionDTO;
 use App\Exception\auth\UtilisateurFedeExistePasException;
+use App\Exception\auth\UtilisateurNonAdmisException;
 use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -54,6 +55,8 @@ final class AuthController extends AbstractController
             $response = new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=success");
             $response->headers->setCookie($token["cookie"]);
             return $response;
+        } catch (UtilisateurNonAdmisException $e) {
+            return new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=nonAdmis");
         } catch (UtilisateurOAuthExistePasException $e) {
             return new RedirectResponse($this->params->get('front_host') . "/inscription?" . http_build_query([
                 'ssmdp' => true,

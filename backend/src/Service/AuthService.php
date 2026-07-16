@@ -61,10 +61,6 @@ class AuthService
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
 
-        if (!$user->isEmailValide()) {
-            $this->envoyerEmailVerification($user);
-            throw new UtilisateurMailNonValideException();
-        }
         if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
 
         return $this->genererTokenCookieAvecRefreshToken($user);
