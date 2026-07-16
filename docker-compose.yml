@@ -19,6 +19,7 @@ services:
       context: .
       dockerfile: ./docker/php-fpm/dockerfile
     environment:
+      FRONT_HOST: ${FRONT_HOST}
       DATABASE_URL: ${DATABASE_URL}
       MAILER_DSN: ${MAILER_DSN}
       NOREPLY_EMAIL: ${NOREPLY_EMAIL}
@@ -40,7 +41,7 @@ services:
   ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:16-alpine
-    ports:
+    ports:  
       - ${POSTGRES_PORT}:5432
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
