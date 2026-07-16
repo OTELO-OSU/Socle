@@ -24,6 +24,7 @@ import MonCompte from './pages/MonCompte'
 import SoumissionDUAdmin from './pages/SoumissionDUAdmin'
 import TagsAdmin from './pages/TagsAdmin'
 import HarvesterAdmin from './pages/HarvesterAdmin'
+import FedeCallback from './pages/FedeCallback'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -62,6 +63,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/connexion" element={<Connexion />} />
               <Route path="/inscription" element={<Inscription />} />
+              <Route path="/callbackCas" element={<FedeCallback />} />
               <Route path="/orcid" element={<OrcidCallback />} />
               <Route path="/verification-email" element={<VerificationMailCallback />} />
               <Route path="/compte" element={<MonCompte />} />
