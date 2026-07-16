@@ -762,7 +762,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertEquals('Inscription réussie. Un email vous sera envoyé quand votre compte sera activé.', $data['message']);
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionOauth@example.com']);
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
