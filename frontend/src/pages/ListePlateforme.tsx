@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { BarChart, Details, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
+import { BarChart, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
