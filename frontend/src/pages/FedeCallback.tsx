@@ -22,16 +22,18 @@ export default function FedeCallback() {
                 message: "Connexion réussie",
                 couleur: "success",
             });
-            navigate('/');
+            navigate('/', { replace: true });
+            return;
         } else {
             snackbarContext?.trigger({
                 message: "Une erreur est survenue lors de la connexion via le fédérateur d'identité",
                 couleur: "error",
             });
-            navigate('/connexion');
+            navigate('/connexion', { replace: true });
+            return;
         }
 
-    }, [searchParams, snackbarContext, navigate]);
+    }, []);
 
     return (
         <Box
