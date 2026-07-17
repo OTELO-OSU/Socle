@@ -8,6 +8,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link, Link as RouterLink } from 'react-router-dom'
 import { AccountCircle } from '@mui/icons-material';
+import { FRONT_URL } from '../utils/constante';
 export default function HeaderAppBar() {
 
     const authContext = useContext(AuthContext)
@@ -15,8 +16,7 @@ export default function HeaderAppBar() {
     const isConnected = token !== null;
 
     async function handleDeconnexion() {
-        const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
-        window.location.href = `https://${frontendUrl}/Shibboleth.sso/Logout?return=${frontendUrl}/deconnexion`;
+        window.location.href = `https://${FRONT_URL}/Shibboleth.sso/Logout?return=${FRONT_URL}/deconnexion`;
     }
 
     return (
