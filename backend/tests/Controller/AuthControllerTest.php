@@ -769,9 +769,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('User', $user->getNom());
         $this->assertTrue($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
-        $this->assertNotNull($user->getUtilisateurVerification());
-        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
-        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
+        $this->assertNull($user->getUtilisateurVerification());
     }
 
     public function testVerificationMailSansToken(): void
