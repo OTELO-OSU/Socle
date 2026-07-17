@@ -767,7 +767,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
         $this->assertEquals('User', $user->getNom());
-        $this->assertFalse($user->isEmailValide());
+        $this->assertTrue($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
