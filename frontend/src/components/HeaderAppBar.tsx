@@ -6,24 +6,17 @@ import InscriptionIcon from '@mui/icons-material/PersonAdd';
 import DeconnexionIcon from '@mui/icons-material/Logout';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
-import { Link, Link as RouterLink, useNavigate } from 'react-router-dom'
-import { SnackbarContext } from '../context/snackbarContext';
+import { Link, Link as RouterLink } from 'react-router-dom'
 import { AccountCircle } from '@mui/icons-material';
 export default function HeaderAppBar() {
 
     const authContext = useContext(AuthContext)
-    const snackbarContext = useContext(SnackbarContext)
-    const navigate = useNavigate();
     const token = authContext?.token ?? null;
     const isConnected = token !== null;
 
     async function handleDeconnexion() {
-        await authContext?.deconnexion()
-        snackbarContext?.trigger({
-            message: "Déconnexion réussie",
-            couleur: "success",
-        })
-        navigate('/')
+        const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+        window.location.href = `https://${frontendUrl}/Shibboleth.sso/Logout?return=${frontendUrl}/deconnexion`;
     }
 
     return (

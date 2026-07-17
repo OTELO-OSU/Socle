@@ -25,6 +25,7 @@ import SoumissionDUAdmin from './pages/SoumissionDUAdmin'
 import TagsAdmin from './pages/TagsAdmin'
 import HarvesterAdmin from './pages/HarvesterAdmin'
 import FedeCallback from './pages/FedeCallback'
+import Deconnexion from './pages/Deconnexion'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -67,6 +68,7 @@ function App() {
               <Route path="/orcid" element={<OrcidCallback />} />
               <Route path="/verification-email" element={<VerificationMailCallback />} />
               <Route path="/compte" element={<MonCompte />} />
+              <Route path="/deconnexion" element={<Deconnexion />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
@@ -96,7 +98,7 @@ function App() {
             {snackbarContext?.message}
           </Alert>
         </Snackbar>
-      </Box >
+      </Box>
     </>
   )
 }
