@@ -353,4 +353,58 @@ class AuthService
             $this->mailerService->sendEmailToUser($admin->getEmail(), $sujet, $body, $this->params->get('front_host') . '/administration');
         }
     }
+
+    function motDePasseOubliePhase1(string $email): void
+    {
+        /** @var Utilisateur $user */
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+        if (!$user) {
+            return;
+        }
+
+        if ($user->getUtilisateurVerification()) {
+            $this->em->remove($user->getUtilisateurVerification());
+            $this->em->flush();
+            $user->setUtilisateurVerification(null);
+        }
+
+        $token = bin2hex(random_bytes(32));
+
+        $userVerification = new UtilisateurVerification();
+        $userVerification->setUtilisateur($user);
+        $userVerification->setToken($token);
+        $userVerification->setExpiration(new \DateTime('+1 hour'));
+        $userVerification->setType("password_reset");
+
+        $this->em->persist($userVerification);
+        $this->em->flush();
+
+        $host = $this->params->get('front_host');
+
+        $resetLink = $host . "/reinitialisation-mdp?token=" . $token;
+
+        $this->mailerService->sendEmailToUser(
+            $user->getEmail(),
+            "Réinitialisation de votre mot de passe",
+            "Une réinitalisation de mot de passe a été demandée pour votre compte.\n\nSi vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.",
+            $resetLink
+        );
+    }
+
+    function motDePasseOubliePhase2(string $token, string $mdp): void
+    {
+        /** @var UtilisateurVerification $user */
+        $user = $this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => $token, 'type' => 'password_reset']);
+        if (!$user) {
+            throw new Exception("Token invalide ou expiré.", 400);
+        }
+
+        if ($user->getExpiration() < new \DateTime()) {
+            throw new Exception("Token expiré.", 400);
+        }
+
+        $user->getUtilisateur()->setMdp($this->passwordHasher->hashPassword($user->getUtilisateur(), $mdp));
+        $this->em->remove($user);
+        $this->em->flush();
+    }
 }

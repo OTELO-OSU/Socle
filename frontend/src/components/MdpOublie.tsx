@@ -5,17 +5,29 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import { motDePasseOubliePhase1 } from '../services/authService';
+import { useContext } from 'react';
+import { SnackbarContext } from '../context/snackbarContext';
 
 interface MdpOublieProps {
     open: boolean;
     handleClose: () => void;
 }
 
-function envoyerMailResetPassword(email: string) {
-    console.log(email);
-}
-
 export default function MdpOublie({ open, handleClose }: MdpOublieProps) {
+
+    const snackbar = useContext(SnackbarContext);
+    async function envoyerMailResetPassword(email: string) {
+        const data = await motDePasseOubliePhase1(email);
+
+        if (data) {
+            snackbar?.trigger({
+                message: data.message,
+                couleur: 'success',
+            });
+        }
+    };
+
     return (
         <Dialog
             open={open}
@@ -23,13 +35,14 @@ export default function MdpOublie({ open, handleClose }: MdpOublieProps) {
             slotProps={{
                 paper: {
                     component: 'form',
-                    onSubmit: (event: React.SubmitEvent<HTMLFormElement>) => {
+                    onSubmit: async (event: React.SubmitEvent<HTMLFormElement>) => {
                         event.preventDefault();
+                        event.stopPropagation();
 
                         const data = new FormData(event.currentTarget);
                         const email = data.get('email') as string;
 
-                        envoyerMailResetPassword(email);
+                        await envoyerMailResetPassword(email);
                         handleClose();
                     },
                     sx: { backgroundImage: 'none' },

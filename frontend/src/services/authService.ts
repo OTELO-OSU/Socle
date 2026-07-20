@@ -1,7 +1,7 @@
 import { symfony } from "../utils/axios";
 
 export async function connexion(email: string, mdp: string) {
-    const {data, status} = await symfony.post('/connexion', {}, {
+    const { data, status } = await symfony.post('/connexion', {}, {
         auth: {
             username: email,
             password: mdp,
@@ -12,13 +12,13 @@ export async function connexion(email: string, mdp: string) {
 }
 
 export async function connexionViaOrcid(code: string) {
-    const {data, status} = await symfony.post(`/orcid/connexion/${code}`);
+    const { data, status } = await symfony.post(`/orcid/connexion/${code}`);
 
     return { data, status };
 }
 
 export async function refreshSession() {
-    const {data, status} = await symfony.post('/refresh', {}, { withCredentials: true });
+    const { data, status } = await symfony.post('/refresh', {}, { withCredentials: true });
 
     return { data, status };
 }
@@ -34,7 +34,7 @@ export async function inscription(prenom: string, nom: string, email: string, md
             directeur_unite_demande: true
         };
     }
-    const {data, status} = await symfony.post('/inscription', {
+    const { data, status } = await symfony.post('/inscription', {
         prenom,
         nom,
         email,
@@ -57,7 +57,7 @@ export async function inscriptionSsMdp(prenom: string, nom: string, email: strin
             directeur_unite_demande: true
         };
     }
-    const {data, status} = await symfony.post('/inscription?ssmdp=true', {
+    const { data, status } = await symfony.post('/inscription?ssmdp=true', {
         prenom,
         nom,
         email,
@@ -70,7 +70,7 @@ export async function inscriptionSsMdp(prenom: string, nom: string, email: strin
 }
 
 export async function deconnexion(token: string) {
-    const {status} = await symfony.post('/deconnexion', {}, {
+    const { status } = await symfony.post('/deconnexion', {}, {
         headers: {
             'Authorization': `Bearer ${token}`,
         }
@@ -80,10 +80,26 @@ export async function deconnexion(token: string) {
 }
 
 export async function verifierMail(token: string) {
-    const {data, status} = await symfony.post('/verifie-mail', {
+    const { data, status } = await symfony.post('/verifie-mail', {
         token
     });
 
     return { data, status };
 }
-    
+
+export async function motDePasseOubliePhase1(email: string) {
+    const { data } = await symfony.post<{ message: string }>('/mdp-oublie', {
+        email
+    });
+
+    return data;
+}
+
+export async function motDePasseOubliePhase2(token: string, mdp: string) {
+    const { data } = await symfony.patch<{ message: string }>('/mdp-oublie', {
+        token,
+        mdp
+    });
+
+    return data;
+}

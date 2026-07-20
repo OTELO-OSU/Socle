@@ -157,4 +157,27 @@ final class AuthController extends AbstractController
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+    #[Route('/mdp-oublie', methods: ['POST'])]
+    public function motDePasseOublie(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+        if (!isset($json['email'])) return $this->json(['message' => 'L\'email est requis.'], 400);
+
+
+        $this->authService->motDePasseOubliePhase1($json['email']);
+        return $this->json(['message' => 'Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.'], 200);
+    }
+
+    #[Route('/mdp-oublie', methods: ['PATCH'])]
+    public function motDePasseOubliePhase2(Request $request): Response
+    {
+        $json = json_decode($request->getContent(), true);
+        if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
+        if (!isset($json['mdp'])) return $this->json(['message' => 'Le mot de passe est requis.'], 400);
+
+
+        $this->authService->motDePasseOubliePhase2($json['token'], $json['mdp']);
+        return $this->json(['message' => 'Votre mot de passe a été réinitialisé avec succès.'], 200);
+    }
 }

@@ -26,6 +26,7 @@ import TagsAdmin from './pages/TagsAdmin'
 import HarvesterAdmin from './pages/HarvesterAdmin'
 import FedeCallback from './pages/FedeCallback'
 import Deconnexion from './pages/Deconnexion'
+import ResetMdp from './pages/ResetMdp'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -69,6 +70,7 @@ function App() {
               <Route path="/verification-email" element={<VerificationMailCallback />} />
               <Route path="/compte" element={<MonCompte />} />
               <Route path="/deconnexion" element={<Deconnexion />} />
+              <Route path="/reinitialisation-mdp" element={<ResetMdp />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
