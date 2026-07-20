@@ -206,12 +206,24 @@ class PlateformeService
     {
         if (!$this->security->isGranted('CREER', Plateforme::class)) throw new Exception("Vous n'avez pas les droits pour créer une plateforme", 403);
 
+        //* Si il est DU ou DU délégué on force le laboratoire
+        // Vérifier si il est Admin Dir Osu ou Dir Osu delegue
+        $superUser = $this->security->isGranted('ROLE_ADMIN_DIR_OSU') || $this->security->isGranted('ROLE_DIR_OSU_DELEGUE') || $this->security->isGranted('ROLE_ADMIN');
+
+        /** @var Utilisateur $user */
+        $user = $this->security->getUser();
+        $entites = $user->getEntites();
+        $entitesDelegues = $user->getDeleguesDirecteur();
+
         $plateforme = new Plateforme();
         $plateformeHistorique = new PlateformeHistorique();
         $plateforme->addPlateformeHistorique($plateformeHistorique);
         $plateformeHistorique->setNomOfficiel($nom);
         $plateformeHistorique->setAnnee($this->getAnneeDeSaisieEnCours());
         $plateformeHistorique->setBrouillon(true);
+        if (!$superUser) {
+            $plateformeHistorique->setLaboratoireOperateur($entites->first() ?? $entitesDelegues->first());
+        }
 
         $this->em->persist($plateforme);
         $this->em->persist($plateformeHistorique);
@@ -824,6 +836,26 @@ class PlateformeService
                     $plateformeHisto->setAutreTypeLabellisation($value);
                     break;
                 case 'laboratoire_operateur_id':
+                    /** @var Utilisateur $user */
+                    $user = $this->security->getUser();
+
+                    $superUser = $this->security->isGranted('ROLE_ADMIN') || $this->security->isGranted('ROLE_DIR_OSU') || $this->security->isGranted('ROLE_DIR_OSU_DELEGUE');
+                    $canEdit = $superUser
+                        || $user->getPlateformeHistoriquePersonnels()->exists(
+                            function (int $key, PlateformeHistoriquePersonnel $personnel) use ($plateformeHisto) {
+                                return $personnel->getPlateformeHistorique() === $plateformeHisto
+                                    && (
+                                        $personnel->isResponsablePlateforme()
+                                        || $personnel->isResponsableScientifique()
+                                        || $personnel->isResponsableTechnique()
+                                    );
+                            }
+                        );
+
+                    if (!$canEdit) {
+                        continue;
+                    }
+
                     if ($value === null) {
                         $plateformeHisto->setLaboratoireOperateur(null);
                         break;
