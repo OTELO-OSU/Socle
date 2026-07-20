@@ -303,10 +303,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->utilisateurVerification;
     }
 
-    public function setUtilisateurVerification(UtilisateurVerification $utilisateurVerification): static
+    public function setUtilisateurVerification(?UtilisateurVerification $utilisateurVerification): static
     {
-        // set the owning side of the relation if necessary
-        if ($utilisateurVerification->getUtilisateur() !== $this) {
+        if ($utilisateurVerification !== null && $utilisateurVerification->getUtilisateur() !== $this) {
             $utilisateurVerification->setUtilisateur($this);
         }
 

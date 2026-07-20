@@ -362,6 +362,12 @@ class AuthService
             return;
         }
 
+        if ($user->getUtilisateurVerification()) {
+            $this->em->remove($user->getUtilisateurVerification());
+            $this->em->flush();
+            $user->setUtilisateurVerification(null);
+        }
+
         $token = bin2hex(random_bytes(32));
 
         $userVerification = new UtilisateurVerification();
@@ -380,7 +386,7 @@ class AuthService
         $this->mailerService->sendEmailToUser(
             $user->getEmail(),
             "Réinitialisation de votre mot de passe",
-            "Une réinitalisation de mot de passe a été demandée pour votre compte. Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : " . $resetLink . "\n\nSi vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.",
+            "Une réinitalisation de mot de passe a été demandée pour votre compte.\n\nSi vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.",
             $resetLink
         );
     }
