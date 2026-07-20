@@ -852,17 +852,14 @@ class PlateformeService
                             }
                         );
 
-                    if (!$canEdit) {
-                        continue;
+                    if ($canEdit) {
+                        if ($value === null) {
+                            $plateformeHisto->setLaboratoireOperateur(null);
+                        } else {
+                            $plateformeHisto->setLaboratoireOperateur($this->em->getReference(Entite::class, $value));
+                        }
                     }
-
-                    if ($value === null) {
-                        $plateformeHisto->setLaboratoireOperateur(null);
-                        break;
-                    } else {
-                        $plateformeHisto->setLaboratoireOperateur($this->em->getReference(Entite::class, $value));
-                        break;
-                    }
+                    break;
                 case 'tutelles_principales_ids':
                     $tutellePrincipaleActuelle = $plateformeHisto->getPlateformeHistoriqueTutelles();
                     foreach ($tutellePrincipaleActuelle as $record) {
