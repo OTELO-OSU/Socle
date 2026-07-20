@@ -1,5 +1,5 @@
-import { Alert, Divider, Grid, Stack, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
+import { Alert, Autocomplete, Divider, Grid, Stack, TextField, Typography } from "@mui/material";
+import { Controller, useFormContext } from "react-hook-form";
 import { useContext, useEffect, useRef } from "react";
 import { DictionnaireContext } from "../../context/dictionnaireContext";
 import { RHFTextField } from "../RHFTextField";
@@ -126,7 +126,29 @@ export function Presentation() {
                         label="Site web"
                         placeholder="<https://sarm.cnrs.fr/>"
                     />
-                    <RHFSelect name="ville_id" control={control} id="ville" label="Ville" items={villeOptions} sx={{ mt: 2 }} />
+                    <Controller
+                        name="ville_id"
+                        control={control}
+                        render={({ field }) => (
+                            <Autocomplete
+                                sx={{ mt: 2 }}
+                                options={villeOptions}
+                                value={villeOptions.find(option =>
+                                    option.value === field.value
+                                ) ?? null}
+                                onChange={(_, options) =>
+                                    field.onChange(options?.value)
+                                }
+                                isOptionEqualToValue={(option, value) =>
+                                    option.value === value.value
+                                }
+                                getOptionLabel={(option) => option.label}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Ville" />
+                                )}
+                            />
+                        )}
+                    />
                     <RHFTextField
                         sx={{ mt: 2 }}
                         name="logo_url"
@@ -151,7 +173,7 @@ export function Presentation() {
                 </Grid>
                 <Grid size="grow">
                     {tagsOptions.length === 0 ? (
-                        <Typography variant="body1" component="p">
+                        <Typography variant="body1" component="div">
                             <Alert severity="error">Le service central de tag est actuellement indisponible. Veuillez envoyer un mail à otelo-si@univ-lorraine.fr</Alert>
                         </Typography>
                     ) : (
@@ -167,13 +189,80 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow">
-                    <RHFSelect name="laboratoire_operateur_id" control={control} label="Laboratoire opérateur" items={uniteOptions} />
+                    <Controller
+                        name="laboratoire_operateur_id"
+                        control={control}
+                        render={({ field }) => (
+                            <Autocomplete
+                                options={uniteOptions}
+                                value={uniteOptions.find(option =>
+                                    option.value === field.value
+                                ) ?? null}
+                                onChange={(_, options) =>
+                                    field.onChange(options?.value)
+                                }
+                                isOptionEqualToValue={(option, value) =>
+                                    option.value === value.value
+                                }
+                                getOptionLabel={(option) => option.label}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Laboratoire opérateur" />
+                                )}
+                            />
+                        )}
+                    />
                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                        <RHFSelect name="tutelles_principales_ids" control={control} label="Tutelle(s) principale(s)" multiple items={employeurOptions} />
-                        <RHFSelect name="tutelles_secondaires_ids" control={control} label="Tutelle(s) secondaire(s)" multiple items={employeurOptions} />
+                        <Controller
+                            name="tutelles_principales_ids"
+                            control={control}
+                            render={({ field }) => (
+                                <Autocomplete
+                                    multiple
+                                    options={employeurOptions}
+                                    value={employeurOptions.filter(option =>
+                                        field.value?.includes(option.value)
+                                    )}
+                                    onChange={(_, options) =>
+                                        field.onChange(options.map(option => option.value))
+                                    }
+                                    isOptionEqualToValue={(option, value) =>
+                                        option.value === value.value
+                                    }
+                                    getOptionLabel={(option) => option.label}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Tutelles principales" />
+                                    )}
+                                    sx={{ width: "50%" }}
+                                />
+                            )}
+                        />
+                        <Controller
+                            name="tutelles_secondaires_ids"
+                            control={control}
+                            render={({ field }) => (
+                                <Autocomplete
+                                    multiple
+                                    options={employeurOptions}
+                                    value={employeurOptions.filter(option =>
+                                        field.value?.includes(option.value)
+                                    )}
+                                    onChange={(_, options) =>
+                                        field.onChange(options.map(option => option.value))
+                                    }
+                                    isOptionEqualToValue={(option, value) =>
+                                        option.value === value.value
+                                    }
+                                    getOptionLabel={(option) => option.label}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Tutelles secondaires" />
+                                    )}
+                                    sx={{ width: "50%" }}
+                                />
+                            )}
+                        />
                     </Stack>
                 </Grid>
-            </Grid>
+            </Grid >
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
             <Grid container spacing={2} sx={{ mt: 2 }}>
                 <Grid size={{ xs: 1, md: 3 }}>
