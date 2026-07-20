@@ -396,11 +396,11 @@ class AuthService
         /** @var UtilisateurVerification $user */
         $user = $this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => $token, 'type' => 'password_reset']);
         if (!$user) {
-            throw new Exception("Token invalide ou expiré.", 400);
+            throw new Exception("Token invalide ou expiré.", 403);
         }
 
         if ($user->getExpiration() < new \DateTime()) {
-            throw new Exception("Token expiré.", 400);
+            throw new Exception("Token invalide ou expiré.", 403);
         }
 
         $user->getUtilisateur()->setMdp($this->passwordHasher->hashPassword($user->getUtilisateur(), $mdp));
