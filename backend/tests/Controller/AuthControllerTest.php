@@ -14,6 +14,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+use function PHPUnit\Framework\assertNotNull;
+use function PHPUnit\Framework\assertNull;
+
 class AuthControllerTest extends WebTestCase
 {
     private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
@@ -894,5 +897,192 @@ class AuthControllerTest extends WebTestCase
             self::assertEmailAddressContains($message1, 'to', 'admin2@example.com');
             self::assertEmailAddressContains($message2, 'to', 'admin@example.com');
         }
+    }
+
+    public function testMotDePasseOublieMailInconnu(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['email' => 'inconnu@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testMotDePasseOublieMailConnu(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['email' => 'test@example.com'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.', $data['message']);
+        self::assertEmailCount(1);
+
+        self::assertNotNull($this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->getUtilisateurVerification());
+    }
+
+    public function testMotDePasseOublieResetSuccess(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setUtilisateurVerification(
+            (new UtilisateurVerification())
+                ->setToken('token')
+                ->setExpiration((new \DateTime())->modify('+1 hour'))
+                ->setType('password_reset')
+        );
+
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['token' => 'token', 'mdp' => 'newpassword'])
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Votre mot de passe a été réinitialisé avec succès.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testMotDePasseOublieResetSansToken(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setUtilisateurVerification(
+            (new UtilisateurVerification())
+                ->setToken('token')
+                ->setExpiration((new \DateTime())->modify('+1 hour'))
+                ->setType('password_reset')
+        );
+
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['mdp' => 'newpassword'])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Le token est requis.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testMotDePasseOublieResetSansPassword(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setUtilisateurVerification(
+            (new UtilisateurVerification())
+                ->setToken('token')
+                ->setExpiration((new \DateTime())->modify('+1 hour'))
+                ->setType('password_reset')
+        );
+
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['token' => 'token'])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Le mot de passe est requis.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testMotDePasseOublieResetAvecFauxToken(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setUtilisateurVerification(
+            (new UtilisateurVerification())
+                ->setToken('token')
+                ->setExpiration((new \DateTime())->modify('+1 hour'))
+                ->setType('password_reset')
+        );
+
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['token' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'mdp' => 'newpassword'])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testMotDePasseOublieResetAvecTokenExpire(): void
+    {
+        $client = $this->client;
+
+        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setUtilisateurVerification(
+            (new UtilisateurVerification())
+                ->setToken('token')
+                ->setExpiration((new \DateTime())->modify('-1 hour'))
+                ->setType('password_reset')
+        );
+
+        $this->em->flush();
+
+        $client->request(
+            'PATCH',
+            '/api/mdp-oublie',
+            [],
+            [],
+            ["CONTENT_TYPE" => "application/json"],
+            \json_encode(['token' => 'token', 'mdp' => 'newpassword'])
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        self::assertEmailCount(0);
     }
 }
