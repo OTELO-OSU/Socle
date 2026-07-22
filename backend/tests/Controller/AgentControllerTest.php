@@ -518,10 +518,8 @@ class AgentControllerTest extends WebTestCase
         $utilisateur->setAttenteApprobationDU(true);
         $utilisateur->setUnite($this->unite);
 
-        $this->user->setUnite($this->unite2);
         $this->em->persist($utilisateur);
-        $this->em->persist($this->user);
-        $this->unite->setDirecteur($this->user);
+        $this->unite2->setDirecteur($this->user);
         $this->em->persist($this->unite);
         $this->em->flush();
 
@@ -642,11 +640,12 @@ class AgentControllerTest extends WebTestCase
         $utilisateur->setAttenteApprobationDU(true);
         $utilisateur->setUnite($this->unite);
 
-        $this->user->setUnite($this->unite2);
+        $this->user->getEntites()->clear();
+        $this->user->getEntites()->add($this->unite2);
         $this->em->persist($utilisateur);
         $this->em->persist($this->user);
-        $this->unite->setDirecteur($this->user);
-        $this->em->persist($this->unite);
+        $this->unite2->setDirecteur($this->user);
+        $this->em->persist($this->unite2);
         $this->em->flush();
 
         $client->request(
