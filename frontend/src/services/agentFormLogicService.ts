@@ -52,7 +52,7 @@ export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[]) {
 
     selectedBaps.forEach((bapItem) => {
         (bapItem.emploiTypes ?? []).forEach((emploiType) => {
-            unique.set(emploiType.id, { id: emploiType.id, nom: emploiType.nom });
+            unique.set(emploiType.id, { id: emploiType.id, nom: `${emploiType.acronyme} - ${emploiType.nom}` });
         });
     });
 
