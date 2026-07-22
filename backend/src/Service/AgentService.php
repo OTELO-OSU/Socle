@@ -383,10 +383,16 @@ class AgentService
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
             $agentUnite = $agent->getUnite();
+            $unites = [];
             /** @var Utilisateur $user */
             $user = $this->security->getUser();
-            $userUnite = $user->getUnite();
-            if ($agentUnite != $userUnite) {
+            $user->getEntites()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            $user->getDeleguesDirecteur()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            if (!in_array($agentUnite, $unites)) {
                 throw new Exception("Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.", 403);
             }
         }
@@ -418,10 +424,16 @@ class AgentService
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
             $agentUnite = $agent->getUnite();
+            $unites = [];
             /** @var Utilisateur $user */
             $user = $this->security->getUser();
-            $userUnite = $user->getUnite();
-            if ($agentUnite != $userUnite) {
+            $user->getEntites()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            $user->getDeleguesDirecteur()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            if (!in_array($agentUnite, $unites)) {
                 throw new Exception("Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.", 403);
             }
         }
