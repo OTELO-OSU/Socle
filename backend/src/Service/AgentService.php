@@ -354,10 +354,16 @@ class AgentService
         if ($this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
             $agents = $this->em->getRepository(Utilisateur::class)->findBy(['attenteApprobationDU' => true]);
         } else {
+            $unites = [];
             /** @var Utilisateur $user */
             $user = $this->security->getUser();
-            $unite = $user->getUnite();
-            $agents = $this->em->getRepository(Utilisateur::class)->findBy(['attenteApprobationDU' => true, 'unite' => $unite]);
+            $user->getEntites()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            $user->getDeleguesDirecteur()->map(function (Entite $entite) use (&$unites) {
+                $unites[] = $entite;
+            });
+            $agents = $this->em->getRepository(Utilisateur::class)->findBy(['attenteApprobationDU' => true, 'unite' => $unites]);
         }
 
         return $agents;
