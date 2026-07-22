@@ -1,4 +1,4 @@
-import { FormControl, FormControlLabel, MenuItem, Radio, RadioGroup, Stack, TextField } from "@mui/material";
+import { Autocomplete, FormControl, FormControlLabel, MenuItem, Radio, RadioGroup, Stack, TextField } from "@mui/material";
 import { useContext, useMemo } from "react";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import {
@@ -100,41 +100,31 @@ export function AgentAdvancedFields({ value, onChange, disabled = false, emailRe
                 fullWidth
             />
 
-            <TextField
-                select
-                label="Employeur"
-                value={value.employeur_id ?? ""}
-                onChange={(event) => {
-                    const nextEmployeurId = event.target.value === "" ? null : Number(event.target.value);
+            <Autocomplete
+                options={dictionnaire.employeur}
+                getOptionLabel={(option) => formatEmployeurLabel(option)}
+                value={dictionnaire.employeur.find((employeur) => employeur.id === value.employeur_id) ?? null}
+                onChange={(_, nextEmployeur) => {
+                    const nextEmployeurId = nextEmployeur ? nextEmployeur.id : null;
                     onChange(resetOnEmployeurChange(value, nextEmployeurId, dictionnaire.employeur));
                 }}
                 disabled={disabled}
                 fullWidth
-            >
-                {dictionnaire.employeur.map((employeur) => (
-                    <MenuItem key={employeur.id} value={employeur.id}>
-                        {formatEmployeurLabel(employeur)}
-                    </MenuItem>
-                ))}
-            </TextField>
+                renderInput={(params) => <TextField {...params} label="Employeur" />}
+            />
 
-            <TextField
-                select
-                label="Unite"
-                value={value.unite_id ?? ""}
-                onChange={(event) => {
-                    const nextUniteId = event.target.value === "" ? null : Number(event.target.value);
+            <Autocomplete
+                options={dictionnaire.unite}
+                getOptionLabel={(option) => formatUniteLabel(option)}
+                value={dictionnaire.unite.find((unite) => unite.id === value.unite_id) ?? null}
+                onChange={(_, nextUnite) => {
+                    const nextUniteId = nextUnite ? nextUnite.id : null;
                     onChange({ ...value, unite_id: nextUniteId });
                 }}
                 disabled={disabled}
                 fullWidth
-            >
-                {dictionnaire.unite.map((unite) => (
-                    <MenuItem key={unite.id} value={unite.id}>
-                        {formatUniteLabel(unite)}
-                    </MenuItem>
-                ))}
-            </TextField>
+                renderInput={(params) => <TextField {...params} label="Unite" />}
+            />
 
             <TextField
                 select
@@ -174,23 +164,18 @@ export function AgentAdvancedFields({ value, onChange, disabled = false, emailRe
             )}
 
             {value.type_contrat_id && estCDD && value.doctorant === true && (
-                <TextField
-                    select
-                    label="Universite de rattachement"
-                    value={value.universite_rattachement_id ?? ""}
-                    onChange={(event) => {
-                        const nextUniversiteId = event.target.value === "" ? null : Number(event.target.value);
+                <Autocomplete
+                    options={dictionnaire.universite}
+                    getOptionLabel={(option) => formatUniversiteLabel(option)}
+                    renderInput={(params) => <TextField {...params} label="Universite de rattachement" />}
+                    value={dictionnaire.universite.find((universite) => universite.id === value.universite_rattachement_id) ?? null}
+                    onChange={(_, universite) => {
+                        const nextUniversiteId = universite ? universite.id : null;
                         onChange({ ...value, universite_rattachement_id: nextUniversiteId });
                     }}
                     disabled={disabled}
                     fullWidth
-                >
-                    {dictionnaire.universite.map((universite) => (
-                        <MenuItem key={universite.id} value={universite.id}>
-                            {formatUniversiteLabel(universite)}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                />
             )}
 
             {value.type_contrat_id && (!estCDD || value.doctorant === false) && (
