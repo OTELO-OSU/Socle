@@ -139,6 +139,16 @@ final class UtilisateurVoter extends Voter
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
                 break;
             case self::SOUMETTRE_AU_DU:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                $entites = $user->getEntites();
+                $entitesDelegue = $user->getDeleguesDirecteur();
+                if ($entites->count() > 0 || $entitesDelegue->count() > 0) {
+                    return true;
+                }
+
                 $plateformeHistorique = $user->getPlateformeHistoriquePersonnels();
                 foreach ($plateformeHistorique as $ph) {
                     if ($ph->isResponsableScientifique() || $ph->isResponsableTechnique() || $ph->isResponsablePlateforme()) {
