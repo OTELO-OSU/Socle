@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PlateformeHistoriqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\SerializedName;
@@ -358,6 +359,10 @@ class PlateformeHistorique
     #[SerializedName("nombre_autres_etudiants")]
     #[ORM\Column(nullable: true)]
     private ?int $nombreAutresEtudiants = null;
+
+    #[Groups(["plateforme:list", "plateforme:detail"])]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     public function __construct()
     {
@@ -1349,5 +1354,17 @@ class PlateformeHistorique
             $ids[] = $tag->getTagId();
         }
         return $ids;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
     }
 }
