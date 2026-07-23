@@ -374,6 +374,7 @@ class PlateformeControllerTest extends WebTestCase
                 [
                     "id" => "griejgeroi",
                     "futur" => false,
+                    "nombre" => 1,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
                     "modele" => "Modèle Test",
@@ -401,6 +402,7 @@ class PlateformeControllerTest extends WebTestCase
                 ],
                 [
                     "id" => "UUUUUUUUUUUUU",
+                    "nombre" => 1,
                     "futur" => true,
                     "nom" => "Instrument Test",
                     "marque" => "Marque test",
@@ -1740,6 +1742,66 @@ class PlateformeControllerTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testSauvegarderPlateformeEquipementActuelSansNombre(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["instruments"][0]["nombre"] = null;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre de l'équipement est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre de l'équipement est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
     public function testSauvegarderPlateformeEquipementActuelSansAnneeAcquisition(): void
     {
         $client = $this->client;
@@ -2274,6 +2336,66 @@ class PlateformeControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "Le nom de l'équipement est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSauvegarderPlateformeEquipementFuturSansNombre(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+        $plateformeData = $this->getPlateformeCompleteArray();
+        $plateformeData['id'] = $creationResponse['plateforme_id'];
+
+        $plateformeData['brouillon'] = true;
+
+        $plateformeData["instruments"][1]["nombre"] = null;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre de l'équipement est requis.",
+            $data['messageArray'][0]
+        );
+
+        self::assertEmailCount(0);
+
+        $plateformeData['brouillon'] = false;
+
+        $client->request(
+            'PUT',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode($plateformeData)
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Le nombre de l'équipement est requis.",
             $data['messageArray'][0]
         );
 
