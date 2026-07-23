@@ -41,8 +41,8 @@ function InstrumentActuelCard({
         >
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                        {instrument.nom || "Equipement sans nom"}
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                        {instrument.nom || "Equipement sans nom"} <Chip label={`Nombre: ${instrument.nombre}`} size="small" color="default" variant="outlined" sx={{ ml: 1 }} />
                     </Typography>
 
                     <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
@@ -135,6 +135,7 @@ function DialogInstrumentActuel({
     const formInstru = useForm<Instrument>({
         shouldUnregister: false,
         defaultValues: {
+            nombre: 1,
             source_financement: [],
         },
     });
@@ -170,6 +171,7 @@ function DialogInstrumentActuel({
         if (!instrumentToEdit) {
             reset({
                 nom: "",
+                nombre: 1,
                 marque: "",
                 modele: "",
                 annee_acquisition: null,
@@ -183,6 +185,7 @@ function DialogInstrumentActuel({
 
         reset({
             nom: instrumentToEdit.nom ?? "",
+            nombre: instrumentToEdit.nombre ?? 1,
             marque: instrumentToEdit.marque ?? "",
             modele: instrumentToEdit.modele ?? "",
             annee_acquisition: instrumentToEdit.annee_acquisition ?? null,
@@ -215,6 +218,7 @@ function DialogInstrumentActuel({
         const newInstrument: Instrument = {
             id: instrumentToEdit?.id ?? hashNouveauInstrument,
             nom: data.nom ?? null,
+            nombre: data.nombre ?? 1,
             marque: data.marque ?? null,
             modele: data.modele ?? null,
             annee_acquisition: data.annee_acquisition ?? null,
@@ -235,8 +239,9 @@ function DialogInstrumentActuel({
 
     const handleNextStep = async () => {
         const isStepOneValid = await trigger(["nom"]);
+        const isStepOneValid2 = await trigger(["nombre"]);
 
-        if (isStepOneValid) {
+        if (isStepOneValid && isStepOneValid2) {
             setStep(1);
         }
     };
@@ -270,10 +275,17 @@ function DialogInstrumentActuel({
                     </Typography>
                     {step === 0 &&
                         <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
-                            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: "bold" }}>
                                 Général
                             </Typography>
-                            <RHFTextField rules={{ required: "Le champs nom est requis" }} name="nom" control={control} label="Nom de l'équipement" fullWidth sx={{ mb: 2 }} />
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                                <Grid size={{ xs: 9 }}>
+                                    <RHFTextField rules={{ required: "Le champs nom est requis" }} name="nom" control={control} label="Nom de l'équipement" fullWidth />
+                                </Grid>
+                                <Grid size={{ xs: 3 }}>
+                                    <NombreTextField size="medium" rules={{ required: "Le champs nombre est requis" }} name="nombre" control={control} label="Nombre" fullWidth />
+                                </Grid>
+                            </Grid>
                             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                                 <RHFTextField name="marque" control={control} label="Marque" fullWidth sx={{ mb: 2 }} />
                                 <RHFTextField name="modele" control={control} label="Modèle" fullWidth sx={{ mb: 2 }} />

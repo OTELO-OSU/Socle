@@ -171,6 +171,11 @@ class PlateformeHistoriqueDTO
                     new Assert\NotBlank(message: 'Le nom de l\'équipement est requis.'),
                     new Assert\Type('string'),
                 ]),
+                'nombre' =>
+                new Assert\Required([
+                    new Assert\NotBlank(message: 'Le nombre de l\'équipement est requis.'),
+                    new Assert\Type('integer'),
+                ]),
                 'marque' =>
                 new Assert\Optional([
                     new Assert\Type('string'),

@@ -675,6 +675,7 @@ class PlateformeService
         $instrumentEntity->setNom($instrument["nom"]);
         $instrumentEntity->setMarque($instrument["marque"]);
         $instrumentEntity->setModele($instrument["modele"]);
+        $instrumentEntity->setNombre($instrument["nombre"]);
 
         if (($instrument["annee_acquisition"] ?? null) !== null) {
             $instrumentEntity->setAnneeAcquisition($instrument["annee_acquisition"]);
@@ -702,6 +703,7 @@ class PlateformeService
         $instrumentEntity->setNom($instrument["nom"]);
         $instrumentEntity->setMarque($instrument["marque"]);
         $instrumentEntity->setModele($instrument["modele"]);
+        $instrumentEntity->setNombre($instrument["nombre"]);
 
         $instrumentEntity->setAnneeAchatEnvisagee($instrument["annee_achat_envisagee"] ?? null);
         $instrumentEntity->setCout($instrument["cout"]);
