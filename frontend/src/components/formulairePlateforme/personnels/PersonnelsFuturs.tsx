@@ -227,7 +227,7 @@ export function PersonnelFuturs() {
     return (
         <Box sx={{ p: 1 }}>
             <Typography variant="h6" component="h2">
-                Postes Futurs
+                Postes Futur
             </Typography>
             <Grid container spacing={2} sx={{ mt: 2, alignItems: "center" }}>
                 <Grid size={{ xs: 6, md: 8 }}><Typography variant="subtitle1" component="h3" sx={{ fontWeight: "bold" }}>
