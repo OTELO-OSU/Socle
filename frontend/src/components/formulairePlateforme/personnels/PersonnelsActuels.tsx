@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Dialog, Link, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Chip, Dialog, IconButton, Link, TextField, Typography } from "@mui/material";
 import Account from '@mui/icons-material/AccountCircle';
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect, useState } from "react";
@@ -9,6 +9,8 @@ import { AgentAdvancedFields } from "../../AgentAdvancedFields";
 import { SnackbarContext } from "../../../context/snackbarContext";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
+import { Delete, Edit } from "@mui/icons-material";
+import NombreTextField from "../../NombreTextField";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
@@ -366,9 +368,10 @@ function DialogSoumettreAuDu({ onUtilisateurCree }: { onUtilisateurCree: (agent:
 type PersonnelCardProps = {
     personnel: PersonnelActuelFormValue;
     onDelete: () => void;
+    onQuotaUpdate: (number: number | null) => void;
 };
 
-function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
+function PersonnelCard({ personnel, onDelete, onQuotaUpdate }: PersonnelCardProps) {
     const estResponsableScientifique = personnel.responsable_scientifique;
     const estResponsableTechnique = personnel.responsable_technique;
     const estResponsablePlateforme = personnel.responsable_plateforme;
@@ -384,13 +387,47 @@ function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
     const corps = dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id) ?? null;
     const typeContrat = dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id) ?? null;
 
-
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [newQuotite, setNewQuotite] = useState<number | null>(personnel.quotite);
 
     return (
         <Box sx={{
             p: 2, py: 1, my: 2, border: "1px solid", borderColor: "divider", borderRadius: 5, display: "flex", justifyContent: "space-between", gap: 2,
             background: backgroundGradient,
         }}>
+
+            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6" component="h2">
+                            Changement de la quotité de travail
+                        </Typography>
+                        <TextField
+                            sx={{ mt: 2 }}
+                            fullWidth
+                            label="Quotité de travail (%)"
+                            placeholder="50"
+                            type="number"
+                            value={newQuotite ?? 0}
+                            onChange={(event) => {
+                                setNewQuotite(event.target.value ? Number(event.target.value) : null);
+                            }}
+                            slotProps={{ htmlInput: { min: 0, max: 100 } }}
+                        />
+                    </CardContent>
+                    <CardActions sx={{ display: "flex", justifyContent: "end" }}>
+                        <Button onClick={() => setDialogOpen(false)} color="primary">
+                            Annuler
+                        </Button>
+                        <Button onClick={() => {
+                            onQuotaUpdate(newQuotite);
+                            setDialogOpen(false)
+                        }} variant="contained" color="primary">
+                            Valider
+                        </Button>
+                    </CardActions>
+                </Card>
+            </Dialog>
 
 
             <Box sx={{
@@ -408,9 +445,15 @@ function PersonnelCard({ personnel, onDelete }: PersonnelCardProps) {
                 {estResponsableTechnique && <Chip color="secondary" label="Responsable technique" size="small" />}
                 {estResponsablePlateforme && <Chip color="secondary" label="Responsable plateforme" size="small" />}
             </Box >
-            <Button color="error" disabled={estResponsableScientifique || estResponsableTechnique || estResponsablePlateforme} onClick={onDelete}>
-                Supprimer
-            </Button>
+            <Box>
+                <IconButton color="error" onClick={() => setDialogOpen(true)}>
+                    <Edit />
+                </IconButton>
+                <IconButton color="error" disabled={estResponsableScientifique || estResponsableTechnique || estResponsablePlateforme} onClick={onDelete}>
+                    <Delete />
+                </IconButton>
+            </Box>
+
         </Box >
     )
 
@@ -463,6 +506,22 @@ export function PersonnelActuels() {
         });
     };
 
+    const handleUpdateQuotite = (utilisateur_id: number, newQuotite: number | null) => {
+        const currentPersonnels = (getValues(PERSONNELS_FIELD_NAME) as PersonnelActuelFormValue[] | undefined) ?? [];
+        const updatedPersonnels = currentPersonnels.map((personnel) => {
+            if (personnel.utilisateur_id === utilisateur_id) {
+                return { ...personnel, quotite: newQuotite };
+            }
+            return personnel;
+        });
+
+        setValue(PERSONNELS_FIELD_NAME, updatedPersonnels, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+        });
+    };
+
     return (
         <Box sx={{ p: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -477,6 +536,7 @@ export function PersonnelActuels() {
                     key={personnel.utilisateur_id}
                     personnel={personnel}
                     onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
                 />
             ))}
             {personnels.length === 0 && (
