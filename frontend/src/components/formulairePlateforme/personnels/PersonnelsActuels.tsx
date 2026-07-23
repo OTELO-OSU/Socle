@@ -10,7 +10,6 @@ import { SnackbarContext } from "../../../context/snackbarContext";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { Delete, Edit } from "@mui/icons-material";
-import NombreTextField from "../../NombreTextField";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
