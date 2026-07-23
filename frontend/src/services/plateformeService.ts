@@ -100,6 +100,7 @@ export type Publication = {
 export type Instrument = {
     id: number | string;
     nom: string;
+    nombre: number;
     marque: string | null;
     modele: string | null;
     annee_acquisition?: number | null;

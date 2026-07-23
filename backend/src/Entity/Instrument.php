@@ -113,6 +113,10 @@ class Instrument
     #[SerializedName('cout_maintenance')]
     private ?float $coutMaintenance = null;
 
+    #[Groups(["plateforme:detail"])]
+    #[ORM\Column]
+    private ?int $nombre = null;
+
     public function __construct()
     {
         $this->instrumentMutualisations = new ArrayCollection();
@@ -421,6 +425,18 @@ class Instrument
     public function setCoutMaintenance(?float $coutMaintenance): static
     {
         $this->coutMaintenance = $coutMaintenance;
+
+        return $this;
+    }
+
+    public function getNombre(): ?int
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(int $nombre): static
+    {
+        $this->nombre = $nombre;
 
         return $this;
     }
