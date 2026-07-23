@@ -150,6 +150,15 @@ export function Presentation() {
                         )}
                     />
                     <RHFTextField
+                        multiline
+                        sx={{ mt: 2 }}
+                        name="description"
+                        control={control}
+                        label="Description de la plateforme"
+                        minRows={7}
+                        placeholder="Décrivez brièvement la plateforme..."
+                    />
+                    <RHFTextField
                         sx={{ mt: 2 }}
                         name="logo_url"
                         control={control}

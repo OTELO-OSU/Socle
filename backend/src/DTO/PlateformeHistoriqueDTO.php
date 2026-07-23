@@ -36,6 +36,8 @@ class PlateformeHistoriqueDTO
     #[EntityExists(entity: 'App\Entity\Ville')]
     public ?int $ville_id = null;
 
+    public ?string $description = null;
+
     public ?string $logo_url = null;
 
     public ?string $autre_type_labellisation = null;

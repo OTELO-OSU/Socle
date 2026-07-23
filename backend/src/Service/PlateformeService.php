@@ -820,6 +820,9 @@ class PlateformeService
                 case 'site_web':
                     $plateformeHisto->setSiteWeb($value);
                     break;
+                case 'description':
+                    $plateformeHisto->setDescription($value);
+                    break;
                 case 'ville_id':
                     if ($value === null) {
                         $plateformeHisto->setVille(null);

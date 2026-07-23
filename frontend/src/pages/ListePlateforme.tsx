@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { BarChart, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
+import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -37,6 +37,19 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                     <Verified fontSize="small" />
                                     Instrument national
                                 </Typography>
+                            )}
+                            {plateforme.dernier_historique.description && (
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
+                                        <Description />
+                                        Description :
+                                    </Typography>
+                                    <Typography
+                                        variant="body2" color="textPrimary" sx={{ px: 4 }}
+                                    >
+                                        {plateforme.dernier_historique.description.length > 200 ? plateforme.dernier_historique.description.substring(0, 500) + "..." : plateforme.dernier_historique.description}
+                                    </Typography>
+                                </Box>
                             )}
                             {responsableScientifique.length > 0 && (
                                 <>

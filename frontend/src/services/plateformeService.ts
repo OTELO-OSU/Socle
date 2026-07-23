@@ -26,6 +26,7 @@ export type PlateformeLightPublique = {
         nom_officiel: string;
         forme_developpee_nom_officiel: string | null;
         site_web: string | null;
+        description: string | null;
         ville_id: number | null;
         logo_url: string | null;
         autre_type_labellisation: string | null;
@@ -125,6 +126,7 @@ export type DernierHistorique = {
     nom_officiel: string;
     forme_developpee_nom_officiel: string | null;
     site_web: string | null;
+    description: string | null;
     ville_id: number | null;
     logo_url: string | null;
     autre_type_labellisation: string | null;
