@@ -37,6 +37,7 @@ function toNumberList(value: string | number | Array<string | number>) {
 }
 
 export function AgentAdvancedFields({ value, onChange, disabled = false, emailReadOnly = false }: AgentAdvancedFieldsProps) {
+
     const dictionnaire = useContext(DictionnaireContext);
 
     const estCDD = isCDD(value.type_contrat_id ?? null, dictionnaire.typeContrat);
@@ -53,8 +54,8 @@ export function AgentAdvancedFields({ value, onChange, disabled = false, emailRe
     );
 
     const emploiTypesOptions = useMemo(
-        () => getEmploiTypesOptions(value.baps_ids ?? [], dictionnaire.bap),
-        [dictionnaire.bap, value.baps_ids],
+        () => getEmploiTypesOptions(value.baps_ids ?? [], dictionnaire.bap ?? [], dictionnaire.corps.find((corps) => corps.id === value.corps_id) ?? null,),
+        [dictionnaire.bap, value.baps_ids, value.corps_id, dictionnaire.corps]
     );
 
     return (
@@ -231,7 +232,7 @@ export function AgentAdvancedFields({ value, onChange, disabled = false, emailRe
                         value={value.baps_ids ?? []}
                         onChange={(event) => {
                             const nextBapsIds = toNumberList(event.target.value as unknown as Array<string | number>);
-                            onChange(syncEmploiTypesWithBaps(value, nextBapsIds, dictionnaire.bap));
+                            onChange(syncEmploiTypesWithBaps(value, nextBapsIds, dictionnaire.bap, dictionnaire.corps.find((corps) => corps.id === value.corps_id) ?? null));
                         }}
                         disabled={disabled}
                         fullWidth

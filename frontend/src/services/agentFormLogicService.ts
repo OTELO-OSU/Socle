@@ -42,16 +42,35 @@ export function getCompatibilites(corpsId: number | null, corps: Corps[]) {
     };
 }
 
-export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[]) {
+export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[], corps: Corps | null) {
+    if (!corps) {
+        return [] as { id: number; nom: string }[];
+    }
+
+    const CORPSACRO_CHIFFRE = {
+        "IR": 1,
+        "IE": 2,
+        "AI": 3,
+        "T": 4,
+        "AJT": 5,
+    }
+
     if (bapsIds.length === 0) {
         return [] as { id: number; nom: string }[];
     }
 
-    const selectedBaps = baps.filter((item) => bapsIds.includes(item.id));
+    const selectedBaps = baps.filter((item) => {
+        return bapsIds.includes(item.id);
+    });
     const unique = new Map<number, { id: number; nom: string }>();
 
     selectedBaps.forEach((bapItem) => {
         (bapItem.emploiTypes ?? []).forEach((emploiType) => {
+            const corpsAcronyme = corps?.acronyme ?? "";
+            const chiffreET = CORPSACRO_CHIFFRE[corpsAcronyme as keyof typeof CORPSACRO_CHIFFRE] ?? 0;
+            if (emploiType.acronyme?.charAt(1) !== String(chiffreET)) {
+                return false;
+            }
             unique.set(emploiType.id, { id: emploiType.id, nom: `${emploiType.acronyme} - ${emploiType.nom}` });
         });
     });
@@ -120,8 +139,8 @@ export function resetOnEmployeurChange(state: Agent, nextEmployeurId: number | n
     };
 }
 
-export function syncEmploiTypesWithBaps(state: Agent, nextBapsIds: number[], baps: Bap[]): Agent {
-    const allowedIds = getEmploiTypesOptions(nextBapsIds, baps).map((item) => item.id);
+export function syncEmploiTypesWithBaps(state: Agent, nextBapsIds: number[], baps: Bap[], corps: Corps | null): Agent {
+    const allowedIds = getEmploiTypesOptions(nextBapsIds, baps, corps).map((item) => item.id);
 
     return {
         ...state,
