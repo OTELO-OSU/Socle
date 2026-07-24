@@ -47,7 +47,7 @@ export default function Utilisation() {
                 <TauxTextFieldHint label="7j/7j, 12h/24h" name="modele_77_1224_taux" helperText="" />
                 <TauxTextFieldHint label="5j/7j, 24h/24h" name="modele_57_2424_taux" helperText="" />
                 <TauxTextFieldHint label="5j/7j, 12h/24h" name="modele_57_1224_taux" helperText="" />
-                <LayoutLabelHintInput label="Somme des coûts" helperText="" >
+                <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
                         variant="outlined"
@@ -72,7 +72,7 @@ export default function Utilisation() {
                 <TauxTextFieldHint label="En développement" name="utilisation_developpement_taux" helperText="" />
                 <TauxTextFieldHint label="En panne" name="utilisation_panne_taux" helperText="" />
                 <TauxTextFieldHint label="En temps mort" name="utilisation_temps_mort_taux" helperText="" />
-                <LayoutLabelHintInput label="Somme des pourcentages" helperText="" >
+                <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
                         variant="outlined"
@@ -96,7 +96,7 @@ export default function Utilisation() {
                 <TauxTextFieldHint label="En collaboration interne: projet porté par quelqu’un d’autre du laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_interne_taux" helperText="" />
                 <TauxTextFieldHint label="En collaboration externe: projet porté par quelqu’un d’un autre laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_externe_taux" helperText="" />
                 <TauxTextFieldHint label="Prestation de service: service à 100%, prestation sans collaboration, et pas d’association aux résultats " name="utilisation_prestation_service_taux" helperText="" />
-                <LayoutLabelHintInput label="Somme des pourcentages" helperText="" >
+                <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
                         variant="outlined"
