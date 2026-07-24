@@ -92,7 +92,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                         const nextBapIds = (Array.isArray(value) ? value : [value]).map((v) => v.id);
                         onChange?.({ ...poste, baps_ids: nextBapIds });
                     }}
-                    renderInput={(params) => <TextField {...params} label="BAP" />} />
+                    renderInput={(params) => <TextField {...params} />} />
             </ChampPosteFutur>
             <ChampPosteFutur label="Emploi type">
                 <Autocomplete
@@ -109,7 +109,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                         onChange?.({ ...poste, emploi_types_ids: nextEmploiTypeIds });
                     }}
                     disabled={!poste.baps_ids?.length || !poste.corps_id}
-                    renderInput={(params) => <TextField {...params} label="Emploi type" />}
+                    renderInput={(params) => <TextField {...params} />}
                     renderValue={(value, getItemProps) =>
                         value.map((option, index) => (
                             <Chip
