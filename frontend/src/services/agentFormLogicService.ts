@@ -44,7 +44,7 @@ export function getCompatibilites(corpsId: number | null, corps: Corps[]) {
 
 export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[], corps: Corps | null) {
     if (!corps) {
-        return [] as { id: number; nom: string }[];
+        return [] as { id: number; nom: string, acronyme: string }[];
     }
 
     const CORPSACRO_CHIFFRE = {
@@ -56,13 +56,13 @@ export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[], corps: Cor
     }
 
     if (bapsIds.length === 0) {
-        return [] as { id: number; nom: string }[];
+        return [] as { id: number; nom: string, acronyme: string }[];
     }
 
     const selectedBaps = baps.filter((item) => {
         return bapsIds.includes(item.id);
     });
-    const unique = new Map<number, { id: number; nom: string }>();
+    const unique = new Map<number, { id: number; nom: string, acronyme: string }>();
 
     selectedBaps.forEach((bapItem) => {
         (bapItem.emploiTypes ?? []).forEach((emploiType) => {
@@ -71,7 +71,7 @@ export function getEmploiTypesOptions(bapsIds: number[], baps: Bap[], corps: Cor
             if (emploiType.acronyme?.charAt(1) !== String(chiffreET)) {
                 return false;
             }
-            unique.set(emploiType.id, { id: emploiType.id, nom: `${emploiType.acronyme} - ${emploiType.nom}` });
+            unique.set(emploiType.id, { id: emploiType.id, nom: `${emploiType.acronyme} - ${emploiType.nom}`, acronyme: emploiType.acronyme });
         });
     });
 
