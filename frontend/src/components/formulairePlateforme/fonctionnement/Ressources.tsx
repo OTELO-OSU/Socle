@@ -184,7 +184,7 @@ export default function Ressources() {
                 <TauxTextFieldHint label="Contribution directe du laboratoire sur ses crédits" name="contribution_credit_taux" helperText="" />
                 <TauxTextFieldHint label="Contribution directe de projets de recherche (ANR, ERC, INSU, ...)" name="contribution_projet_recherche_taux" helperText="" />
                 <TauxTextFieldHint label="Contribution directe de structures PIA (LABEX, Equipex, ...)" name="contribution_structure_pia_taux" helperText="" />
-                <LayoutLabelHintInput label="Somme des pourcentages" helperText="" >
+                <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
                         variant="outlined"
