@@ -31,18 +31,17 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
     return (
         <Box sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 1, p: 2 }}>
             <ChampPosteFutur label="Employeur">
-                <Select
+                <Autocomplete
+                    options={employeurOptions}
                     fullWidth
-                    value={poste.employeur_id ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, employeur_id: e.target.value as number })}
-                    displayEmpty
-                >
-                    {employeurOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                        </MenuItem>
-                    ))}
-                </Select>
+                    value={employeurOptions.find((option) => option.value === poste.employeur_id) ?? null}
+                    onChange={(_, value) => onChange?.({ ...poste, employeur_id: value?.value as number })}
+                    renderInput={(params) => <TextField {...params} />}
+                    isOptionEqualToValue={(option) =>
+                        option.value === poste.employeur_id
+                    }
+                    getOptionLabel={(option) => option.label}
+                />
             </ChampPosteFutur>
             <ChampPosteFutur label="Modalité de recrutement">
                 <Select
