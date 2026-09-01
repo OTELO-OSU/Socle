@@ -5,5 +5,15 @@
     "./docker-compose.override.yml"
   ],
   "service": "workspace",
-  "workspaceFolder": "/workspace"
+  "workspaceFolder": "/workspace",
+  "runServices": [
+    "workspace",
+    "nginx",
+    "php",
+    "frontend",
+    "database",
+    "mailer",
+    "adminer",
+    "central"
+  ]
 }
