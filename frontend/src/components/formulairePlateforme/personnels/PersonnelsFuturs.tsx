@@ -1,9 +1,9 @@
-import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Chip, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import type { PosteFutur } from "../../../services/plateformeService";
-import type { EmploiType } from "../../../services/dictionnaireService";
+import { getEmploiTypesOptions } from "../../../services/agentFormLogicService";
 
 const PERSONNELS_FIELD_NAME = "postes_futurs";
 
@@ -25,30 +25,23 @@ function ChampPosteFutur({ children, label }: { children: React.ReactNode; label
 function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void }) {
     const { employeurOptions, corps, bap, modalitesRecrutement } = useContext(DictionnaireContext);
 
-    const emploiTypeDisponible: EmploiType[] = []
-    poste.baps_ids.forEach((bapId) => {
-        const et = bap.find((b) => b.id === bapId)?.emploiTypes;
-        if (et) {
-            emploiTypeDisponible.push(...et);
-        }
-    });
+    const emploiTypeDisponible: { id: number; nom: string; acronyme: string }[] = getEmploiTypesOptions(poste.baps_ids ?? [], bap, corps.find((c) => c.id === poste.corps_id) ?? null);
 
 
     return (
         <Box sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 1, p: 2 }}>
             <ChampPosteFutur label="Employeur">
-                <Select
+                <Autocomplete
+                    options={employeurOptions}
                     fullWidth
-                    value={poste.employeur_id ?? ""}
-                    onChange={(e) => onChange?.({ ...poste, employeur_id: e.target.value as number })}
-                    displayEmpty
-                >
-                    {employeurOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                        </MenuItem>
-                    ))}
-                </Select>
+                    value={employeurOptions.find((option) => option.value === poste.employeur_id) ?? null}
+                    onChange={(_, value) => onChange?.({ ...poste, employeur_id: value?.value as number })}
+                    renderInput={(params) => <TextField {...params} />}
+                    isOptionEqualToValue={(option) =>
+                        option.value === poste.employeur_id
+                    }
+                    getOptionLabel={(option) => option.label}
+                />
             </ChampPosteFutur>
             <ChampPosteFutur label="Modalité de recrutement">
                 <Select
@@ -79,41 +72,51 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                 </Select>
             </ChampPosteFutur>
             <ChampPosteFutur label="BAP">
-                <Select
+                <Autocomplete
+                    options={bap}
                     multiple
                     fullWidth
-                    value={poste.baps_ids ?? []}
-                    onChange={(e) => {
-                        const nextBapIds = (Array.isArray(e.target.value) ? e.target.value : [e.target.value]).map(Number);
-                        onChange?.({ ...poste, baps_ids: nextBapIds, emploi_types_ids: [] });
+                    value={bap.filter((option) => poste.baps_ids?.includes(option.id)) ?? []}
+                    getOptionLabel={(x) => `${x.lettre} - ${x.nom}`}
+                    renderValue={(value, getItemProps) =>
+                        value.map((option, index) => (
+                            <Chip
+                                {...getItemProps({ index: index })}
+                                label={`${option.lettre}`} // seulement pour les chips
+                            />
+                        ))}
+                    isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                    }
+                    onChange={(_, value) => {
+                        const nextBapIds = (Array.isArray(value) ? value : [value]).map((v) => v.id);
+                        onChange?.({ ...poste, baps_ids: nextBapIds });
                     }}
-                    displayEmpty
-                >
-                    {bap.map((option) => (
-                        <MenuItem key={option.id} value={option.id}>
-                            {option.lettre} - {option.nom}
-                        </MenuItem>
-                    ))}
-                </Select>
+                    renderInput={(params) => <TextField {...params} />} />
             </ChampPosteFutur>
             <ChampPosteFutur label="Emploi type">
-                <Select
+                <Autocomplete
+                    options={emploiTypeDisponible}
                     multiple
                     fullWidth
-                    value={poste.emploi_types_ids ?? []}
-                    onChange={(e) => {
-                        const nextEmploiTypeIds = (Array.isArray(e.target.value) ? e.target.value : [e.target.value]).map(Number);
+                    value={emploiTypeDisponible.filter((option) => poste.emploi_types_ids?.includes(option.id)) ?? []}
+                    getOptionLabel={(x) => x.nom}
+                    isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                    }
+                    onChange={(_, value) => {
+                        const nextEmploiTypeIds = (Array.isArray(value) ? value : [value]).map((v) => v.id);
                         onChange?.({ ...poste, emploi_types_ids: nextEmploiTypeIds });
                     }}
-                    displayEmpty
-                    disabled={!poste.baps_ids?.length}
-                >
-                    {emploiTypeDisponible?.map((option) => (
-                        <MenuItem key={option.id} value={option.id}>
-                            {option.acronyme} - {option.nom}
-                        </MenuItem>
-                    ))}
-                </Select>
+                    disabled={!poste.baps_ids?.length || !poste.corps_id}
+                    renderInput={(params) => <TextField {...params} />}
+                    renderValue={(value, getItemProps) =>
+                        value.map((option, index) => (
+                            <Chip
+                                {...getItemProps({ index: index })}
+                                label={option.acronyme}
+                            />
+                        ))} />
             </ChampPosteFutur>
             <ChampPosteFutur label="Quotité">
                 <TextField
