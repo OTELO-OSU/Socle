@@ -1,10 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogTitle, Link, Stack, Typography } from "@mui/material";
-import L from "leaflet";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-cluster";
-import { useMap } from "react-leaflet/hooks";
+import { Container, Link, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from "@mui/material";
+import { useContext, useMemo, useState } from "react";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import { fetchPlateformePublique } from "../services/plateformeService";
 
@@ -17,20 +13,8 @@ type PlateformeMapPoint = {
     longitude: number;
 };
 
-function FitMapToPoints({ points }: { points: PlateformeMapPoint[] }) {
-    const map = useMap();
-
-    useEffect(() => {
-        if (points.length === 0) {
-            return;
-        }
-
-        const bounds = L.latLngBounds(points.map((point) => [point.latitude, point.longitude] as [number, number]));
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
-    }, [map, points]);
-
-    return null;
-}
+type SortField = "unite" | "siteWeb" | "ville" | "nom";
+type SortDirection = "asc" | "desc";
 
 function normalizeWebsiteUrl(siteWeb: string): string {
     if (/^https?:\/\//i.test(siteWeb)) {
@@ -65,63 +49,112 @@ export default function Home() {
         queryKey: ["plateformes", "map-points"],
         queryFn: getPlateformeMapPoints,
     });
-    const [selectedPoint, setSelectedPoint] = useState<PlateformeMapPoint | null>(null);
+    const [sortField, setSortField] = useState<SortField>("nom");
+    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
     const villesById = useMemo(() => {
         return new Map(dictionnaire.ville.map((ville) => [ville.id, ville.nom]));
     }, [dictionnaire.ville]);
 
-    const selectedVille =
-        selectedPoint?.villeId != null ? (villesById.get(selectedPoint.villeId) ?? "Ville inconnue") : "Ville non renseignée";
+    const sortedPoints = useMemo(() => {
+        const getSortableValue = (point: PlateformeMapPoint, field: SortField) => {
+            switch (field) {
+                case "siteWeb":
+                    return point.siteWeb ?? "";
+                case "ville":
+                    return point.villeId ? (villesById.get(point.villeId) ?? "") : "";
+                case "unite":
+                case "nom":
+                    return point.nom;
+            }
+        };
+
+        return [...points].sort((left, right) => {
+            const leftValue = getSortableValue(left, sortField);
+            const rightValue = getSortableValue(right, sortField);
+            const comparison = leftValue.localeCompare(rightValue, "fr", { sensitivity: "base" });
+
+            if (comparison !== 0) {
+                return sortDirection === "asc" ? comparison : -comparison;
+            }
+
+            return left.nom.localeCompare(right.nom, "fr", { sensitivity: "base" });
+        });
+    }, [points, sortDirection, sortField, villesById]);
+
+    const handleSort = (field: SortField) => {
+        setSortDirection((currentDirection) => {
+            if (sortField === field) {
+                return currentDirection === "asc" ? "desc" : "asc";
+            }
+
+            return "asc";
+        });
+        setSortField(field);
+    };
 
     return (
-        <>
-            <MapContainer className="h-full w-screen" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
-            [85, 180],
-            ]} scrollWheelZoom={true} maxBoundsViscosity={1.0}
-                worldCopyJump={true}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <FitMapToPoints points={points} />
-                <MarkerClusterGroup chunkedLoading>
-                    {points.map((point) => (
-                        <Marker
-                            key={point.id}
-                            position={[point.latitude, point.longitude]}
-                            eventHandlers={{
-                                click: () => {
-                                    setSelectedPoint(point);
-                                },
-                            }}
-                        />
-                    ))}
-                </MarkerClusterGroup>
-            </MapContainer>
-
-            <Dialog open={selectedPoint !== null} onClose={() => setSelectedPoint(null)} maxWidth="sm" fullWidth>
-                <DialogTitle>Informations plateforme</DialogTitle>
-                <DialogContent>
-                    {selectedPoint && (
-                        <Stack spacing={1.5}>
-                            <Typography><strong>Nom :</strong> {selectedPoint.nom}</Typography>
-                            <Typography>
-                                <strong>Site web :</strong>{" "}
-                                {selectedPoint.siteWeb ? (
-                                    <Link href={normalizeWebsiteUrl(selectedPoint.siteWeb)} target="_blank" rel="noopener noreferrer">
-                                        {selectedPoint.siteWeb}
+        <Container>
+            <Table sx={{ mt: 5, mb: 5 }} aria-label="Liste des plateformes publiques">
+                <TableHead>
+                    <TableRow>
+                        <TableCell sortDirection={sortField === "unite" ? sortDirection : false}>
+                            <TableSortLabel
+                                active={sortField === "unite"}
+                                direction={sortField === "unite" ? sortDirection : "asc"}
+                                onClick={() => handleSort("unite")}
+                            >
+                                Unité
+                            </TableSortLabel>
+                        </TableCell>
+                        <TableCell sortDirection={sortField === "siteWeb" ? sortDirection : false}>
+                            <TableSortLabel
+                                active={sortField === "siteWeb"}
+                                direction={sortField === "siteWeb" ? sortDirection : "asc"}
+                                onClick={() => handleSort("siteWeb")}
+                            >
+                                Site Web
+                            </TableSortLabel>
+                        </TableCell>
+                        <TableCell sortDirection={sortField === "ville" ? sortDirection : false}>
+                            <TableSortLabel
+                                active={sortField === "ville"}
+                                direction={sortField === "ville" ? sortDirection : "asc"}
+                                onClick={() => handleSort("ville")}
+                            >
+                                Ville
+                            </TableSortLabel>
+                        </TableCell>
+                        <TableCell sortDirection={sortField === "nom" ? sortDirection : false}>
+                            <TableSortLabel
+                                active={sortField === "nom"}
+                                direction={sortField === "nom" ? sortDirection : "asc"}
+                                onClick={() => handleSort("nom")}
+                            >
+                                Nom
+                            </TableSortLabel>
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {sortedPoints.map((point) => (
+                        <TableRow key={point.id}>
+                            <TableCell>{point.nom}</TableCell>
+                            <TableCell>
+                                {point.siteWeb ? (
+                                    <Link href={normalizeWebsiteUrl(point.siteWeb)} target="_blank" rel="noopener noreferrer">
+                                        {point.siteWeb}
                                     </Link>
                                 ) : (
-                                    "Non renseigné"
+                                    "Pas de site web"
                                 )}
-                            </Typography>
-                            <Typography><strong>Ville :</strong> {selectedVille}</Typography>
-                        </Stack>
-                    )}
-                </DialogContent>
-            </Dialog>
-        </>
+                            </TableCell>
+                            <TableCell>{point.villeId ? villesById.get(point.villeId) : "Ville inconnue"}</TableCell>
+                            <TableCell>{point.nom}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Container>
     )
 }
