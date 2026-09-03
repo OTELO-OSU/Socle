@@ -6,6 +6,7 @@ use App\Repository\PlateformeHistoriqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -1255,7 +1256,7 @@ class PlateformeHistorique
     public function getInstruments(): Collection
     {
         return $this->instruments->matching(
-            Criteria::create()->orderBy(['id' => Criteria::ASC])
+            Criteria::create()->orderBy(['id' => Order::Ascending])
         );
     }
 
