@@ -11,6 +11,7 @@ type PlateformeMapPoint = {
     villeId: number | null;
     latitude: number;
     longitude: number;
+    laboratoire: number | null;
 };
 
 type SortField = "laboratoire" | "siteWeb" | "ville" | "nom";
@@ -145,7 +146,7 @@ export default function Home() {
                 <TableBody>
                     {sortedPoints.map((point) => (
                         <TableRow key={point.id}>
-                            <TableCell>{laboById.get(point.laboratoire) || "Laboratoire inconnu"}</TableCell>
+                            <TableCell>{point.laboratoire ? laboById.get(point.laboratoire) : "Laboratoire inconnu"}</TableCell>
                             <TableCell>
                                 {point.siteWeb ? (
                                     <Link href={normalizeWebsiteUrl(point.siteWeb)} target="_blank" rel="noopener noreferrer">
