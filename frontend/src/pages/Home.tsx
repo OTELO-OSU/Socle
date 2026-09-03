@@ -13,7 +13,7 @@ type PlateformeMapPoint = {
     longitude: number;
 };
 
-type SortField = "unite" | "siteWeb" | "ville" | "nom";
+type SortField = "laboratoire" | "siteWeb" | "ville" | "nom";
 type SortDirection = "asc" | "desc";
 
 function normalizeWebsiteUrl(siteWeb: string): string {
@@ -40,6 +40,7 @@ async function getPlateformeMapPoints(): Promise<PlateformeMapPoint[]> {
             villeId: plateforme.dernier_historique.ville_id,
             latitude: plateforme.dernier_historique.latitude as number,
             longitude: plateforme.dernier_historique.longitude as number,
+            laboratoire: plateforme.dernier_historique.laboratoire_operateur_id ? plateforme.dernier_historique.laboratoire_operateur_id : null,
         }));
 }
 
@@ -56,6 +57,10 @@ export default function Home() {
         return new Map(dictionnaire.ville.map((ville) => [ville.id, ville.nom]));
     }, [dictionnaire.ville]);
 
+    const laboById = useMemo(() => {
+        return new Map(dictionnaire.unite.map((unite) => [unite.id, unite.nom]));
+    }, [dictionnaire.unite]);
+
     const sortedPoints = useMemo(() => {
         const getSortableValue = (point: PlateformeMapPoint, field: SortField) => {
             switch (field) {
@@ -63,7 +68,8 @@ export default function Home() {
                     return point.siteWeb ?? "";
                 case "ville":
                     return point.villeId ? (villesById.get(point.villeId) ?? "") : "";
-                case "unite":
+                case "laboratoire":
+                    return point.laboratoire ? (laboById.get(point.laboratoire) ?? "") : "";
                 case "nom":
                     return point.nom;
             }
@@ -98,13 +104,13 @@ export default function Home() {
             <Table sx={{ mt: 5, mb: 5 }} aria-label="Liste des plateformes publiques">
                 <TableHead>
                     <TableRow>
-                        <TableCell sortDirection={sortField === "unite" ? sortDirection : false}>
+                        <TableCell sortDirection={sortField === "laboratoire" ? sortDirection : false}>
                             <TableSortLabel
-                                active={sortField === "unite"}
-                                direction={sortField === "unite" ? sortDirection : "asc"}
-                                onClick={() => handleSort("unite")}
+                                active={sortField === "laboratoire"}
+                                direction={sortField === "laboratoire" ? sortDirection : "asc"}
+                                onClick={() => handleSort("laboratoire")}
                             >
-                                Unité
+                                Laboratoire
                             </TableSortLabel>
                         </TableCell>
                         <TableCell sortDirection={sortField === "siteWeb" ? sortDirection : false}>
@@ -139,7 +145,7 @@ export default function Home() {
                 <TableBody>
                     {sortedPoints.map((point) => (
                         <TableRow key={point.id}>
-                            <TableCell>{point.nom}</TableCell>
+                            <TableCell>{laboById.get(point.laboratoire) || "Laboratoire inconnu"}</TableCell>
                             <TableCell>
                                 {point.siteWeb ? (
                                     <Link href={normalizeWebsiteUrl(point.siteWeb)} target="_blank" rel="noopener noreferrer">

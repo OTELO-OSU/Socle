@@ -490,7 +490,7 @@ class PlateformeHistorique
         return $this;
     }
 
-    #[Groups(['plateforme:detail'])]
+    #[Groups(['plateforme:detail', 'plateforme:list:publique', 'plateforme:list'])]
     #[SerializedName('laboratoire_operateur_id')]
     public function getLaboratoireOperateurId(): ?int
     {
