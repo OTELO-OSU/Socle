@@ -236,7 +236,7 @@ export default function PlateformeAdmin() {
                                             onClose={handleCloseMenu}
                                         >
                                             <MenuItem onClick={handleModifyPlateforme}>Modifier</MenuItem>
-                                            <MenuItem onClick={handleCloseMenu}>Supprimer</MenuItem>
+                                            <MenuItem disabled onClick={handleCloseMenu}>Supprimer</MenuItem>
                                         </Menu>
                                     </Box>
                                 </CardContent>
