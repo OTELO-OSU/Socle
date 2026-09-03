@@ -14,6 +14,13 @@ function InstrumentActuelMaintenanceCard({
     onEdit: (instrument: Instrument) => void;
 }) {
     const dictionnaireContext = useContext(DictionnaireContext);
+    const selectedMutualisation = instrument.mutualise_autre_instrument
+        ? "mutualiseAutreInstrument"
+        : instrument.mutualise_umr_osu
+            ? "mutualiseUmrOsu"
+            : instrument.mutualise_site
+                ? "mutualiseSite"
+                : "";
 
     return (
         <Box
@@ -73,7 +80,21 @@ function InstrumentActuelMaintenanceCard({
                                     name="radio-buttons-group"
                                 >
                                     {dictionnaireContext.typeContratMaintenance.map((type) => (
-                                        <FormControlLabel value={type.id} control={<Radio />} label={type.nom} key={type.id} />
+                                        <FormControlLabel
+                                            value={type.id}
+                                            control={
+                                                <Radio
+                                                    onClick={(event) => {
+                                                        if (instrument.contrat_maintenance_id === type.id) {
+                                                            event.preventDefault();
+                                                            onEdit({ ...instrument, contrat_maintenance_id: null });
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            label={type.nom}
+                                            key={type.id}
+                                        />
                                     ))}
                                 </RadioGroup>
                             </FormControl>
@@ -103,7 +124,7 @@ function InstrumentActuelMaintenanceCard({
                         <Grid size={{ xs: "grow" }} sx={{ display: "flex" }}>
                             <FormControl sx={{ height: "100%", width: "100%" }}>
                                 <RadioGroup
-                                    value={instrument.mutualise_autre_instrument ? "mutualiseAutreInstrument" : instrument.mutualise_umr_osu ? "mutualiseUmrOsu" : instrument.mutualise_site ? "mutualiseSite" : ""}
+                                    value={selectedMutualisation}
 
                                     onChange={(event) => {
                                         const selectedValue = event.target.value;
@@ -118,9 +139,66 @@ function InstrumentActuelMaintenanceCard({
                                     aria-labelledby={`${instrument.id}-label`}
                                     name="radio-buttons-group"
                                 >
-                                    <FormControlLabel value="mutualiseAutreInstrument" control={<Radio />} label="Mutualisé avec d'autres instruments de la plateforme" />
-                                    <FormControlLabel value="mutualiseUmrOsu" control={<Radio />} label="Mutualisé avec l'UMR/OSU" />
-                                    <FormControlLabel value="mutualiseSite" control={<Radio />} label="Mutualisé à l'échelle du site (Université)" />
+                                    <FormControlLabel
+                                        value="mutualiseAutreInstrument"
+                                        control={
+                                            <Radio
+                                                onClick={(event) => {
+                                                    if (selectedMutualisation === "mutualiseAutreInstrument") {
+                                                        event.preventDefault();
+                                                        onEdit({
+                                                            ...instrument,
+                                                            mutualise_autre_instrument: false,
+                                                            mutualise_umr_osu: false,
+                                                            mutualise_site: false,
+                                                            mutualise_autre_instrument_ids: [],
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        }
+                                        label="Mutualisé avec d'autres instruments de la plateforme"
+                                    />
+                                    <FormControlLabel
+                                        value="mutualiseUmrOsu"
+                                        control={
+                                            <Radio
+                                                onClick={(event) => {
+                                                    if (selectedMutualisation === "mutualiseUmrOsu") {
+                                                        event.preventDefault();
+                                                        onEdit({
+                                                            ...instrument,
+                                                            mutualise_autre_instrument: false,
+                                                            mutualise_umr_osu: false,
+                                                            mutualise_site: false,
+                                                            mutualise_autre_instrument_ids: [],
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        }
+                                        label="Mutualisé avec l'UMR/OSU"
+                                    />
+                                    <FormControlLabel
+                                        value="mutualiseSite"
+                                        control={
+                                            <Radio
+                                                onClick={(event) => {
+                                                    if (selectedMutualisation === "mutualiseSite") {
+                                                        event.preventDefault();
+                                                        onEdit({
+                                                            ...instrument,
+                                                            mutualise_autre_instrument: false,
+                                                            mutualise_umr_osu: false,
+                                                            mutualise_site: false,
+                                                            mutualise_autre_instrument_ids: [],
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        }
+                                        label="Mutualisé à l'échelle du site (Université)"
+                                    />
                                     <Select
                                         sx={{ mt: 2 }}
                                         value={instrument.mutualise_autre_instrument_ids || []}
