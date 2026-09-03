@@ -15,5 +15,13 @@
     "mailer",
     "adminer",
     "central"
-  ]
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "Vue.volar"
+      ]
+    }
+  }
 }
