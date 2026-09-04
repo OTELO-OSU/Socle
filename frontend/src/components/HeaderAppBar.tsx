@@ -19,12 +19,15 @@ export default function HeaderAppBar() {
         window.location.href = `${FRONT_URL}/Shibboleth.sso/Logout?return=${FRONT_URL}/deconnexion`;
     }
 
+    const dev = import.meta.env.DEV;
+
     return (
         <Box>
+
             <AppBar position="fixed">
                 <Toolbar>
                     <Typography variant="h6" component={RouterLink} to="/" sx={{ flexGrow: 1 }} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        POE
+                        POE {dev && <Typography variant="caption">DEV</Typography>}
                     </Typography>
 
                     {isConnected &&

@@ -25,12 +25,31 @@ A platform can have multiple tags from among those defined in the central tag re
 
 ### Roles
 
-Admin - Can do everything
+```Admin``` - Can do everything
 
-OSU Director - Can do everything
+```OSU Director``` - Can do everything
 
-Unit Director - For his laboratory; can create a platform, assign user to be platform manager, edit platform, approve users who sign up to be in charge of platform
+```Unit Director``` - For his laboratory; can create a platform, assign user to be platform manager, edit platform, approve users who sign up to be in charge of platform
 
-Platform Manager - Can edit his platform
+```Platform Manager``` - Can edit his platform
 
-Public - Can only view the homepage with all platform with limited information
+```Public``` - Can only view the homepage with all platform with limited information
+
+## Deployment
+
+Firstly you have to rename the .env.example to .env and fill it
+
+```sh
+mv .env.example .env
+```
+
+Then start all the containers
+
+```sh
+docker compose --profile build up
+```
+
+And finally generate the rsa key for the JWT
+
+```sh
+docker compose exec -it php php /var/www/backend/bin/console lexik:jwt:generate-keypair

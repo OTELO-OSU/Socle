@@ -37,13 +37,14 @@ services:
       MAILER_DSN: smtp://mailer:1025
       NOREPLY_EMAIL: noreply@ul.fr
       CENTRAL_TAG: http://central
+      JWT_PASSPHRASE: passphrase
 
   frontend:
     image: node:22
     working_dir: /frontend
     volumes:
       - ./frontend:/frontend
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "npm install && exec npm run dev -- --host 0.0.0.0"
     ports:
       - "5173"
     environment:
