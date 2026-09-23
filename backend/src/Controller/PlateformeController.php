@@ -33,6 +33,17 @@ final class PlateformeController extends AbstractController
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list:publique']]);
     }
 
+    #[Route('/plateforme/{id}', methods: ['DELETE'], requirements: ['id' => '\\d+'])]
+    public function supprPlateforme(int $id): Response
+    {
+        $this->plateformeService->supprimerPlateforme($id);
+
+        return $this->json(
+            ['message' => 'Plateforme supprimée avec succès.'],
+            200,
+        );
+    }
+
     #[Route('/plateforme/{id}', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function getPlateformeDetail(int $id): Response
     {
@@ -47,21 +58,6 @@ final class PlateformeController extends AbstractController
             ]
         );
     }
-
-    // #[Route('/plateforme/{id}', methods: ['GET'], requirements: ['id' => '\\d+'])]
-    // public function getPlateformeDetail(int $id): Response
-    // {
-    //     $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($id);
-
-    //     return $this->json(
-    //         $plateforme,
-    //         200,
-    //         [],
-    //         [
-    //             "groups" => ["plateforme:detail"],
-    //         ]
-    //     );
-    // }
 
     #[Route('/plateforme', methods: ['POST'])]
     public function creerPlateforme(Request $request): Response

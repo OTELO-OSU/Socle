@@ -246,3 +246,9 @@ export async function testerPlateforme(plateformeId: number, data: DernierHistor
 
     return { message: message };
 }
+
+export async function deletePlateforme(plateformeId: number) {
+    const { data: { message } } = await symfony.delete<{ message: string }>(`/plateforme/${plateformeId}`);
+
+    return { message: message };
+}

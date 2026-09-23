@@ -69,7 +69,7 @@ class Instrument
     /**
      * @var Collection<int, InstrumentMutualisation>
      */
-    #[ORM\OneToMany(targetEntity: InstrumentMutualisation::class, mappedBy: 'instrumentSource')]
+    #[ORM\OneToMany(targetEntity: InstrumentMutualisation::class, mappedBy: 'instrumentSource', cascade: ['remove'], orphanRemoval: true)]
     private Collection $instrumentMutualisations;
 
     #[ORM\ManyToOne(inversedBy: 'instruments')]

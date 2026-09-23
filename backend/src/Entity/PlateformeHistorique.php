@@ -78,7 +78,7 @@ class PlateformeHistorique
      * @var Collection<int, PlateformeHistoriquePersonnel>
      */
     #[SerializedName("personnels")]
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriquePersonnel::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     #[Groups(['plateforme:list', "plateforme:detail"])]
     private Collection $plateformeHistoriquePersonnels;
 
@@ -314,21 +314,21 @@ class PlateformeHistorique
      * @var Collection<int, PlateformeHistoriqueTutelle>
      */
     #[SerializedName("tutelles")]
-    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: PlateformeHistoriqueTutelle::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     private Collection $plateformeHistoriqueTutelles;
 
     /**
      * @var Collection<int, PosteFutur>
      */
     #[SerializedName("postes_futurs")]
-    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: PosteFutur::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     #[Groups(["plateforme:detail"])]
     private Collection $posteFuturs;
 
     /**
      * @var Collection<int, ContributionTutelle>
      */
-    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: ContributionTutelle::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     #[Groups(["plateforme:detail"])]
     #[SerializedName("contribution_tutelle_detail")]
     private Collection $contributionTutelles;
@@ -336,7 +336,7 @@ class PlateformeHistorique
     /**
      * @var Collection<int, Instrument>
      */
-    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: Instrument::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     #[Groups(["plateforme:detail"])]
     private Collection $instruments;
 
@@ -347,7 +347,7 @@ class PlateformeHistorique
     /**
      * @var Collection<int, Publications>
      */
-    #[ORM\OneToMany(targetEntity: Publications::class, mappedBy: 'plateformeHistorique')]
+    #[ORM\OneToMany(targetEntity: Publications::class, mappedBy: 'plateformeHistorique', cascade: ['persist', 'remove'])]
     #[Groups(["plateforme:detail"])]
     #[SerializedName("publications")]
     private Collection $publications;
