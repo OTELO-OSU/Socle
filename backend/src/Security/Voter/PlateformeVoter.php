@@ -16,13 +16,14 @@ final class PlateformeVoter extends Voter
     public const LIRE = 'LIRE';
     public const SAUVEGARDER = 'SAUVEGARDER';
     public const EXPORTER = 'EXPORTER';
+    public const SUPPRIMER = 'SUPPRIMER';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         $testA = in_array($attribute, [self::CREER])
             && $subject === Plateforme::class;
 
-        $testB = in_array($attribute, [self::LIRE, self::SAUVEGARDER, self::EXPORTER, self::AFFILIER, self::TAG])
+        $testB = in_array($attribute, [self::LIRE, self::SAUVEGARDER, self::EXPORTER, self::AFFILIER, self::SUPPRIMER, self::TAG])
             && $subject instanceof Plateforme;
         return $testA || $testB;
     }
@@ -46,6 +47,24 @@ final class PlateformeVoter extends Voter
                 $entitesDelegue = $user->getDeleguesDirecteur();
                 if (count($entites) > 0 || count($entitesDelegue) > 0) {
                     return true;
+                }
+                break;
+            case self::SUPPRIMER:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
                 }
                 break;
             case self::LIRE:

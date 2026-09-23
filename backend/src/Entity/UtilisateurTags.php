@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 class UtilisateurTags
 {
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'utilisateurTags')]
     #[ORM\JoinColumn(nullable: false, name: "utilisateur_id", referencedColumnName: "id", onDelete: "CASCADE")]
     private Utilisateur $utilisateur;
 

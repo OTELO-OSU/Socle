@@ -19,7 +19,7 @@ class InstrumentMutualisation
     #[ORM\JoinColumn(nullable: false)]
     private ?Instrument $instrumentSource = null;
 
-    #[ORM\ManyToOne(inversedBy: 'instrumentMutualisations')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["plateforme:detail"])]
     #[MaxDepth(1)]

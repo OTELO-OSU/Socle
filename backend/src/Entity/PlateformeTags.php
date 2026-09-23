@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PlateformeTags
 {
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Plateforme::class)]
+    #[ORM\ManyToOne(targetEntity: Plateforme::class, inversedBy: 'plateformeTags')]
     #[ORM\JoinColumn(nullable: false, name: "plateforme_id", referencedColumnName: "id", onDelete: "CASCADE")]
     private Plateforme $plateforme;
 
