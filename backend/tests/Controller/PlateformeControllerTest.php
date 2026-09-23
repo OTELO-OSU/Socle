@@ -7972,4 +7972,80 @@ class PlateformeControllerTest extends WebTestCase
 
         self::assertEmailCount(0);
     }
+
+    public function testSuppressionPlateformeForbiddenUser(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+
+        $idPlateforme = $data['plateforme_id'];
+
+        self::assertEmailCount(0);
+
+        $client->request(
+            'DELETE',
+            '/api/plateforme/' . $idPlateforme,
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(
+            "Vous n'avez pas les droits pour supprimer cette plateforme.",
+            $creationResponse['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testSuppressionPlateformeSuccessAdmin(): void
+    {
+        $client = $this->client;
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+
+        $idPlateforme = $data['plateforme_id'];
+
+        self::assertEmailCount(0);
+
+        $client->request(
+            'DELETE',
+            '/api/plateforme/' . $idPlateforme,
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getAdminAccessToken()],
+        );
+
+        $creationResponse = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(
+            'Plateforme supprimée avec succès.',
+            $creationResponse['message']
+        );
+
+        self::assertEmailCount(0);
+    }
 }

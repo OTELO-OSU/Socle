@@ -237,7 +237,7 @@ class PlateformeService
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) throw new Exception("Plateforme non trouvée.", 404);
 
-        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new Exception("Vous n'avez pas les droits pour supprimer cette plateforme", 403);
+        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new Exception("Vous n'avez pas les droits pour supprimer cette plateforme.", 403);
 
         $this->em->remove($plateforme);
         $this->em->flush();

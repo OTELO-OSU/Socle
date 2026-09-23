@@ -53,6 +53,19 @@ final class PlateformeVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
                 break;
             case self::LIRE:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
