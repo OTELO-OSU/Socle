@@ -1,12 +1,16 @@
 services:
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: ./docker/nginx/dockerfile
+      args:
+        - VITE_API_URL=${API_URL}
+        - VITE_FRONT_URL=${FRONT_HOST}
     ports:
       - ${NGINX_PORT}:80
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./backend:/var/www/backend:ro
-      - ./frontend/dist:/var/www/frontend:ro
     depends_on:
       php:
         condition: service_started
@@ -29,17 +33,6 @@ services:
       - ./backend:/var/www/backend:rw
     depends_on:
       - database
-
-  builder:
-    image: node:24-alpine
-    profiles: ["build"]
-    working_dir: /app
-    command: sh -c "npm install && npm run build"
-    environment:
-      - VITE_API_URL=${API_URL}
-      - VITE_FRONT_URL=${FRONT_HOST}
-    volumes:
-      - ./frontend:/app
 
   ###> doctrine/doctrine-bundle ###
   database:

@@ -3,7 +3,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { creerPlateforme, deletePlateforme, fetchPlateformeListeParPage, patchResponsablePlateforme, type PlateformeLight } from "../services/plateformeService";
 import { SnackbarContext } from "../context/snackbarContext";
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
-import { Delete, Description, Download, Group, Launch, ManageAccounts, Verified } from "@mui/icons-material";
+import { Delete, Download, Group, Launch, ManageAccounts } from "@mui/icons-material";
 import type { Agent } from "../services/agentService";
 import type { AxiosError } from "axios";
 import type { ApiError } from "../utils/axios";

@@ -46,7 +46,7 @@ mv .env.example .env
 Then start all the containers
 
 ```sh
-docker compose --profile build up
+docker compose up
 ```
 
 And finally generate the rsa key for the JWT
