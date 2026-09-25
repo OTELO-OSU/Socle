@@ -61,7 +61,9 @@ services:
       - frontend
 
   workspace:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    build:
+      context: .
+      dockerfile: .devcontainer/dockerfile
     volumes:
       - .:/workspace
     command: sleep infinity

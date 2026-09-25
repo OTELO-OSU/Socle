@@ -16,11 +16,23 @@
     "adminer",
     "central"
   ],
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "configureZshAsDefaultShell": true
+    }
+  },
   "customizations": {
     "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      },
       "extensions": [
         "bmewburn.vscode-intelephense-client",
-        "Vue.volar"
+        "Vue.volar",
+        "GitLab.gitlab-workflow"
       ]
     }
   }
