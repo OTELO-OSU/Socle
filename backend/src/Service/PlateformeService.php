@@ -856,19 +856,8 @@ class PlateformeService
                     $user = $this->security->getUser();
 
                     $superUser = $this->security->isGranted('ROLE_ADMIN') || $this->security->isGranted('ROLE_DIR_OSU') || $this->security->isGranted('ROLE_DIR_OSU_DELEGUE');
-                    $canEdit = $superUser
-                        || $user->getPlateformeHistoriquePersonnels()->exists(
-                            function (int $key, PlateformeHistoriquePersonnel $personnel) use ($plateformeHisto) {
-                                return $personnel->getPlateformeHistorique() === $plateformeHisto
-                                    && (
-                                        $personnel->isResponsablePlateforme()
-                                        || $personnel->isResponsableScientifique()
-                                        || $personnel->isResponsableTechnique()
-                                    );
-                            }
-                        );
 
-                    if ($canEdit) {
+                    if ($superUser) {
                         if ($value === null) {
                             $plateformeHisto->setLaboratoireOperateur(null);
                         } else {
