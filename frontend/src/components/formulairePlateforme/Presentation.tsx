@@ -7,6 +7,7 @@ import { RHFSelect } from "../RHFTextSelect";
 import NombreTextField from "../NombreTextField";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import { useMap, useMapEvents } from "react-leaflet/hooks";
+import { AuthContext } from "../../context/authContext";
 
 type MapPoint = {
     latitude: number | null;
@@ -92,7 +93,7 @@ function PreviewMap() {
 
 export function Presentation() {
     const { control } = useFormContext();
-
+    const authContext = useContext(AuthContext);
     const { villeOptions, uniteOptions, employeurOptions, tagsOptions } = useContext(DictionnaireContext);
 
     return (
@@ -203,6 +204,7 @@ export function Presentation() {
                         control={control}
                         render={({ field }) => (
                             <Autocomplete
+                                disabled={!authContext?.estAdmin}
                                 options={uniteOptions}
                                 value={uniteOptions.find(option =>
                                     option.value === field.value
