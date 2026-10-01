@@ -15,17 +15,18 @@ import SaveIcon from '@mui/icons-material/Save';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SnackbarContext } from "../context/snackbarContext";
-import { isAxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 import { fetchDetailPlateformeHarvestee } from "../services/harvesterService";
 
 export default function ModificationPlateforme() {
     const [errorsArray, setErrorsArray] = useState<string[]>([]);
     const searchParams = new URLSearchParams(window.location.search);
+    const [readonly, setReadonly] = useState(false);
     const methods = useForm<DernierHistorique>({
         defaultValues: {
             publications: []
         },
-        disabled: searchParams.get('harvester') === 'true',
+        disabled: searchParams.get('harvester') === 'true' || readonly,
     });
 
     const {
@@ -34,7 +35,6 @@ export default function ModificationPlateforme() {
     } = methods;
 
     const [verificationValide, setVerificationValide] = useState(false);
-
     const boutonActif = verificationValide && !isDirty;
 
 
@@ -69,12 +69,12 @@ export default function ModificationPlateforme() {
                 message: res.message,
             })
         } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
             updateErrorsArray(error);
 
-            console.error("Erreur lors de l'enregistrement au brouillon :", error);
             snackbarContext?.trigger({
                 couleur: "error",
-                message: "Erreur lors de l'enregistrement au brouillon",
+                message: axiosError.response?.data.message || "Erreur lors de l'enregistrement au brouillon",
             })
         }
 
@@ -163,6 +163,7 @@ export default function ModificationPlateforme() {
                     // Mettre à jour les valeurs du formulaire avec les données récupérées
                     methods.reset(data.dernier_historique);
                     methods.setValue("annee", undefined);
+                    setReadonly(data.readonly);
                     setInstrumentNational(data.instrument_national);
                     if (data.instrument_national) {
                         if (methods.getValues("dotation_instrument_national") === undefined) {

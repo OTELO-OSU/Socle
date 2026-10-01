@@ -15,6 +15,7 @@ export type PlateformeLight = {
         brouillon: boolean;
     };
     pourcentage_remplissage?: number | null;
+    readonly?: boolean;
 }
 
 export type PlateformeLightPublique = {
@@ -210,6 +211,7 @@ export type plateformeDetails = {
     instrument_national: boolean;
     pseudo_id: string;
     dernier_historique: DernierHistorique;
+    readonly: boolean;
 }
 
 export async function fetchPlateformeDetails(plateformeId: number) {

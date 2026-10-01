@@ -41,6 +41,10 @@ class Plateforme
     #[SerializedName("pourcentage_remplissage")]
     private ?float $pourcentageRemplissage = null;
 
+    #[Groups(["plateforme:list", "plateforme:detail"])]
+    #[SerializedName("readonly")]
+    private ?bool $readonly = null;
+
     /**
      * @var Collection<int, UtilisateurInscription>
      */
@@ -204,6 +208,18 @@ class Plateforme
     public function setPourcentageRemplissage(?float $pourcentageRemplissage): static
     {
         $this->pourcentageRemplissage = $pourcentageRemplissage;
+
+        return $this;
+    }
+
+    public function isReadonly(): ?bool
+    {
+        return $this->readonly;
+    }
+
+    public function setReadonly(?bool $readonly): static
+    {
+        $this->readonly = $readonly;
 
         return $this;
     }

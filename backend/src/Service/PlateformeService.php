@@ -461,6 +461,11 @@ class PlateformeService
 
         foreach ($plateformes as $plateforme) {
             $plateforme->setPourcentageRemplissage($this->getPlateformePourcentage($plateforme->getLastHistorique()));
+            if ($this->security->isGranted(PlateformeVoter::READONLY, $plateforme)) {
+                $plateforme->setReadonly(true);
+            } else {
+                $plateforme->setReadonly(false);
+            }
         }
 
         return [
@@ -504,7 +509,14 @@ class PlateformeService
             throw new Exception("Aucun historique trouvé pour cette plateforme.", 404);
         }
 
-        return $dernierHistorique->getPlateforme();
+        $plateforme = $dernierHistorique->getPlateforme();
+        if ($this->security->isGranted(PlateformeVoter::READONLY, $plateforme)) {
+            $plateforme->setReadonly(true);
+        } else {
+            $plateforme->setReadonly(false);
+        }
+
+        return $plateforme;
     }
 
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
