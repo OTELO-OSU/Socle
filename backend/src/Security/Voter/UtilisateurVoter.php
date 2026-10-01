@@ -105,18 +105,52 @@ final class UtilisateurVoter extends Voter
                 break;
             case self::MODIFIER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
-                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
-                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
-
                 /** @var Utilisateur $subject */
+
+                // On ne peut pas modifier un administrateur si on est directeur d'OSU
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) {
+                    if ($subject->getRoles() && in_array('ROLE_ADMIN', $subject->getRoles())) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+
+                // On ne peut pas modifier un administrateur ou un directeur d'OSU si on est délégué d'OSU
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) {
+                    if ($subject->getRoles() && (in_array('ROLE_ADMIN', $subject->getRoles()) || in_array('ROLE_DIR_OSU', $subject->getRoles()))) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+
                 if ($user->getId() === $subject->getId()) {
                     return true;
                 }
                 break;
             case self::MODIFIER_EMAIL:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
-                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
-                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                /** @var Utilisateur $subject */
+
+                // On ne peut pas modifier un administrateur si on est directeur d'OSU
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) {
+                    if ($subject->getRoles() && in_array('ROLE_ADMIN', $subject->getRoles())) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+
+                // On ne peut pas modifier un administrateur ou un directeur d'OSU si on est délégué d'OSU
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) {
+                    if ($subject->getRoles() && (in_array('ROLE_ADMIN', $subject->getRoles()) || in_array('ROLE_DIR_OSU', $subject->getRoles()))) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
                 break;
             case self::GetEnAttenteDeValidation:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
