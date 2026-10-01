@@ -33,6 +33,10 @@ class AgentService
             throw new Exception("Vous devez être authentifié.", 401);
         }
 
+        if (!$this->security->isGranted(UtilisateurVoter::LISTER, Utilisateur::class)) {
+            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+        }
+
         $offset = ($page - 1) * self::AGENT_PAR_PAGE;
 
         $conn = $this->em->getConnection();

@@ -4,12 +4,14 @@ namespace App\Security\Voter;
 
 use App\Entity\Entite;
 use App\Entity\Utilisateur;
+use App\Entity\UtilisateurTags;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class UtilisateurVoter extends Voter
 {
+    public const LISTER = 'LISTER';
     public const GetEnAttenteDeValidation = 'GetEnAttenteDeValidation';
     public const GERER_EN_ATTENTE_DE_VALIDATION_DU_DU = 'GERER_EN_ATTENTE_DE_VALIDATION_DU_DU';
     public const GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE = 'GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE';
@@ -33,7 +35,7 @@ final class UtilisateurVoter extends Voter
         $a = in_array($attribute, [self::APPROUVER, self::MODIFIER, self::MODIFIER_EMAIL])
             && $subject instanceof \App\Entity\Utilisateur;
 
-        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GERER_HMT, self::TAG_UTILISATEUR, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE, self::GET_TOUTE_UNITE])
+        $b = in_array($attribute, [self::GetEnAttenteDeValidation, self::GERER_HMT, self::TAG_UTILISATEUR, self::GET_ADMIN_OSU, self::CHANGER_DU, self::CHANGER_DO, self::CHANGER_DELEGUE_DO, self::SOUMETTRE_AU_DU, self::SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, self::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE, self::GERER_ANNEE_SAISIE, self::GET_TOUTE_UNITE, self::LISTER])
             && $subject === Utilisateur::class;
 
         $c = in_array($attribute, [self::CHANGER_DELEGUE_DU])
@@ -52,6 +54,30 @@ final class UtilisateurVoter extends Voter
         }
 
         switch ($attribute) {
+            case self::LISTER:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                // Si il est DU
+                if ($user->getEntites()->count() > 0 || $user->getDeleguesDirecteur()->count() > 0) {
+                    return true;
+                }
+
+                // Si il est tagué
+                // Ne pas rentrer dans la complexité d'analyser si chaque tag existe dans une plateforme
+                if ($user->getUtilisateurTags()->count() > 0) {
+                    return true;
+                }
+
+                // Si il est responsable scientifique, technique ou plateforme
+                foreach ($user->getPlateformeHistoriquePersonnels() as $personnel) {
+                    if ($personnel->isResponsableScientifique() || $personnel->isResponsableTechnique() || $personnel->isResponsablePlateforme()) {
+                        return true;
+                    }
+                }
+
+                return false;
             case self::APPROUVER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
