@@ -23,6 +23,7 @@ class AgentControllerTest extends WebTestCase
     private ?Plateforme $testPlateforme = null;
     private ?PlateformeHistorique $plateformeHisto = null;
     private ?Utilisateur $user = null;
+    private ?Utilisateur $admin = null;
     private ?Entite $unite = null;
     private ?Entite $unite2 = null;
     private ?Entite $uar = null;
@@ -171,6 +172,7 @@ class AgentControllerTest extends WebTestCase
         $this->corps = $corps;
         $this->grade = $grade;
         $this->plateformeHisto = $plateformeHisto;
+        $this->admin = $admin;
 
         $this->payloadSoumissionDU = [
             'prenom' => 'Test',
@@ -937,6 +939,129 @@ class AgentControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame('Modification effectuée avec succès', $data['message']);
         $this->assertSame('newemail@example.com', $data['utilisateur']['email']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAdminEnTantQueDORefuser(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $user = $this->em->find(Utilisateur::class, $this->user->getId());
+        $user->setRoles(['ROLE_DIR_OSU']);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->admin->getId(),
+            'email' => $this->admin->getEmail(),
+            'nom' => $this->admin->getNom(),
+            'prenom' => $this->admin->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierAdminEnTantQueDODRefuser(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $user = $this->em->find(Utilisateur::class, $this->user->getId());
+        $user->setRoles(['ROLE_DIR_OSU_DELEGUE']);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->admin->getId(),
+            'email' => $this->admin->getEmail(),
+            'nom' => $this->admin->getNom(),
+            'prenom' => $this->admin->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testModifierDOEnTantQueDODRefuser(): void
+    {
+        $client = $this->client;
+
+        $typeContrat = new TypeContrat();
+        $typeContrat->setNom('Type Contrat Test');
+        $this->em->persist($typeContrat);
+        $user = $this->em->find(Utilisateur::class, $this->user->getId());
+        $user->setRoles(['ROLE_DIR_OSU_DELEGUE']);
+        $admin = $this->em->find(Utilisateur::class, $this->admin->getId());
+        $admin->setRoles(['ROLE_DIR_OSU']);
+        $this->em->persist($user);
+        $this->em->persist($admin);
+        $this->em->flush();
+
+        $payload = [
+            'utilisateur_id' => $this->admin->getId(),
+            'email' => $this->admin->getEmail(),
+            'nom' => $this->admin->getNom(),
+            'prenom' => $this->admin->getPrenom(),
+            'employeur_id' => $this->employeur->getId(),
+            'unite_id' => $this->unite->getId(),
+            'type_contrat_id' => $typeContrat->getId(),
+            'corps_id' => $this->corps->getId(),
+            'grade_id' => $this->grade->getId(),
+        ];
+
+        $client->request(
+            'PUT',
+            '/api/agent',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            json_encode($payload, JSON_THROW_ON_ERROR)
+        );
+
+        $this->assertResponseStatusCodeSame(403);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
 
         self::assertEmailCount(0);
     }
