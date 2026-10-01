@@ -208,7 +208,7 @@ class PlateformeService
 
         //* Si il est DU ou DU délégué on force le laboratoire
         // Vérifier si il est Admin Dir Osu ou Dir Osu delegue
-        $superUser = $this->security->isGranted('ROLE_ADMIN_DIR_OSU') || $this->security->isGranted('ROLE_DIR_OSU_DELEGUE') || $this->security->isGranted('ROLE_ADMIN');
+        $superUser = $this->security->isGranted('ROLE_DIR_OSU') || $this->security->isGranted('ROLE_DIR_OSU_DELEGUE') || $this->security->isGranted('ROLE_ADMIN');
 
         /** @var Utilisateur $user */
         $user = $this->security->getUser();
@@ -222,7 +222,7 @@ class PlateformeService
         $plateformeHistorique->setAnnee($this->getAnneeDeSaisieEnCours());
         $plateformeHistorique->setBrouillon(true);
         if (!$superUser) {
-            $plateformeHistorique->setLaboratoireOperateur($entites->first() ?? $entitesDelegues->first());
+            $plateformeHistorique->setLaboratoireOperateur($entites->first() ?: $entitesDelegues->first());
         }
 
         $this->em->persist($plateforme);

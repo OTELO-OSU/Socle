@@ -233,6 +233,120 @@ class PlateformeControllerTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testcreatePlateformeDirOsu(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $user->setRoles(['ROLE_DIR_OSU']);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme créée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testcreatePlateformeDirOsuDelegue(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $user->setRoles(['ROLE_DIR_OSU_DELEGUE']);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme créée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testcreatePlateformeDU(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $unite = $this->em->getRepository(Entite::class)->findOneBy([]);
+        $unite->setDirecteur($user);
+        $this->em->persist($unite);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme créée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
+    public function testcreatePlateformeDUD(): void
+    {
+        $client = $this->client;
+
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
+        $unite = $this->em->getRepository(Entite::class)->findOneBy([]);
+        $unite->addDelegueDirecteur($user);
+        $this->em->persist($unite);
+        $this->em->flush();
+
+        $client->request(
+            'POST',
+            '/api/plateforme',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $this->getUserAccessToken()],
+            \json_encode(['nom' => 'Test Plateforme'])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(
+            "Plateforme créée avec succès.",
+            $data['message']
+        );
+
+        self::assertEmailCount(0);
+    }
+
     public function testcreatePlateformeSansNom(): void
     {
         $client = $this->client;
