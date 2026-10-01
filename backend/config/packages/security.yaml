@@ -12,6 +12,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            user_checker: App\Security\UserChecker
             provider: only_provider
             jwt: ~
 
