@@ -37,8 +37,6 @@ class UtilisateurInscriptionDTO
     #[EntityExists(entity: 'App\Entity\Plateforme', groups: ['affiliation'])]
     public ?int $plateforme_demande_id = null;
 
-    public ?bool $directeur_osu_demande = null;
-
     #[NotBlank(groups: ['oauth'], message: 'Le token est obligatoire')]
     public ?string $token = null;
 
@@ -48,7 +46,6 @@ class UtilisateurInscriptionDTO
         $demande = 0;
         if ($this->plateforme_demande_id !== null) $demande++;
         if ($this->directeur_unite_demande === true) $demande++;
-        if ($this->directeur_osu_demande === true) $demande++;
 
         if ($demande === 0) {
             $context->buildViolation('Au moins une demande doit être faite (plateforme, unité ou OSU)')

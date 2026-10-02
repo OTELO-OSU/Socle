@@ -23,13 +23,9 @@ export async function refreshSession() {
     return { data, status };
 }
 
-export async function inscription(prenom: string, nom: string, email: string, mdp: string, role: number, unite_id: number) {
+export async function inscription(prenom: string, nom: string, email: string, mdp: string, role: number, unite_id: number, plateforme_id: number | null) {
     let rolesValue;
-    if (role === 3) {
-        rolesValue = {
-            directeur_osu_demande: true
-        };
-    } else if (role === 2) {
+    if (role === 2) {
         rolesValue = {
             directeur_unite_demande: true
         };
@@ -40,19 +36,16 @@ export async function inscription(prenom: string, nom: string, email: string, md
         email,
         mdp,
         unite_id,
+        plateforme_demande_id: plateforme_id,
         ...rolesValue
     });
 
     return { data, status };
 }
 
-export async function inscriptionSsMdp(prenom: string, nom: string, email: string, role: number, token: string | null, unite_id: number) {
+export async function inscriptionSsMdp(prenom: string, nom: string, email: string, role: number, token: string | null, unite_id: number, plateforme_id: number | null) {
     let rolesValue;
-    if (role === 3) {
-        rolesValue = {
-            directeur_osu_demande: true
-        };
-    } else if (role === 2) {
+    if (role === 2) {
         rolesValue = {
             directeur_unite_demande: true
         };
@@ -63,6 +56,7 @@ export async function inscriptionSsMdp(prenom: string, nom: string, email: strin
         email,
         token,
         unite_id,
+        plateforme_demande_id: plateforme_id,
         ...rolesValue
     });
 

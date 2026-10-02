@@ -4,9 +4,10 @@ export type UtilisateurEnAttente = {
     id: number;
     email: string;
     nom: string;
+    unite_id: number | null;
     prenom: string;
     plateformeDemande: string | null;
-    uniteDemande: string | null;
+    directeurUniteDemande: boolean;
 }
 
 export async function fetchUtilisateurEnAttente() {

@@ -30,6 +30,7 @@ class AdminService
                 "email" => $user->getEmail(),
                 "nom" => $user->getNom(),
                 "prenom" => $user->getPrenom(),
+                "unite_id" => $user->getUnite() ? $user->getUnite()->getId() : null,
                 "plateformeDemande" => $user->getUtilisateurInscription()->getPlateformeDemande() ? $user->getUtilisateurInscription()->getPlateformeDemande()->getLastHistorique()->getNomOfficiel() : null,
                 "directeurUniteDemande" => $user->getUtilisateurInscription()->isDirecteurUniteDemande(),
             ];

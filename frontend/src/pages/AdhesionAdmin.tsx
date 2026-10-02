@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approuverUtilisateur, fetchUtilisateurEnAttente, refuserUtilisateur, type UtilisateurEnAttente } from "../services/adminService";
-import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { Chip, IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useContext } from "react";
 import { SnackbarContext } from "../context/snackbarContext";
 import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
+import { DictionnaireContext } from "../context/dictionnaireContext";
 
 export default function AdhesionAdmin() {
     const snackbarStore = useContext(SnackbarContext);
+    const dictionnaireStore = useContext(DictionnaireContext);
     const queryClient = useQueryClient();
     const { data: utilisateurs } = useQuery({
         queryKey: ['utilisateurs', 'en-attente', 'admin'],
@@ -50,22 +52,28 @@ export default function AdhesionAdmin() {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell>Rôle</TableCell>
                             <TableCell>Nom</TableCell>
                             <TableCell>Prénom</TableCell>
                             <TableCell>Email</TableCell>
+                            <TableCell>Unité</TableCell>
                             <TableCell>Plateforme demandée</TableCell>
-                            <TableCell>Unité demandée</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {utilisateurs?.map((utilisateur) => (
                             <TableRow key={utilisateur.email}>
+                                <TableCell>{utilisateur.plateformeDemande && (
+                                    <Chip label="Responsable de plateforme" color="primary" />
+                                )}{utilisateur.directeurUniteDemande && (
+                                    <Chip label="Directeur d'unité" color="warning" />
+                                )}</TableCell>
                                 <TableCell>{utilisateur.nom}</TableCell>
                                 <TableCell>{utilisateur.prenom}</TableCell>
                                 <TableCell>{utilisateur.email}</TableCell>
+                                <TableCell>{dictionnaireStore.uniteOptions.find((u) => u.value === utilisateur.unite_id)?.label || 'N/A'}</TableCell>
                                 <TableCell>{utilisateur.plateformeDemande}</TableCell>
-                                <TableCell>{utilisateur.uniteDemande}</TableCell>
                                 <TableCell sx={{ textAlign: 'center' }}>
                                     <IconButton onClick={() => approveMutation.mutate(utilisateur.email)}><CheckIcon color="success" /></IconButton>
                                     <IconButton onClick={() => rejectMutation.mutate(utilisateur.email)}><ClearIcon color="error" /></IconButton>
