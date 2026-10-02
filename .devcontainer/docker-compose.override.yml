@@ -33,6 +33,7 @@ services:
 
   php:
     environment:
+      APP_ENV: dev
       DATABASE_URL: postgresql://poe:poe@database:5432/poe?serverVersion=16&charset=utf8
       MAILER_DSN: smtp://mailer:1025
       NOREPLY_EMAIL: noreply@ul.fr

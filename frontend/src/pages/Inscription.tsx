@@ -257,7 +257,6 @@ export default function Inscription() {
                         <InputLabel id="role-label">Rôle</InputLabel>
                         <Select label="Rôle" labelId="role-label" id="role" value={role} onChange={(e) => setRole(e.target.value)} name="role">
                             <MenuItem value="2">Directeur d'Unité</MenuItem>
-                            <MenuItem value="3">Directeur OSU</MenuItem>
                         </Select>
                         <FormHelperText>{roleErrorMessage}</FormHelperText>
                     </FormControl>

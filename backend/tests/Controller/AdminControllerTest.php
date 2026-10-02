@@ -277,7 +277,6 @@ class AdminControllerTest extends WebTestCase
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setDirecteurUniteDemande(true);
-        $userInscription->setDirecteurOsuDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
 
@@ -313,7 +312,6 @@ class AdminControllerTest extends WebTestCase
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setPlateformeDemande($this->testPlateforme);
-        $userInscription->setDirecteurOsuDemande(false);
         $userInscription->setDirecteurUniteDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
@@ -347,47 +345,12 @@ class AdminControllerTest extends WebTestCase
         );
     }
 
-    public function testAdmissionOsuDemande(): void
-    {
-        $client = $this->client;
-
-        $userInscription = new UtilisateurInscription();
-        $userInscription->setDirecteurOsuDemande(true);
-        $userInscription->setDirecteurUniteDemande(false);
-        $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
-        $this->em->flush();
-
-        $client->request(
-            'POST',
-            '/api/utilisateurs/approuver',
-            [],
-            [],
-            ["HTTP_AUTHORIZATION" => 'Bearer ' . $this->getAdminAccessToken()],
-            \json_encode(['email' => 'test@example.com'])
-        );
-
-        $this->assertResponseStatusCodeSame(200);
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(
-            "Utilisateur approuvé avec succès.",
-            $data['message']
-        );
-
-        $admisUser = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
-        $this->assertTrue($admisUser->isAdmis());
-        $this->assertContains('ROLE_DIR_OSU', $admisUser->getRoles());
-        self::assertEmailCount(1);
-        $message = self::getMailerMessage(0);
-        $this->assertEmailHeaderSame($message, 'To', 'test@example.com');
-    }
-
     public function testRefusUtilisateurSuccess(): void
     {
         $client = $this->client;
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setPlateformeDemande($this->testPlateforme);
-        $userInscription->setDirecteurOsuDemande(false);
         $userInscription->setDirecteurUniteDemande(false);
         $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->setAdmis(false)->setUtilisateurInscription($userInscription);
         $this->em->flush();
@@ -750,7 +713,6 @@ class AdminControllerTest extends WebTestCase
         $us = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
         $us->setAdmis(false);
         $ui = new UtilisateurInscription();
-        $ui->setDirecteurOsuDemande(true);
         $ui->setDirecteurUniteDemande(false);
         $us->setUtilisateurInscription($ui);
         $this->em->flush();
@@ -782,9 +744,6 @@ class AdminControllerTest extends WebTestCase
         );
         $this->assertFalse(
             $data['0']['directeurUniteDemande']
-        );
-        $this->assertTrue(
-            $data['0']['directeurOsuDemande']
         );
 
         self::assertEmailCount(0);

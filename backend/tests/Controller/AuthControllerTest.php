@@ -373,49 +373,6 @@ class AuthControllerTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
-    public function testInscriptionOsuDemande(): void
-    {
-        $client = $this->client;
-
-        $client->request(
-            'POST',
-            '/api/inscription',
-            [],
-            [],
-            ["CONTENT_TYPE" => "application/json"],
-            \json_encode([
-                'nom' => 'Test',
-                'prenom' => 'User',
-                'email' => 'testInscription@example.com',
-                'mdp' => 'password',
-                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
-            ])
-        );
-
-        $this->assertResponseStatusCodeSame(201);
-
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
-        $this->assertNotNull($user);
-        $this->assertFalse($user->isEmailValide());
-        $this->assertFalse($user->isAdmis());
-
-        $userInscription = $user->getUtilisateurInscription();
-        $this->assertNotNull($userInscription);
-        $this->assertTrue($userInscription->isDirecteurOsuDemande());
-        $this->assertFalse($userInscription->isDirecteurUniteDemande());
-        $this->assertNull($userInscription->getPlateformeDemande());
-
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
-        $this->assertNotNull($user->getUtilisateurVerification());
-        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
-        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
-
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
-    }
-
     public function testInscriptionEntiteDemande(): void
     {
         $client = $this->client;
@@ -443,7 +400,6 @@ class AuthControllerTest extends WebTestCase
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isDirecteurOsuDemande());
         $this->assertTrue($userInscription->isDirecteurUniteDemande());
         $this->assertNull($userInscription->getPlateformeDemande());
 
@@ -485,7 +441,6 @@ class AuthControllerTest extends WebTestCase
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isDirecteurOsuDemande());
         $this->assertFalse($userInscription->isDirecteurUniteDemande());
         $this->assertNotNull($userInscription->getPlateformeDemande());
 

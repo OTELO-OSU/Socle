@@ -7,7 +7,6 @@ export type UtilisateurEnAttente = {
     prenom: string;
     plateformeDemande: string | null;
     uniteDemande: string | null;
-    osuDemande: boolean;
 }
 
 export async function fetchUtilisateurEnAttente() {

@@ -23,9 +23,6 @@ class UtilisateurInscription
     #[ORM\Column]
     private ?bool $directeurUniteDemande = null;
 
-    #[ORM\Column]
-    private ?bool $directeurOsuDemande = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -63,18 +60,6 @@ class UtilisateurInscription
     public function setDirecteurUniteDemande(?bool $directeurUniteDemande): static
     {
         $this->directeurUniteDemande = $directeurUniteDemande;
-
-        return $this;
-    }
-
-    public function isDirecteurOsuDemande(): ?bool
-    {
-        return $this->directeurOsuDemande;
-    }
-
-    public function setDirecteurOsuDemande(bool $directeurOsuDemande): static
-    {
-        $this->directeurOsuDemande = $directeurOsuDemande;
 
         return $this;
     }

@@ -55,7 +55,6 @@ export default function AdhesionAdmin() {
                             <TableCell>Email</TableCell>
                             <TableCell>Plateforme demandée</TableCell>
                             <TableCell>Unité demandée</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>OSU demandé</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>Action</TableCell>
                         </TableRow>
                     </TableHead>
@@ -67,7 +66,6 @@ export default function AdhesionAdmin() {
                                 <TableCell>{utilisateur.email}</TableCell>
                                 <TableCell>{utilisateur.plateformeDemande}</TableCell>
                                 <TableCell>{utilisateur.uniteDemande}</TableCell>
-                                <TableCell sx={{ textAlign: 'center' }}>{utilisateur.osuDemande ? 'Oui' : 'Non'}</TableCell>
                                 <TableCell sx={{ textAlign: 'center' }}>
                                     <IconButton onClick={() => approveMutation.mutate(utilisateur.email)}><CheckIcon color="success" /></IconButton>
                                     <IconButton onClick={() => rejectMutation.mutate(utilisateur.email)}><ClearIcon color="error" /></IconButton>

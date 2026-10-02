@@ -113,7 +113,6 @@ class AuthService
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
         $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
         $this->em->persist($userInscription);
@@ -201,7 +200,6 @@ class AuthService
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
         $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
 
