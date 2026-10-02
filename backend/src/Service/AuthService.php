@@ -281,7 +281,7 @@ class AuthService
             ->withExpires(time() + 604800)
             ->withHttpOnly(true)
             ->withSecure(true)
-            ->withSameSite('None')
+            ->withSameSite('Lax')
             ->withPath('/');
 
         return [
