@@ -217,9 +217,10 @@ class AuthService
 
     function checkRefreshToken(string $refreshToken)
     {
+        $refreshTokenHash = hash('sha256', $refreshToken);
         /** @var RefreshToken $refreshToken */
         // Récupération du record refreshToken
-        $refreshToken = $this->em->getRepository(RefreshToken::class)->findOneBy(['token' => $refreshToken]);
+        $refreshToken = $this->em->getRepository(RefreshToken::class)->findOneBy(['token' => $refreshTokenHash]);
 
         // Vérification que le refreshToken soit existant et pas expiré
         if (!$refreshToken || $refreshToken->getExpiration() < new \DateTime()) throw new RefreshTokenInvalideOuExpireException();
@@ -261,12 +262,14 @@ class AuthService
         // Création d'un token
         $refreshToken = bin2hex(random_bytes(64));
 
+        $refreshTokenHash = hash('sha256', $refreshToken);
+
         // Définition de l'expiration dans 7 jours
         $expiration = new \DateTime('+7 days');
 
         // Création du record de refreshToken
         $refreshTokenEntity = new RefreshToken();
-        $refreshTokenEntity->setToken($refreshToken);
+        $refreshTokenEntity->setToken($refreshTokenHash);
         $refreshTokenEntity->setExpiration($expiration);
         $refreshTokenEntity->setUtilisateur($user);
         $this->em->persist($refreshTokenEntity);
