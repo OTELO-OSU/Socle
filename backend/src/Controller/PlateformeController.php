@@ -110,6 +110,10 @@ final class PlateformeController extends AbstractController
     #[Route('/plateforme/test', methods: ['POST'])]
     public function testPlateforme(Request $request): Response
     {
+        if (!$this->getUser()) {
+            return $this->json(['message' => 'Accès refusé.'], 403);
+        }
+
         $json = json_decode($request->getContent(), true);
 
         $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
