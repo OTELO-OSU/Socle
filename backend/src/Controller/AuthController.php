@@ -3,15 +3,16 @@
 namespace App\Controller;
 
 use App\DTO\UtilisateurInscriptionDTO;
-use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurNonAdmisException;
 use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -21,8 +22,11 @@ final class AuthController extends AbstractController
     public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params, private readonly SerializerInterface $serializer, private readonly ValidatorInterface $validator) {}
 
     #[Route('/connexion', methods: ['POST'])]
-    public function connexion(Request $request): Response
-    {
+    public function connexion(
+        Request $request,
+        #[Target('login')]
+        RateLimiterFactoryInterface $loginLimiter
+    ): Response {
         $authorizationHeader = $request->headers->get('Authorization');
         if (!$authorizationHeader) return $this->json(['message' => 'Le header autorisation est requis !'], 401);
 
@@ -36,7 +40,17 @@ final class AuthController extends AbstractController
         // Récupération du username et du password
         list($username, $password) = explode(':', $decodedCredentials);
 
+        // On créé le limiter pour l'IP du client et on consomme une tentative après les tests de format
+        $limiter = $loginLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de connexion. Veuillez réessayer plus tard.'], 429);
+        }
+
         $couple = $this->authService->connexionBasic($username, $password);
+
+        // Si la connexion est réussie, on reset le limiter pour l'IP du client
+        $limiter->reset();
 
         $response = $this->json(['token' => $couple['token']]);
         $response->headers->setCookie($couple['cookie']);

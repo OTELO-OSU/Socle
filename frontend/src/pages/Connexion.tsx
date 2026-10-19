@@ -80,6 +80,13 @@ export default function Connexion() {
                     couleur: 'warning',
                 });
             }
+
+            if (error.response?.status === 429) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'Trop de tentatives de connexion. Veuillez réessayer plus tard.',
+                    couleur: 'warning',
+                });
+            }
         }
     }
     return (

@@ -48,10 +48,10 @@ class UtilisateurInscriptionDTO
         if ($this->directeur_unite_demande === true) $demande++;
 
         if ($demande === 0) {
-            $context->buildViolation('Au moins une demande doit être faite (plateforme, unité ou OSU)')
+            $context->buildViolation('Au moins une demande doit être faite (plateforme, unité)')
                 ->addViolation();
         } elseif ($demande > 1) {
-            $context->buildViolation('Une seule demande doit être faite (plateforme, unité ou OSU)')
+            $context->buildViolation('Une seule demande doit être faite (plateforme, unité)')
                 ->addViolation();
         }
     }

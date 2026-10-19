@@ -39,6 +39,7 @@ services:
       NOREPLY_EMAIL: noreply@ul.fr
       CENTRAL_TAG: http://central
       JWT_PASSPHRASE: passphrase
+      TRUSTED_PROXIES: 127.0.0.1,172.28.0.1
 
   frontend:
     image: node:22

@@ -283,7 +283,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -309,7 +309,7 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'email' => 'testInscription@example.com',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -335,7 +335,7 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -368,7 +368,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
-        $this->assertContains('Au moins une demande doit être faite (plateforme, unité ou OSU)', $data['messageArray']);
+        $this->assertContains('Au moins une demande doit être faite (plateforme, unité)', $data['messageArray']);
 
         self::assertEmailCount(0);
     }
@@ -536,7 +536,8 @@ class AuthControllerTest extends WebTestCase
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
         $user->getRefreshTokens()->add(
             (new \App\Entity\RefreshToken())
-                ->setToken('abcde')
+                // SHA256 de abcde
+                ->setToken('36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c')
                 ->setUtilisateur($user)
                 ->setExpiration((new \DateTime())->modify('1 hour'))
         );
@@ -615,7 +616,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -640,7 +641,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token_invalide'
             ])
         );
@@ -676,7 +677,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token123'
             ])
         );
@@ -712,7 +713,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token123'
             ])
         );
@@ -1038,6 +1039,40 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testLimitConnexion(): void
+    {
+        $client = $this->client;
+
+        // Clear les tokens de login
+        $factory = static::getContainer()->get('limiter.login');
+        $factory->create('127.0.0.1')->reset();
+
+        for ($i = 0; $i < 100; $i++) {
+            $client->request(
+                'POST',
+                '/api/connexion',
+                [],
+                [],
+                ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:mauvaismotdepasse')]
+            );
+        }
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:mauvaismotdepasse')]
+        );
+
+        $this->assertResponseStatusCodeSame(429);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Trop de tentatives de connexion. Veuillez réessayer plus tard.', $data['message']);
+        $factory->create('127.0.0.1')->reset();
         self::assertEmailCount(0);
     }
 }
