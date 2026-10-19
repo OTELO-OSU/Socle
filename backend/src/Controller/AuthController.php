@@ -62,6 +62,9 @@ final class AuthController extends AbstractController
     #[Route('/connexionFede', methods: ['GET'])]
     public function connexionFede(Request $request): Response
     {
+        if (!$request->headers->has('mail') || !$request->headers->has('givenname') || !$request->headers->has('sn')) {
+            return new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=error");
+        }
         try {
             $mail = $request->headers->get('mail');
             $prenom = $request->headers->get('givenname');
