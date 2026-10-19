@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class AuthController extends AbstractController
@@ -209,12 +210,22 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/mdp-oublie', methods: ['PATCH'])]
-    public function motDePasseOubliePhase2(Request $request): Response
+    public function motDePasseOubliePhase2(Request $request, ValidatorInterface $validator): Response
     {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
         if (!isset($json['mdp'])) return $this->json(['message' => 'Le mot de passe est requis.'], 400);
 
+        // Vérifier si le mot de passe est compromis
+        $violations = $validator->validate($json['mdp'], [
+            new NotCompromisedPassword(message: 'Le mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre.')
+        ]);
+
+        if (count($violations) > 0) {
+            foreach ($violations as $violation) {
+                return $this->json(['message' => $violation->getMessage()], 400);
+            }
+        }
 
         $this->authService->motDePasseOubliePhase2($json['token'], $json['mdp']);
         return $this->json(['message' => 'Votre mot de passe a été réinitialisé avec succès.'], 200);

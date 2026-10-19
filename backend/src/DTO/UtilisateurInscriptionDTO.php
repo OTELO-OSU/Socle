@@ -5,6 +5,7 @@ namespace App\DTO;
 use App\Validator\EntityExists;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -30,6 +31,7 @@ class UtilisateurInscriptionDTO
     public ?int $unite_id = null;
 
     #[NotBlank(groups: ['basic'], message: 'Le mot de passe est obligatoire')]
+    #[NotCompromisedPassword(groups: ['basic'], message: 'Le mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre.')]
     public ?string $mdp = null;
 
     public ?bool $directeur_unite_demande = null;
