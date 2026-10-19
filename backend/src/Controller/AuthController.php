@@ -39,7 +39,7 @@ final class AuthController extends AbstractController
         if (!\str_contains($decodedCredentials, ":")) return $this->json(['message' => 'Encodage du header autorisation invalide'], 401);
 
         // Récupération du username et du password
-        list($username, $password) = explode(':', $decodedCredentials);
+        list($username, $password) = explode(':', $decodedCredentials, 2);
 
         // On créé le limiter pour l'IP du client et on consomme une tentative après les tests de format
         $limiter = $loginLimiter->create($request->getClientIp());
