@@ -82,8 +82,11 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/inscription', methods: ['POST'])]
-    public function inscription(Request $request): Response
-    {
+    public function inscription(
+        Request $request,
+        #[Target('inscription')]
+        RateLimiterFactoryInterface $inscriptionLimiter
+    ): Response {
         $ssmdp = $request->query->get('ssmdp', false);
         $dto = $this->serializer->deserialize($request->getContent(), UtilisateurInscriptionDTO::class, 'json');
 
@@ -100,6 +103,12 @@ final class AuthController extends AbstractController
                 $messages[] = $violation->getMessage();
             }
             return $this->json(['messageArray' => $messages], 400);
+        }
+
+        $limiter = $inscriptionLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives d\'inscription. Veuillez réessayer plus tard.'], 429);
         }
 
         if ($ssmdp) {
@@ -148,11 +157,19 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/verifie-mail', methods: ['POST'])]
-    public function verifieMail(Request $request): Response
-    {
+    public function verifieMail(
+        Request $request,
+        #[Target('verifier-email')]
+        RateLimiterFactoryInterface $verifieMailLimiter
+    ): Response {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
 
+        $limiter = $verifieMailLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de vérification. Veuillez réessayer plus tard.'], 429);
+        }
 
         $this->authService->verificationMailUtilisateur($json['token']);
         return $this->json(['message' => 'Email vérifié avec succès.'], 200);
@@ -173,11 +190,19 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/mdp-oublie', methods: ['POST'])]
-    public function motDePasseOublie(Request $request): Response
-    {
+    public function motDePasseOublie(
+        Request $request,
+        #[Target('mdp-oubliee')]
+        RateLimiterFactoryInterface $motDePasseOublieLimiter
+    ): Response {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['email'])) return $this->json(['message' => 'L\'email est requis.'], 400);
 
+        $limiter = $motDePasseOublieLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de réinitialisation de mot de passe. Veuillez réessayer plus tard.'], 429);
+        }
 
         $this->authService->motDePasseOubliePhase1($json['email']);
         return $this->json(['message' => 'Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.'], 200);

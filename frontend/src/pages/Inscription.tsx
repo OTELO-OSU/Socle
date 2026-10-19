@@ -205,6 +205,11 @@ export default function Inscription() {
                     message: error.response.data?.messageArray.map((msg) => `- ${msg}`).join('\n') || 'Une erreur est survenue lors de l\'inscription',
                     couleur: 'error',
                 });
+            } else if (error.response?.status === 429) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'Trop de tentatives d\'inscription. Veuillez réessayer plus tard.',
+                    couleur: 'error',
+                });
             }
         }
     }
