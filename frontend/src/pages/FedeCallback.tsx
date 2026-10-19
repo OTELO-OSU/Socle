@@ -22,6 +22,7 @@ export default function FedeCallback() {
                 message: "Connexion réussie",
                 couleur: "success",
             });
+            sessionStorage.setItem("fedeConnexion", "true");
             navigate('/', { replace: true });
             return;
         } else if (status === "nonAdmis") {

@@ -16,7 +16,11 @@ export default function HeaderAppBar() {
     const isConnected = token !== null;
 
     async function handleDeconnexion() {
-        window.location.href = `${FRONT_URL}/Shibboleth.sso/Logout?return=${FRONT_URL}/deconnexion`;
+        if (sessionStorage.getItem("fedeConnexion") === "true") {
+            window.location.href = `${FRONT_URL}/Shibboleth.sso/Logout?return=${FRONT_URL}/deconnexion`;
+        } else {
+            window.location.href = `${FRONT_URL}/deconnexion`;
+        }
     }
 
     const dev = import.meta.env.DEV;

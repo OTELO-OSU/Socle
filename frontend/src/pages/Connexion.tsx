@@ -64,6 +64,7 @@ export default function Connexion() {
                 message: 'Connexion réussie',
                 couleur: 'success',
             });
+            sessionStorage.setItem("fedeConnexion", "false");
             naviagate('/');
         } catch (e) {
             const error = e as AxiosError<ApiError>;
