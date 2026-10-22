@@ -15,6 +15,8 @@ use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AgentService
 {
@@ -27,66 +29,116 @@ class AgentService
         private readonly Security $security
     ) {}
 
-    function getAgentParPage(int $page, ?string $search): array
+    public function getAgentParPage(int $page, ?string $search = null): array
     {
         if ($this->security->getUser() === null) {
-            throw new Exception("Vous devez être authentifié.", 401);
+            throw new UnauthorizedHttpException(
+                'Bearer',
+                'Vous devez être authentifié.'
+            );
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::LISTER, Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException(
+                "Vous n'avez pas les droits nécessaires."
+            );
         }
 
+        if ($page < 1) {
+            throw new \InvalidArgumentException(
+                'Le numéro de page doit être supérieur ou égal à 1.'
+            );
+        }
+
+        $search = trim($search ?? '');
         $offset = ($page - 1) * self::AGENT_PAR_PAGE;
 
         $conn = $this->em->getConnection();
 
-        $qb = $conn->createQueryBuilder();
-        $qb
-            ->select('u.id')
-            ->from('utilisateur', 'u');
+        // Construction des critères communs aux deux requêtes
+        $applyFilters = static function ($qb) use ($search): void {
+            $qb->andWhere(
+                'NOT EXISTS (
+                SELECT 1
+                FROM utilisateur_machine um
+                WHERE um.utilisateur_id = u.id
+            )'
+            );
 
-        if ($search) {
-            $qb->where('(
-                        u.prenom ILIKE :search
-                        OR u.nom ILIKE :search
-                        OR u.email ILIKE :search
-            )');
-            $qb->setParameter('search', '%' . $search . '%');
-        }
-
-        $qb
-            ->orderBy('u.nom', 'ASC')
-            ->andWhere('NOT EXISTS (SELECT 1 FROM utilisateur_machine um WHERE um.utilisateur_id = u.id)')
-            ->setFirstResult($offset)
-            ->setMaxResults(self::AGENT_PAR_PAGE);
-
-        $resQb = $qb->executeQuery()->fetchAllAssociative();
-
-        $agents = $this->em->getRepository(Utilisateur::class)->findBy(['id' => array_column($resQb, 'id')]);
-
-        $countQb = $conn->createQueryBuilder();
-        $countQb
-            ->select('COUNT(DISTINCT u.id)')
-            ->from('utilisateur', 'u')
-            ->andWhere('NOT EXISTS (SELECT 1 FROM utilisateur_machine um WHERE um.utilisateur_id = u.id)');
-
-        if ($search) {
-            $countQb->andWhere('(
+            if ($search !== '') {
+                $qb->andWhere('(
                 u.prenom ILIKE :search
                 OR u.nom ILIKE :search
                 OR u.email ILIKE :search
             )');
-            $countQb->setParameter('search', '%' . $search . '%');
+
+                $qb->setParameter('search', '%' . $search . '%');
+            }
+        };
+
+        // Récupération des identifiants paginés
+        $qb = $conn->createQueryBuilder();
+
+        $qb
+            ->select('u.id')
+            ->from('utilisateur', 'u');
+
+        $applyFilters($qb);
+
+        $qb
+            ->orderBy('u.nom', 'ASC')
+            ->addOrderBy('u.prenom', 'ASC')
+            ->addOrderBy('u.id', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults(self::AGENT_PAR_PAGE);
+
+        $ids = array_column(
+            $qb->executeQuery()->fetchAllAssociative(),
+            'id'
+        );
+
+        // Récupération des entités Doctrine
+        $agents = [];
+
+        if ($ids !== []) {
+            $agentsTrouves = $this->em
+                ->getRepository(Utilisateur::class)
+                ->findBy(['id' => $ids]);
+
+            // Réindexation par identifiant pour conserver l'ordre SQL
+            $agentsParId = [];
+
+            foreach ($agentsTrouves as $agent) {
+                $agentsParId[(string) $agent->getId()] = $agent;
+            }
+
+            foreach ($ids as $id) {
+                $key = (string) $id;
+
+                if (isset($agentsParId[$key])) {
+                    $agents[] = $agentsParId[$key];
+                }
+            }
         }
 
-        $total = (int) $countQb->executeQuery()->fetchOne();
+        // Comptage total avec les mêmes critères
+        $countQb = $conn->createQueryBuilder();
+
+        $countQb
+            ->select('COUNT(u.id)')
+            ->from('utilisateur', 'u');
+
+        $applyFilters($countQb);
+
+        $total = (int) $countQb
+            ->executeQuery()
+            ->fetchOne();
 
         return [
             'agents' => $agents,
             'page' => $page,
-            'pages_total' => ceil($total / self::AGENT_PAR_PAGE),
-            'total' => $total
+            'pages_total' => (int) ceil($total / self::AGENT_PAR_PAGE),
+            'total' => $total,
         ];
     }
 
