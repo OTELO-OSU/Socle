@@ -281,7 +281,7 @@ class AuthControllerTest extends WebTestCase
             ["CONTENT_TYPE" => "application/json"],
             \json_encode([
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'directeur_unite_demande' => true
             ])
@@ -307,7 +307,7 @@ class AuthControllerTest extends WebTestCase
             ["CONTENT_TYPE" => "application/json"],
             \json_encode([
                 'nom' => 'Test',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'directeur_unite_demande' => true
             ])
@@ -360,7 +360,7 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password'
             ])
         );
@@ -386,14 +386,14 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
                 'directeur_unite_demande' => true
             ])
         );
 
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testinscription@example.com']);
         $this->assertNotNull($user);
         $this->assertFalse($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
@@ -411,7 +411,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
 
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
+        $this->assertVerificationEmailSentTo('testinscription@example.com');
     }
 
     public function testInscriptionPlateformeDemande(): void
@@ -427,14 +427,14 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
                 'plateforme_demande_id' => $this->em->getRepository(Plateforme::class)->findOneBy([])->getId()
             ])
         );
 
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testinscription@example.com']);
         $this->assertNotNull($user);
         $this->assertFalse($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
@@ -452,7 +452,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
 
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
+        $this->assertVerificationEmailSentTo('testinscription@example.com');
     }
 
     public function testRefreshTokenNonEnvoye(): void
@@ -693,7 +693,7 @@ class AuthControllerTest extends WebTestCase
         $client = $this->client;
 
         $utilisateurInscriptionOauth = new UtilisateurInscriptionOAuth();
-        $utilisateurInscriptionOauth->setEmail('inscriptionOauth@example.com');
+        $utilisateurInscriptionOauth->setEmail('inscriptionoauth@example.com');
         $utilisateurInscriptionOauth->setNom('User');
         $utilisateurInscriptionOauth->setPrenom('Test');
         $utilisateurInscriptionOauth->setToken('token123');
@@ -722,7 +722,7 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email vous sera envoyé quand votre compte sera activé.', $data['message']);
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionOauth@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionoauth@example.com']);
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
         $this->assertEquals('User', $user->getNom());

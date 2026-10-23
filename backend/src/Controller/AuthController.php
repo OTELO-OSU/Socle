@@ -163,7 +163,7 @@ final class AuthController extends AbstractController
     #[Route('/verifie-mail', methods: ['POST'])]
     public function verifieMail(
         Request $request,
-        #[Target('verifier-email')]
+        #[Target('verifier_email')]
         RateLimiterFactoryInterface $verifieMailLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
@@ -196,7 +196,7 @@ final class AuthController extends AbstractController
     #[Route('/mdp-oublie', methods: ['POST'])]
     public function motDePasseOublie(
         Request $request,
-        #[Target('mdp-oubliee')]
+        #[Target('mdp_oublie')]
         RateLimiterFactoryInterface $motDePasseOublieLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
