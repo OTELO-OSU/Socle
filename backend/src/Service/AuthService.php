@@ -27,6 +27,7 @@ use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthService
 {
@@ -36,7 +37,8 @@ class AuthService
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly OrcidService $orcidService,
         private readonly MailerService $mailerService,
-        private readonly ParameterBagInterface $params
+        private readonly ParameterBagInterface $params,
+        private readonly TranslatorInterface $translator
     ) {}
 
     function connexionBasic(string $email, string $password)
@@ -101,7 +103,7 @@ class AuthService
         // Vérification que l'email n'est pas déjà utilisé
         $email = strtolower($dto->email);
         $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-        if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
+        if ($existingUser) throw new ConflictHttpException($this->translator->trans('exception.conflict.email_deja_utilise'));
 
         $user = new Utilisateur();
         $user->setEmail($email);
@@ -113,7 +115,7 @@ class AuthService
         /** @var Entite|null $unite */
         $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
         if (!$unite || !$unite->isLaboratoire()) {
-            throw new NotFoundHttpException("L'unité spécifiée n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.unite'));
         }
 
         $user->setUnite($unite);
@@ -179,14 +181,14 @@ class AuthService
             // Vérifier si le mail n'est pas déjà utilisé
             $email = strtolower($inscriptionOAuth->getEmail());
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-            if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
+            if ($existingUser) throw new ConflictHttpException($this->translator->trans('exception.conflict.email_deja_utilise'));
             $user->setEmail($email);
             $user->setEmailValide(true);
         } else {
             // Vérifier si le mail n'est pas déjà utilisé
             $email = strtolower($dto->email);
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-            if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
+            if ($existingUser) throw new ConflictHttpException($this->translator->trans('exception.conflict.email_deja_utilise'));
             $user->setEmail($email);
         }
 
@@ -202,7 +204,7 @@ class AuthService
         /** @var Entite|null $unite */
         $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
         if (!$unite || !$unite->isLaboratoire()) {
-            throw new NotFoundHttpException("L'unité spécifiée n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.unite'));
         }
 
         $user->setUnite($unite);
@@ -336,13 +338,13 @@ class AuthService
             ->findOneBy(['token' => $token, 'type' => 'email_validation']);
 
         if (!$verif) {
-            throw new BadRequestHttpException("Le token de vérification est invalide.");
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.token_invalide'));
         }
 
         if ($verif->getExpiration() < new DateTime()) {
             $this->em->remove($verif);
             $this->em->flush();
-            throw new GoneHttpException("Le token de vérification a expiré.");
+            throw new GoneHttpException($this->translator->trans('exception.gone.token_expire'));
         }
 
         $user = $verif->getUtilisateur();
@@ -410,11 +412,11 @@ class AuthService
         /** @var UtilisateurVerification $user */
         $user = $this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => $token, 'type' => 'password_reset']);
         if (!$user) {
-            throw new BadRequestHttpException("Le token de réinitialisation est invalide.");
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.token_invalide'));
         }
 
         if ($user->getExpiration() < new \DateTime()) {
-            throw new GoneHttpException("Le token de réinitialisation a expiré.");
+            throw new GoneHttpException($this->translator->trans('exception.gone.token_expire'));
         }
 
         $user->getUtilisateur()->setMdp($this->passwordHasher->hashPassword($user->getUtilisateur(), $mdp));

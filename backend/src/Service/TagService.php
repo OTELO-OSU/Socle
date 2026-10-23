@@ -18,6 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TagService
 {
@@ -25,7 +26,8 @@ class TagService
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
         private readonly ParameterBagInterface $params,
-        private readonly Security $security
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator
     ) {}
 
     public function getTags(): array
@@ -69,7 +71,7 @@ class TagService
 
     public function getTagsAdmin(): array
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Accès refusé.");
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
         $tags = $this->getTags();
 
         $tagsAvecAffiliationArray = [];
@@ -108,9 +110,9 @@ class TagService
     public function getPlateformeTags(int $plateformeId): array
     {
         /** @var Plateforme $plateforme */
-        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new NotFoundHttpException("La plateforme n'existe pas.");
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour consulter les tags de cette plateforme.");
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
 
         $plateformeTags = $plateforme->getPlateformeTags();
         $arrayTags = [];
@@ -153,10 +155,10 @@ class TagService
     {
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new NotFoundHttpException("La plateforme n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour tagger cette plateforme");
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
 
         $currentTags = $plateforme->getPlateformeTags();
         foreach ($currentTags as $currentTag) {
@@ -190,11 +192,11 @@ class TagService
 
     public function tagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour tagger cet utilisateur.");
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
         }
 
         $tagsCentral = $this->getTags();
@@ -204,7 +206,7 @@ class TagService
             throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
         }
 
-        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException("L'utilisateur a déjà ce tag.");
+        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException($this->translator->trans('exception.conflict.utilisateur_deja_tag'));
 
         $userTag = new UtilisateurTags($utilisateur, $tagId);
         $this->em->persist($userTag);
@@ -213,17 +215,17 @@ class TagService
 
     public function untagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour enlever le tag de cet utilisateur.");
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
         }
 
         $tag = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
             'utilisateur' => $utilisateur,
             'tagId' => $tagId,
-        ]) or throw new ConflictHttpException("L'utilisateur n'a pas ce tag.");
+        ]) or throw new ConflictHttpException($this->translator->trans('exception.conflict.utilisateur_pas_tag'));
 
         $this->em->remove($tag);
         $this->em->flush();

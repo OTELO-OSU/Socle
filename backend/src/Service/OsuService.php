@@ -8,18 +8,21 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class OsuService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly Security $security
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator
     ) {}
 
     public function getAdminOsu()
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GET_ADMIN_OSU, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas la permission pour voir les informations du directeur de l'OSU et de ses délégués.");
+        if (!$this->security->isGranted(UtilisateurVoter::GET_ADMIN_OSU, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_osu'));
 
         $conn = $this->em->getConnection();
 
@@ -63,13 +66,13 @@ class OsuService
 
     public function switchDirOsu(?int $idNewDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour changer le directeur de l'OSU.");
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DO, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_osu'));
 
         $newDirOsu = null;
 
         if ($idNewDirOsu !== null) {
             $newDirOsu = $this->em->getRepository(Utilisateur::class)->find($idNewDirOsu);
-            if (!$newDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
+            if (!$newDirOsu) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
         }
 
         $conn = $this->em->getConnection();
@@ -97,10 +100,10 @@ class OsuService
 
     public function retirerDelegue(int $idDelegueDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour retirer un délégué du directeur de l'OSU.");
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_osu'));
 
         $delegueDirOsu = $this->em->getRepository(Utilisateur::class)->find($idDelegueDirOsu);
-        if (!$delegueDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
+        if (!$delegueDirOsu) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
         $delegueDirOsu->setRoles(array_diff($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU_DELEGUE']));
         $this->em->persist($delegueDirOsu);
@@ -109,12 +112,12 @@ class OsuService
 
     public function ajouterDelegue(int $idDelegueDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour ajouter un délégué au directeur de l'OSU.");
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_osu'));
 
         $delegueDirOsu = $this->em->getRepository(Utilisateur::class)->find($idDelegueDirOsu);
-        if (!$delegueDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
+        if (!$delegueDirOsu) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
-        if (in_array('ROLE_DIR_OSU', $delegueDirOsu->getRoles())) throw new BadRequestHttpException("Cet utilisateur est déjà directeur de l'OSU.");
+        if (in_array('ROLE_DIR_OSU', $delegueDirOsu->getRoles())) throw new ConflictHttpException($this->translator->trans('exception.conflict.utilisateur_deja_dir_osu'));
 
         $delegueDirOsu->setRoles(array_merge($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU_DELEGUE']));
         $this->em->persist($delegueDirOsu);

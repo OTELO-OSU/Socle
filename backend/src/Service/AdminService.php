@@ -12,18 +12,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly MailerService $mailerService,
-        private readonly Security $security
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator
     ) {}
 
     function getUtilisateurEnAttenteDeValidation(): array
     {
-        if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new AccessDeniedException("Vous n'avez pas les droits pour voir les utilisateurs en attente de validation");
+        if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new AccessDeniedException($this->translator->trans('exception.permission.voir_utilisateur_en_attente_validation'));
 
         $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false, "emailValide" => true, "attenteApprobationDU" => false]);
         return array_map(function (Utilisateur $user) {
@@ -41,9 +43,9 @@ class AdminService
     function approuverUtilisateur(string $email)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
-        if (!$user) throw new NotFoundHttpException("Utilisateur non trouvé.");
+        if (!$user) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
-        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException("Vous n'avez pas les droits pour approuver cet utilisateur");
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException($this->translator->trans('exception.permission.approuver_utilisateur'));
 
         $user->setAdmis(true);
 
@@ -76,9 +78,9 @@ class AdminService
     function refuserUtilisateur(string $email)
     {
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
-        if (!$user) throw new NotFoundHttpException("Utilisateur non trouvé.");
+        if (!$user) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
-        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException("Vous n'avez pas les droits pour refuser cet utilisateur", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException($this->translator->trans('exception.permission.refuser_utilisateur'), 403);
 
         $this->mailerService->sendEmailToUser(
             $user->getEmail(),
@@ -95,15 +97,15 @@ class AdminService
         /** @var Plateforme $plateforme */
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new NotFoundHttpException("La plateforme n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
 
         // Vérification des permissions de l'utilisateur
-        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, $plateforme)) throw new AccessDeniedException("Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.");
+        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, $plateforme)) throw new AccessDeniedException($this->translator->trans('exception.permission.affilier_plateforme'));
 
         $plateforme = $plateforme->getLastHistorique();
         if (!$plateforme) {
-            throw new NotFoundHttpException("La plateforme n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
 
         // Récupération des utilisateurs à affilier

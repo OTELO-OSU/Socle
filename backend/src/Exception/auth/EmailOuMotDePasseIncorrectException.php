@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exception\Auth;
+namespace App\Exception\auth;
 
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 

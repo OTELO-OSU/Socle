@@ -24,6 +24,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ExcelService
 {
@@ -31,7 +32,8 @@ class ExcelService
     public function __construct(
         private EntityManagerInterface $em,
         private Security $security,
-        private SerializerInterface $serializerInterface
+        private SerializerInterface $serializerInterface,
+        private readonly TranslatorInterface $translator
     ) {}
 
     function convertNameArrayToString($obj)
@@ -67,10 +69,10 @@ class ExcelService
         $platform = $this->em->getRepository(Plateforme::class)->find($platformId);
         if (!$platform) {
             // Lève une exception si la plateforme n'existe pas
-            throw new NotFoundHttpException("La plateforme n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
         if (!$this->security->isGranted(PlateformeVoter::EXPORTER, $platform)) {
-            throw new AccessDeniedHttpException("Accès refusé");
+            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.exporter'));
         }
 
         $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);

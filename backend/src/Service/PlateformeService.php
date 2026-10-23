@@ -32,6 +32,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PlateformeService
 {
@@ -41,13 +42,14 @@ class PlateformeService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly TagService $tagService,
-        private readonly Security $security
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
     {
         $anneeSaisieEnCours = $this->em->getRepository(Parametre::class)->findOneBy(["cle" => "annee_saisie_en_cours"]);
-        if (!$anneeSaisieEnCours) throw new NotFoundHttpException("Aucune année de saisie n'a été trouvée.");
+        if (!$anneeSaisieEnCours) throw new NotFoundHttpException($this->translator->trans('exception.not_found.annee_saisie'));
         return (int) $anneeSaisieEnCours->getValeur();
     }
 
@@ -204,7 +206,7 @@ class PlateformeService
 
     function creerPlateforme(string $nom)
     {
-        if (!$this->security->isGranted('CREER', Plateforme::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour créer une plateforme");
+        if (!$this->security->isGranted('CREER', Plateforme::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.creer_plateforme'));
 
         //* Si il est DU ou DU délégué on force le laboratoire
         // Vérifier si il est Admin Dir Osu ou Dir Osu delegue
@@ -235,9 +237,9 @@ class PlateformeService
     function supprimerPlateforme(int $plateformeId)
     {
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
-        if (!$plateforme) throw new NotFoundHttpException("La plateforme n'existe pas.");
+        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
 
-        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour supprimer cette plateforme.");
+        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.supprimer_plateforme'));
 
         $this->em->remove($plateforme);
         $this->em->flush();
@@ -247,16 +249,16 @@ class PlateformeService
     {
         /** @var Plateforme $plateforme * */
         $plateforme = $this->em->getRepository(Plateforme::class)->find($dto->id);
-        if (!$plateforme) throw new NotFoundHttpException("La plateforme n'existe pas.");
+        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
 
         $plateformeHisto = $plateforme->getLastHistorique();
-        if (!$plateformeHisto) throw new NotFoundHttpException("L'historique de la plateforme n'existe pas.");
-        if (!$this->security->isGranted('SAUVEGARDER', $plateformeHisto->getPlateforme())) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour sauvegarder cette plateforme");
+        if (!$plateformeHisto) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+        if (!$this->security->isGranted('SAUVEGARDER', $plateformeHisto->getPlateforme())) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarder_plateforme'));
 
         $anneeDto = $plateformeHisto->getAnnee();
         $anneeSaisie = $this->getAnneeDeSaisieEnCours();
 
-        if ($anneeDto > $anneeSaisie) throw new AccessDeniedHttpException("Impossible de sauvegarder une plateforme pour une année supérieure à l'année de saisie en cours.");
+        if ($anneeDto > $anneeSaisie) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarde_annee_saisie_superieur'));
 
         if ($anneeDto < $anneeSaisie) {
             $dernierRecord = $this->em->getRepository(PlateformeHistorique::class)->findOneBy(['plateforme' => $plateformeHisto->getPlateforme()], ['annee' => 'DESC']);
@@ -264,7 +266,7 @@ class PlateformeService
                 //* Duplication du record pour l'année de saisie en cours
                 $plateformeHisto = $this->dupliquerPlateformeHistorique($plateformeHisto);
             } else {
-                throw new AccessDeniedHttpException("Impossible de sauvegarder une plateforme pour une année inférieure à l'année de saisie en cours.");
+                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarde_annee_saisie_inferieur'));
             }
         }
         $plateformeHisto = $this->ecraserChampsPlateforme($plateformeHisto, $dto);
@@ -492,12 +494,12 @@ class PlateformeService
 
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new NotFoundHttpException("La plateforme n'existe pas.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
 
         if (!$byPassSecurity) {
             if (!$this->security->isGranted(PlateformeVoter::LIRE, $plateforme)) {
-                throw new AccessDeniedHttpException("Vous n'avez pas les droits pour consulter cette plateforme");
+                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.acces_plateforme'));
             }
         }
 
@@ -507,7 +509,7 @@ class PlateformeService
         );
 
         if (!$dernierHistorique) {
-            throw new NotFoundHttpException("Aucun historique trouvé pour cette plateforme.");
+            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
         }
 
         $plateforme = $dernierHistorique->getPlateforme();

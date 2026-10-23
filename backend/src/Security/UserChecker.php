@@ -7,9 +7,15 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserChecker implements UserCheckerInterface
 {
+
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {}
+
     public function checkPreAuth(UserInterface $user): void
     {
         if (!$user instanceof Utilisateur) {
@@ -17,11 +23,11 @@ class UserChecker implements UserCheckerInterface
         }
 
         if (!$user->isEmailValide()) {
-            throw new AccessDeniedException('Votre compte n\'est pas encore activé. Veuillez attendre l\'activation de votre compte.');
+            throw new AccessDeniedException($this->translator->trans('exception.auth.email_non_verifie'));
         }
 
         if (!$user->isAdmis()) {
-            throw new AccessDeniedException('Votre compte n\'est pas approuvé.');
+            throw new AccessDeniedException($this->translator->trans('exception.auth.compte_non_approuve'));
         }
     }
 

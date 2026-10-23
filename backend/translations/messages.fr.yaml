@@ -1,0 +1,61 @@
+exception:
+    auth:
+        non_connecte: "Vous devez être connecté pour accéder à cette ressource."
+        email_non_verifie: "Votre adresse e-mail n'a pas été vérifiée. Veuillez vérifier votre boîte de réception pour un e-mail de confirmation."
+        compte_non_approuve: "Votre compte n'a pas encore été approuvé par un administrateur. Vous recevrez une notification dès que votre compte sera approuvé."
+
+    permission:
+        voir_utilisateur_en_attente_validation: "Vous n'avez pas les droits pour voir les utilisateurs en attente de validation."
+        approuver_utilisateur: "Vous n'avez pas les droits pour approuver cet utilisateur."
+        refuser_utilisateur: "Vous n'avez pas les droits pour refuser cet utilisateur."
+        affilier_plateforme: "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme."
+        lister_utilisateur: "Vous n'avez pas les permissions nécessaires pour lister les agents."
+        soumettre_au_du: "Vous n'avez pas les permissions nécessaires pour soumettre un personnel dans cette unité."
+        modifier_utilisateur: "Vous n'avez pas les permissions nécessaires pour modifier cet utilisateur."
+        gerer_utilisateur_soumission_du: "Vous n'avez pas les permissions nécessaires pour gérer les utilisateurs en cours de soumission au DU."
+        exporter: "Vous n'avez pas les permissions nécessaires pour exporter les données de cette plateforme."
+        gerer_harvester: "Vous n'avez pas les permissions nécessaires pour gérer les harvesters / comptes machines."
+        acces_plateforme: "Vous n'avez pas les permissions nécessaires pour accéder à cette plateforme."
+        creer_plateforme: "Vous n'avez pas les permissions nécessaires pour créer une plateforme."
+        supprimer_plateforme: "Vous n'avez pas les permissions nécessaires pour supprimer cette plateforme."
+        sauvegarder_plateforme: "Vous n'avez pas les permissions nécessaires pour sauvegarder cette plateforme."
+        gerer_osu: "Vous n'avez pas les permissions nécessaires pour gérer l'OSU."
+        sauvegarde_annee_saisie_superieur: "Impossible de sauvegarder l'année de saisie car elle est supérieure à l'année de saisie en cours."
+        sauvegarde_annee_saisie_inferieur: "Impossible de sauvegarder l'année de saisie car elle est inférieure à l'année de saisie en cours."
+        gerer_annee_saisie: "Vous n'avez pas les permissions nécessaires pour gérer l'année de saisie."
+        gerer_tag: "Vous n'avez pas les permissions nécessaires pour gérer les tags."
+        gerer_delegue_du: "Vous n'avez pas les permissions nécessaires pour gérer le délégué du DU."
+        gerer_du: "Vous n'avez pas les permissions nécessaires pour gérer le DU."
+        gerer_unite: "Vous n'avez pas les permissions nécessaires pour gérer les unités."
+
+    not_found:
+        utilisateur: "Utilisateur non trouvé."
+        plateforme: "Plateforme non trouvée."
+        unite: "Unité non trouvée."
+        employeur: "Employeur non trouvé."
+        type_contrat: "Type de contrat non trouvé."
+        corps: "Corps non trouvé."
+        grade: "Grade non trouvé."
+        universite_rattachement: "Université de rattachement non trouvée."
+        utilisateur_machine: "Utilisateur machine non trouvé."
+        harvester: "Harvester non trouvé."
+        annee_saisie: "Aucune année de saisie n'a été trouvée."
+
+    bad_request:
+        numero_page_invalide: "Le numéro de page doit être un entier positif."
+        corps_obligatoire: "Le corps est obligatoire."
+        grade_obligatoire: "Le grade est obligatoire."
+        grade_non_appartient_corps: "Le grade spécifié n'appartient pas au corps spécifié."
+        token_invalide: "Le token de vérification est invalide."
+        hmt_invalide: "Le HMT fourni est invalide."
+
+    gone:
+        token_expire: "Le token de vérification a expiré."
+
+    conflict:
+        email_deja_utilise: "L'adresse e-mail est déjà utilisée par un autre utilisateur."
+        utilisateur_machine_existe: "Un utilisateur machine avec ce clientId existe déjà."
+        utilisateur_deja_dir_osu: "Cet utilisateur est déjà directeur de l'OSU."
+        harvester_existe: "Un harvester avec ce host existe déjà."
+        utilisateur_pas_tag: "L'utilisateur n'a pas ce tag."
+        utilisateur_deja_tag: "L'utilisateur a déjà ce tag."
