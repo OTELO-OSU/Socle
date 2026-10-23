@@ -29,6 +29,7 @@ services:
       NOREPLY_EMAIL: ${NOREPLY_EMAIL}
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       CENTRAL_TAG: ${CENTRAL_TAG}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES}
     volumes:
       - ./backend:/var/www/backend:rw
     depends_on:

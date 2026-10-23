@@ -1,4 +1,4 @@
-import { Box, Button, Card, FormControl, FormHelperText, FormLabel, InputLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Card, FormControl, FormHelperText, FormLabel, InputLabel, Link, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
@@ -7,6 +7,7 @@ import { useNavigate, Link as RouterLink, useSearchParams } from "react-router-d
 import { inscription, inscriptionSsMdp } from "../services/authService";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import { formatUniteLabel } from "../services/formatLabelService";
+import { fetchPlateformePublique } from "../services/plateformeService";
 
 export default function Inscription() {
     const [prenomError, setPrenomError] = useState(false);
@@ -18,6 +19,10 @@ export default function Inscription() {
     const [unite, setUnite] = useState('');
     const [uniteError, setUniteError] = useState(false);
     const [uniteErrorMessage, setUniteErrorMessage] = useState('');
+    const [plateforme, setPlateforme] = useState<number | null>(null);
+    const [plateformeError, setPlateformeError] = useState(false);
+    const [plateformeErrorMessage, setPlateformeErrorMessage] = useState('');
+    const [plateformes, setPlateformes] = useState<{ id: number; nom: string }[]>([]);
     const [role, setRole] = useState('');
     const [roleError, setRoleError] = useState(false);
     const [roleErrorMessage, setRoleErrorMessage] = useState('');
@@ -46,6 +51,23 @@ export default function Inscription() {
     }, [searchParams]);
 
     useEffect(() => {
+        // Fetch la liste de plateforme publique
+        fetchPlateformePublique()
+            .then((plateformes) => {
+                if (plateformes.length > 0) {
+                    const res = plateformes.map((plateforme) => ({
+                        id: plateforme.id,
+                        nom: plateforme.dernier_historique?.nom_officiel,
+                    }));
+                    setPlateformes(res);
+                    console.log(res);
+
+                }
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la récupération des plateformes publiques :", error);
+            });
+
         const message = atob(searchParams.get("message") || "");
         if (message) {
             trigger?.({
@@ -66,6 +88,7 @@ export default function Inscription() {
         const nom = data.get('nom') as string;
         const selectedRole = parseInt(data.get('role') as string);
         const selectedUnite = parseInt(data.get('unite') as string);
+        const selectedPlateforme = data.get('plateforme') as string;
 
         let hasError = false;
 
@@ -96,6 +119,15 @@ export default function Inscription() {
         } else {
             setEmailError(false);
             setEmailErrorMessage('');
+        }
+
+        if (!selectedPlateforme && selectedRole === 1) {
+            setPlateformeError(true);
+            setPlateformeErrorMessage('Plateforme requise');
+            hasError = true;
+        } else {
+            setPlateformeError(false);
+            setPlateformeErrorMessage('');
         }
 
         if (!selectedUnite) {
@@ -153,13 +185,13 @@ export default function Inscription() {
 
         try {
             if (!ssMdpBool) {
-                const { data } = await inscription(prenom, nom, email, mdp, selectedRole, selectedUnite);
+                const { data } = await inscription(prenom, nom, email, mdp, selectedRole, selectedUnite, plateforme);
                 snackbarContext?.trigger({
                     message: data.message,
                     couleur: 'success',
                 });
             } else {
-                const { data } = await inscriptionSsMdp(prenom, nom, email, selectedRole, token, selectedUnite);
+                const { data } = await inscriptionSsMdp(prenom, nom, email, selectedRole, token, selectedUnite, plateforme);
                 snackbarContext?.trigger({
                     message: data.message,
                     couleur: 'success',
@@ -171,6 +203,11 @@ export default function Inscription() {
             if (error.response?.status === 400) {
                 snackbarContext?.trigger({
                     message: error.response.data?.messageArray.map((msg) => `- ${msg}`).join('\n') || 'Une erreur est survenue lors de l\'inscription',
+                    couleur: 'error',
+                });
+            } else if (error.response?.status === 429) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'Trop de tentatives d\'inscription. Veuillez réessayer plus tard.',
                     couleur: 'error',
                 });
             }
@@ -256,11 +293,19 @@ export default function Inscription() {
                     <FormControl fullWidth error={roleError}>
                         <InputLabel id="role-label">Rôle</InputLabel>
                         <Select label="Rôle" labelId="role-label" id="role" value={role} onChange={(e) => setRole(e.target.value)} name="role">
+                            <MenuItem value="1">Responsable de Plateforme</MenuItem>
                             <MenuItem value="2">Directeur d'Unité</MenuItem>
-                            <MenuItem value="3">Directeur OSU</MenuItem>
                         </Select>
                         <FormHelperText>{roleErrorMessage}</FormHelperText>
                     </FormControl>
+                    {role === '1' && (
+                        <FormControl fullWidth error={plateformeError}>
+                            <Autocomplete options={plateformes} getOptionLabel={(option) => option.nom} onChange={(_, newValue) => setPlateforme(newValue!.id)} renderInput={(params) =>
+                                <TextField {...params} name="plateforme" label="Plateforme" id="plateforme"></TextField>
+                            } />
+                            <FormHelperText>{plateformeErrorMessage}</FormHelperText>
+                        </FormControl>
+                    )}
                     {(ssMdp !== '1' || !token) &&
                         <>
                             <FormControl>

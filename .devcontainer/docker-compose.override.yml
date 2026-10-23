@@ -33,11 +33,16 @@ services:
 
   php:
     environment:
+      APP_ENV: dev
       DATABASE_URL: postgresql://poe:poe@database:5432/poe?serverVersion=16&charset=utf8
       MAILER_DSN: smtp://mailer:1025
       NOREPLY_EMAIL: noreply@ul.fr
       CENTRAL_TAG: http://central
       JWT_PASSPHRASE: passphrase
+      TRUSTED_PROXIES: 127.0.0.1,172.28.0.1
+    depends_on:
+      database:
+        condition: service_healthy
 
   frontend:
     image: node:22

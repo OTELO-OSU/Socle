@@ -64,6 +64,7 @@ export default function Connexion() {
                 message: 'Connexion réussie',
                 couleur: 'success',
             });
+            sessionStorage.setItem("fedeConnexion", "false");
             naviagate('/');
         } catch (e) {
             const error = e as AxiosError<ApiError>;
@@ -77,6 +78,13 @@ export default function Connexion() {
             if (error.response?.status === 403) {
                 snackbarContext?.trigger({
                     message: error.response.data?.message || 'Votre compte est en attente de validation par un administrateur',
+                    couleur: 'warning',
+                });
+            }
+
+            if (error.response?.status === 429) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'Trop de tentatives de connexion. Veuillez réessayer plus tard.',
                     couleur: 'warning',
                 });
             }

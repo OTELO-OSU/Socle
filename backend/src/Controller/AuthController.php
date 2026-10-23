@@ -3,17 +3,19 @@
 namespace App\Controller;
 
 use App\DTO\UtilisateurInscriptionDTO;
-use App\Exception\auth\UtilisateurFedeExistePasException;
 use App\Exception\auth\UtilisateurNonAdmisException;
 use App\Exception\auth\UtilisateurOAuthExistePasException;
 use App\Service\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class AuthController extends AbstractController
@@ -21,8 +23,11 @@ final class AuthController extends AbstractController
     public function __construct(private readonly AuthService $authService, private readonly ParameterBagInterface $params, private readonly SerializerInterface $serializer, private readonly ValidatorInterface $validator) {}
 
     #[Route('/connexion', methods: ['POST'])]
-    public function connexion(Request $request): Response
-    {
+    public function connexion(
+        Request $request,
+        #[Target('login')]
+        RateLimiterFactoryInterface $loginLimiter
+    ): Response {
         $authorizationHeader = $request->headers->get('Authorization');
         if (!$authorizationHeader) return $this->json(['message' => 'Le header autorisation est requis !'], 401);
 
@@ -34,9 +39,19 @@ final class AuthController extends AbstractController
         if (!\str_contains($decodedCredentials, ":")) return $this->json(['message' => 'Encodage du header autorisation invalide'], 401);
 
         // Récupération du username et du password
-        list($username, $password) = explode(':', $decodedCredentials);
+        list($username, $password) = explode(':', $decodedCredentials, 2);
+
+        // On créé le limiter pour l'IP du client et on consomme une tentative après les tests de format
+        $limiter = $loginLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de connexion. Veuillez réessayer plus tard.'], 429);
+        }
 
         $couple = $this->authService->connexionBasic($username, $password);
+
+        // Si la connexion est réussie, on reset le limiter pour l'IP du client
+        $limiter->reset();
 
         $response = $this->json(['token' => $couple['token']]);
         $response->headers->setCookie($couple['cookie']);
@@ -47,6 +62,9 @@ final class AuthController extends AbstractController
     #[Route('/connexionFede', methods: ['GET'])]
     public function connexionFede(Request $request): Response
     {
+        if (!$request->headers->has('mail') || !$request->headers->has('givenname') || !$request->headers->has('sn')) {
+            return new RedirectResponse($this->params->get('front_host') . "/callbackCas?status=error");
+        }
         try {
             $mail = $request->headers->get('mail');
             $prenom = $request->headers->get('givenname');
@@ -68,8 +86,11 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/inscription', methods: ['POST'])]
-    public function inscription(Request $request): Response
-    {
+    public function inscription(
+        Request $request,
+        #[Target('inscription')]
+        RateLimiterFactoryInterface $inscriptionLimiter
+    ): Response {
         $ssmdp = $request->query->get('ssmdp', false);
         $dto = $this->serializer->deserialize($request->getContent(), UtilisateurInscriptionDTO::class, 'json');
 
@@ -86,6 +107,12 @@ final class AuthController extends AbstractController
                 $messages[] = $violation->getMessage();
             }
             return $this->json(['messageArray' => $messages], 400);
+        }
+
+        $limiter = $inscriptionLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives d\'inscription. Veuillez réessayer plus tard.'], 429);
         }
 
         if ($ssmdp) {
@@ -134,11 +161,19 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/verifie-mail', methods: ['POST'])]
-    public function verifieMail(Request $request): Response
-    {
+    public function verifieMail(
+        Request $request,
+        #[Target('verifier_email')]
+        RateLimiterFactoryInterface $verifieMailLimiter
+    ): Response {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
 
+        $limiter = $verifieMailLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de vérification. Veuillez réessayer plus tard.'], 429);
+        }
 
         $this->authService->verificationMailUtilisateur($json['token']);
         return $this->json(['message' => 'Email vérifié avec succès.'], 200);
@@ -159,23 +194,41 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/mdp-oublie', methods: ['POST'])]
-    public function motDePasseOublie(Request $request): Response
-    {
+    public function motDePasseOublie(
+        Request $request,
+        #[Target('mdp_oublie')]
+        RateLimiterFactoryInterface $motDePasseOublieLimiter
+    ): Response {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['email'])) return $this->json(['message' => 'L\'email est requis.'], 400);
 
+        $limiter = $motDePasseOublieLimiter->create($request->getClientIp());
+        $consume = $limiter->consume(1);
+        if (!$consume->isAccepted()) {
+            return $this->json(['message' => 'Trop de tentatives de réinitialisation de mot de passe. Veuillez réessayer plus tard.'], 429);
+        }
 
         $this->authService->motDePasseOubliePhase1($json['email']);
         return $this->json(['message' => 'Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.'], 200);
     }
 
     #[Route('/mdp-oublie', methods: ['PATCH'])]
-    public function motDePasseOubliePhase2(Request $request): Response
+    public function motDePasseOubliePhase2(Request $request, ValidatorInterface $validator): Response
     {
         $json = json_decode($request->getContent(), true);
         if (!isset($json['token'])) return $this->json(['message' => 'Le token est requis.'], 400);
         if (!isset($json['mdp'])) return $this->json(['message' => 'Le mot de passe est requis.'], 400);
 
+        // Vérifier si le mot de passe est compromis
+        $violations = $validator->validate($json['mdp'], [
+            new NotCompromisedPassword(message: 'Le mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre.')
+        ]);
+
+        if (count($violations) > 0) {
+            foreach ($violations as $violation) {
+                return $this->json(['message' => $violation->getMessage()], 400);
+            }
+        }
 
         $this->authService->motDePasseOubliePhase2($json['token'], $json['mdp']);
         return $this->json(['message' => 'Votre mot de passe a été réinitialisé avec succès.'], 200);

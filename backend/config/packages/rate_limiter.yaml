@@ -1,0 +1,18 @@
+framework:
+    rate_limiter:
+        login:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '5 minutes'
+        inscription:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '5 minutes'
+        mdp-oublie:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '60 minutes'
+        verifier-email:
+            policy: 'sliding_window'
+            limit: 15
+            interval: '10 minutes'

@@ -36,6 +36,7 @@ class AuthService
 
     function connexionBasic(string $email, string $password)
     {
+        $email = strtolower($email);
         $userRepo = $this->em->getRepository(Utilisateur::class);
         /** @var Utilisateur | null $user */
         $user = $userRepo->findOneBy(["email" => $email, "attenteApprobationDU" => false]);
@@ -57,6 +58,7 @@ class AuthService
 
     function connexionFede(string $email, string $prenom, string $nom)
     {
+        $email = strtolower($email);
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "attenteApprobationDU" => false]);
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
@@ -76,7 +78,9 @@ class AuthService
         $profile = $this->orcidService->getProfileOrcid($accessToken);
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["sub_orcid" => $profile["sub"]]);
 
-        if (!$user) $this->creationInscriptionOAuth($profile["email"] ?? null, $profile["given_name"] ?? null, $profile["family_name"] ?? null, $profile["sub"]);
+        $email = $profile["email"] ?? null;
+        if ($email) $email = strtolower($email);
+        if (!$user) $this->creationInscriptionOAuth($email, $profile["given_name"] ?? null, $profile["family_name"] ?? null, $profile["sub"]);
 
         if (!$user->isEmailValide()) {
             $this->envoyerEmailVerification($user);
@@ -90,11 +94,12 @@ class AuthService
     function inscriptionBasic(UtilisateurInscriptionDTO $dto)
     {
         // Vérification que l'email n'est pas déjà utilisé
-        $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+        $email = strtolower($dto->email);
+        $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
         if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
 
         $user = new Utilisateur();
-        $user->setEmail($dto->email);
+        $user->setEmail($email);
         $user->setPrenom($dto->prenom);
         $user->setNom($dto->nom);
         $user->setMdp($this->passwordHasher->hashPassword($user, $dto->mdp));
@@ -113,7 +118,6 @@ class AuthService
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
         $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
         $this->em->persist($userInscription);
@@ -168,15 +172,17 @@ class AuthService
 
         if ($inscriptionOAuth->getEmail()) {
             // Vérifier si le mail n'est pas déjà utilisé
-            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+            $email = strtolower($inscriptionOAuth->getEmail());
+            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
             if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
-            $user->setEmail($inscriptionOAuth->getEmail());
+            $user->setEmail($email);
             $user->setEmailValide(true);
         } else {
             // Vérifier si le mail n'est pas déjà utilisé
-            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $dto->email]);
+            $email = strtolower($dto->email);
+            $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
             if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
-            $user->setEmail($dto->email);
+            $user->setEmail($email);
         }
 
         if ($inscriptionOAuth->getPrenom()) $user->setPrenom($inscriptionOAuth->getPrenom());
@@ -201,7 +207,6 @@ class AuthService
 
         $userInscription = new UtilisateurInscription();
         $userInscription->setUtilisateur($user);
-        $userInscription->setDirecteurOsuDemande($dto->directeur_osu_demande === true ? true : false);
         $userInscription->setPlateformeDemande($dto->plateforme_demande_id ? $this->em->getReference(Plateforme::class, $dto->plateforme_demande_id) : null);
         $userInscription->setDirecteurUniteDemande($dto->directeur_unite_demande === true ? true : false);
 
@@ -219,9 +224,10 @@ class AuthService
 
     function checkRefreshToken(string $refreshToken)
     {
+        $refreshTokenHash = hash('sha256', $refreshToken);
         /** @var RefreshToken $refreshToken */
         // Récupération du record refreshToken
-        $refreshToken = $this->em->getRepository(RefreshToken::class)->findOneBy(['token' => $refreshToken]);
+        $refreshToken = $this->em->getRepository(RefreshToken::class)->findOneBy(['token' => $refreshTokenHash]);
 
         // Vérification que le refreshToken soit existant et pas expiré
         if (!$refreshToken || $refreshToken->getExpiration() < new \DateTime()) throw new RefreshTokenInvalideOuExpireException();
@@ -263,12 +269,14 @@ class AuthService
         // Création d'un token
         $refreshToken = bin2hex(random_bytes(64));
 
+        $refreshTokenHash = hash('sha256', $refreshToken);
+
         // Définition de l'expiration dans 7 jours
         $expiration = new \DateTime('+7 days');
 
         // Création du record de refreshToken
         $refreshTokenEntity = new RefreshToken();
-        $refreshTokenEntity->setToken($refreshToken);
+        $refreshTokenEntity->setToken($refreshTokenHash);
         $refreshTokenEntity->setExpiration($expiration);
         $refreshTokenEntity->setUtilisateur($user);
         $this->em->persist($refreshTokenEntity);
@@ -280,7 +288,7 @@ class AuthService
             ->withExpires(time() + 604800)
             ->withHttpOnly(true)
             ->withSecure(true)
-            ->withSameSite('None')
+            ->withSameSite('Lax')
             ->withPath('/');
 
         return [
@@ -356,6 +364,7 @@ class AuthService
 
     function motDePasseOubliePhase1(string $email): void
     {
+        $email = strtolower($email);
         /** @var Utilisateur $user */
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
         if (!$user) {

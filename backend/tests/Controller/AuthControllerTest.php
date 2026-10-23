@@ -281,9 +281,9 @@ class AuthControllerTest extends WebTestCase
             ["CONTENT_TYPE" => "application/json"],
             \json_encode([
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -307,9 +307,9 @@ class AuthControllerTest extends WebTestCase
             ["CONTENT_TYPE" => "application/json"],
             \json_encode([
                 'nom' => 'Test',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -335,7 +335,7 @@ class AuthControllerTest extends WebTestCase
                 'nom' => 'Test',
                 'prenom' => 'User',
                 'mdp' => 'password',
-                'directeur_osu_demande' => \true
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -360,7 +360,7 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password'
             ])
         );
@@ -368,52 +368,9 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('messageArray', $data);
-        $this->assertContains('Au moins une demande doit être faite (plateforme, unité ou OSU)', $data['messageArray']);
+        $this->assertContains('Au moins une demande doit être faite (plateforme, unité)', $data['messageArray']);
 
         self::assertEmailCount(0);
-    }
-
-    public function testInscriptionOsuDemande(): void
-    {
-        $client = $this->client;
-
-        $client->request(
-            'POST',
-            '/api/inscription',
-            [],
-            [],
-            ["CONTENT_TYPE" => "application/json"],
-            \json_encode([
-                'nom' => 'Test',
-                'prenom' => 'User',
-                'email' => 'testInscription@example.com',
-                'mdp' => 'password',
-                'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
-            ])
-        );
-
-        $this->assertResponseStatusCodeSame(201);
-
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
-        $this->assertNotNull($user);
-        $this->assertFalse($user->isEmailValide());
-        $this->assertFalse($user->isAdmis());
-
-        $userInscription = $user->getUtilisateurInscription();
-        $this->assertNotNull($userInscription);
-        $this->assertTrue($userInscription->isDirecteurOsuDemande());
-        $this->assertFalse($userInscription->isDirecteurUniteDemande());
-        $this->assertNull($userInscription->getPlateformeDemande());
-
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
-        $this->assertNotNull($user->getUtilisateurVerification());
-        $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
-        $this->assertNotNull($user->getUtilisateurVerification()->getToken());
-
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
     }
 
     public function testInscriptionEntiteDemande(): void
@@ -429,21 +386,20 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
                 'directeur_unite_demande' => true
             ])
         );
 
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testinscription@example.com']);
         $this->assertNotNull($user);
         $this->assertFalse($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isDirecteurOsuDemande());
         $this->assertTrue($userInscription->isDirecteurUniteDemande());
         $this->assertNull($userInscription->getPlateformeDemande());
 
@@ -455,7 +411,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
 
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
+        $this->assertVerificationEmailSentTo('testinscription@example.com');
     }
 
     public function testInscriptionPlateformeDemande(): void
@@ -471,21 +427,20 @@ class AuthControllerTest extends WebTestCase
             \json_encode([
                 'nom' => 'Test',
                 'prenom' => 'User',
-                'email' => 'testInscription@example.com',
+                'email' => 'testinscription@example.com',
                 'mdp' => 'password',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
                 'plateforme_demande_id' => $this->em->getRepository(Plateforme::class)->findOneBy([])->getId()
             ])
         );
 
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testInscription@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'testinscription@example.com']);
         $this->assertNotNull($user);
         $this->assertFalse($user->isEmailValide());
         $this->assertFalse($user->isAdmis());
 
         $userInscription = $user->getUtilisateurInscription();
         $this->assertNotNull($userInscription);
-        $this->assertFalse($userInscription->isDirecteurOsuDemande());
         $this->assertFalse($userInscription->isDirecteurUniteDemande());
         $this->assertNotNull($userInscription->getPlateformeDemande());
 
@@ -497,7 +452,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
 
-        $this->assertVerificationEmailSentTo('testInscription@example.com');
+        $this->assertVerificationEmailSentTo('testinscription@example.com');
     }
 
     public function testRefreshTokenNonEnvoye(): void
@@ -581,7 +536,8 @@ class AuthControllerTest extends WebTestCase
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com']);
         $user->getRefreshTokens()->add(
             (new \App\Entity\RefreshToken())
-                ->setToken('abcde')
+                // SHA256 de abcde
+                ->setToken('36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c')
                 ->setUtilisateur($user)
                 ->setExpiration((new \DateTime())->modify('1 hour'))
         );
@@ -660,7 +616,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true
             ])
         );
 
@@ -685,7 +641,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token_invalide'
             ])
         );
@@ -721,7 +677,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token123'
             ])
         );
@@ -737,7 +693,7 @@ class AuthControllerTest extends WebTestCase
         $client = $this->client;
 
         $utilisateurInscriptionOauth = new UtilisateurInscriptionOAuth();
-        $utilisateurInscriptionOauth->setEmail('inscriptionOauth@example.com');
+        $utilisateurInscriptionOauth->setEmail('inscriptionoauth@example.com');
         $utilisateurInscriptionOauth->setNom('User');
         $utilisateurInscriptionOauth->setPrenom('Test');
         $utilisateurInscriptionOauth->setToken('token123');
@@ -757,7 +713,7 @@ class AuthControllerTest extends WebTestCase
                 'prenom' => 'User',
                 'email' => 'inscriptionOauth@example.com',
                 'unite_id' => $this->em->getRepository(Entite::class)->findOneBy(["laboratoire" => true])->getId(),
-                'directeur_osu_demande' => \true,
+                'directeur_unite_demande' => true,
                 'token' => 'token123'
             ])
         );
@@ -766,7 +722,7 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Inscription réussie. Un email vous sera envoyé quand votre compte sera activé.', $data['message']);
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionOauth@example.com']);
+        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionoauth@example.com']);
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
         $this->assertEquals('User', $user->getNom());
@@ -1083,6 +1039,40 @@ class AuthControllerTest extends WebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        self::assertEmailCount(0);
+    }
+
+    public function testLimitConnexion(): void
+    {
+        $client = $this->client;
+
+        // Clear les tokens de login
+        $factory = static::getContainer()->get('limiter.login');
+        $factory->create('127.0.0.1')->reset();
+
+        for ($i = 0; $i < 100; $i++) {
+            $client->request(
+                'POST',
+                '/api/connexion',
+                [],
+                [],
+                ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:mauvaismotdepasse')]
+            );
+        }
+
+        $client->request(
+            'POST',
+            '/api/connexion',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:mauvaismotdepasse')]
+        );
+
+        $this->assertResponseStatusCodeSame(429);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('message', $data);
+        $this->assertEquals('Trop de tentatives de connexion. Veuillez réessayer plus tard.', $data['message']);
+        $factory->create('127.0.0.1')->reset();
         self::assertEmailCount(0);
     }
 }
