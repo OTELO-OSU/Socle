@@ -2,8 +2,14 @@
 
 namespace App\Exception\auth;
 
-class UtilisateurNonAdmisException extends \Exception
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+class UtilisateurNonAdmisException extends AccessDeniedHttpException
 {
-    protected $message = "Votre compte n'a pas encore été admis. Un email vous sera envoyé une fois votre compte activé.";
-    protected $code = 403;
+    public function __construct()
+    {
+        parent::__construct(
+            "Votre compte n'a pas encore été approuvé. Un email vous sera envoyé une fois votre compte activé."
+        );
+    }
 }

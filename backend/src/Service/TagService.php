@@ -9,10 +9,13 @@ use App\Entity\UtilisateurTags;
 use App\Security\Voter\PlateformeVoter;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -40,22 +43,23 @@ class TagService
             $statusCode = $response->getStatusCode();
 
             if ($statusCode >= 400) {
-                throw new Exception(
+                throw new ServiceUnavailableHttpException(
+                    null,
                     "Le service central des tags a retourné une erreur HTTP $statusCode."
                 );
             }
 
             $tags = $response->toArray(false);
         } catch (TransportExceptionInterface $e) {
-            throw new Exception(
+            throw new ServiceUnavailableHttpException(
+                null,
                 "La connexion au service central des tags a échoué.",
-                503,
-                $e
             );
         }
 
         if (!is_array($tags)) {
-            throw new Exception(
+            throw new ServiceUnavailableHttpException(
+                null,
                 "La réponse de l'URL centrale n'est pas un JSON valide."
             );
         }
@@ -65,7 +69,7 @@ class TagService
 
     public function getTagsAdmin(): array
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Accès refusé.");
         $tags = $this->getTags();
 
         $tagsAvecAffiliationArray = [];
@@ -104,9 +108,9 @@ class TagService
     public function getPlateformeTags(int $plateformeId): array
     {
         /** @var Plateforme $plateforme */
-        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new Exception("Plateforme non trouvée.", 404);
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new NotFoundHttpException("La plateforme n'existe pas.");
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new Exception("Accès refusé.", 403);
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour consulter les tags de cette plateforme.");
 
         $plateformeTags = $plateforme->getPlateformeTags();
         $arrayTags = [];
@@ -125,17 +129,17 @@ class TagService
                 ],
             ]);
         } catch (TransportExceptionInterface $e) {
-            throw new Exception("Impossible de joindre le service central des tags ($centralUrl): " . $e->getMessage(), 0, $e);
+            throw new ServiceUnavailableHttpException("Impossible de joindre le service central des tags ($centralUrl): " . $e->getMessage(), 0, $e);
         }
 
         if ($response->getStatusCode() >= 400) {
-            throw new Exception("Le service central des tags a retourne une erreur HTTP " . $response->getStatusCode() . ".");
+            throw new ServiceUnavailableHttpException("Le service central des tags a retourne une erreur HTTP " . $response->getStatusCode() . ".");
         }
 
         $tags = $response->toArray(false);
 
         if (!is_array($tags)) {
-            throw new Exception("La réponse de l'URL centrale n'est pas un JSON valide.");
+            throw new ServiceUnavailableHttpException("La réponse de l'URL centrale n'est pas un JSON valide.");
         }
 
         $tags = array_values(array_filter($tags, function ($tag) use ($arrayTags) {
@@ -149,10 +153,10 @@ class TagService
     {
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new Exception("Plateforme non trouvée.");
+            throw new NotFoundHttpException("La plateforme n'existe pas.");
         }
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new Exception("Accès refusé.", 403);
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour tagger cette plateforme");
 
         $currentTags = $plateforme->getPlateformeTags();
         foreach ($currentTags as $currentTag) {
@@ -166,7 +170,7 @@ class TagService
 
         foreach ($tagIds as $tagId) {
             if (!in_array($tagId, $validTagIds)) {
-                throw new Exception("Tag avec l'ID $tagId est invalide.");
+                throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
             }
             $existingTag = $this->em->getRepository(PlateformeTags::class)->findOneBy([
                 'plateforme' => $plateforme,
@@ -186,21 +190,21 @@ class TagService
 
     public function tagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour tagger cet utilisateur.");
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new Exception("Utilisateur non trouvé.");
+            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         $tagsCentral = $this->getTags();
         $validTagIds = array_map(fn($tag) => $tag['id'], $tagsCentral);
 
         if (!in_array($tagId, $validTagIds)) {
-            throw new Exception("Tag avec l'ID $tagId est invalide.");
+            throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
         }
 
-        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new Exception("L'utilisateur a déjà ce tag.", 400);
+        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException("L'utilisateur a déjà ce tag.");
 
         $userTag = new UtilisateurTags($utilisateur, $tagId);
         $this->em->persist($userTag);
@@ -209,17 +213,17 @@ class TagService
 
     public function untagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new Exception("Accès refusé.", 403);
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException("Vous n'avez pas les droits pour enlever le tag de cet utilisateur.");
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new Exception("Utilisateur non trouvé.");
+            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         $tag = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
             'utilisateur' => $utilisateur,
             'tagId' => $tagId,
-        ]) or throw new Exception("L'utilisateur n'a pas ce tag.", 404);
+        ]) or throw new ConflictHttpException("L'utilisateur n'a pas ce tag.");
 
         $this->em->remove($tag);
         $this->em->flush();

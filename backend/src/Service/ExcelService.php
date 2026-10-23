@@ -10,21 +10,19 @@ use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\Grade;
-use App\Entity\Instrument;
 use App\Entity\ModaliteRecrutement;
 use App\Entity\Plateforme;
-use App\Entity\PlateformeHistorique;
 use App\Entity\SectionCnrs;
 use App\Entity\TypeContrat;
-use App\Entity\Utilisateur;
 use App\Entity\Ville;
 use App\Security\Voter\PlateformeVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ExcelService
@@ -32,7 +30,6 @@ class ExcelService
 
     public function __construct(
         private EntityManagerInterface $em,
-        private PlateformeService $platformeService,
         private Security $security,
         private SerializerInterface $serializerInterface
     ) {}
@@ -64,196 +61,22 @@ class ExcelService
         return $name;
     }
 
-    // function exportAllPossiblePlatformToExcel()
-    // {
-    //     /** @var User $user */
-    //     $user = $this->security->getUser();
-    //     if (!$user) {
-    //         // Lève une exception si l'utilisateur n'est pas connecté
-    //         throw new UserNotFoundException();
-    //     }
-    //     $id = (string) $user->getId();
-
-    //     // Si l'utilisateur est admin, on récupère toutes les plateformes
-    //     if (\in_array("ROLE_ADMIN", $user->getRoles())) {
-    //         $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //             ->sort("data.name")
-    //             ->getQuery()
-    //             ->execute();
-    //     }
-    //     // Sinon, on récupère les plateformes où l'utilisateur est hôte OU des réseaux où il est hôte
-    //     else {
-    //         // Récupère les réseaux où l'utilisateur est host
-    //         $networks = $this->dm->createQueryBuilder(Networks::class)
-    //             ->field("hosts")->in([$id])
-    //             ->getQuery()->execute();
-
-    //         $networkIds = [];
-    //         /** @var Network $network */
-    //         foreach ($networks as $network) {
-    //             $networkIds[] = $network->getId();
-    //         }
-
-    //         // Récupère les plateformes où l'utilisateur est host OU dont le network est hosté par lui
-    //         $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //             ->addOr(
-    //                 $this->dm->createQueryBuilder(Platforms::class)->expr()->field("hosts")->in([$id])
-    //             )
-    //             ->addOr(
-    //                 $this->dm->createQueryBuilder(Platforms::class)->expr()->field("data.network")->in($networkIds)
-    //             )
-    //             ->sort("data.name")
-    //             ->getQuery()
-    //             ->execute();
-    //     }
-
-    //     return $this->exportPlatformsToExcel($platforms);
-    // }
-
     function exportSinglePlatformToExcel(int $platformId)
     {
         // On récupère la plateforme
         $platform = $this->em->getRepository(Plateforme::class)->find($platformId);
         if (!$platform) {
             // Lève une exception si la plateforme n'existe pas
-            throw new Exception("Plateforme non trouvée", 404);
+            throw new NotFoundHttpException("La plateforme n'existe pas.");
         }
         if (!$this->security->isGranted(PlateformeVoter::EXPORTER, $platform)) {
-            throw new Exception("Accès refusé", 403);
+            throw new AccessDeniedHttpException("Accès refusé");
         }
 
         $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);
 
         return $this->exportPlatformeArrayEnExcel([$json]);
     }
-
-    // function exportAllPlatformFromNetworkToExcel($networkName)
-    // {
-    //     // On récupère le réseau
-    //     $network = $this->dm->getRepository(Networks::class)->findOneBy(['label' => $networkName]);
-    //     if (!$network) {
-    //         // Lève une exception si le réseau n'existe pas
-    //         throw new NetworkNotFoundException();
-    //     }
-
-    //     /** @var User $user */
-    //     $user = $this->security->getUser();
-    //     if (!$user) {
-    //         // Lève une exception si l'utilisateur n'est pas connecté
-    //         throw new UserNotFoundException();
-    //     }
-
-    //     // On récupère l'ID de l'utilisateur
-    //     $id = (string) $user->getId();
-
-    //     // Si l'utilisateur n'est pas admin on vérifie qu'il y a droit
-    //     if (!\in_array("ROLE_ADMIN", $user->getRoles())) {
-
-    //         if (!\in_array($id, $network->getHosts())) {
-    //             throw new NetworkNotFoundException();
-    //         }
-    //     }
-
-    //     // On récupère les plateformes du réseau
-    //     $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //         ->field("data.network")->equals($network->getLabel())
-    //         ->getQuery()
-    //         ->execute();
-
-    //     $array = [];
-
-    //     foreach ($platforms as $platform) {
-    //         $array[] = $platform;
-    //     }
-
-    //     // On exporte les plateformes
-    //     return $this->exportPlatformsToExcel($array);
-    // }
-
-    // function exportAllPlatformFromOsuToExcel($osuId)
-    // {
-    //     // On récupère l'osu
-    //     $osu = $this->em->getRepository(Osu::class)->find($osuId);
-    //     if (!$osu) {
-    //         // Lève une exception si l'osu n'existe pas
-    //         throw new OsuNotFoundException();
-    //     }
-
-    //     /** @var User $user */
-    //     $user = $this->security->getUser();
-    //     if (!$user) {
-    //         // Lève une exception si l'utilisateur n'est pas connecté
-    //         throw new UserNotFoundException();
-    //     }
-
-    //     // On récupère l'ID de l'utilisateur
-    //     $id = (string) $user->getId();
-
-    //     // Si l'utilisateur n'est pas admin on vérifie qu'il y a droit
-    //     if (!\in_array("ROLE_ADMIN", $user->getRoles())) {
-
-    //         if ($id !== (string) $osu->getDirector()->getId()) {
-    //             throw new OsuNotFoundException();
-    //         }
-    //     }
-
-    //     // On récupère les plateformes de l'OSU
-    //     $labosOfOsu = $osu->getLaboratories();
-
-    //     $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //         ->field("data.laboratory.origin")->equals("laboratory")
-    //         ->field("data.laboratory.id")->in($labosOfOsu->map(fn($labo) => $labo->getId())->toArray())
-    //         ->getQuery()
-    //         ->execute();
-
-    //     $array = [];
-
-    //     foreach ($platforms as $platform) {
-    //         $array[] = $platform;
-    //     }
-
-    //     // On exporte les plateformes
-    //     return $this->exportPlatformsToExcel($array);
-    // }
-
-    // function exportAllPlatformFromLaboratoryToExcel($laboratoryId, $origin)
-    // {
-    //     $array = [];
-    //     if ($origin == "laboratory") {
-    //         // On récupère l'osu
-    //         $laboratory = $this->em->getRepository(Laboratory::class)->find($laboratoryId);
-    //         if (!$laboratory) {
-    //             // Lève une exception si le labo n'existe pas
-    //             throw new LaboratoryNotFoundException();
-    //         }
-
-    //         $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //             ->field("data.laboratory.origin")->equals("laboratory")
-    //             ->field("data.laboratory.id")->equals((int) $laboratoryId)
-    //             ->getQuery()
-    //             ->execute();
-    //     } else if ($origin == "hostOrganizations") {
-    //         // On récupère l'osu
-    //         $laboratory = $this->em->getRepository(HostOrganizations::class)->find($laboratoryId);
-    //         if (!$laboratory) {
-    //             // Lève une exception si le labo n'existe pas
-    //             throw new LaboratoryNotFoundException();
-    //         }
-
-    //         $platforms = $this->dm->createQueryBuilder(Platforms::class)
-    //             ->field("data.laboratory.origin")->equals("hostOrganizations")
-    //             ->field("data.laboratory.id")->equals((int) $laboratoryId)
-    //             ->getQuery()
-    //             ->execute();
-    //     }
-
-    //     foreach ($platforms as $platform) {
-    //         $array[] = $platform;
-    //     }
-
-    //     // On exporte les plateformes
-    //     return $this->exportPlatformsToExcel($array);
-    // }
 
     private function formatVille(?int $villeId): string
     {

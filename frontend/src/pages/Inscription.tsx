@@ -211,6 +211,17 @@ export default function Inscription() {
                     couleur: 'error',
                 });
             }
+            else if (error.response?.status === 409) {
+                snackbarContext?.trigger({
+                    message: error.response.data?.message || 'L\'email est déjà utilisé par un compte existant.',
+                    couleur: 'error',
+                });
+            } else {
+                snackbarContext?.trigger({
+                    message: error.response?.data?.message || 'Une erreur est survenue lors de l\'inscription',
+                    couleur: 'error',
+                });
+            }
         }
     }
     return (

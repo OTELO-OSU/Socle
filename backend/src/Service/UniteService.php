@@ -6,15 +6,16 @@ use App\Entity\Entite;
 use App\Entity\Utilisateur;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class UniteService
 {
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly MailerService $mailerService,
         private readonly Security $security
     ) {}
 
@@ -23,7 +24,7 @@ class UniteService
         /** @var \App\Entity\Utilisateur $user */
         $user = $this->security->getUser();
         if ($user === null) {
-            throw new Exception("Vous devez être authentifié.", 401);
+            throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
         }
 
         if ($this->security->isGranted(UtilisateurVoter::GET_TOUTE_UNITE, Utilisateur::class)) {
@@ -44,7 +45,7 @@ class UniteService
             }
 
             if (empty($array)) {
-                throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+                throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires.");
             }
 
             $unites = $array;
@@ -56,13 +57,13 @@ class UniteService
     function modifierDirecteurUnite(int $uniteId, ?int $utilisateurId)
     {
         if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DU, Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires pour changer le directeur d'unité.");
         }
 
         /** @var Entite $unite */
         $unite = $this->em->getRepository(Entite::class)->find($uniteId);
         if (!$unite || !$unite->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité n'existe pas.");
         }
 
         $utilisateur = null;
@@ -70,7 +71,7 @@ class UniteService
             /** @var Utilisateur|null $utilisateur */
             $utilisateur = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
             if (!$utilisateur) {
-                throw new Exception("L'utilisateur spécifié est invalide.", 400);
+                throw new NotFoundHttpException("L'utilisateur n'existe pas.");
             }
         }
 
@@ -84,17 +85,17 @@ class UniteService
         /** @var Entite|null $uniteEntity */
         $uniteEntity = $this->em->getRepository(Entite::class)->find($uniteId);
         if (!$uniteEntity || !$uniteEntity->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité n'existe pas.");
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DU, $uniteEntity)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires pour ajouter un délégué au directeur d'unité.");
         }
 
         /** @var Utilisateur|null $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$utilisateur) {
-            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         $uniteEntity->addDelegueDirecteur($utilisateur);
@@ -106,17 +107,17 @@ class UniteService
         /** @var Entite|null $uniteEntity */
         $uniteEntity = $this->em->getRepository(Entite::class)->find($uniteId);
         if (!$uniteEntity || !$uniteEntity->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité n'existe pas.");
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DU, $uniteEntity)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires pour supprimer un délégué du directeur d'unité.");
         }
 
         /** @var Utilisateur|null $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$utilisateur) {
-            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         $uniteEntity->removeDelegueDirecteur($utilisateur);

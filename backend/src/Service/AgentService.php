@@ -13,9 +13,11 @@ use App\Entity\TypeContrat;
 use App\Entity\Utilisateur;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AgentService
@@ -45,7 +47,7 @@ class AgentService
         }
 
         if ($page < 1) {
-            throw new \InvalidArgumentException(
+            throw new BadRequestHttpException(
                 'Le numéro de page doit être supérieur ou égal à 1.'
             );
         }
@@ -145,13 +147,13 @@ class AgentService
     function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section): Utilisateur
     {
         if (!$this->security->isGranted("SOUMETTRE_AU_DU", Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedException("Vous n'avez pas les droits nécessaires.");
         }
 
         // On vérifie l'unité
         $u = $this->em->getRepository(Entite::class)->find($unite);
         if (!$u || !$u->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité spécifiée n'existe pas");
         }
 
         if (!$this->security->isGranted("SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -159,21 +161,21 @@ class AgentService
             $sender = $this->security->getUser();
             $uSender = $sender->getUnite();
             if ($uSender != $u) {
-                throw new Exception("Vous n'avez pas les droits nécessaires pour créer un utilisateur dans cette unité.", 403);
+                throw new AccessDeniedException("Vous n'avez pas les droits nécessaires pour créer un utilisateur dans cette unité.", 403);
             }
         }
 
         // Vérification de l'employeur
         $employeurEntity = $this->em->getRepository(Entite::class)->find($employeur);
         if (!$employeurEntity || !$employeurEntity->isEmployeur()) {
-            throw new Exception("L'employeur spécifié est invalide.", 400);
+            throw new NotFoundHttpException("L'employeur spécifié n'existe pas.");
         }
 
         // Vérification du type de contrat
         /** @var TypeContrat $typeContratEntity */
         $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
         if (!$typeContratEntity) {
-            throw new Exception("Le type de contrat spécifié est invalide.", 400);
+            throw new NotFoundHttpException("Le type de contrat n'existe pas.");
         }
 
         $corpsEntity = null;
@@ -186,28 +188,28 @@ class AgentService
 
         if (!$doctorant) {
             if ($corps === null) {
-                throw new Exception("Le corps est obligatoire.", 400);
+                throw new BadRequestHttpException("Le corps est obligatoire.");
             } else if ($grade === null) {
-                throw new Exception("Le grade est obligatoire.", 400);
+                throw new BadRequestHttpException("Le grade est obligatoire.");
             }
 
             // Vérification du corps
             /** @var Corps $corpsEntity */
             $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
             if (!$corpsEntity) {
-                throw new Exception("Le corps spécifié est invalide.", 400);
+                throw new NotFoundHttpException("Le corps spécifié n'existe pas.");
             }
 
             // Vérfication du grade
             /** @var Grade $gradeEntity */
             $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
             if (!$gradeEntity) {
-                throw new Exception("Le grade spécifié est invalide.", 400);
+                throw new NotFoundHttpException("Le grade spécifié n'existe pas.");
             }
 
             // Vérification de la liaison corps_grade
             if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
-                throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+                throw new BadRequestHttpException("Le grade spécifié n'est pas associé au corps sélectionné.");
             }
 
             foreach ($baps_ids ?? [] as $baps_id) {
@@ -233,7 +235,7 @@ class AgentService
                 /** @var Entite $univRattachementEntity */
                 $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
                 if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
-                    throw new Exception("L'université de rattachement spécifiée est invalide.", 400);
+                    throw new NotFoundHttpException("L'université de rattachement spécifiée n'existe pas.");
                 }
             }
         }
@@ -281,30 +283,30 @@ class AgentService
         /** @var Utilisateur $user */
         $user = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$user) {
-            throw new Exception("L'utilisateur spécifié est invalide.", 400);
+            throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::MODIFIER, $user)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedException("Vous n'avez pas les droits nécessaires.");
         }
 
         // On vérifie l'unité
         $u = $this->em->getRepository(Entite::class)->find($unite);
         if (!$u || !$u->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité spécifiée n'existe pas.");
         }
 
         // Vérification de l'employeur
         $employeurEntity = $this->em->getRepository(Entite::class)->find($employeur);
         if (!$employeurEntity || !$employeurEntity->isEmployeur()) {
-            throw new Exception("L'employeur spécifié est invalide.", 400);
+            throw new NotFoundHttpException("L'employeur spécifié n'existe pas.");
         }
 
         // Vérification du type de contrat
         /** @var TypeContrat $typeContratEntity */
         $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
         if (!$typeContratEntity) {
-            throw new Exception("Le type de contrat spécifié est invalide.", 400);
+            throw new NotFoundHttpException("Le type de contrat n'existe pas.");
         }
 
         $corpsEntity = null;
@@ -317,28 +319,28 @@ class AgentService
 
         if (!$doctorant) {
             if ($corps === null) {
-                throw new Exception("Le corps est obligatoire.", 400);
+                throw new BadRequestHttpException("Le corps est obligatoire.");
             } else if ($grade === null) {
-                throw new Exception("Le grade est obligatoire.", 400);
+                throw new BadRequestHttpException("Le grade est obligatoire.");
             }
 
             // Vérification du corps
             /** @var Corps $corpsEntity */
             $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
             if (!$corpsEntity) {
-                throw new Exception("Le corps spécifié est invalide.", 400);
+                throw new NotFoundHttpException("Le corps spécifié n'existe pas.");
             }
 
             // Vérfication du grade
             /** @var Grade $gradeEntity */
             $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
             if (!$gradeEntity) {
-                throw new Exception("Le grade spécifié est invalide.", 400);
+                throw new NotFoundHttpException("Le grade spécifié n'existe pas.");
             }
 
             // Vérification de la liaison corps_grade
             if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
-                throw new Exception("Le grade spécifié n'est pas associé au corps sélectionné.", 400);
+                throw new BadRequestHttpException("Le grade spécifié n'est pas associé au corps sélectionné.");
             }
 
             foreach ($baps_ids ?? [] as $baps_id) {
@@ -364,7 +366,7 @@ class AgentService
                 /** @var Entite $univRattachementEntity */
                 $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
                 if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
-                    throw new Exception("L'université de rattachement spécifiée est invalide.", 400);
+                    throw new NotFoundHttpException("L'université de rattachement spécifiée n'existe pas.");
                 }
             }
         }
@@ -402,7 +404,7 @@ class AgentService
     function getUtilisateurEnAttenteDeValidationDuDu(): array
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires.");
         }
 
         $agents = [];
@@ -428,13 +430,13 @@ class AgentService
     function approuveUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
     {
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires.");
         }
 
         /** @var Utilisateur $agent */
         $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$agent || !$agent->isAttenteApprobationDU()) {
-            throw new Exception("L'utilisateur spécifié est invalide ou n'est pas en attente d'approbation DU.", 400);
+            throw new NotFoundHttpException("L'utilisateur spécifié n'existe pas.");
         }
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -449,7 +451,7 @@ class AgentService
                 $unites[] = $entite;
             });
             if (!in_array($agentUnite, $unites)) {
-                throw new Exception("Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.", 403);
+                throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.");
             }
         }
 
@@ -469,13 +471,13 @@ class AgentService
     function refusUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
     {
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
-            throw new Exception("Vous n'avez pas les droits nécessaires.", 403);
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires.");
         }
 
         /** @var Utilisateur $agent */
         $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$agent || !$agent->isAttenteApprobationDU()) {
-            throw new Exception("L'utilisateur spécifié est invalide ou n'est pas en attente d'approbation DU.", 400);
+            throw new NotFoundHttpException("L'utilisateur spécifié n'existe pas.");
         }
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -490,7 +492,7 @@ class AgentService
                 $unites[] = $entite;
             });
             if (!in_array($agentUnite, $unites)) {
-                throw new Exception("Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.", 403);
+                throw new AccessDeniedHttpException("Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.");
             }
         }
 

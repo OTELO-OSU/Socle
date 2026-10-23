@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -10,7 +11,8 @@ class MailerService
 {
     public function __construct(
         private MailerInterface $mailer,
-        private ParameterBagInterface $params
+        private ParameterBagInterface $params,
+        private LoggerInterface $logger
     ) {}
 
     function generateMailBody($bodyMessage, $bodyLink, $footerMessage = "")
@@ -86,8 +88,7 @@ class MailerService
 
             $this->mailer->send($email);
         } catch (\Exception $e) {
-            // Log the error or handle it as needed
-            error_log("Failed to send email: " . $e->getMessage());
+            $this->logger->error("Erreur lors de l'envoi de l'email à $user_mail : " . $e->getMessage());
         }
     }
 }

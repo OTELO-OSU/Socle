@@ -2,15 +2,13 @@
 
 namespace App\Service;
 
-use App\Entity\Plateforme;
-use App\Entity\PlateformeHistorique;
-use App\Entity\PlateformeHistoriquePersonnel;
 use App\Entity\Utilisateur;
-use App\Security\Voter\PlateformeVoter;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OsuService
 {
@@ -21,7 +19,7 @@ class OsuService
 
     public function getAdminOsu()
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GET_ADMIN_OSU, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GET_ADMIN_OSU, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas la permission pour voir les informations du directeur de l'OSU et de ses délégués.");
 
         $conn = $this->em->getConnection();
 
@@ -65,13 +63,13 @@ class OsuService
 
     public function switchDirOsu(?int $idNewDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DO, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour changer le directeur de l'OSU.");
 
         $newDirOsu = null;
 
         if ($idNewDirOsu !== null) {
             $newDirOsu = $this->em->getRepository(Utilisateur::class)->find($idNewDirOsu);
-            if (!$newDirOsu) throw new Exception("Utilisateur non trouvé.", 404);
+            if (!$newDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
         }
 
         $conn = $this->em->getConnection();
@@ -99,10 +97,10 @@ class OsuService
 
     public function retirerDelegue(int $idDelegueDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour retirer un délégué du directeur de l'OSU.");
 
         $delegueDirOsu = $this->em->getRepository(Utilisateur::class)->find($idDelegueDirOsu);
-        if (!$delegueDirOsu) throw new Exception("Utilisateur non trouvé.", 404);
+        if (!$delegueDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
 
         $delegueDirOsu->setRoles(array_diff($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU_DELEGUE']));
         $this->em->persist($delegueDirOsu);
@@ -111,12 +109,12 @@ class OsuService
 
     public function ajouterDelegue(int $idDelegueDirOsu)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::CHANGER_DELEGUE_DO, Utilisateur::class)) throw new AccessDeniedHttpException("Vous n'avez pas les droits pour ajouter un délégué au directeur de l'OSU.");
 
         $delegueDirOsu = $this->em->getRepository(Utilisateur::class)->find($idDelegueDirOsu);
-        if (!$delegueDirOsu) throw new Exception("Utilisateur non trouvé.", 404);
+        if (!$delegueDirOsu) throw new NotFoundHttpException("L'utilisateur n'existe pas.");
 
-        if (in_array('ROLE_DIR_OSU', $delegueDirOsu->getRoles())) throw new Exception("Cet utilisateur est déjà directeur de l'OSU.", 400);
+        if (in_array('ROLE_DIR_OSU', $delegueDirOsu->getRoles())) throw new BadRequestHttpException("Cet utilisateur est déjà directeur de l'OSU.");
 
         $delegueDirOsu->setRoles(array_merge($delegueDirOsu->getRoles(), ['ROLE_DIR_OSU_DELEGUE']));
         $this->em->persist($delegueDirOsu);

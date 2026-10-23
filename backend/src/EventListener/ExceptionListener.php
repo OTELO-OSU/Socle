@@ -7,7 +7,6 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 
 #[AsEventListener(event: KernelEvents::EXCEPTION)]
 class ExceptionListener
@@ -17,24 +16,17 @@ class ExceptionListener
         $e = $event->getThrowable();
 
         if ($e instanceof HttpExceptionInterface) {
-            $status = $e->getStatusCode();
-        } elseif ($e instanceof SerializerExceptionInterface) {
-            // JSON mal formé
-            $status = 400;
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => $e->getMessage(),
+                ], $e->getStatusCode())
+            );
         } else {
-            $status = $this->sanitizeStatus($e->getCode());
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => 'Une erreur est survenue.',
+                ], 500)
+            );
         }
-
-        $event->setResponse(
-            new JsonResponse([
-                'message' => $e->getMessage(),
-            ], $status)
-        );
-    }
-
-    private function sanitizeStatus($code): int
-    {
-        $code = (int) $code;
-        return ($code >= 400 && $code <= 599) ? $code : 500;
     }
 }

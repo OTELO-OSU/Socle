@@ -21,6 +21,11 @@ use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\GoneHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthService
@@ -96,7 +101,7 @@ class AuthService
         // Vérification que l'email n'est pas déjà utilisé
         $email = strtolower($dto->email);
         $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-        if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+        if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
 
         $user = new Utilisateur();
         $user->setEmail($email);
@@ -108,7 +113,7 @@ class AuthService
         /** @var Entite|null $unite */
         $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
         if (!$unite || !$unite->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité spécifiée n'existe pas.");
         }
 
         $user->setUnite($unite);
@@ -161,11 +166,11 @@ class AuthService
     {
         // Récupérer les infos de la table d'inscription OAuth
         $inscriptionOAuth = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(["token" => $dto->token]);
-        if (!$inscriptionOAuth) throw new Exception("Token d'inscription OAuth invalide.", 400);
+        if (!$inscriptionOAuth) throw new UnauthorizedHttpException('Bearer', "Token d'inscription OAuth invalide.");
         if ($inscriptionOAuth->getExpiration() < new DateTime()) {
             $this->em->remove($inscriptionOAuth);
             $this->em->flush();
-            throw new Exception("Token d'inscription OAuth expiré.", 400);
+            throw new UnauthorizedHttpException('Bearer', "Token d'inscription OAuth expiré.");
         }
 
         $user = new Utilisateur();
@@ -174,14 +179,14 @@ class AuthService
             // Vérifier si le mail n'est pas déjà utilisé
             $email = strtolower($inscriptionOAuth->getEmail());
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-            if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+            if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
             $user->setEmail($email);
             $user->setEmailValide(true);
         } else {
             // Vérifier si le mail n'est pas déjà utilisé
             $email = strtolower($dto->email);
             $existingUser = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email]);
-            if ($existingUser) throw new Exception("L'email est déjà utilisé par un compte existant.", 400);
+            if ($existingUser) throw new ConflictHttpException("L'email est déjà utilisé par un compte existant.");
             $user->setEmail($email);
         }
 
@@ -197,7 +202,7 @@ class AuthService
         /** @var Entite|null $unite */
         $unite = $this->em->getRepository(Entite::class)->find($dto->unite_id);
         if (!$unite || !$unite->isLaboratoire()) {
-            throw new Exception("L'unité spécifiée est invalide.", 400);
+            throw new NotFoundHttpException("L'unité spécifiée n'existe pas.");
         }
 
         $user->setUnite($unite);
@@ -331,13 +336,13 @@ class AuthService
             ->findOneBy(['token' => $token, 'type' => 'email_validation']);
 
         if (!$verif) {
-            throw new \InvalidArgumentException("Token de vérification invalide.", 403);
+            throw new BadRequestHttpException("Le token de vérification est invalide.");
         }
 
         if ($verif->getExpiration() < new DateTime()) {
             $this->em->remove($verif);
             $this->em->flush();
-            throw new \InvalidArgumentException("Token de vérification expiré.", 403);
+            throw new GoneHttpException("Le token de vérification a expiré.");
         }
 
         $user = $verif->getUtilisateur();
@@ -405,11 +410,11 @@ class AuthService
         /** @var UtilisateurVerification $user */
         $user = $this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => $token, 'type' => 'password_reset']);
         if (!$user) {
-            throw new Exception("Token invalide ou expiré.", 403);
+            throw new BadRequestHttpException("Le token de réinitialisation est invalide.");
         }
 
         if ($user->getExpiration() < new \DateTime()) {
-            throw new Exception("Token invalide ou expiré.", 403);
+            throw new GoneHttpException("Le token de réinitialisation a expiré.");
         }
 
         $user->getUtilisateur()->setMdp($this->passwordHasher->hashPassword($user->getUtilisateur(), $mdp));
