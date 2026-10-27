@@ -226,7 +226,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour créer une plateforme",
+            static::getContainer()->get('translator')->trans('exception.permission.creer_plateforme'),
             $data['message']
         );
 
@@ -362,7 +362,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Le nom officiel de la plateforme est requis.",
+            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_nom_obligatoire'),
             $data['message']
         );
 
@@ -389,7 +389,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Aucune année de saisie n'a été trouvée.",
+            static::getContainer()->get('translator')->trans('exception.not_found.annee_saisie'),
             $data['message']
         );
 
@@ -8118,7 +8118,7 @@ class PlateformeControllerTest extends WebTestCase
         $creationResponse = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertEquals(
-            "Vous n'avez pas les droits pour supprimer cette plateforme.",
+            static::getContainer()->get('translator')->trans('exception.permission.supprimer_plateforme'),
             $creationResponse['message']
         );
 

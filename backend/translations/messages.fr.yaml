@@ -3,6 +3,12 @@ exception:
         non_connecte: "Vous devez être connecté pour accéder à cette ressource."
         email_non_verifie: "Votre adresse e-mail n'a pas été vérifiée. Veuillez vérifier votre boîte de réception pour un e-mail de confirmation."
         compte_non_approuve: "Votre compte n'a pas encore été approuvé par un administrateur. Vous recevrez une notification dès que votre compte sera approuvé."
+        refresh_token_invalide_ou_expire: "Le refresh token est invalide ou expiré."
+        inscription_reussie: "Inscription réussie. Un email de vérification vous a été envoyé."
+        inscription_reussie_attente_approbation: "Inscription réussie. Un email de vérification vous sera envoyé lorsque votre compte sera approuvé par un administrateur."
+        email_verifie: "Votre adresse e-mail a été vérifiée avec succès."
+        envoie_email_reinitialisation_mdp: "Un email de réinitialisation de mot de passe a été envoyé à l'adresse spécifiée."
+        reinitialisation_mdp_reussie: "Votre mot de passe a été réinitialisé avec succès."
 
     permission:
         voir_utilisateur_en_attente_validation: "Vous n'avez pas les droits pour voir les utilisateurs en attente de validation."
@@ -27,9 +33,12 @@ exception:
         gerer_delegue_du: "Vous n'avez pas les permissions nécessaires pour gérer le délégué du DU."
         gerer_du: "Vous n'avez pas les permissions nécessaires pour gérer le DU."
         gerer_unite: "Vous n'avez pas les permissions nécessaires pour gérer les unités."
+        annee_saisie_requise: "Vous devez spécifier une année de saisie pour cette action."
+        annee_saisie_invalide: "L'année de saisie doit être au format YYYY"
+        annee_saisie_change: "L'année de saisie a été changée avec succès."
 
     not_found:
-        utilisateur: "Utilisateur non trouvé."
+        utilisateur: "Utilisateur nresponsableon trouvé."
         plateforme: "Plateforme non trouvée."
         unite: "Unité non trouvée."
         employeur: "Employeur non trouvé."
@@ -45,9 +54,25 @@ exception:
         numero_page_invalide: "Le numéro de page doit être un entier positif."
         corps_obligatoire: "Le corps est obligatoire."
         grade_obligatoire: "Le grade est obligatoire."
+        token_obligatoire: "Le token de vérification est obligatoire."
         grade_non_appartient_corps: "Le grade spécifié n'appartient pas au corps spécifié."
         token_invalide: "Le token de vérification est invalide."
         hmt_invalide: "Le HMT fourni est invalide."
+        header_authorization_manquant: "L'en-tête Authorization est manquant."
+        header_authorization_invalide: "L'en-tête Authorization est invalide."
+        refresh_token_manquant: "Le refresh token est manquant."
+        email_obligatoire: "L'adresse e-mail est obligatoire."
+        mdp_obligatoire: "Le mot de passe est obligatoire."
+        mdp_compromise: "Le mot de passe fourni est compromis. Veuillez choisir un mot de passe plus sûr."
+        plateforme_id_manquant: "L'identifiant de la plateforme est manquant."
+        champs_manquants: "Certains champs obligatoires sont manquants."
+        champs_approbation_boolean: "Le champ 'approbation' doit être un booléen."
+        utilisateur_id_manquant: "L'identifiant de l'utilisateur est manquant."
+        plateforme_nom_manquant: "Le nom officiel de la plateforme est requis."
+        plateforme_status_manquant: "Le status de l'enregistrement de la plateforme est requis."
+        tag_id_manquant: "L'identifiant du tag est requis."
+        unite_id_manquant: "L'identifiant de l'unité est requis."
+        operation_invalide: "Opération invalide. L'opération doit être 'add' ou 'remove'."
 
     gone:
         token_expire: "Le token de vérification a expiré."
@@ -59,3 +84,48 @@ exception:
         harvester_existe: "Un harvester avec ce host existe déjà."
         utilisateur_pas_tag: "L'utilisateur n'a pas ce tag."
         utilisateur_deja_tag: "L'utilisateur a déjà ce tag."
+
+    rate_limit:
+        tentative_connexion: "Trop de tentatives de connexion. Veuillez réessayer plus tard."
+        tentative_inscription: "Trop de tentatives d'inscription. Veuillez réessayer plus tard."
+        tentative_verification: "Trop de tentatives de vérification. Veuillez réessayer plus tard."
+        tentative_mdp_oublie: "Trop de tentatives de réinitialisation de mot de passe. Veuillez réessayer plus tard."
+
+    admin:
+        utilisateur_approuve: "Utilisateur approuvé avec succès."
+        utilisateur_refuse: "Utilisateur refusé avec succès."
+        responsable_plateforme_modifie: "Les responsables de la plateforme ont été modifiés avec succès."
+        utilisateur_modifie: "L'utilisateur a été modifié avec succès."
+
+    harvester:
+        client_id_obligatoire: "Le clientId est obligatoire."
+        host_obligatoire: "Le host est obligatoire."
+        harvester_cree: "Harvester créé avec succès."
+        harvester_supprime: "Harvester supprimé avec succès."
+        harvester_id_obligatoire: "L'identifiant du harvester est obligatoire."
+        utilisateur_machine_cree: "Utilisateur machine créé avec succès."
+        utilisateur_machine_supprime: "Utilisateur machine supprimé avec succès."
+        hmt_obligatoire: "Le HMT est obligatoire."
+        hmt_supprime: "HMT supprimé avec succès."
+        hmt_ajoute: "HMT ajouté avec succès."
+        client_id_secret_id_obligatoire: "Le clientId et le secretId sont obligatoires."
+        client_id_secret_id_obligatoire_plateforme_id: "Le clientId, le secretId et l'identifiant de la plateforme sont obligatoires."
+
+    osu:
+        dir_osu_change: "Le directeur de l'OSU a été changé avec succès."
+        delegue_osu_ajoute: "Le délégué de l'OSU a été ajouté avec succès."
+        delegue_osu_retire: "Le délégué de l'OSU a été retiré avec succès."
+
+    plateforme:
+        plateforme_supprimee: "Plateforme supprimée avec succès."
+        plateforme_cree: "Plateforme créée avec succès."
+        plateforme_sauvegardee: "Plateforme sauvegardée avec succès."
+        plateforme_prete_validation: "La plateforme est prête pour la validation."
+
+    tags:
+        tags_modifies_succes: "Les tags ont été modifiés avec succès."
+
+    unite:
+        du_modifie: "Le DU a été modifié avec succès."
+        delegue_unite_ajoute: "Le délégué du directeur de l'unité a été ajouté avec succès."
+        delegue_unite_retire: "Le délégué du directeur de l'unité a été retiré avec succès."

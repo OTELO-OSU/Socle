@@ -338,7 +338,7 @@ class AuthService
             ->findOneBy(['token' => $token, 'type' => 'email_validation']);
 
         if (!$verif) {
-            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.token_invalide'));
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('exception.bad_request.token_invalide'));
         }
 
         if ($verif->getExpiration() < new DateTime()) {
@@ -412,7 +412,7 @@ class AuthService
         /** @var UtilisateurVerification $user */
         $user = $this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => $token, 'type' => 'password_reset']);
         if (!$user) {
-            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.token_invalide'));
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('exception.bad_request.token_invalide'));
         }
 
         if ($user->getExpiration() < new \DateTime()) {

@@ -105,7 +105,7 @@ class AuthControllerTest extends WebTestCase
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test667@example.com:password')]
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "L'email ou le mot de passe est incorrect.",
@@ -127,7 +127,7 @@ class AuthControllerTest extends WebTestCase
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password667')]
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             "L'email ou le mot de passe est incorrect.",
@@ -152,10 +152,10 @@ class AuthControllerTest extends WebTestCase
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas validé votre adresse email. Un email de validation vous a été renvoyé.",
+            static::getContainer()->get('translator')->trans('exception.auth.email_non_verifie'),
             $data['message']
         );
 
@@ -177,10 +177,10 @@ class AuthControllerTest extends WebTestCase
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('test@example.com:password')]
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Votre compte n'a pas encore été admis. Un email vous sera envoyé une fois votre compte activé.",
+            static::getContainer()->get('translator')->trans('exception.auth.compte_non_approuve'),
             $data['message']
         );
 
@@ -406,7 +406,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.inscription_reussie'), $data['message']);
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
@@ -447,7 +447,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email de validation a été envoyé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.inscription_reussie'), $data['message']);
         $this->assertNotNull($user->getUtilisateurVerification());
         $this->assertEquals('email_validation', $user->getUtilisateurVerification()->getType());
         $this->assertNotNull($user->getUtilisateurVerification()->getToken());
@@ -469,7 +469,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Aucun refresh token n\'a été envoyé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.bad_request.refresh_token_manquant'), $data['message']);
 
         self::assertEmailCount(0);
     }
@@ -489,10 +489,10 @@ class AuthControllerTest extends WebTestCase
             []
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.refresh_token_invalide_ou_expire'), $data['message']);
 
         self::assertEmailCount(0);
     }
@@ -521,10 +521,10 @@ class AuthControllerTest extends WebTestCase
             []
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Le refresh token est invalide ou expiré.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.refresh_token_invalide_ou_expire'), $data['message']);
 
         self::assertEmailCount(0);
     }
@@ -646,7 +646,7 @@ class AuthControllerTest extends WebTestCase
             ])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Token d\'inscription OAuth invalide.', $data['message']);
@@ -682,7 +682,7 @@ class AuthControllerTest extends WebTestCase
             ])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
         $this->assertEquals('Token d\'inscription OAuth expiré.', $data['message']);
@@ -721,7 +721,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Inscription réussie. Un email vous sera envoyé quand votre compte sera activé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.inscription_reussie_attente_approbation'), $data['message']);
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'inscriptionoauth@example.com']);
         $this->assertNotNull($user);
         $this->assertEquals('Test', $user->getPrenom());
@@ -746,7 +746,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Le token est requis.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.bad_request.token_obligatoire'), $data['message']);
     }
 
     public function testVerificationMailFauxToken(): void
@@ -762,10 +762,13 @@ class AuthControllerTest extends WebTestCase
             \json_encode(['token' => 'token_invalide'])
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Token de vérification invalide.', $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('exception.bad_request.token_invalide'),
+            $data['message']
+        );
     }
 
     public function testVerificationMailTokenExpire(): void
@@ -787,10 +790,13 @@ class AuthControllerTest extends WebTestCase
             \json_encode(['token' => 'token_expirée'])
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(410);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Token de vérification expiré.', $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('exception.gone.token_expire'),
+            $data['message']
+        );
         $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token_expirée']));
     }
 
@@ -835,7 +841,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Email vérifié avec succès.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.email_verifie'), $data['message']);
         $this->assertNull($this->em->getRepository(UtilisateurVerification::class)->findOneBy(['token' => 'token']));
 
         self::assertEmailCount(3);
@@ -871,7 +877,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.envoie_email_reinitialisation_mdp'), $data['message']);
         self::assertEmailCount(0);
     }
 
@@ -891,7 +897,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Un email avec les instructions pour réinitialiser votre mot de passe a été envoyé.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.envoie_email_reinitialisation_mdp'), $data['message']);
         self::assertEmailCount(1);
 
         self::assertNotNull($this->em->getRepository(Utilisateur::class)->findOneBy(['email' => 'test@example.com'])->getUtilisateurVerification());
@@ -922,7 +928,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Votre mot de passe a été réinitialisé avec succès.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.auth.reinitialisation_mdp_reussie'), $data['message']);
         self::assertEmailCount(0);
     }
 
@@ -951,7 +957,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Le token est requis.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.bad_request.token_obligatoire'), $data['message']);
         self::assertEmailCount(0);
     }
 
@@ -980,7 +986,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Le mot de passe est requis.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.bad_request.mdp_obligatoire'), $data['message']);
         self::assertEmailCount(0);
     }
 
@@ -1006,10 +1012,13 @@ class AuthControllerTest extends WebTestCase
             \json_encode(['token' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'mdp' => 'newpassword'])
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(401);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('exception.bad_request.token_invalide'),
+            $data['message']
+        );
         self::assertEmailCount(0);
     }
 
@@ -1035,10 +1044,13 @@ class AuthControllerTest extends WebTestCase
             \json_encode(['token' => 'token', 'mdp' => 'newpassword'])
         );
 
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(410);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Token invalide ou expiré.', $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('exception.gone.token_expire'),
+            $data['message']
+        );
         self::assertEmailCount(0);
     }
 
@@ -1071,7 +1083,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(429);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals('Trop de tentatives de connexion. Veuillez réessayer plus tard.', $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.rate_limit.tentative_connexion'), $data['message']);
         $factory->create('127.0.0.1')->reset();
         self::assertEmailCount(0);
     }

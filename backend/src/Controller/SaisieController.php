@@ -2,17 +2,16 @@
 
 namespace App\Controller;
 
-use App\Service\ExcelService;
-use App\Service\OsuService;
 use App\Service\SaisieService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class SaisieController extends AbstractController
 {
-    public function __construct(private readonly SaisieService $ss) {}
+    public function __construct(private readonly SaisieService $ss, private readonly TranslatorInterface $translator) {}
 
     #[Route('/saisie', methods: ['GET'])]
     public function getOsuAdmin(): Response
@@ -29,16 +28,16 @@ final class SaisieController extends AbstractController
         $annee = $json['annee'] ?? null;
 
         if (!$annee) {
-            return $this->json(['message' => "L'année de saisie est requise."], 400);
+            return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_requise')], 400);
         }
 
         //Vérifier qu'il y a 4 chiffres
         if (!preg_match('/^\d{4}$/', $annee)) {
-            return $this->json(['message' => "L'année de saisie doit être au format YYYY."], 400);
+            return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_invalide')], 400);
         }
 
         $this->ss->setAnneeDeSaisie($annee);
 
-        return $this->json(['message' => "L'année de saisie a été changée."], 200);
+        return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_change')], 200);
     }
 }

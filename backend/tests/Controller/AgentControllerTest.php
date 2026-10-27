@@ -244,7 +244,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires.",
+            static::getContainer()->get('translator')->trans('exception.permission.soumettre_au_du'),
             $data['message']
         );
 
@@ -279,7 +279,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires pour créer un utilisateur dans cette unité.",
+            static::getContainer()->get('translator')->trans('exception.permission.soumettre_au_du'),
             $data['message']
         );
 
@@ -394,7 +394,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Champs requis manquants",
+            static::getContainer()->get('translator')->trans('exception.bad_request.champs_manquants'),
             $data['message']
         );
 
@@ -429,7 +429,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Champs requis manquants",
+            static::getContainer()->get('translator')->trans('exception.bad_request.champs_manquants'),
             $data['message']
         );
 
@@ -465,7 +465,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Le champ approbation doit être un booléen.",
+            static::getContainer()->get('translator')->trans('exception.bad_request.champs_approbation_boolean'),
             $data['message']
         );
 
@@ -501,7 +501,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires.",
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -540,7 +540,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires pour approuver cet utilisateur.",
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -581,7 +581,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'utilisateur à bien été approuvé",
+            static::getContainer()->get('translator')->trans('exception.admin.utilisateur_approuve'),
             $data['message']
         );
 
@@ -623,7 +623,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires.",
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -665,7 +665,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires pour refuser cet utilisateur.",
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -706,7 +706,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'utilisateur à bien été refusé",
+            static::getContainer()->get('translator')->trans('exception.admin.utilisateur_refuse'),
             $data['message']
         );
 
@@ -810,7 +810,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
         $this->assertSame('Test Modifié', $data['utilisateur']['nom']);
 
         self::assertEmailCount(0);
@@ -848,7 +848,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
         $this->assertSame('test@example.com', $data['utilisateur']['email']);
 
         $userRefreshed = $this->em->find(Utilisateur::class, $this->user->getId());
@@ -900,7 +900,10 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('droits', strtolower($data['message']));
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -937,7 +940,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
         $this->assertSame('newemail@example.com', $data['utilisateur']['email']);
 
         self::assertEmailCount(0);
@@ -978,7 +981,10 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1018,7 +1024,10 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1061,7 +1070,10 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Vous n\'avez pas les droits nécessaires.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1086,7 +1098,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Champs requis manquants', $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.bad_request.champs_manquants'), $data['message']);
 
         self::assertEmailCount(0);
     }
@@ -1121,9 +1133,12 @@ class AgentControllerTest extends WebTestCase
             json_encode($payload, JSON_THROW_ON_ERROR)
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('utilisateur', strtolower($data['message']));
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1158,9 +1173,12 @@ class AgentControllerTest extends WebTestCase
             json_encode($payload, JSON_THROW_ON_ERROR)
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('unité', strtolower($data['message']));
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.not_found.unite'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1196,7 +1214,10 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertStringContainsString('corps', strtolower($data['message']));
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.corps_obligatoire'),
+            $data['message']
+        );
 
         self::assertEmailCount(0);
     }
@@ -1233,7 +1254,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame('Modification effectuée avec succès', $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
         $this->assertTrue($data['utilisateur']['doctorant']);
 
         self::assertEmailCount(0);

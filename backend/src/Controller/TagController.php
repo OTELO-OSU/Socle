@@ -7,10 +7,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class TagController extends AbstractController
 {
-    public function __construct(private readonly TagService $ts) {}
+    public function __construct(private readonly TagService $ts, private readonly TranslatorInterface $translator) {}
 
     #[Route('/tags', methods: ['GET'])]
     public function getTags(): Response
@@ -33,7 +34,7 @@ final class TagController extends AbstractController
     {
         $plateformeId = $request->query->get('id', null);
         if ($plateformeId === null) {
-            return $this->json(['message' => 'L\'ID de la plateforme est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_id_manquant')], 400);
         }
         $tags = $this->ts->getPlateformeTags($plateformeId);
 
@@ -47,10 +48,10 @@ final class TagController extends AbstractController
         $plateformeId = $json['id'] ?? null;
         $tagIds = $json['tagIds'] ?? [];
         if ($plateformeId === null) {
-            return $this->json(['message' => 'L\'ID de la plateforme est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_id_manquant')], 400);
         }
         $this->ts->tagPlateforme($plateformeId, $tagIds);
-        return $this->json(['message' => 'Tags modifiés avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
     }
 
     #[Route('/utilisateur/tags', methods: ['POST'])]
@@ -60,13 +61,13 @@ final class TagController extends AbstractController
         $utilisateurId = $json['id'] ?? null;
         $tagId = $json['tagId'] ?? null;
         if ($utilisateurId === null) {
-            return $this->json(['message' => 'L\'ID de l\'utilisateur est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.utilisateur_id_manquant')], 400);
         }
         if ($tagId === null) {
-            return $this->json(['message' => 'L\'ID du tag est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.tag_id_manquant')], 400);
         }
         $this->ts->tagUtilisateur($utilisateurId, $tagId);
-        return $this->json(['message' => 'Tag ajouté avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
     }
 
     #[Route('/utilisateur/tags', methods: ['DELETE'])]
@@ -76,12 +77,12 @@ final class TagController extends AbstractController
         $utilisateurId = $json['id'] ?? null;
         $tagId = $json['tagId'] ?? null;
         if ($utilisateurId === null) {
-            return $this->json(['message' => 'L\'ID de l\'utilisateur est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.utilisateur_id_manquant')], 400);
         }
         if ($tagId === null) {
-            return $this->json(['message' => 'L\'ID du tag est requis.'], 400);
+            return $this->json(['message' => $this->translator->trans('exception.bad_request.tag_id_manquant')], 400);
         }
         $this->ts->untagUtilisateur($utilisateurId, $tagId);
-        return $this->json(['message' => 'Tag supprimé avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Security;
 
 use App\Entity\Utilisateur;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -23,11 +23,11 @@ class UserChecker implements UserCheckerInterface
         }
 
         if (!$user->isEmailValide()) {
-            throw new AccessDeniedException($this->translator->trans('exception.auth.email_non_verifie'));
+            throw new AccessDeniedHttpException($this->translator->trans('exception.auth.email_non_verifie'));
         }
 
         if (!$user->isAdmis()) {
-            throw new AccessDeniedException($this->translator->trans('exception.auth.compte_non_approuve'));
+            throw new AccessDeniedHttpException($this->translator->trans('exception.auth.compte_non_approuve'));
         }
     }
 

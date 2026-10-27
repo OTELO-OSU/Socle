@@ -189,7 +189,7 @@ class TagControllerTest extends WebTestCase
 
         $this->client->request('GET', '/api/tags');
 
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseStatusCodeSame(503);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame('Le service central des tags a retourné une erreur HTTP 500.', $data['message']);
     }
@@ -242,7 +242,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Accès refusé.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_tag'),
+            $data['message']
+        );
     }
 
     public function testGetPlateformeTagsSuccessAdmin(): void
@@ -279,7 +282,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Accès refusé.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.permission.gerer_tag'),
+            $data['message']
+        );
     }
 
     public function testGetPlateformeTagsRetourne404SiPlateformeIntrouvable(): void
@@ -294,7 +300,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Plateforme non trouvée.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.not_found.plateforme'),
+            $data['message']
+        );
     }
 
     public function testGetPlateformeTagsRetourneErreurSiIdAbsent(): void
@@ -303,7 +312,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID de la plateforme est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testPatchPlateformeTagsSuccessAjouteEtSupprime(): void
@@ -329,7 +341,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Tags modifiés avec succès.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            $data['message']
+        );
 
         $this->em->clear();
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
@@ -353,9 +368,12 @@ class TagControllerTest extends WebTestCase
             ], JSON_THROW_ON_ERROR)
         );
 
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Plateforme non trouvée.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.not_found.plateforme'),
+            $data['message']
+        );
     }
 
     public function testPatchPlateformeTagsRetourneErreurSiIdAbsent(): void
@@ -373,7 +391,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID de la plateforme est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testPatchPlateformeTagsAvecTagIdsNullVideLesTags(): void
@@ -398,7 +419,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Tags modifiés avec succès.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            $data['message']
+        );
 
         $this->em->clear();
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
@@ -424,7 +448,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Tag ajouté avec succès.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            $data['message']
+        );
 
         $saved = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
             'utilisateur' => $user,
@@ -448,7 +475,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID de l'utilisateur est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testPostUtilisateurTagsRetourneErreurSiTagIdAbsent(): void
@@ -468,7 +498,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID du tag est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.tag_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testDeleteUtilisateurTagsSuccessAdmin(): void
@@ -491,7 +524,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame('Tag supprimé avec succès.', $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            $data['message']
+        );
 
         $saved = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
             'utilisateur' => $user,
@@ -515,7 +551,10 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID de l'utilisateur est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testDeleteUtilisateurTagsRetourneErreurSiTagIdAbsent(): void
@@ -535,6 +574,9 @@ class TagControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame("L'ID du tag est requis.", $data['message']);
+        $this->assertSame(
+            static::getContainer()->get('translator')->trans('exception.bad_request.tag_id_manquant'),
+            $data['message']
+        );
     }
 }

@@ -10,7 +10,8 @@ use App\Security\Voter\PlateformeVoter;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\Finder\Exception\xception;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -25,7 +26,7 @@ class AdminService
 
     function getUtilisateurEnAttenteDeValidation(): array
     {
-        if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new AccessDeniedException($this->translator->trans('exception.permission.voir_utilisateur_en_attente_validation'));
+        if (!$this->security->isGranted('GetEnAttenteDeValidation', Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.voir_utilisateur_en_attente_validation'));
 
         $users = $this->em->getRepository(Utilisateur::class)->findBy(["admis" => false, "emailValide" => true, "attenteApprobationDU" => false]);
         return array_map(function (Utilisateur $user) {
@@ -45,7 +46,7 @@ class AdminService
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
-        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException($this->translator->trans('exception.permission.approuver_utilisateur'));
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.approuver_utilisateur'));
 
         $user->setAdmis(true);
 
@@ -80,7 +81,7 @@ class AdminService
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "admis" => false, "emailValide" => true]);
         if (!$user) throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
 
-        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedException($this->translator->trans('exception.permission.refuser_utilisateur'), 403);
+        if (!$this->security->isGranted(UtilisateurVoter::APPROUVER, $user)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.refuser_utilisateur'));
 
         $this->mailerService->sendEmailToUser(
             $user->getEmail(),
@@ -101,7 +102,7 @@ class AdminService
         }
 
         // Vérification des permissions de l'utilisateur
-        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, $plateforme)) throw new AccessDeniedException($this->translator->trans('exception.permission.affilier_plateforme'));
+        if (!$this->security->isGranted(PlateformeVoter::AFFILIER, $plateforme)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.affilier_plateforme'));
 
         $plateforme = $plateforme->getLastHistorique();
         if (!$plateforme) {
