@@ -166,7 +166,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'email est requis.",
+            static::getContainer()->get('translator')->trans('auth.exception.email_obligatoire'),
             $data['message']
         );
 
@@ -189,7 +189,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur non trouvé.",
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -212,7 +212,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur non trouvé.",
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -238,7 +238,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour approuver cet utilisateur",
+            static::getContainer()->get('translator')->trans('admin.exception.approuver_utilisateur'),
             $data['message']
         );
 
@@ -264,7 +264,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour refuser cet utilisateur",
+            static::getContainer()->get('translator')->trans('admin.exception.refuser_utilisateur'),
             $data['message']
         );
 
@@ -393,7 +393,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'ID de la plateforme est requis.",
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_id_manquant'),
             $data['message']
         );
 
@@ -416,7 +416,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "La plateforme n'existe pas.",
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_nf'),
             $data['message']
         );
 
@@ -442,7 +442,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -468,7 +468,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Responsables de la plateforme mis à jour avec succès.",
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -516,7 +516,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Responsables de la plateforme mis à jour avec succès.",
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -578,7 +578,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -623,7 +623,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Responsables de la plateforme mis à jour avec succès.",
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -677,7 +677,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme.",
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -699,7 +699,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits pour voir les utilisateurs en attente de validation",
+            static::getContainer()->get('translator')->trans('admin.exception.voir_utilisateur_en_attente_validation'),
             $data['message']
         );
 

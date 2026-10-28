@@ -4,21 +4,21 @@ namespace App\Service;
 
 use App\Entity\Harvester;
 use App\Entity\Plateforme;
-use App\Entity\PlateformeHistorique;
-use App\Entity\PlateformeHistoriquePersonnel;
-use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurMachine;
-use App\Entity\UtilisateurTags;
-use App\Security\Voter\PlateformeVoter;
 use App\Security\Voter\UtilisateurVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HarvesterService
 {
@@ -27,13 +27,14 @@ class HarvesterService
         private readonly HttpClientInterface $httpClient,
         private readonly Security $security,
         private readonly SerializerInterface $serializerInterface,
-        private readonly PlateformeService $plateformeService
+        private readonly PlateformeService $plateformeService,
+        private readonly TranslatorInterface $translator
     ) {}
 
     public function creerHMT(string $clientId): array
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour créer un utilisateur machine.", 403);
-        $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId]) && throw new Exception("Un utilisateur machine avec ce clientId existe déjà.", 400);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
+        $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId]) && throw new ConflictHttpException($this->translator->trans('harvester.exception.utilisateur_machine_existe'));
 
         $clientSecret = bin2hex(random_bytes(16));
 
@@ -61,17 +62,17 @@ class HarvesterService
 
     public function ajoutHMT(string $hmt): void
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour créer un utilisateur machine.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
 
         $parts = explode(".", $hmt);
         if (count($parts) !== 3) {
-            throw new Exception("HMT invalide.", 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.hmt_invalide'));
         }
         $clientId = base64_decode($parts[0]);
         $clientSecret = base64_decode($parts[1]);
         $host = base64_decode($parts[2]);
 
-        $this->em->getRepository(Harvester::class)->findOneBy(["host" => $host]) && throw new Exception("Un harvester avec ce host existe déjà.", 400);
+        $this->em->getRepository(Harvester::class)->findOneBy(["host" => $host]) && throw new ConflictHttpException($this->translator->trans('harvester.exception.harvester_existe'));
 
         $harvester = new Harvester();
         $harvester->setClientId($clientId);
@@ -83,7 +84,7 @@ class HarvesterService
 
     public function getPlateformeListePourMachine(string $clientId, string $clientSecret): array
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new Exception("Harvester non trouvé.", 404);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
@@ -101,7 +102,7 @@ class HarvesterService
 
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new Exception("Harvester non trouvé.", 404);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
         $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
@@ -117,7 +118,7 @@ class HarvesterService
         }
 
         if (empty(array_intersect($arrayIds, $arrayTags))) {
-            throw new Exception("Accès refusé.", 403);
+            throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.acces_plateforme'));
         } else {
             return $plateformeMere;
         }
@@ -169,7 +170,7 @@ class HarvesterService
         $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
 
         if (!$harvester) {
-            throw new Exception("Harvester non trouvé.", 404);
+            throw new NotFoundHttpException($this->translator->trans('harvester.exception.harvester_nf'));
         }
 
         try {
@@ -180,19 +181,19 @@ class HarvesterService
                 ],
             ]);
         } catch (Exception $e) {
-            throw new Exception("Erreur lors de la requête HTTP.", 500);
+            throw new ServiceUnavailableHttpException(null, "Erreur lors de la récupération des données de la plateforme.");
         }
 
         $plateforme = $response->toArray(false);
 
         if (!is_array($plateforme)) {
-            throw new Exception("Erreur lors de la requête HTTP.", 500);
+            throw new ServiceUnavailableHttpException(null, "Erreur lors de la récupération des données de la plateforme.");
         }
 
         $tagsPlateforme = $plateforme['tags_ids'] ?? [];
         $bool = $this->verifPermission($tagsPlateforme);
         if (!$bool) {
-            throw new Exception("Accès refusé.", 403);
+            throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.acces_plateforme'));
         }
 
         return $plateforme;
@@ -200,9 +201,9 @@ class HarvesterService
 
     function supprimerHMT(int $id): void
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un utilisateur machine.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
 
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new Exception("Harvester non trouvé.", 404);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
         $userMachine = $harvester->getUtilisateur();
         $this->em->remove($harvester);
         $this->em->remove($userMachine);
@@ -211,22 +212,22 @@ class HarvesterService
 
     function supprimerHarvester(int $id): void
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un harvester.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
 
-        $harvester = $this->em->getRepository(Harvester::class)->find($id) ?? throw new Exception("Harvester non trouvé.", 404);
+        $harvester = $this->em->getRepository(Harvester::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('harvester.exception.harvester_nf'));
         $this->em->remove($harvester);
         $this->em->flush();
     }
 
     function getHarvesters(): array
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un harvester.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
         return $this->em->getRepository(Harvester::class)->findAll();
     }
 
     function getHMT(): array
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new Exception("Vous n'avez pas les droits pour supprimer un harvester.", 403);
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
         return $this->em->getRepository(UtilisateurMachine::class)->findAll();
     }
 

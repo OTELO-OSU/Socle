@@ -6,11 +6,13 @@ use App\Service\UniteService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class UniteController extends AbstractController
 {
-    public function __construct(private readonly UniteService $us) {}
+    public function __construct(private readonly UniteService $us, private readonly TranslatorInterface $translator) {}
 
     #[Route('/unite', methods: ['GET'])]
     public function getUnite(): Response
@@ -24,10 +26,10 @@ final class UniteController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!\is_array($data) || !\array_key_exists('unite_id', $data) || !\array_key_exists('utilisateur_id', $data)) {
-            return $this->json(['message' => 'Champs requis manquants'], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
         $this->us->modifierDirecteurUnite($data['unite_id'], $data['utilisateur_id']);
-        return $this->json(['message' => 'Directeur de l\'unité modifié avec succès'], 200);
+        return $this->json(['message' => $this->translator->trans('unite.succes.du_modifie')], 200);
     }
 
     #[Route('/unite/directeur/delegue', methods: ['PATCH'])]
@@ -36,12 +38,12 @@ final class UniteController extends AbstractController
         $json = json_decode($request->getContent(), true);
         $operation = $json['operation'] ?? null;
         if (!in_array($operation, ['add', 'remove'])) {
-            return $this->json(['message' => "Opération invalide. L'opération doit être 'add' ou 'remove'."], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.operation_invalide'));
         }
 
         $uniteId = $json['unite_id'] ?? null;
         if (!$uniteId) {
-            return $this->json(['message' => "L'ID de l'unité est requis."], 400);
+            throw new BadRequestHttpException($this->translator->trans('unite.exception.unite_id_manquant'));
         }
 
         $message = null;
@@ -49,15 +51,15 @@ final class UniteController extends AbstractController
         $id = $json['delegue_directeur_unite_id'] ?? null;
 
         if (!$id) {
-            return $this->json(['message' => "L'ID de l'utilisateur est requis."], 400);
+            throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.utilisateur_id_manquant'));
         }
 
         if ($operation === 'add') {
             $this->us->ajouterDelegue($id, $uniteId);
-            $message = "Le délégué du directeur de l'OSU a été ajouté.";
+            $message = $this->translator->trans('unite.succes.delegue_unite_ajoute');
         } else {
             $this->us->supprimerDelegue($id, $uniteId);
-            $message = "Le délégué du directeur de l'OSU a été retiré.";
+            $message = $this->translator->trans('unite.succes.delegue_unite_retire');
         }
 
         return $this->json(['message' => $message], 200);

@@ -2,39 +2,57 @@
 
 namespace App\EventListener;
 
+use App\Exception\auth\RefreshTokenInvalideOuExpireException;
+use App\Exception\auth\UtilisateurMailNonValideException;
+use App\Exception\auth\UtilisateurNonAdmisException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener(event: KernelEvents::EXCEPTION)]
 class ExceptionListener
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {}
     public function __invoke(ExceptionEvent $event): void
     {
         $e = $event->getThrowable();
 
-        if ($e instanceof HttpExceptionInterface) {
-            $status = $e->getStatusCode();
-        } elseif ($e instanceof SerializerExceptionInterface) {
-            // JSON mal formé
-            $status = 400;
+        if ($e instanceof UtilisateurMailNonValideException) {
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => $this->translator->trans('auth.exception.email_non_verifie'),
+                ], 401)
+            );
+        } else if ($e instanceof UtilisateurNonAdmisException) {
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => $this->translator->trans('auth.exception.compte_non_approuve'),
+                ], 401)
+            );
+        } else if ($e instanceof RefreshTokenInvalideOuExpireException) {
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => $this->translator->trans('auth.exception.refresh_token_invalide_ou_expire'),
+                ], 401)
+            );
+        } else if ($e instanceof HttpExceptionInterface) {
+            $event->setResponse(
+                new JsonResponse([
+                    'message' => $e->getMessage(),
+                ], $e->getStatusCode())
+            );
         } else {
-            $status = $this->sanitizeStatus($e->getCode());
+            $event->setResponse(
+                dd($e),
+                new JsonResponse([
+                    'message' => 'Une erreur est survenue.',
+                ], 500)
+            );
         }
-
-        $event->setResponse(
-            new JsonResponse([
-                'message' => $e->getMessage(),
-            ], $status)
-        );
-    }
-
-    private function sanitizeStatus($code): int
-    {
-        $code = (int) $code;
-        return ($code >= 400 && $code <= 599) ? $code : 500;
     }
 }

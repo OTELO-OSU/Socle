@@ -150,7 +150,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Utilisateur non trouvé.",
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -173,7 +173,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits.",
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -196,7 +196,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Le directeur de l'OSU a été changé.",
+            static::getContainer()->get('translator')->trans('osu.succes.dir_osu_change'),
             $data['message']
         );
 
@@ -222,7 +222,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits.",
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -246,7 +246,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits.",
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -268,7 +268,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Opération invalide. L'opération doit être 'add' ou 'remove'.",
+            static::getContainer()->get('translator')->trans('exception.bad_request.operation_invalide'),
             $data['message']
         );
 
@@ -291,7 +291,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Opération invalide. L'opération doit être 'add' ou 'remove'.",
+            static::getContainer()->get('translator')->trans('exception.bad_request.operation_invalide'),
             $data['message']
         );
 
@@ -314,7 +314,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'ID de l'utilisateur est requis.",
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
             $data['message']
         );
 
@@ -337,7 +337,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits.",
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -360,7 +360,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Le délégué du directeur de l'OSU a été ajouté.",
+            static::getContainer()->get('translator')->trans('osu.succes.delegue_osu_ajoute'),
             $data['message']
         );
 
@@ -386,7 +386,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Le délégué du directeur de l'OSU a été ajouté.",
+            static::getContainer()->get('translator')->trans('osu.succes.delegue_osu_ajoute'),
             $data['message']
         );
 
@@ -412,7 +412,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits.",
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 

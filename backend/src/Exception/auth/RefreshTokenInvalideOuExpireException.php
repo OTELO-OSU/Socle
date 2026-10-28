@@ -2,8 +2,15 @@
 
 namespace App\Exception\auth;
 
-class RefreshTokenInvalideOuExpireException extends \Exception
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+
+class RefreshTokenInvalideOuExpireException extends UnauthorizedHttpException
 {
-    protected $message = "Le refresh token est invalide ou expiré.";
-    protected $code = 403;
+    public function __construct()
+    {
+        parent::__construct(
+            'Bearer',
+            "Le refresh token est invalide ou expiré."
+        );
+    }
 }
