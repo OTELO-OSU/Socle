@@ -2,8 +2,14 @@
 
 namespace App\Exception\auth;
 
-class UtilisateurMailNonValideException extends \Exception
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+class UtilisateurMailNonValideException extends AccessDeniedHttpException
 {
-    protected $message = "Vous n'avez pas validé votre adresse email. Un email de validation vous a été renvoyé.";
-    protected $code = 403;
+    public function __construct()
+    {
+        parent::__construct(
+            "Vous n'avez pas validé votre adresse email. Un email de validation vous a été renvoyé."
+        );
+    }
 }

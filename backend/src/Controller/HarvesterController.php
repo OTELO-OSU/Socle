@@ -7,18 +7,20 @@ use App\Service\HarvesterService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class HarvesterController extends AbstractController
 {
-    public function __construct(private readonly HarvesterService $hs, private readonly ExcelService $es) {}
+    public function __construct(private readonly HarvesterService $hs, private readonly ExcelService $es, private readonly TranslatorInterface $translator) {}
 
     #[Route('/harvester/hmt', methods: ['GET'])]
     public function gethmt(Request $request): Response
     {
         $clientId = $request->query->get('clientId', null);
         if ($clientId === null) {
-            return $this->json(['message' => 'Le clientId est requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_obligatoire'));
         }
         $hmt = $this->hs->creerHMT($clientId);
 
@@ -31,12 +33,12 @@ final class HarvesterController extends AbstractController
         $json = json_decode($request->getContent(), true);
         $clientId = $json['clientId'] ?? null;
         if ($clientId === null) {
-            return $this->json(['message' => 'Le clientId est requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_obligatoire'));
         }
 
         $this->hs->supprimerHMT($clientId);
 
-        return $this->json(['message' => 'HMT supprimé avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('harvester.succes.utilisateur_machine_supprime')], 200);
     }
 
     #[Route('/harvester', methods: ['DELETE'])]
@@ -45,12 +47,12 @@ final class HarvesterController extends AbstractController
         $json = json_decode($request->getContent(), true);
         $harvesterId = $json['harvesterId'] ?? null;
         if ($harvesterId === null) {
-            return $this->json(['message' => 'Le harvesterId est requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.harvester_id_obligatoire'));
         }
 
         $this->hs->supprimerHarvester($harvesterId);
 
-        return $this->json(['message' => 'Harvester supprimé avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('harvester.succes.harvester_supprime')], 200);
     }
 
     #[Route('/harvester/hmt', methods: ['POST'])]
@@ -59,10 +61,10 @@ final class HarvesterController extends AbstractController
         $json = json_decode($request->getContent(), true);
         $hmt = $json['hmt'] ?? null;
         if ($hmt === null) {
-            return $this->json(['message' => 'Le hmt est requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.hmt_obligatoire'));
         }
         $this->hs->ajoutHMT($hmt);
-        return $this->json(['message' => 'HMT ajouté avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('harvester.succes.hmt_ajoute')], 200);
     }
 
     #[Route('/harvester/plateformes', methods: ['GET'])]
@@ -89,7 +91,7 @@ final class HarvesterController extends AbstractController
         $clientId = $request->query->get('clientId', null);
         $clientSecret = $request->query->get('clientSecret', null);
         if ($clientId === null || $clientSecret === null) {
-            return $this->json(['message' => 'Le clientId et le clientSecret sont requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_secret_id_obligatoire'));
         }
         $plateformes = $this->hs->getPlateformeListePourMachine($clientId, $clientSecret);
 
@@ -103,7 +105,7 @@ final class HarvesterController extends AbstractController
         $clientId = $request->query->get('clientId', null);
         $clientSecret = $request->query->get('clientSecret', null);
         if ($plateformeId === null || $clientId === null || $clientSecret === null) {
-            return $this->json(['message' => 'L\'ID de la plateforme, le clientId et le clientSecret sont requis.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_secret_id_obligatoire_plateforme_id'));
         }
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 

@@ -2,34 +2,19 @@
 
 namespace App\Service;
 
-use App\Entity\RefreshToken;
-use App\Entity\Utilisateur;
-use App\Exception\auth\EmailOuMotDePasseIncorrectException;
-use App\Exception\auth\RefreshTokenInvalideOuExpireException;
-use App\Exception\auth\UtilisateurFedeExistePasException;
-use App\Exception\auth\UtilisateurMailNonValideException;
-use App\Exception\auth\UtilisateurNonAdmisException;
-use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class OrcidService
 {
     public function __construct(
-        private readonly EntityManagerInterface $em,
-        private readonly JWTTokenManagerInterface $tokenManager,
-        private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly HttpClientInterface $c,
         private readonly ParameterBagInterface $params
     ) {}
 
     /**
-     * @throws Exception
+     * @throws UnauthorizedHttpException
      * @return string access token ORCID
      */
     function getTokenOrcid(string $code)
@@ -48,7 +33,7 @@ class OrcidService
             ],
         ]);
 
-        if ($response->getStatusCode() == 401) throw new Exception("La requête vers ORCID n'a pas abboutie.", 500);
+        if ($response->getStatusCode() == 401) throw new UnauthorizedHttpException('Bearer', "La requête vers ORCID n'a pas abboutie.");
 
         $data = $response->toArray();
 

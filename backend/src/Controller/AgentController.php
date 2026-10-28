@@ -6,11 +6,13 @@ use App\Service\AgentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class AgentController extends AbstractController
 {
-    public function __construct(private readonly AgentService $utilisateurService) {}
+    public function __construct(private readonly AgentService $utilisateurService, private readonly TranslatorInterface $translator) {}
 
     #[Route('/agent', methods: ['GET'])]
     public function getUtilisateurs(Request $request): Response
@@ -33,7 +35,7 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data["type_contrat_id"]) || !isset($data["unite_id"])) {
-            return $this->json(['message' => 'Champs requis manquants'], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         $corps = null;
@@ -97,21 +99,21 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['utilisateurId']) || !isset($data['approbation'])) {
-            return $this->json(['message' => 'Champs requis manquants'], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         if (!is_bool($data['approbation'])) {
-            return $this->json(['message' => 'Le champ approbation doit être un booléen.'], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_approbation_boolean'));
         }
 
         $approbation = $data['approbation'];
 
         if ($approbation) {
             $this->utilisateurService->approuveUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
-            return $this->json(['message' => 'L\'utilisateur à bien été approuvé',], 200);
+            return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_approuve')], 200);
         } else {
             $this->utilisateurService->refusUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
-            return $this->json(['message' => 'L\'utilisateur à bien été refusé',], 200);
+            return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_refuse')], 200);
         }
     }
 
@@ -120,7 +122,7 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['utilisateur_id']) || !isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data['type_contrat_id']) || !isset($data['unite_id'])) {
-            return $this->json(['message' => 'Champs requis manquants'], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         $corps = null;
@@ -183,6 +185,6 @@ final class AgentController extends AbstractController
             $section
         );
 
-        return $this->json(['message' => 'Modification effectuée avec succès', 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
+        return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_modifie'), 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }
 }

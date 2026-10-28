@@ -7,15 +7,23 @@ use App\Service\PlateformeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PlateformeController extends AbstractController
 {
-    public function __construct(private readonly PlateformeService $plateformeService, private readonly SerializerInterface $serializer, private readonly ValidatorInterface $validator) {}
+    public function __construct(
+        private readonly PlateformeService $plateformeService,
+        private readonly SerializerInterface $serializer,
+        private readonly ValidatorInterface $validator,
+        private readonly TranslatorInterface $translator
+    ) {}
 
     #[Route('/plateforme', methods: ['GET'])]
     public function getPlateforme(Request $request): Response
@@ -39,7 +47,7 @@ final class PlateformeController extends AbstractController
         $this->plateformeService->supprimerPlateforme($id);
 
         return $this->json(
-            ['message' => 'Plateforme supprimée avec succès.'],
+            ['message' => $this->translator->trans('plateforme.succes.plateforme_supprimee')],
             200,
         );
     }
@@ -63,10 +71,12 @@ final class PlateformeController extends AbstractController
     public function creerPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['nom'])) return $this->json(['message' => 'Le nom officiel de la plateforme est requis.'], 400);
+        if (!isset($json['nom'])) {
+            throw new BadRequestHttpException($this->translator->trans('plateforme.exception.plateforme_nom_manquant'));
+        }
 
         $plt = $this->plateformeService->creerPlateforme($json['nom']);
-        return $this->json(['message' => 'Plateforme créée avec succès.', 'plateforme_id' => $plt->getId()], 201);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_cree'), 'plateforme_id' => $plt->getId()], 201);
     }
 
     #[Route('/plateforme', methods: ['PUT'])]
@@ -74,7 +84,9 @@ final class PlateformeController extends AbstractController
     {
         $json = json_decode($request->getContent(), true);
         $brouillon = $json['brouillon'] ?? null;
-        if ($brouillon === null) return $this->json(['message' => 'Le statut de l\'enregistrement doit être spécifié'], 400);
+        if ($brouillon === null) {
+            throw new BadRequestHttpException($this->translator->trans('plateforme.exception.plateforme_status_manquant'));
+        }
         unset($json['brouillon']);
 
         $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
@@ -104,14 +116,14 @@ final class PlateformeController extends AbstractController
         }
 
         $this->plateformeService->sauvegarderPlateforme($dto, $brouillon);
-        return $this->json(['message' => 'Plateforme sauvegardée avec succès.'], 200);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_sauvegardee')], 200);
     }
 
     #[Route('/plateforme/test', methods: ['POST'])]
     public function testPlateforme(Request $request): Response
     {
         if (!$this->getUser()) {
-            return $this->json(['message' => 'Accès refusé.'], 403);
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
         }
 
         $json = json_decode($request->getContent(), true);
@@ -137,6 +149,6 @@ final class PlateformeController extends AbstractController
             return $this->json(['messageArray' => $errorMessages], 400);
         }
 
-        return $this->json(['message' => 'La plateforme est prête à être validée.'], 200);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_prete_validation')], 200);
     }
 }

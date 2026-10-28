@@ -125,7 +125,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Champs requis manquants",
+            static::getContainer()->get('translator')->trans('exception.bad_request.champs_manquants'),
             $data['message']
         );
 
@@ -148,7 +148,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Champs requis manquants",
+            static::getContainer()->get('translator')->trans('exception.bad_request.champs_manquants'),
             $data['message']
         );
 
@@ -171,7 +171,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Vous n'avez pas les droits nécessaires.",
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_du'),
             $data['message']
         );
 
@@ -191,10 +191,10 @@ class UniteControllerTest extends WebTestCase
             json_encode(['utilisateur_id' => $this->user->getId(), 'unite_id' => -1])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'unité spécifiée est invalide.",
+            static::getContainer()->get('translator')->trans('unite.exception.unite_nf'),
             $data['message']
         );
 
@@ -214,10 +214,10 @@ class UniteControllerTest extends WebTestCase
             json_encode(['utilisateur_id' => -1, 'unite_id' => $this->unite->getId()])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "L'utilisateur spécifié est invalide.",
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -240,7 +240,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Directeur de l'unité modifié avec succès",
+            static::getContainer()->get('translator')->trans('unite.succes.du_modifie'),
             $data['message']
         );
 
@@ -263,7 +263,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Directeur de l'unité modifié avec succès",
+            static::getContainer()->get('translator')->trans('unite.succes.du_modifie'),
             $data['message']
         );
 
@@ -292,7 +292,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            "Opération invalide. L'opération doit être 'add' ou 'remove'.",
+            static::getContainer()->get('translator')->trans('exception.bad_request.operation_invalide'),
             $data['message']
         );
     }
@@ -315,7 +315,10 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("L'ID de l'unité est requis.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.exception.unite_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueSansDelegueId(): void
@@ -336,7 +339,10 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("L'ID de l'utilisateur est requis.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueInterdit(): void
@@ -358,7 +364,10 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("Vous n'avez pas les droits nécessaires.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_delegue_du'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueUniteInconnue(): void
@@ -378,9 +387,12 @@ class UniteControllerTest extends WebTestCase
             ])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("L'unité spécifiée est invalide.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.exception.unite_nf'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueUserInconnu(): void
@@ -400,9 +412,12 @@ class UniteControllerTest extends WebTestCase
             ])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("L'utilisateur spécifié est invalide.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueAjouterSucces(): void
@@ -424,7 +439,10 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("Le délégué du directeur de l'OSU a été ajouté.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_ajoute'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueRetirerSucces(): void
@@ -446,7 +464,10 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("Le délégué du directeur de l'OSU a été retiré.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_retire'),
+            $data['message']
+        );
     }
 
     public function testSwitchDelegueDirecteurPeutAjouter(): void
@@ -472,6 +493,9 @@ class UniteControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals("Le délégué du directeur de l'OSU a été ajouté.", $data['message']);
+        $this->assertEquals(
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_ajoute'),
+            $data['message']
+        );
     }
 }
