@@ -22,3 +22,13 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN echo "0 3 * * * cd /var/www/backend && php bin/console app:clear-token-expire" > /etc/crontabs/www-data
+
+RUN chmod 600 /etc/crontabs/www-data
+
+COPY docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["php-fpm"]
