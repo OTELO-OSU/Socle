@@ -15,11 +15,33 @@ class MailerService
         private LoggerInterface $logger
     ) {}
 
+    private function escape(?string $value): string
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+    }
+
+    /** N'autorise que les liens http(s) afin d'empêcher les URL de type javascript: */
+    private function isSafeUrl(?string $url): bool
+    {
+        if (!$url) {
+            return false;
+        }
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+
+        return \is_string($scheme) && \in_array(strtolower($scheme), ['http', 'https'], true);
+    }
+
     function generateMailBody($bodyMessage, $bodyLink, $footerMessage = "")
     {
-        if ($bodyLink) {
+        // Le message est échappé puis les retours à la ligne sont conservés
+        $safeMessage = nl2br($this->escape($bodyMessage));
+        $safeFooter = $this->escape($footerMessage);
+        $safeLogo = $this->escape($this->params->get('email_logo'));
+
+        if ($this->isSafeUrl($bodyLink)) {
+            $safeLink = $this->escape($bodyLink);
             $bodyButton = <<<EOF
-            <a href="$bodyLink" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #fff; text-decoration: none; border-radius: 5px;">Cliquez ici</a>
+            <a href="$safeLink" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #fff; text-decoration: none; border-radius: 5px;">Cliquez ici</a>
             EOF;
         } else {
             $bodyButton = "";
@@ -64,10 +86,10 @@ class MailerService
     <body>
         <div class="container">
             <div class="card">
-                <img src="{$this->params->get('email_logo')}" alt="Logo" style="width: auto; max-height: 256px;">
-                <p>$bodyMessage</p>
+                <img src="$safeLogo" alt="Logo" style="width: auto; max-height: 256px;">
+                <p>$safeMessage</p>
                 $bodyButton
-                <div class="footer">$footerMessage</div>
+                <div class="footer">$safeFooter</div>
             </div>
         </div>
     </body>
