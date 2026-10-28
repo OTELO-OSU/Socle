@@ -123,7 +123,7 @@ class HarvesterControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('exception.harvester.client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
     }
 
     public function testGetDetailPlateformeHarvesterRetourne200AvecDetail(): void

@@ -362,7 +362,7 @@ class PlateformeControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_nom_obligatoire'),
+            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_nom_manquant'),
             $data['message']
         );
 
