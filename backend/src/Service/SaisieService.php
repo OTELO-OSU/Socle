@@ -20,7 +20,7 @@ class SaisieService
 
     public function getAnneeDeSaisieEnCours()
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_ANNEE_SAISIE, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_annee_saisie'));
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_ANNEE_SAISIE, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('annee_saisie.exception.gerer_annee_saisie'));
 
         $anneeSaisieEnCours = $this->em->getRepository(Parametre::class)->findOneBy(['cle' => 'annee_saisie_en_cours']);
 
@@ -29,7 +29,7 @@ class SaisieService
 
     public function setAnneeDeSaisie(?int $anneeSaisie)
     {
-        if (!$this->security->isGranted(UtilisateurVoter::GERER_ANNEE_SAISIE, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_annee_saisie'));
+        if (!$this->security->isGranted(UtilisateurVoter::GERER_ANNEE_SAISIE, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('annee_saisie.exception.gerer_annee_saisie'));
 
         $anneeSaisieEnCours = $this->em->getRepository(Parametre::class)->findOneBy(['cle' => 'annee_saisie_en_cours']);
         if (!$anneeSaisieEnCours) {

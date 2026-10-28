@@ -150,7 +150,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -173,7 +173,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_osu'),
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -196,7 +196,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.osu.dir_osu_change'),
+            static::getContainer()->get('translator')->trans('osu.succes.dir_osu_change'),
             $data['message']
         );
 
@@ -222,7 +222,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_osu'),
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -246,7 +246,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_osu'),
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -314,7 +314,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
             $data['message']
         );
 
@@ -337,7 +337,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_osu'),
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 
@@ -360,7 +360,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.osu.delegue_osu_ajoute'),
+            static::getContainer()->get('translator')->trans('osu.succes.delegue_osu_ajoute'),
             $data['message']
         );
 
@@ -386,7 +386,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.osu.delegue_osu_ajoute'),
+            static::getContainer()->get('translator')->trans('osu.succes.delegue_osu_ajoute'),
             $data['message']
         );
 
@@ -412,7 +412,7 @@ class OsuControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_osu'),
+            static::getContainer()->get('translator')->trans('osu.exception.gerer_osu'),
             $data['message']
         );
 

@@ -28,7 +28,7 @@ final class UniteController extends AbstractController
             return $this->json(['message' => $this->translator->trans('exception.bad_request.champs_manquants')], 400);
         }
         $this->us->modifierDirecteurUnite($data['unite_id'], $data['utilisateur_id']);
-        return $this->json(['message' => $this->translator->trans('exception.unite.du_modifie')], 200);
+        return $this->json(['message' => $this->translator->trans('unite.succes.du_modifie')], 200);
     }
 
     #[Route('/unite/directeur/delegue', methods: ['PATCH'])]
@@ -42,7 +42,7 @@ final class UniteController extends AbstractController
 
         $uniteId = $json['unite_id'] ?? null;
         if (!$uniteId) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.unite_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('unite.exception.unite_id_manquant')], 400);
         }
 
         $message = null;
@@ -50,15 +50,15 @@ final class UniteController extends AbstractController
         $id = $json['delegue_directeur_unite_id'] ?? null;
 
         if (!$id) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.utilisateur_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('utilisateur.exception.utilisateur_id_manquant')], 400);
         }
 
         if ($operation === 'add') {
             $this->us->ajouterDelegue($id, $uniteId);
-            $message = $this->translator->trans('exception.unite.delegue_unite_ajoute');
+            $message = $this->translator->trans('unite.succes.delegue_unite_ajoute');
         } else {
             $this->us->supprimerDelegue($id, $uniteId);
-            $message = $this->translator->trans('exception.unite.delegue_unite_retire');
+            $message = $this->translator->trans('unite.succes.delegue_unite_retire');
         }
 
         return $this->json(['message' => $message], 200);

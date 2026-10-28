@@ -69,10 +69,10 @@ class ExcelService
         $platform = $this->em->getRepository(Plateforme::class)->find($platformId);
         if (!$platform) {
             // Lève une exception si la plateforme n'existe pas
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+            throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
         }
         if (!$this->security->isGranted(PlateformeVoter::EXPORTER, $platform)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.exporter'));
+            throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.exporter'));
         }
 
         $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);

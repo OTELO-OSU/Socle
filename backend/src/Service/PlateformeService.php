@@ -49,7 +49,7 @@ class PlateformeService
     function getAnneeDeSaisieEnCours(): int
     {
         $anneeSaisieEnCours = $this->em->getRepository(Parametre::class)->findOneBy(["cle" => "annee_saisie_en_cours"]);
-        if (!$anneeSaisieEnCours) throw new NotFoundHttpException($this->translator->trans('exception.not_found.annee_saisie'));
+        if (!$anneeSaisieEnCours) throw new NotFoundHttpException($this->translator->trans('annee_saisie.exception.annee_saisie_nf'));
         return (int) $anneeSaisieEnCours->getValeur();
     }
 
@@ -206,7 +206,7 @@ class PlateformeService
 
     function creerPlateforme(string $nom)
     {
-        if (!$this->security->isGranted('CREER', Plateforme::class)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.creer_plateforme'));
+        if (!$this->security->isGranted('CREER', Plateforme::class)) throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.creer_plateforme'));
 
         //* Si il est DU ou DU délégué on force le laboratoire
         // Vérifier si il est Admin Dir Osu ou Dir Osu delegue
@@ -237,9 +237,9 @@ class PlateformeService
     function supprimerPlateforme(int $plateformeId)
     {
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
-        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
 
-        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.supprimer_plateforme'));
+        if (!$this->security->isGranted('SUPPRIMER', $plateforme)) throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.supprimer_plateforme'));
 
         $this->em->remove($plateforme);
         $this->em->flush();
@@ -249,16 +249,16 @@ class PlateformeService
     {
         /** @var Plateforme $plateforme * */
         $plateforme = $this->em->getRepository(Plateforme::class)->find($dto->id);
-        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+        if (!$plateforme) throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
 
         $plateformeHisto = $plateforme->getLastHistorique();
-        if (!$plateformeHisto) throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
-        if (!$this->security->isGranted('SAUVEGARDER', $plateformeHisto->getPlateforme())) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarder_plateforme'));
+        if (!$plateformeHisto) throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
+        if (!$this->security->isGranted('SAUVEGARDER', $plateformeHisto->getPlateforme())) throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.sauvegarder_plateforme'));
 
         $anneeDto = $plateformeHisto->getAnnee();
         $anneeSaisie = $this->getAnneeDeSaisieEnCours();
 
-        if ($anneeDto > $anneeSaisie) throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarde_annee_saisie_superieur'));
+        if ($anneeDto > $anneeSaisie) throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.sauvegarde_annee_saisie_superieur'));
 
         if ($anneeDto < $anneeSaisie) {
             $dernierRecord = $this->em->getRepository(PlateformeHistorique::class)->findOneBy(['plateforme' => $plateformeHisto->getPlateforme()], ['annee' => 'DESC']);
@@ -266,7 +266,7 @@ class PlateformeService
                 //* Duplication du record pour l'année de saisie en cours
                 $plateformeHisto = $this->dupliquerPlateformeHistorique($plateformeHisto);
             } else {
-                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.sauvegarde_annee_saisie_inferieur'));
+                throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.sauvegarde_annee_saisie_inferieur'));
             }
         }
         $plateformeHisto = $this->ecraserChampsPlateforme($plateformeHisto, $dto);
@@ -494,12 +494,12 @@ class PlateformeService
 
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+            throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
         }
 
         if (!$byPassSecurity) {
             if (!$this->security->isGranted(PlateformeVoter::LIRE, $plateforme)) {
-                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.acces_plateforme'));
+                throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.acces_plateforme'));
             }
         }
 
@@ -509,7 +509,7 @@ class PlateformeService
         );
 
         if (!$dernierHistorique) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+            throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
         }
 
         $plateforme = $dernierHistorique->getPlateforme();

@@ -45,7 +45,7 @@ final class PlateformeController extends AbstractController
         $this->plateformeService->supprimerPlateforme($id);
 
         return $this->json(
-            ['message' => $this->translator->trans('exception.plateforme.plateforme_supprimee')],
+            ['message' => $this->translator->trans('plateforme.succes.plateforme_supprimee')],
             200,
         );
     }
@@ -69,10 +69,10 @@ final class PlateformeController extends AbstractController
     public function creerPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['nom'])) return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_nom_manquant')], 400);
+        if (!isset($json['nom'])) return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_nom_manquant')], 400);
 
         $plt = $this->plateformeService->creerPlateforme($json['nom']);
-        return $this->json(['message' => $this->translator->trans('exception.plateforme.plateforme_cree'), 'plateforme_id' => $plt->getId()], 201);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_cree'), 'plateforme_id' => $plt->getId()], 201);
     }
 
     #[Route('/plateforme', methods: ['PUT'])]
@@ -80,7 +80,7 @@ final class PlateformeController extends AbstractController
     {
         $json = json_decode($request->getContent(), true);
         $brouillon = $json['brouillon'] ?? null;
-        if ($brouillon === null) return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_status_manquant')], 400);
+        if ($brouillon === null) return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_status_manquant')], 400);
         unset($json['brouillon']);
 
         $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
@@ -110,14 +110,14 @@ final class PlateformeController extends AbstractController
         }
 
         $this->plateformeService->sauvegarderPlateforme($dto, $brouillon);
-        return $this->json(['message' => $this->translator->trans('exception.plateforme.plateforme_sauvegardee')], 200);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_sauvegardee')], 200);
     }
 
     #[Route('/plateforme/test', methods: ['POST'])]
     public function testPlateforme(Request $request): Response
     {
         if (!$this->getUser()) {
-            return $this->json(['message' => $this->translator->trans('exception.auth.non_connecte')], 401);
+            return $this->json(['message' => $this->translator->trans('auth.exception.non_connecte')], 401);
         }
 
         $json = json_decode($request->getContent(), true);
@@ -143,6 +143,6 @@ final class PlateformeController extends AbstractController
             return $this->json(['messageArray' => $errorMessages], 400);
         }
 
-        return $this->json(['message' => $this->translator->trans('exception.plateforme.plateforme_prete_validation')], 200);
+        return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_prete_validation')], 200);
     }
 }

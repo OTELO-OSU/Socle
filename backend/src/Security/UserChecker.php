@@ -23,11 +23,11 @@ class UserChecker implements UserCheckerInterface
         }
 
         if (!$user->isEmailValide()) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.auth.email_non_verifie'));
+            throw new AccessDeniedHttpException($this->translator->trans('auth.exception.email_non_verifie'));
         }
 
         if (!$user->isAdmis()) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.auth.compte_non_approuve'));
+            throw new AccessDeniedHttpException($this->translator->trans('auth.exception.compte_non_approuve'));
         }
     }
 

@@ -109,10 +109,10 @@ final class AgentController extends AbstractController
 
         if ($approbation) {
             $this->utilisateurService->approuveUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
-            return $this->json(['message' => $this->translator->trans('exception.admin.utilisateur_approuve')], 200);
+            return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_approuve')], 200);
         } else {
             $this->utilisateurService->refusUtilisateurEnAttenteDeValidationDuDu($data['utilisateurId']);
-            return $this->json(['message' => $this->translator->trans('exception.admin.utilisateur_refuse')], 200);
+            return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_refuse')], 200);
         }
     }
 
@@ -184,6 +184,6 @@ final class AgentController extends AbstractController
             $section
         );
 
-        return $this->json(['message' => $this->translator->trans('exception.admin.utilisateur_modifie'), 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
+        return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_modifie'), 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);
     }
 }

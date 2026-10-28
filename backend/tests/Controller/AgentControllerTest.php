@@ -244,7 +244,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.soumettre_au_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.soumettre_au_du'),
             $data['message']
         );
 
@@ -279,7 +279,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.soumettre_au_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.soumettre_au_du'),
             $data['message']
         );
 
@@ -501,7 +501,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -540,7 +540,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -581,7 +581,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.admin.utilisateur_approuve'),
+            static::getContainer()->get('translator')->trans('admin.succes.utilisateur_approuve'),
             $data['message']
         );
 
@@ -623,7 +623,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -665,7 +665,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_utilisateur_soumission_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_utilisateur_soumission_du'),
             $data['message']
         );
 
@@ -706,7 +706,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.admin.utilisateur_refuse'),
+            static::getContainer()->get('translator')->trans('admin.succes.utilisateur_refuse'),
             $data['message']
         );
 
@@ -810,7 +810,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('admin.succes.utilisateur_modifie'), $data['message']);
         $this->assertSame('Test Modifié', $data['utilisateur']['nom']);
 
         self::assertEmailCount(0);
@@ -848,7 +848,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('admin.succes.utilisateur_modifie'), $data['message']);
         $this->assertSame('test@example.com', $data['utilisateur']['email']);
 
         $userRefreshed = $this->em->find(Utilisateur::class, $this->user->getId());
@@ -901,7 +901,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.modifier_utilisateur'),
             $data['message']
         );
 
@@ -940,7 +940,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('admin.succes.utilisateur_modifie'), $data['message']);
         $this->assertSame('newemail@example.com', $data['utilisateur']['email']);
 
         self::assertEmailCount(0);
@@ -982,7 +982,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.modifier_utilisateur'),
             $data['message']
         );
 
@@ -1025,7 +1025,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.modifier_utilisateur'),
             $data['message']
         );
 
@@ -1071,7 +1071,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.modifier_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.modifier_utilisateur'),
             $data['message']
         );
 
@@ -1136,7 +1136,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -1176,7 +1176,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.not_found.unite'),
+            static::getContainer()->get('translator')->trans('unite.exception.unite_nf'),
             $data['message']
         );
 
@@ -1215,7 +1215,7 @@ class AgentControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.corps_obligatoire'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.corps_obligatoire'),
             $data['message']
         );
 
@@ -1254,7 +1254,7 @@ class AgentControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('exception.admin.utilisateur_modifie'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('admin.succes.utilisateur_modifie'), $data['message']);
         $this->assertTrue($data['utilisateur']['doctorant']);
 
         self::assertEmailCount(0);

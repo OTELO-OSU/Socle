@@ -166,7 +166,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.email_obligatoire'),
+            static::getContainer()->get('translator')->trans('auth.exception.email_obligatoire'),
             $data['message']
         );
 
@@ -189,7 +189,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -212,7 +212,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -238,7 +238,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.approuver_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.approuver_utilisateur'),
             $data['message']
         );
 
@@ -264,7 +264,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.refuser_utilisateur'),
+            static::getContainer()->get('translator')->trans('admin.exception.refuser_utilisateur'),
             $data['message']
         );
 
@@ -393,7 +393,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_id_manquant'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_id_manquant'),
             $data['message']
         );
 
@@ -416,7 +416,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.plateforme'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_nf'),
             $data['message']
         );
 
@@ -442,7 +442,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.affilier_plateforme'),
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -468,7 +468,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.admin.responsable_plateforme_modifie'),
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -516,7 +516,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.admin.responsable_plateforme_modifie'),
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -578,7 +578,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.affilier_plateforme'),
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -623,7 +623,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.admin.responsable_plateforme_modifie'),
+            static::getContainer()->get('translator')->trans('admin.succes.responsable_plateforme_modifie'),
             $data['message']
         );
 
@@ -677,7 +677,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.affilier_plateforme'),
+            static::getContainer()->get('translator')->trans('admin.exception.affilier_plateforme'),
             $data['message']
         );
 
@@ -699,7 +699,7 @@ class AdminControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.voir_utilisateur_en_attente_validation'),
+            static::getContainer()->get('translator')->trans('admin.exception.voir_utilisateur_en_attente_validation'),
             $data['message']
         );
 

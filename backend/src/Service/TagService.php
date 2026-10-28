@@ -71,7 +71,7 @@ class TagService
 
     public function getTagsAdmin(): array
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('tag.exception.gerer_tag'));
         $tags = $this->getTags();
 
         $tagsAvecAffiliationArray = [];
@@ -110,9 +110,9 @@ class TagService
     public function getPlateformeTags(int $plateformeId): array
     {
         /** @var Plateforme $plateforme */
-        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+        $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId) ?? throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('tag.exception.gerer_tag'));
 
         $plateformeTags = $plateforme->getPlateformeTags();
         $arrayTags = [];
@@ -155,10 +155,10 @@ class TagService
     {
         $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
         if (!$plateforme) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.plateforme'));
+            throw new NotFoundHttpException($this->translator->trans('plateforme.exception.plateforme_nf'));
         }
 
-        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
+        $this->security->isGranted(PlateformeVoter::TAG, $plateforme) || throw new AccessDeniedHttpException($this->translator->trans('tag.exception.gerer_tag'));
 
         $currentTags = $plateforme->getPlateformeTags();
         foreach ($currentTags as $currentTag) {
@@ -192,11 +192,11 @@ class TagService
 
     public function tagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('tag.exception.gerer_tag'));
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf'));
         }
 
         $tagsCentral = $this->getTags();
@@ -206,7 +206,7 @@ class TagService
             throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
         }
 
-        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException($this->translator->trans('exception.conflict.utilisateur_deja_tag'));
+        $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException($this->translator->trans('tag.exception.utilisateur_deja_tag'));
 
         $userTag = new UtilisateurTags($utilisateur, $tagId);
         $this->em->persist($userTag);
@@ -215,17 +215,17 @@ class TagService
 
     public function untagUtilisateur(int $userId, int $tagId): void
     {
-        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_tag'));
+        $this->security->isGranted(UtilisateurVoter::TAG_UTILISATEUR, Utilisateur::class) || throw new AccessDeniedHttpException($this->translator->trans('tag.exception.gerer_tag'));
         /** @var Utilisateur $utilisateur */
         $utilisateur = $this->em->getRepository(Utilisateur::class)->find($userId);
         if (!$utilisateur) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf'));
         }
 
         $tag = $this->em->getRepository(UtilisateurTags::class)->findOneBy([
             'utilisateur' => $utilisateur,
             'tagId' => $tagId,
-        ]) or throw new ConflictHttpException($this->translator->trans('exception.conflict.utilisateur_pas_tag'));
+        ]) or throw new ConflictHttpException($this->translator->trans('tag.exception.utilisateur_pas_tag'));
 
         $this->em->remove($tag);
         $this->em->flush();

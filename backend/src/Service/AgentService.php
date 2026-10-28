@@ -37,19 +37,19 @@ class AgentService
         if ($this->security->getUser() === null) {
             throw new UnauthorizedHttpException(
                 'Bearer',
-                $this->translator->trans('exception.auth.non_connecte')
+                $this->translator->trans('auth.exception.non_connecte')
             );
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::LISTER, Utilisateur::class)) {
             throw new AccessDeniedHttpException(
-                $this->translator->trans('exception.permission.lister_utilisateur')
+                $this->translator->trans('admin.exception.lister_utilisateur')
             );
         }
 
         if ($page < 1) {
             throw new BadRequestHttpException(
-                $this->translator->trans('exception.bad_request.numero_page_invalide')
+                $this->translator->trans('plateforme.exception.numero_page_invalide')
             );
         }
 
@@ -148,13 +148,13 @@ class AgentService
     function creationUtilisateurParResponsable(string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section): Utilisateur
     {
         if (!$this->security->isGranted("SOUMETTRE_AU_DU", Utilisateur::class)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.soumettre_au_du'));
+            throw new AccessDeniedHttpException($this->translator->trans('unite.exception.soumettre_au_du'));
         }
 
         // On vérifie l'unité
         $u = $this->em->getRepository(Entite::class)->find($unite);
         if (!$u || !$u->isLaboratoire()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.unite'));
+            throw new NotFoundHttpException($this->translator->trans('unite.exception.unite_nf'));
         }
 
         if (!$this->security->isGranted("SOUMETTRE_AU_DU_DANS_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -162,21 +162,21 @@ class AgentService
             $sender = $this->security->getUser();
             $uSender = $sender->getUnite();
             if ($uSender != $u) {
-                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.soumettre_au_du'));
+                throw new AccessDeniedHttpException($this->translator->trans('unite.exception.soumettre_au_du'));
             }
         }
 
         // Vérification de l'employeur
         $employeurEntity = $this->em->getRepository(Entite::class)->find($employeur);
         if (!$employeurEntity || !$employeurEntity->isEmployeur()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.employeur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.employeur_nf'));
         }
 
         // Vérification du type de contrat
         /** @var TypeContrat $typeContratEntity */
         $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
         if (!$typeContratEntity) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.type_contrat'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.type_contrat_nf'));
         }
 
         $corpsEntity = null;
@@ -189,28 +189,28 @@ class AgentService
 
         if (!$doctorant) {
             if ($corps === null) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.corps_obligatoire'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.corps_obligatoire'));
             } else if ($grade === null) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.grade_obligatoire'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.grade_obligatoire'));
             }
 
             // Vérification du corps
             /** @var Corps $corpsEntity */
             $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
             if (!$corpsEntity) {
-                throw new NotFoundHttpException($this->translator->trans('exception.not_found.corps'));
+                throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.corps_nf'));
             }
 
             // Vérfication du grade
             /** @var Grade $gradeEntity */
             $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
             if (!$gradeEntity) {
-                throw new NotFoundHttpException($this->translator->trans('exception.not_found.grade'));
+                throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.grade_nf'));
             }
 
             // Vérification de la liaison corps_grade
             if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.grade_non_appartient_corps'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.grade_non_appartient_corps'));
             }
 
             foreach ($baps_ids ?? [] as $baps_id) {
@@ -236,7 +236,7 @@ class AgentService
                 /** @var Entite $univRattachementEntity */
                 $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
                 if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
-                    throw new NotFoundHttpException($this->translator->trans('exception.not_found.universite_rattachement'));
+                    throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.universite_rattachement_nf'));
                 }
             }
         }
@@ -284,30 +284,30 @@ class AgentService
         /** @var Utilisateur $user */
         $user = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$user) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf'));
         }
 
         if (!$this->security->isGranted(UtilisateurVoter::MODIFIER, $user)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.modifier_utilisateur'));
+            throw new AccessDeniedHttpException($this->translator->trans('admin.exception.modifier_utilisateur'));
         }
 
         // On vérifie l'unité
         $u = $this->em->getRepository(Entite::class)->find($unite);
         if (!$u || !$u->isLaboratoire()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.unite'));
+            throw new NotFoundHttpException($this->translator->trans('unite.exception.unite_nf'));
         }
 
         // Vérification de l'employeur
         $employeurEntity = $this->em->getRepository(Entite::class)->find($employeur);
         if (!$employeurEntity || !$employeurEntity->isEmployeur()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.employeur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.employeur_nf'));
         }
 
         // Vérification du type de contrat
         /** @var TypeContrat $typeContratEntity */
         $typeContratEntity = $this->em->getRepository(TypeContrat::class)->find($typeContrat);
         if (!$typeContratEntity) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.type_contrat'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.type_contrat_nf'));
         }
 
         $corpsEntity = null;
@@ -320,28 +320,28 @@ class AgentService
 
         if (!$doctorant) {
             if ($corps === null) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.corps_obligatoire'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.corps_obligatoire'));
             } else if ($grade === null) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.grade_obligatoire'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.grade_obligatoire'));
             }
 
             // Vérification du corps
             /** @var Corps $corpsEntity */
             $corpsEntity = $this->em->getRepository(Corps::class)->find($corps);
             if (!$corpsEntity) {
-                throw new NotFoundHttpException($this->translator->trans('exception.not_found.corps'));
+                throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.corps_nf'));
             }
 
             // Vérfication du grade
             /** @var Grade $gradeEntity */
             $gradeEntity = $this->em->getRepository(Grade::class)->find($grade);
             if (!$gradeEntity) {
-                throw new NotFoundHttpException($this->translator->trans('exception.not_found.grade'));
+                throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.grade_nf'));
             }
 
             // Vérification de la liaison corps_grade
             if (!$corpsEntity->getGrades()->contains($gradeEntity)) {
-                throw new BadRequestHttpException($this->translator->trans('exception.bad_request.grade_non_appartient_corps'));
+                throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.grade_non_appartient_corps'));
             }
 
             foreach ($baps_ids ?? [] as $baps_id) {
@@ -367,7 +367,7 @@ class AgentService
                 /** @var Entite $univRattachementEntity */
                 $univRattachementEntity = $this->em->getRepository(Entite::class)->find($universiteRattachement);
                 if (!$univRattachementEntity || !$univRattachementEntity->isUniversite()) {
-                    throw new NotFoundHttpException($this->translator->trans('exception.not_found.universite_rattachement'));
+                    throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.universite_rattachement_nf'));
                 }
             }
         }
@@ -405,7 +405,7 @@ class AgentService
     function getUtilisateurEnAttenteDeValidationDuDu(): array
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_EN_ATTENTE_DE_VALIDATION_DU_DU, Utilisateur::class)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_utilisateur_soumission_du'));
+            throw new AccessDeniedHttpException($this->translator->trans('unite.exception.gerer_utilisateur_soumission_du'));
         }
 
         $agents = [];
@@ -431,13 +431,13 @@ class AgentService
     function approuveUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
     {
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_utilisateur_soumission_du'));
+            throw new AccessDeniedHttpException($this->translator->trans('unite.exception.gerer_utilisateur_soumission_du'));
         }
 
         /** @var Utilisateur $agent */
         $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$agent || !$agent->isAttenteApprobationDU()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf'));
         }
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -452,7 +452,7 @@ class AgentService
                 $unites[] = $entite;
             });
             if (!in_array($agentUnite, $unites)) {
-                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_utilisateur_soumission_du'));
+                throw new AccessDeniedHttpException($this->translator->trans('unite.exception.gerer_utilisateur_soumission_du'));
             }
         }
 
@@ -472,13 +472,13 @@ class AgentService
     function refusUtilisateurEnAttenteDeValidationDuDu(int $utilisateurId): void
     {
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU", Utilisateur::class)) {
-            throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_utilisateur_soumission_du'));
+            throw new AccessDeniedHttpException($this->translator->trans('unite.exception.gerer_utilisateur_soumission_du'));
         }
 
         /** @var Utilisateur $agent */
         $agent = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
         if (!$agent || !$agent->isAttenteApprobationDU()) {
-            throw new NotFoundHttpException($this->translator->trans('exception.not_found.utilisateur'));
+            throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf'));
         }
 
         if (!$this->security->isGranted("GERER_EN_ATTENTE_DE_VALIDATION_DU_DU_N_IMPORTE_QUELLE_UNITE", Utilisateur::class)) {
@@ -493,7 +493,7 @@ class AgentService
                 $unites[] = $entite;
             });
             if (!in_array($agentUnite, $unites)) {
-                throw new AccessDeniedHttpException($this->translator->trans('exception.permission.gerer_utilisateur_soumission_du'));
+                throw new AccessDeniedHttpException($this->translator->trans('unite.exception.gerer_utilisateur_soumission_du'));
             }
         }
 

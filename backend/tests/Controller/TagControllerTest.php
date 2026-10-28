@@ -243,7 +243,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_tag'),
+            static::getContainer()->get('translator')->trans('tag.exception.gerer_tag'),
             $data['message']
         );
     }
@@ -283,7 +283,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_tag'),
+            static::getContainer()->get('translator')->trans('tag.exception.gerer_tag'),
             $data['message']
         );
     }
@@ -301,7 +301,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.not_found.plateforme'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_nf'),
             $data['message']
         );
     }
@@ -313,7 +313,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_id_manquant'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_id_manquant'),
             $data['message']
         );
     }
@@ -342,7 +342,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            static::getContainer()->get('translator')->trans('tag.succes.tags_modifies_succes'),
             $data['message']
         );
 
@@ -371,7 +371,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.not_found.plateforme'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_nf'),
             $data['message']
         );
     }
@@ -392,7 +392,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.plateforme_id_manquant'),
+            static::getContainer()->get('translator')->trans('plateforme.exception.plateforme_id_manquant'),
             $data['message']
         );
     }
@@ -420,7 +420,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            static::getContainer()->get('translator')->trans('tag.succes.tags_modifies_succes'),
             $data['message']
         );
 
@@ -449,7 +449,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            static::getContainer()->get('translator')->trans('tag.succes.tags_modifies_succes'),
             $data['message']
         );
 
@@ -476,7 +476,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
             $data['message']
         );
     }
@@ -499,7 +499,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.tag_id_manquant'),
+            static::getContainer()->get('translator')->trans('tag.exception.tag_id_manquant'),
             $data['message']
         );
     }
@@ -525,7 +525,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.tags.tags_modifies_succes'),
+            static::getContainer()->get('translator')->trans('tag.succes.tags_modifies_succes'),
             $data['message']
         );
 
@@ -552,7 +552,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
             $data['message']
         );
     }
@@ -575,7 +575,7 @@ class TagControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame(
-            static::getContainer()->get('translator')->trans('exception.bad_request.tag_id_manquant'),
+            static::getContainer()->get('translator')->trans('tag.exception.tag_id_manquant'),
             $data['message']
         );
     }

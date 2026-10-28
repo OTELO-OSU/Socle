@@ -171,7 +171,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_du'),
             $data['message']
         );
 
@@ -194,7 +194,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.unite'),
+            static::getContainer()->get('translator')->trans('unite.exception.unite_nf'),
             $data['message']
         );
 
@@ -217,7 +217,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
 
@@ -240,7 +240,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.unite.du_modifie'),
+            static::getContainer()->get('translator')->trans('unite.succes.du_modifie'),
             $data['message']
         );
 
@@ -263,7 +263,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.unite.du_modifie'),
+            static::getContainer()->get('translator')->trans('unite.succes.du_modifie'),
             $data['message']
         );
 
@@ -316,7 +316,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.unite_id_manquant'),
+            static::getContainer()->get('translator')->trans('unite.exception.unite_id_manquant'),
             $data['message']
         );
     }
@@ -340,7 +340,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.bad_request.utilisateur_id_manquant'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_id_manquant'),
             $data['message']
         );
     }
@@ -365,7 +365,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_delegue_du'),
+            static::getContainer()->get('translator')->trans('unite.exception.gerer_delegue_du'),
             $data['message']
         );
     }
@@ -390,7 +390,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.unite'),
+            static::getContainer()->get('translator')->trans('unite.exception.unite_nf'),
             $data['message']
         );
     }
@@ -415,7 +415,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.not_found.utilisateur'),
+            static::getContainer()->get('translator')->trans('utilisateur.exception.utilisateur_nf'),
             $data['message']
         );
     }
@@ -440,7 +440,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.unite.delegue_unite_ajoute'),
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_ajoute'),
             $data['message']
         );
     }
@@ -465,7 +465,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.unite.delegue_unite_retire'),
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_retire'),
             $data['message']
         );
     }
@@ -494,7 +494,7 @@ class UniteControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.unite.delegue_unite_ajoute'),
+            static::getContainer()->get('translator')->trans('unite.succes.delegue_unite_ajoute'),
             $data['message']
         );
     }

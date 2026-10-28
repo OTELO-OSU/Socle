@@ -34,7 +34,7 @@ final class TagController extends AbstractController
     {
         $plateformeId = $request->query->get('id', null);
         if ($plateformeId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_id_manquant')], 400);
         }
         $tags = $this->ts->getPlateformeTags($plateformeId);
 
@@ -48,10 +48,10 @@ final class TagController extends AbstractController
         $plateformeId = $json['id'] ?? null;
         $tagIds = $json['tagIds'] ?? [];
         if ($plateformeId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.plateforme_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_id_manquant')], 400);
         }
         $this->ts->tagPlateforme($plateformeId, $tagIds);
-        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
+        return $this->json(['message' => $this->translator->trans('tag.succes.tags_modifies_succes')], 200);
     }
 
     #[Route('/utilisateur/tags', methods: ['POST'])]
@@ -61,13 +61,13 @@ final class TagController extends AbstractController
         $utilisateurId = $json['id'] ?? null;
         $tagId = $json['tagId'] ?? null;
         if ($utilisateurId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.utilisateur_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('utilisateur.exception.utilisateur_id_manquant')], 400);
         }
         if ($tagId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.tag_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('tag.exception.tag_id_manquant')], 400);
         }
         $this->ts->tagUtilisateur($utilisateurId, $tagId);
-        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
+        return $this->json(['message' => $this->translator->trans('tag.succes.tags_modifies_succes')], 200);
     }
 
     #[Route('/utilisateur/tags', methods: ['DELETE'])]
@@ -77,12 +77,12 @@ final class TagController extends AbstractController
         $utilisateurId = $json['id'] ?? null;
         $tagId = $json['tagId'] ?? null;
         if ($utilisateurId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.utilisateur_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('utilisateur.exception.utilisateur_id_manquant')], 400);
         }
         if ($tagId === null) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.tag_id_manquant')], 400);
+            return $this->json(['message' => $this->translator->trans('tag.exception.tag_id_manquant')], 400);
         }
         $this->ts->untagUtilisateur($utilisateurId, $tagId);
-        return $this->json(['message' => $this->translator->trans('exception.tags.tags_modifies_succes')], 200);
+        return $this->json(['message' => $this->translator->trans('tag.succes.tags_modifies_succes')], 200);
     }
 }

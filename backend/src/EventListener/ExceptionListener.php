@@ -25,19 +25,19 @@ class ExceptionListener
         if ($e instanceof UtilisateurMailNonValideException) {
             $event->setResponse(
                 new JsonResponse([
-                    'message' => $this->translator->trans('exception.auth.email_non_verifie'),
+                    'message' => $this->translator->trans('auth.exception.email_non_verifie'),
                 ], 401)
             );
         } else if ($e instanceof UtilisateurNonAdmisException) {
             $event->setResponse(
                 new JsonResponse([
-                    'message' => $this->translator->trans('exception.auth.compte_non_approuve'),
+                    'message' => $this->translator->trans('auth.exception.compte_non_approuve'),
                 ], 401)
             );
         } else if ($e instanceof RefreshTokenInvalideOuExpireException) {
             $event->setResponse(
                 new JsonResponse([
-                    'message' => $this->translator->trans('exception.auth.refresh_token_invalide_ou_expire'),
+                    'message' => $this->translator->trans('auth.exception.refresh_token_invalide_ou_expire'),
                 ], 401)
             );
         } else if ($e instanceof HttpExceptionInterface) {

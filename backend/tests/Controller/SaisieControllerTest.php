@@ -153,7 +153,7 @@ class SaisieControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_annee_saisie'),
+            static::getContainer()->get('translator')->trans('annee_saisie.exception.gerer_annee_saisie'),
             $data['message']
         );
     }
@@ -195,7 +195,7 @@ class SaisieControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.annee_saisie_requise'),
+            static::getContainer()->get('translator')->trans('annee_saisie.exception.annee_saisie_requise'),
             $data['message']
         );
     }
@@ -215,7 +215,7 @@ class SaisieControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.annee_saisie_invalide'),
+            static::getContainer()->get('translator')->trans('annee_saisie.exception.annee_saisie_invalide'),
             $data['message']
         );
     }
@@ -235,7 +235,7 @@ class SaisieControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(403);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.gerer_annee_saisie'),
+            static::getContainer()->get('translator')->trans('annee_saisie.exception.gerer_annee_saisie'),
             $data['message']
         );
     }
@@ -255,7 +255,7 @@ class SaisieControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
-            static::getContainer()->get('translator')->trans('exception.permission.annee_saisie_change'),
+            static::getContainer()->get('translator')->trans('annee_saisie.exception.annee_saisie_change'),
             $data['message']
         );
 

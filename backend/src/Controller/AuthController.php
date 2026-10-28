@@ -119,13 +119,13 @@ final class AuthController extends AbstractController
         if ($ssmdp) {
             $emailValide = $this->authService->validationInscriptionOAuth($dto);
             if ($emailValide) {
-                return $this->json(['message' => $this->translator->trans('exception.auth.inscription_reussie_attente_approbation')], 201);
+                return $this->json(['message' => $this->translator->trans('auth.succes.inscription_reussie_attente_approbation')], 201);
             }
         } else {
             $this->authService->inscriptionBasic($dto);
         }
 
-        return $this->json(['message' => $this->translator->trans('exception.auth.inscription_reussie')], 201);
+        return $this->json(['message' => $this->translator->trans('auth.succes.inscription_reussie')], 201);
     }
 
     #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]
@@ -168,7 +168,7 @@ final class AuthController extends AbstractController
         RateLimiterFactoryInterface $verifieMailLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('exception.bad_request.token_obligatoire')], 400);
+        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('utilisateur.exception.token_obligatoire')], 400);
 
         $limiter = $verifieMailLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
@@ -177,7 +177,7 @@ final class AuthController extends AbstractController
         }
 
         $this->authService->verificationMailUtilisateur($json['token']);
-        return $this->json(['message' => $this->translator->trans('exception.auth.email_verifie')], 200);
+        return $this->json(['message' => $this->translator->trans('auth.succes.email_verifie')], 200);
     }
 
 
@@ -201,7 +201,7 @@ final class AuthController extends AbstractController
         RateLimiterFactoryInterface $motDePasseOublieLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['email'])) return $this->json(['message' => $this->translator->trans('exception.bad_request.email_obligatoire')], 400);
+        if (!isset($json['email'])) return $this->json(['message' => $this->translator->trans('auth.exception.email_obligatoire')], 400);
 
         $limiter = $motDePasseOublieLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
@@ -210,19 +210,19 @@ final class AuthController extends AbstractController
         }
 
         $this->authService->motDePasseOubliePhase1($json['email']);
-        return $this->json(['message' => $this->translator->trans('exception.auth.envoie_email_reinitialisation_mdp')], 200);
+        return $this->json(['message' => $this->translator->trans('auth.succes.envoie_email_reinitialisation_mdp')], 200);
     }
 
     #[Route('/mdp-oublie', methods: ['PATCH'])]
     public function motDePasseOubliePhase2(Request $request, ValidatorInterface $validator): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('exception.bad_request.token_obligatoire')], 400);
-        if (!isset($json['mdp'])) return $this->json(['message' => $this->translator->trans('exception.bad_request.mdp_obligatoire')], 400);
+        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('utilisateur.exception.token_obligatoire')], 400);
+        if (!isset($json['mdp'])) return $this->json(['message' => $this->translator->trans('auth.exception.mdp_obligatoire')], 400);
 
         // Vérifier si le mot de passe est compromis
         $violations = $validator->validate($json['mdp'], [
-            new NotCompromisedPassword(message: $this->translator->trans('exception.bad_request.mdp_compromise'))
+            new NotCompromisedPassword(message: $this->translator->trans('auth.exception.mdp_compromise'))
         ]);
 
         if (count($violations) > 0) {
@@ -232,6 +232,6 @@ final class AuthController extends AbstractController
         }
 
         $this->authService->motDePasseOubliePhase2($json['token'], $json['mdp']);
-        return $this->json(['message' => $this->translator->trans('exception.auth.reinitialisation_mdp_reussie')], 200);
+        return $this->json(['message' => $this->translator->trans('auth.succes.reinitialisation_mdp_reussie')], 200);
     }
 }

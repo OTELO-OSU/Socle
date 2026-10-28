@@ -28,16 +28,16 @@ final class SaisieController extends AbstractController
         $annee = $json['annee'] ?? null;
 
         if (!$annee) {
-            return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_requise')], 400);
+            return $this->json(['message' => $this->translator->trans('annee_saisie.exception.annee_saisie_requise')], 400);
         }
 
         //Vérifier qu'il y a 4 chiffres
         if (!preg_match('/^\d{4}$/', $annee)) {
-            return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_invalide')], 400);
+            return $this->json(['message' => $this->translator->trans('annee_saisie.exception.annee_saisie_invalide')], 400);
         }
 
         $this->ss->setAnneeDeSaisie($annee);
 
-        return $this->json(['message' => $this->translator->trans('exception.permission.annee_saisie_change')], 200);
+        return $this->json(['message' => $this->translator->trans('annee_saisie.exception.annee_saisie_change')], 200);
     }
 }
