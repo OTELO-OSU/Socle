@@ -18,6 +18,8 @@ use App\Entity\Ville;
 use App\Security\Voter\PlateformeVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -35,6 +37,16 @@ class ExcelService
         private SerializerInterface $serializerInterface,
         private readonly TranslatorInterface $translator
     ) {}
+
+    /** Écrit la valeur en forçant le type texte si elle pourrait être interprétée comme une formule */
+    private function setSafeCellValue(Worksheet $sheet, string $coordinate, mixed $value): void
+    {
+        if (\is_string($value) && !is_numeric($value) && preg_match('/^\s*[=+\-@]/', $value)) {
+            $sheet->setCellValueExplicit($coordinate, $value, DataType::TYPE_STRING);
+            return;
+        }
+        $sheet->setCellValue($coordinate, $value);
+    }
 
     function convertNameArrayToString($obj)
     {
@@ -780,7 +792,7 @@ class ExcelService
 
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet1Array); $row++) {
-                $sheet1->setCellValue($col . $row, $sheet1Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet1, $col . $row, $sheet1Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -791,7 +803,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet3Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet3Array); $row++) {
-                $sheet3->setCellValue($col . $row, $sheet3Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet3, $col . $row, $sheet3Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -802,7 +814,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet4Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet4Array); $row++) {
-                $sheet4->setCellValue($col . $row, $sheet4Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet4, $col . $row, $sheet4Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -812,7 +824,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet5Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet5Array); $row++) {
-                $sheet5->setCellValue($col . $row, $sheet5Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet5, $col . $row, $sheet5Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -822,7 +834,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet6Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet6Array); $row++) {
-                $sheet6->setCellValue($col . $row, $sheet6Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet6, $col . $row, $sheet6Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -832,7 +844,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet7Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet7Array); $row++) {
-                $sheet7->setCellValue($col . $row, $sheet7Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet7, $col . $row, $sheet7Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -842,7 +854,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet8Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet8Array); $row++) {
-                $sheet8->setCellValue($col . $row, $sheet8Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet8, $col . $row, $sheet8Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -852,7 +864,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet8BisBisArray[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet8BisBisArray); $row++) {
-                $sheet8BisBis->setCellValue($col . $row, $sheet8BisBisArray[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet8BisBis, $col . $row, $sheet8BisBisArray[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -862,7 +874,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet8BisArray[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet8BisArray); $row++) {
-                $sheet8Bis->setCellValue($col . $row, $sheet8BisArray[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet8Bis, $col . $row, $sheet8BisArray[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -872,7 +884,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet9Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet9Array); $row++) {
-                $sheet9->setCellValue($col . $row, $sheet9Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet9, $col . $row, $sheet9Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -882,7 +894,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet10Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet10Array); $row++) {
-                $sheet10->setCellValue($col . $row, $sheet10Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet10, $col . $row, $sheet10Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -892,7 +904,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet12Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet12Array); $row++) {
-                $sheet12->setCellValue($col . $row, $sheet12Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet12, $col . $row, $sheet12Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -902,7 +914,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet13Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet13Array); $row++) {
-                $sheet13->setCellValue($col . $row, $sheet13Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet13, $col . $row, $sheet13Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -912,7 +924,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet14Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet14Array); $row++) {
-                $sheet14->setCellValue($col . $row, $sheet14Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet14, $col . $row, $sheet14Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -924,7 +936,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet15Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet15Array); $row++) {
-                $sheet15->setCellValue($col . $row, $sheet15Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet15, $col . $row, $sheet15Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -935,7 +947,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet16Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet16Array); $row++) {
-                $sheet16->setCellValue($col . $row, $sheet16Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet16, $col . $row, $sheet16Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -945,7 +957,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet17Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet17Array); $row++) {
-                $sheet17->setCellValue($col . $row, $sheet17Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet17, $col . $row, $sheet17Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -955,7 +967,7 @@ class ExcelService
         $lastLetter = Coordinate::stringFromColumnIndex(count($sheet18Array[0]) + 1);
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet18Array); $row++) {
-                $sheet18->setCellValue($col . $row, $sheet18Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+                $this->setSafeCellValue($sheet18, $col . $row, $sheet18Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
