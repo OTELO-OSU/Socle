@@ -7,6 +7,8 @@ use App\Service\PlateformeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -69,7 +71,9 @@ final class PlateformeController extends AbstractController
     public function creerPlateforme(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['nom'])) return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_nom_manquant')], 400);
+        if (!isset($json['nom'])) {
+            throw new BadRequestHttpException($this->translator->trans('plateforme.exception.plateforme_nom_manquant'));
+        }
 
         $plt = $this->plateformeService->creerPlateforme($json['nom']);
         return $this->json(['message' => $this->translator->trans('plateforme.succes.plateforme_cree'), 'plateforme_id' => $plt->getId()], 201);
@@ -80,7 +84,9 @@ final class PlateformeController extends AbstractController
     {
         $json = json_decode($request->getContent(), true);
         $brouillon = $json['brouillon'] ?? null;
-        if ($brouillon === null) return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_status_manquant')], 400);
+        if ($brouillon === null) {
+            throw new BadRequestHttpException($this->translator->trans('plateforme.exception.plateforme_status_manquant'));
+        }
         unset($json['brouillon']);
 
         $dto = $this->serializer->deserialize(json_encode($json), PlateformeHistoriqueDTO::class, 'json');
@@ -117,7 +123,7 @@ final class PlateformeController extends AbstractController
     public function testPlateforme(Request $request): Response
     {
         if (!$this->getUser()) {
-            return $this->json(['message' => $this->translator->trans('auth.exception.non_connecte')], 401);
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
         }
 
         $json = json_decode($request->getContent(), true);

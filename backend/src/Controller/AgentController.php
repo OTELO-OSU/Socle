@@ -6,6 +6,7 @@ use App\Service\AgentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -34,7 +35,7 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data["type_contrat_id"]) || !isset($data["unite_id"])) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.champs_manquants')], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         $corps = null;
@@ -98,11 +99,11 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['utilisateurId']) || !isset($data['approbation'])) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.champs_manquants')], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         if (!is_bool($data['approbation'])) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.champs_approbation_boolean')], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_approbation_boolean'));
         }
 
         $approbation = $data['approbation'];
@@ -121,7 +122,7 @@ final class AgentController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (!isset($data['utilisateur_id']) || !isset($data['email']) || !isset($data['nom']) || !isset($data['prenom']) || !isset($data['employeur_id']) || !isset($data['type_contrat_id']) || !isset($data['unite_id'])) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.champs_manquants')], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.champs_manquants'));
         }
 
         $corps = null;

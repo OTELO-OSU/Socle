@@ -7,6 +7,7 @@ use App\Service\PlateformeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -18,7 +19,7 @@ final class AdminController extends AbstractController
     public function approuver(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['email'])) return $this->json(['message' => $this->translator->trans('auth.exception.email_obligatoire')], 400);
+        if (!isset($json['email'])) throw new BadRequestHttpException($this->translator->trans('auth.exception.email_obligatoire'));
 
         $this->adminService->approuverUtilisateur($json['email']);
         return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_approuve')], 200);
@@ -28,7 +29,7 @@ final class AdminController extends AbstractController
     public function refuser(Request $request): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['email'])) return $this->json(['message' => $this->translator->trans('auth.exception.email_obligatoire')], 400);
+        if (!isset($json['email'])) throw new BadRequestHttpException($this->translator->trans('auth.exception.email_obligatoire'));
 
         $this->adminService->refuserUtilisateur($json['email']);
         return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_refuse')], 200);
@@ -49,7 +50,7 @@ final class AdminController extends AbstractController
         $plateformeId = $json['plateformeId'] ?? null;
 
         if ($plateformeId === null) {
-            return $this->json(['message' => $this->translator->trans('plateforme.exception.plateforme_id_manquant')], 400);
+            throw new BadRequestHttpException($this->translator->trans('plateforme.exception.plateforme_id_manquant'));
         }
 
         $responsablesScientifiquesIds = $json['responsableScientifiquesIds'] ?? null;

@@ -6,6 +6,7 @@ use App\Service\SaisieService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -28,12 +29,12 @@ final class SaisieController extends AbstractController
         $annee = $json['annee'] ?? null;
 
         if (!$annee) {
-            return $this->json(['message' => $this->translator->trans('annee_saisie.exception.annee_saisie_requise')], 400);
+            throw new BadRequestHttpException($this->translator->trans('annee_saisie.exception.annee_saisie_requise'));
         }
 
         //Vérifier qu'il y a 4 chiffres
         if (!preg_match('/^\d{4}$/', $annee)) {
-            return $this->json(['message' => $this->translator->trans('annee_saisie.exception.annee_saisie_invalide')], 400);
+            throw new BadRequestHttpException($this->translator->trans('annee_saisie.exception.annee_saisie_invalide'));
         }
 
         $this->ss->setAnneeDeSaisie($annee);

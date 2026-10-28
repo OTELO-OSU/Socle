@@ -7,6 +7,7 @@ use App\Service\OsuService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -38,7 +39,7 @@ final class OsuController extends AbstractController
         $json = json_decode($request->getContent(), true);
         $operation = $json['operation'] ?? null;
         if (!in_array($operation, ['add', 'remove'])) {
-            return $this->json(['message' => $this->translator->trans('exception.bad_request.operation_invalide')], 400);
+            throw new BadRequestHttpException($this->translator->trans('exception.bad_request.operation_invalide'));
         }
 
         $message = null;
@@ -46,7 +47,7 @@ final class OsuController extends AbstractController
         $id = $json['delegue_directeur_osu_id'] ?? null;
 
         if (!$id) {
-            return $this->json(['message' => $this->translator->trans('utilisateur.exception.utilisateur_id_manquant')], 400);
+            throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.utilisateur_id_manquant'));
         }
 
         if ($operation === 'add') {

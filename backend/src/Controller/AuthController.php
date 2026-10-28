@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -30,14 +32,14 @@ final class AuthController extends AbstractController
         RateLimiterFactoryInterface $loginLimiter
     ): Response {
         $authorizationHeader = $request->headers->get('Authorization');
-        if (!$authorizationHeader) return $this->json(['message' => $this->translator->trans('exception.auth.header_authorization_manquant')], 400);
+        if (!$authorizationHeader) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_manquant'));
 
-        if (strpos($authorizationHeader, 'Basic ') !== 0) return $this->json(['message' => $this->translator->trans('exception.auth.header_authorization_invalide')], 400);
+        if (strpos($authorizationHeader, 'Basic ') !== 0) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
 
         $base64Credentials = substr($authorizationHeader, 6);
         $decodedCredentials = base64_decode($base64Credentials);
 
-        if (!\str_contains($decodedCredentials, ":")) return $this->json(['message' => $this->translator->trans('exception.auth.header_authorization_invalide')], 400);
+        if (!\str_contains($decodedCredentials, ":")) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
 
         // Récupération du username et du password
         list($username, $password) = explode(':', $decodedCredentials, 2);
@@ -46,7 +48,7 @@ final class AuthController extends AbstractController
         $limiter = $loginLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
         if (!$consume->isAccepted()) {
-            return $this->json(['message' => $this->translator->trans('exception.rate_limit.tentative_connexion')], 429);
+            throw new TooManyRequestsHttpException(null, $this->translator->trans('exception.rate_limit.tentative_connexion'));
         }
 
         $couple = $this->authService->connexionBasic($username, $password);
@@ -113,7 +115,7 @@ final class AuthController extends AbstractController
         $limiter = $inscriptionLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
         if (!$consume->isAccepted()) {
-            return $this->json(['message' => $this->translator->trans('exception.rate_limit.tentative_inscription')], 429);
+            throw new TooManyRequestsHttpException(null, $this->translator->trans('exception.rate_limit.tentative_inscription'));
         }
 
         if ($ssmdp) {
@@ -153,7 +155,7 @@ final class AuthController extends AbstractController
     public function refresh(Request $request): Response
     {
         $refreshToken = $request->cookies->get('refresh_token');
-        if (!$refreshToken) return $this->json(['message' => $this->translator->trans('exception.bad_request.refresh_token_manquant')], 400);
+        if (!$refreshToken) throw new BadRequestHttpException($this->translator->trans('exception.bad_request.refresh_token_manquant'));
 
         $couple = $this->authService->checkRefreshToken($refreshToken);
         $response = $this->json(['token' => $couple['token']], 200);
@@ -168,12 +170,12 @@ final class AuthController extends AbstractController
         RateLimiterFactoryInterface $verifieMailLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('utilisateur.exception.token_obligatoire')], 400);
+        if (!isset($json['token'])) throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.token_obligatoire'));
 
         $limiter = $verifieMailLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
         if (!$consume->isAccepted()) {
-            return $this->json(['message' => $this->translator->trans('exception.rate_limit.tentative_verification')], 429);
+            throw new TooManyRequestsHttpException(null, $this->translator->trans('exception.rate_limit.tentative_verification'));
         }
 
         $this->authService->verificationMailUtilisateur($json['token']);
@@ -201,12 +203,12 @@ final class AuthController extends AbstractController
         RateLimiterFactoryInterface $motDePasseOublieLimiter
     ): Response {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['email'])) return $this->json(['message' => $this->translator->trans('auth.exception.email_obligatoire')], 400);
+        if (!isset($json['email'])) throw new BadRequestHttpException($this->translator->trans('auth.exception.email_obligatoire'));
 
         $limiter = $motDePasseOublieLimiter->create($request->getClientIp());
         $consume = $limiter->consume(1);
         if (!$consume->isAccepted()) {
-            return $this->json(['message' => $this->translator->trans('exception.rate_limit.tentative_mdp_oublie')], 429);
+            throw new TooManyRequestsHttpException(null, $this->translator->trans('exception.rate_limit.tentative_mdp_oublie'));
         }
 
         $this->authService->motDePasseOubliePhase1($json['email']);
@@ -217,8 +219,8 @@ final class AuthController extends AbstractController
     public function motDePasseOubliePhase2(Request $request, ValidatorInterface $validator): Response
     {
         $json = json_decode($request->getContent(), true);
-        if (!isset($json['token'])) return $this->json(['message' => $this->translator->trans('utilisateur.exception.token_obligatoire')], 400);
-        if (!isset($json['mdp'])) return $this->json(['message' => $this->translator->trans('auth.exception.mdp_obligatoire')], 400);
+        if (!isset($json['token'])) throw new BadRequestHttpException($this->translator->trans('utilisateur.exception.token_obligatoire'));
+        if (!isset($json['mdp'])) throw new BadRequestHttpException($this->translator->trans('auth.exception.mdp_obligatoire'));
 
         // Vérifier si le mot de passe est compromis
         $violations = $validator->validate($json['mdp'], [
