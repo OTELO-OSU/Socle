@@ -133,10 +133,13 @@ class HarvesterService
         foreach ($harvesters as $harvester) {
             $host = $harvester->getHost();
             try {
-                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes?clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+                // Création du header Authorization en Basic Auth avec le clientId et le clientSecret
+                $authorizationHeader = 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret());
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes", [
                     'timeout' => 10,
                     'headers' => [
                         'Accept' => 'application/json',
+                        'Authorization' => $authorizationHeader,
                     ],
                 ]);
             } catch (TransportExceptionInterface $e) {
@@ -174,10 +177,12 @@ class HarvesterService
         }
 
         try {
-            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id&clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+            $authorizationHeader = 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret());
+            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id", [
                 'timeout' => 10,
                 'headers' => [
                     'Accept' => 'application/json',
+                    'Authorization' => $authorizationHeader,
                 ],
             ]);
         } catch (Exception $e) {

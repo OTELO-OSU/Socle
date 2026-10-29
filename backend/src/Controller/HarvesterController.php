@@ -88,10 +88,22 @@ final class HarvesterController extends AbstractController
     #[Route('/hmt/plateformes', methods: ['GET'])]
     public function getListePlateformeHarvesterHMT(Request $request): Response
     {
-        $clientId = $request->query->get('clientId', null);
-        $clientSecret = $request->query->get('clientSecret', null);
+        // Récupérer le client id et le secret id dans le header authorization en basic auth
+        $authorizationHeader = $request->headers->get('Authorization');
+        if (!$authorizationHeader) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_manquant'));
+
+        if (strpos($authorizationHeader, 'Basic ') !== 0) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+
+        $base64Credentials = substr($authorizationHeader, 6);
+        $decodedCredentials = base64_decode($base64Credentials);
+
+        if (!\str_contains($decodedCredentials, ":")) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+
+        // Récupération du client id et du secret id
+        list($clientId, $clientSecret) = explode(':', $decodedCredentials, 2);
+
         if ($clientId === null || $clientSecret === null) {
-            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_secret_id_obligatoire'));
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.client_id_secret_id_obligatoire'));
         }
         $plateformes = $this->hs->getPlateformeListePourMachine($clientId, $clientSecret);
 
@@ -102,10 +114,23 @@ final class HarvesterController extends AbstractController
     public function getDetailPlateformeHarvesterHMT(Request $request): Response
     {
         $plateformeId = $request->query->get('plateformeId', null);
-        $clientId = $request->query->get('clientId', null);
-        $clientSecret = $request->query->get('clientSecret', null);
+
+        // Récupérer le client id et le secret id dans le header authorization en basic auth
+        $authorizationHeader = $request->headers->get('Authorization');
+        if (!$authorizationHeader) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_manquant'));
+
+        if (strpos($authorizationHeader, 'Basic ') !== 0) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+
+        $base64Credentials = substr($authorizationHeader, 6);
+        $decodedCredentials = base64_decode($base64Credentials);
+
+        if (!\str_contains($decodedCredentials, ":")) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+
+        // Récupération du client id et du secret id
+        list($clientId, $clientSecret) = explode(':', $decodedCredentials, 2);
+
         if ($plateformeId === null || $clientId === null || $clientSecret === null) {
-            throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_secret_id_obligatoire_plateforme_id'));
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'));
         }
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 

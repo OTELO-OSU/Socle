@@ -89,7 +89,7 @@ class HarvesterControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.succes.client_id_secret_id_obligatoire'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.exception.client_id_secret_id_obligatoire'), $data['message']);
     }
 
     public function testGetListePlateformeHarvesterRetourne200AvecListe(): void
@@ -123,7 +123,7 @@ class HarvesterControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.succes.client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
     }
 
     public function testGetDetailPlateformeHarvesterRetourne200AvecDetail(): void
