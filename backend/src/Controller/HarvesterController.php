@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -16,7 +15,7 @@ final class HarvesterController extends AbstractController
 {
     public function __construct(private readonly HarvesterService $hs, private readonly ExcelService $es, private readonly TranslatorInterface $translator) {}
 
-    #[Route('/harvester/hmt', methods: ['GET'])]
+    #[Route('/harvester/hmt/create', methods: ['POST'])]
     public function gethmt(Request $request): Response
     {
         $clientId = $request->query->get('clientId', null);

@@ -18,7 +18,7 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetHMTRetourne400QuandClientIdAbsent(): void
     {
-        $this->client->request('GET', '/api/harvester/hmt');
+        $this->client->request('POST', '/api/harvester/hmt/create');
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -36,7 +36,7 @@ class HarvesterControllerTest extends WebTestCase
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
-        $this->client->request('GET', '/api/harvester/hmt?clientId=client-123');
+        $this->client->request('POST', '/api/harvester/hmt/create?clientId=client-123');
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
