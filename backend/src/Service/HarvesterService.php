@@ -87,8 +87,7 @@ class HarvesterService
     public function getPlateformeListePourMachine(string $clientId, string $clientSecret): array
     {
         $hashedClientSecret = hash('sha256', $clientSecret);
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
-
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
         foreach ($tagsUserMachine as $tag) {
@@ -106,7 +105,7 @@ class HarvesterService
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
         $hashedClientSecret = hash('sha256', $clientSecret);
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
@@ -222,7 +221,7 @@ class HarvesterService
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
 
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $userMachine = $harvester->getUtilisateur();
         $this->em->remove($harvester);
         $this->em->remove($userMachine);
