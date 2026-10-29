@@ -37,6 +37,7 @@ class HarvesterService
         $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId]) && throw new ConflictHttpException($this->translator->trans('harvester.exception.utilisateur_machine_existe'));
 
         $clientSecret = bin2hex(random_bytes(16));
+        $hashedClientSecret = hash('sha256', $clientSecret);
 
         $user = new Utilisateur();
         $user->setAdmis(\false);
@@ -47,7 +48,7 @@ class HarvesterService
 
         $userMachine = new UtilisateurMachine();
         $userMachine->setClientId($clientId);
-        $userMachine->setClientSecret($clientSecret);
+        $userMachine->setClientSecret($hashedClientSecret);
         $userMachine->setUtilisateur($user);
         $this->em->persist($user);
         $this->em->persist($userMachine);
@@ -84,7 +85,8 @@ class HarvesterService
 
     public function getPlateformeListePourMachine(string $clientId, string $clientSecret): array
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $hashedClientSecret = hash('sha256', $clientSecret);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
@@ -102,7 +104,8 @@ class HarvesterService
 
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $hashedClientSecret = hash('sha256', $clientSecret);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
         $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
