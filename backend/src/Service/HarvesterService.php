@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -129,6 +130,11 @@ class HarvesterService
 
     public function getListePlateformeHarveste(): array
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $harvesters = $this->em->getRepository(Harvester::class)->findAll();
 
         $plateformesArray = [];
@@ -173,6 +179,11 @@ class HarvesterService
 
     public function getDetailPlateformeHarvester(int $id, string $hosts): array
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
 
         if (!$harvester) {
@@ -258,6 +269,11 @@ class HarvesterService
 
     function getPlateformeHarvesteJson(int $plateformeId, string $hosts): string
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
         $json = $this->serializerInterface->serialize($plt, 'json', ['groups' => ['plateforme:detail']]);
         return $json;

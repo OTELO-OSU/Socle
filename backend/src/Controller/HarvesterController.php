@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -68,7 +69,7 @@ final class HarvesterController extends AbstractController
     }
 
     #[Route('/harvester/plateformes', methods: ['GET'])]
-    public function getListePlateformeHarvester(Request $request): Response
+    public function getListePlateformeHarvester(): Response
     {
         $plateformes = $this->hs->getListePlateformeHarveste();
 
@@ -80,6 +81,11 @@ final class HarvesterController extends AbstractController
     {
         $idPlateforme = $request->query->get('plateformeId', null);
         $host = $request->query->get('host', null);
+
+        if ($idPlateforme === null || $host === null) {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.plateforme_id_host_obligatoire'));
+        }
+
         $plateformes = $this->hs->getDetailPlateformeHarvester($idPlateforme, $host);
 
         return $this->json($plateformes, 200);
@@ -150,6 +156,11 @@ final class HarvesterController extends AbstractController
     {
         $id = $request->query->get('id');
         $host = $request->query->get('host');
+
+        if ($id === null || $host === null) {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.plateforme_id_host_obligatoire'));
+        }
+
         $entite = $this->hs->getPlateformeHarvesteJson($id, $host);
         $content = $this->es->exportPlatformeArrayEnExcel([$entite]);
 
