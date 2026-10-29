@@ -81,6 +81,27 @@ export type SourceFinancement = {
     taux: number;
 }
 
+export type DictionnaireReference = {
+    id: number;
+    nom: string | null;
+    acronyme?: string;
+}
+
+export type PlateformeDictionnaire = {
+    villes: Record<string, DictionnaireReference>;
+    entites: Record<string, DictionnaireReference>;
+    operations: Record<string, DictionnaireReference>;
+    contrats_maintenance: Record<string, DictionnaireReference>;
+    methodes_tarif: Record<string, DictionnaireReference>;
+    instruments: Record<string, DictionnaireReference>;
+    corps: Record<string, DictionnaireReference>;
+    types_contrat: Record<string, DictionnaireReference>;
+    employeurs: Record<string, DictionnaireReference>;
+    baps: Record<string, DictionnaireReference>;
+    emploi_types: Record<string, DictionnaireReference>;
+    modalites_recrutement: Record<string, DictionnaireReference>;
+}
+
 export type PosteFutur = {
     employeur_id: number | null;
     modalite_recrutement_id: number | null;
@@ -204,6 +225,7 @@ export type DernierHistorique = {
     publication_autre_type: number | null;
     publication_these: number | null;
     publications: Publication[];
+    dictionnaire?: PlateformeDictionnaire;
 }
 
 export type plateformeDetails = {

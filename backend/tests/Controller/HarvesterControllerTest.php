@@ -18,7 +18,7 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetHMTRetourne400QuandClientIdAbsent(): void
     {
-        $this->client->request('GET', '/api/harvester/hmt');
+        $this->client->request('POST', '/api/harvester/hmt/create');
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -36,7 +36,7 @@ class HarvesterControllerTest extends WebTestCase
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
-        $this->client->request('GET', '/api/harvester/hmt?clientId=client-123');
+        $this->client->request('POST', '/api/harvester/hmt/create', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode(['clientId' => 'client-123']));
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -83,15 +83,6 @@ class HarvesterControllerTest extends WebTestCase
         $this->assertSame(static::getContainer()->get('translator')->trans('harvester.succes.hmt_ajoute'), $data['message']);
     }
 
-    public function testGetListePlateformeHarvesterRetourne400QuandParametresManquants(): void
-    {
-        $this->client->request('GET', '/api/hmt/plateformes?clientId=test-client');
-
-        $this->assertResponseStatusCodeSame(400);
-        $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.succes.client_id_secret_id_obligatoire'), $data['message']);
-    }
-
     public function testGetListePlateformeHarvesterRetourne200AvecListe(): void
     {
         $plateformes = [
@@ -107,8 +98,8 @@ class HarvesterControllerTest extends WebTestCase
             ->willReturn($plateformes);
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
-
-        $this->client->request('GET', '/api/hmt/plateformes?clientId=client-123&clientSecret=secret-456');
+        $this->client->setServerParameter('HTTP_AUTHORIZATION', 'Basic ' . base64_encode('client-123:secret-456'));
+        $this->client->request('GET', '/api/hmt/plateformes');
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -119,11 +110,13 @@ class HarvesterControllerTest extends WebTestCase
 
     public function testGetDetailPlateformeHarvesterRetourne400QuandParametresManquants(): void
     {
-        $this->client->request('GET', '/api/hmt/plateforme?id=1&clientId=client-123');
+        $headerAuth = 'Basic ' . base64_encode('test-client:test-secret');
+        $this->client->setServerParameter('HTTP_AUTHORIZATION', $headerAuth);
+        $this->client->request('GET', '/api/hmt/plateforme?id=1');
 
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.succes.client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
+        $this->assertSame(static::getContainer()->get('translator')->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'), $data['message']);
     }
 
     public function testGetDetailPlateformeHarvesterRetourne200AvecDetail(): void
@@ -141,7 +134,8 @@ class HarvesterControllerTest extends WebTestCase
 
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
-        $this->client->request('GET', '/api/hmt/plateforme?plateformeId=1&clientId=client-123&clientSecret=secret-456');
+        $headerAuth = 'Basic ' . base64_encode('client-123:secret-456');
+        $this->client->request('GET', '/api/hmt/plateforme?plateformeId=1', [], [], ['HTTP_AUTHORIZATION' => $headerAuth]);
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($this->client->getResponse()->getContent(), true);

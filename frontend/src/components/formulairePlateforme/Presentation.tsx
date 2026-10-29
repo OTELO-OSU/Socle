@@ -8,6 +8,7 @@ import NombreTextField from "../NombreTextField";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import { useMap, useMapEvents } from "react-leaflet/hooks";
 import { AuthContext } from "../../context/authContext";
+import type { PlateformeDictionnaire } from "../../services/plateformeService";
 
 type MapPoint = {
     latitude: number | null;
@@ -92,9 +93,22 @@ function PreviewMap() {
 }
 
 export function Presentation() {
-    const { control } = useFormContext();
+    const { control, watch } = useFormContext();
     const authContext = useContext(AuthContext);
     const { villeOptions, uniteOptions, employeurOptions, tagsOptions } = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const villeOptionsPlateforme = plateformeDictionnaire
+        ? Object.values(plateformeDictionnaire.villes).map((ville) => ({
+            value: ville.id,
+            label: ville.nom ?? "",
+        }))
+        : villeOptions;
+    const entiteOptionsPlateforme = plateformeDictionnaire
+        ? Object.values(plateformeDictionnaire.entites).map((entite) => ({
+            value: entite.id,
+            label: entite.acronyme ? `${entite.nom} (${entite.acronyme})` : entite.nom ?? "",
+        }))
+        : employeurOptions;
 
     return (
         <>
@@ -133,8 +147,8 @@ export function Presentation() {
                         render={({ field }) => (
                             <Autocomplete
                                 sx={{ mt: 2 }}
-                                options={villeOptions}
-                                value={villeOptions.find(option =>
+                                options={villeOptionsPlateforme}
+                                value={villeOptionsPlateforme.find(option =>
                                     option.value === field.value
                                 ) ?? null}
                                 onChange={(_, options) =>
@@ -205,8 +219,8 @@ export function Presentation() {
                         render={({ field }) => (
                             <Autocomplete
                                 disabled={!authContext?.estAdmin}
-                                options={uniteOptions}
-                                value={uniteOptions.find(option =>
+                                options={plateformeDictionnaire ? entiteOptionsPlateforme : uniteOptions}
+                                value={(plateformeDictionnaire ? entiteOptionsPlateforme : uniteOptions).find(option =>
                                     option.value === field.value
                                 ) ?? null}
                                 onChange={(_, options) =>
@@ -229,8 +243,8 @@ export function Presentation() {
                             render={({ field }) => (
                                 <Autocomplete
                                     multiple
-                                    options={employeurOptions}
-                                    value={employeurOptions.filter(option =>
+                                    options={entiteOptionsPlateforme}
+                                    value={entiteOptionsPlateforme.filter(option =>
                                         field.value?.includes(option.value)
                                     )}
                                     onChange={(_, options) =>
@@ -253,8 +267,8 @@ export function Presentation() {
                             render={({ field }) => (
                                 <Autocomplete
                                     multiple
-                                    options={employeurOptions}
-                                    value={employeurOptions.filter(option =>
+                                    options={entiteOptionsPlateforme}
+                                    value={entiteOptionsPlateforme.filter(option =>
                                         field.value?.includes(option.value)
                                     )}
                                     onChange={(_, options) =>

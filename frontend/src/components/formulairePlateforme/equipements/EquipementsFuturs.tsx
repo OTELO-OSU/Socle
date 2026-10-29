@@ -6,7 +6,7 @@ import TreeViewFinance from "../../TreeSelectFinance";
 import TroisPoints from "@mui/icons-material/MoreVert";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { RHFSelect } from "../../RHFTextSelect";
-import type { Instrument, SourceFinancement } from "../../../services/plateformeService";
+import type { Instrument, PlateformeDictionnaire, SourceFinancement } from "../../../services/plateformeService";
 import NombreTextField from "../../NombreTextField";
 
 function InstrumentFuturCard({
@@ -19,6 +19,8 @@ function InstrumentFuturCard({
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const dictionnaireContext = useContext(DictionnaireContext);
+    const { watch } = useFormContext();
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
 
 
     const displayValue = (value: string | number | null | undefined, suffix = "") => {
@@ -65,7 +67,12 @@ function InstrumentFuturCard({
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="body2" color="text.secondary">Opération</Typography>
-                            <Typography variant="body1">{displayValue(instrument.operation_id !== null ? dictionnaireContext.operations.find((o) => o.id === instrument.operation_id)?.nom : null)}</Typography>
+                            <Typography variant="body1">{displayValue(
+                                instrument.operation_id !== null
+                                    ? plateformeDictionnaire?.operations?.[String(instrument.operation_id)]?.nom
+                                        ?? dictionnaireContext.operations.find((o) => o.id === instrument.operation_id)?.nom
+                                    : null
+                            )}</Typography>
                         </Grid>
                     </Grid>
 
@@ -84,7 +91,9 @@ function InstrumentFuturCard({
                                 size="small"
                                 color="primary"
                                 variant="outlined"
-                                label={`${dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeur_id)?.nom} • ${source.taux}%`}
+                                label={`${plateformeDictionnaire?.entites?.[String(source.financeur_id)]?.nom
+                                    ?? dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeur_id)?.nom
+                                    ?? "Financeur inconnu"} • ${source.taux}%`}
                             />
                         ))}
                     </Stack>

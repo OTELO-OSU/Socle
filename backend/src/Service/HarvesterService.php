@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -37,6 +38,7 @@ class HarvesterService
         $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId]) && throw new ConflictHttpException($this->translator->trans('harvester.exception.utilisateur_machine_existe'));
 
         $clientSecret = bin2hex(random_bytes(16));
+        $hashedClientSecret = hash('sha256', $clientSecret);
 
         $user = new Utilisateur();
         $user->setAdmis(\false);
@@ -47,7 +49,7 @@ class HarvesterService
 
         $userMachine = new UtilisateurMachine();
         $userMachine->setClientId($clientId);
-        $userMachine->setClientSecret($clientSecret);
+        $userMachine->setClientSecret($hashedClientSecret);
         $userMachine->setUtilisateur($user);
         $this->em->persist($user);
         $this->em->persist($userMachine);
@@ -84,8 +86,8 @@ class HarvesterService
 
     public function getPlateformeListePourMachine(string $clientId, string $clientSecret): array
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
-
+        $hashedClientSecret = hash('sha256', $clientSecret);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
         $arrayIds = [];
         foreach ($tagsUserMachine as $tag) {
@@ -102,7 +104,8 @@ class HarvesterService
 
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $clientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $hashedClientSecret = hash('sha256', $clientSecret);
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
@@ -126,6 +129,11 @@ class HarvesterService
 
     public function getListePlateformeHarveste(): array
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $harvesters = $this->em->getRepository(Harvester::class)->findAll();
 
         $plateformesArray = [];
@@ -133,10 +141,13 @@ class HarvesterService
         foreach ($harvesters as $harvester) {
             $host = $harvester->getHost();
             try {
-                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes?clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+                // Création du header Authorization en Basic Auth avec le clientId et le clientSecret
+                $authorizationHeader = 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret());
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes", [
                     'timeout' => 10,
                     'headers' => [
                         'Accept' => 'application/json',
+                        'Authorization' => $authorizationHeader,
                     ],
                 ]);
             } catch (TransportExceptionInterface $e) {
@@ -167,6 +178,11 @@ class HarvesterService
 
     public function getDetailPlateformeHarvester(int $id, string $hosts): array
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
 
         if (!$harvester) {
@@ -174,10 +190,12 @@ class HarvesterService
         }
 
         try {
-            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id&clientId={$harvester->getClientId()}&clientSecret={$harvester->getClientSecret()}", [
+            $authorizationHeader = 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret());
+            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}/api/hmt/plateforme?plateformeId=$id", [
                 'timeout' => 10,
                 'headers' => [
                     'Accept' => 'application/json',
+                    'Authorization' => $authorizationHeader,
                 ],
             ]);
         } catch (Exception $e) {
@@ -203,7 +221,7 @@ class HarvesterService
     {
         if (!$this->security->isGranted(UtilisateurVoter::GERER_HMT, Utilisateur::class)) throw new AccessDeniedHttpException($this->translator->trans('harvester.exception.gerer_harvester'));
 
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_nf_machine'));
+        $harvester = $this->em->getRepository(UtilisateurMachine::class)->find($id) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
         $userMachine = $harvester->getUtilisateur();
         $this->em->remove($harvester);
         $this->em->remove($userMachine);
@@ -250,6 +268,11 @@ class HarvesterService
 
     function getPlateformeHarvesteJson(int $plateformeId, string $hosts): string
     {
+        // verifier que le user est connecté
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
         $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
         $json = $this->serializerInterface->serialize($plt, 'json', ['groups' => ['plateforme:detail']]);
         return $json;

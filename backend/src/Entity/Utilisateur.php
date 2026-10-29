@@ -18,19 +18,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list', 'utilisateur:list'])]
+    #[Groups(['plateforme:list', 'utilisateur:list', 'plateforme:harvester'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail", 'plateforme:harvester'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail", 'plateforme:harvester'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, unique: true, nullable: true)]
-    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', 'utilisateur:list', "plateforme:detail", 'plateforme:harvester'])]
     private ?string $email = null;
 
     #[Ignore]

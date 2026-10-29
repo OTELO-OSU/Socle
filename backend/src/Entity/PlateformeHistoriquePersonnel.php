@@ -22,25 +22,25 @@ class PlateformeHistoriquePersonnel
     private ?PlateformeHistorique $plateformeHistorique = null;
 
     #[ORM\ManyToOne(inversedBy: 'plateformeHistoriquePersonnels')]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester'])]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester'])]
     #[SerializedName("responsable_scientifique")]
     #[ORM\Column(name: 'responsable_scientifique')]
     private ?bool $responsableScientifique = false;
 
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester'])]
     #[SerializedName("responsable_technique")]
     #[ORM\Column(name: 'responsable_technique')]
     private ?bool $responsableTechnique = false;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester'])]
     private ?int $quotite = 0;
 
-    #[Groups(['plateforme:list', "plateforme:detail"])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester'])]
     #[SerializedName("responsable_plateforme")]
     #[ORM\Column(name: 'responsable_plateforme')]
     private ?bool $responsablePlateforme = false;

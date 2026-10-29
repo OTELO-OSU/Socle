@@ -19,15 +19,15 @@ class Entite
     #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
     private ?int $id = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'source_financement:list', 'universite:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $acronyme = null;
 
-    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list'])]
+    #[Groups(['unite:list', 'employeur:list', 'utilisateur:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $statutJuridique = null;
 
@@ -80,7 +80,7 @@ class Entite
     #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'unite')]
     private Collection $utilisateurs;
 
-    #[Groups(['unite:list', 'utilisateur:list'])]
+    #[Groups(['unite:list', 'utilisateur:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codeUnite = null;
 

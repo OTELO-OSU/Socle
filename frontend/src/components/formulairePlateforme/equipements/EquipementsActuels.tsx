@@ -5,7 +5,7 @@ import { RHFTextField } from "../../RHFTextField";
 import TreeViewFinance from "../../TreeSelectFinance";
 import TroisPoints from "@mui/icons-material/MoreVert";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-import type { Instrument, SourceFinancement } from "../../../services/plateformeService";
+import type { Instrument, PlateformeDictionnaire, SourceFinancement } from "../../../services/plateformeService";
 import NombreTextField from "../../NombreTextField";
 
 function InstrumentActuelCard({
@@ -18,6 +18,8 @@ function InstrumentActuelCard({
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const dictionnaireContext = useContext(DictionnaireContext);
+    const { watch } = useFormContext();
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
 
 
     const displayValue = (value: number | string | null | undefined, suffix = "") => {
@@ -87,7 +89,9 @@ function InstrumentActuelCard({
                                 size="small"
                                 color="primary"
                                 variant="outlined"
-                                label={`${dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeur_id)?.nom} • ${source.taux}%`}
+                                label={`${plateformeDictionnaire?.entites?.[String(source.financeur_id)]?.nom
+                                    ?? dictionnaireContext.sourcesFinancement.find((s) => s.id === source.financeur_id)?.nom
+                                    ?? "Financeur inconnu"} • ${source.taux}%`}
                             />
                         ))}
                     </Stack>

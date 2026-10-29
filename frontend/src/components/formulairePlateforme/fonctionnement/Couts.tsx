@@ -5,10 +5,18 @@ import { useContext } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
+import type { PlateformeDictionnaire } from "../../../services/plateformeService";
 
 export default function Couts() {
     const { getValues, watch, control } = useFormContext();
     const dictionnaireContext = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const determinationTarifOptions = plateformeDictionnaire
+        ? Object.values(plateformeDictionnaire.methodes_tarif).map((methode) => ({
+            value: methode.id,
+            label: methode.nom ?? "",
+        }))
+        : dictionnaireContext.determinationTarifPlateformeOptions;
     watch(["materiel_consommable", "contrat_entretien", "etude_prestation", "fluide_energie", "mission_frais_generaux"], () => {
         totalCoutFonctionnement();
     });
@@ -58,7 +66,7 @@ export default function Couts() {
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Comment sont déterminés les tarifs de la plateforme</Typography>
-            <RHFSelect sx={{ mt: 2 }} control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={dictionnaireContext.determinationTarifPlateformeOptions} />
+            <RHFSelect sx={{ mt: 2 }} control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={determinationTarifOptions} />
         </Box>
 
     );

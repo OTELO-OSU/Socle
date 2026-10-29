@@ -89,14 +89,15 @@ harvester:
         hmt_obligatoire: "Le HMT est obligatoire."
         hmt_supprime: "HMT supprimé avec succès."
         hmt_ajoute: "HMT ajouté avec succès."
-        client_id_secret_id_obligatoire: "Le clientId et le secretId sont obligatoires."
-        client_id_secret_id_obligatoire_plateforme_id: "Le clientId, le secretId et l'identifiant de la plateforme sont obligatoires."
     exception:
         gerer_harvester: "Vous n'avez pas les permissions nécessaires pour gérer les harvesters / comptes machines."
         harvester_nf: "Harvester non trouvé."
         hmt_invalide: "Le HMT fourni est invalide."
         utilisateur_machine_existe: "Un utilisateur machine avec ce clientId existe déjà."
         harvester_existe: "Un harvester avec ce host existe déjà."
+        client_id_secret_id_obligatoire: "Le clientId et le secretId sont obligatoires."
+        client_id_secret_id_obligatoire_plateforme_id: "Le clientId, le secretId et l'identifiant de la plateforme sont obligatoires."
+        plateforme_id_host_obligatoire: "L'identifiant de la plateforme et le host sont obligatoires."
 
 osu:
     succes:
