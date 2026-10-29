@@ -21,29 +21,31 @@ class PosteFutur
     #[ORM\JoinColumn(name: 'plateforme_historique_id', referencedColumnName: 'id', nullable: false)]
     private ?PlateformeHistorique $plateformeHistorique = null;
 
+    #[Groups(["plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'posteFuturs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Entite $employeur = null;
 
+    #[Groups(["plateforme:detail"])]
     #[ORM\ManyToOne(inversedBy: 'posteFuturs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Corps $corps = null;
 
     #[ORM\Column]
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", 'plateforme:harvester'])]
     private ?int $quotite = null;
 
     #[ORM\Column]
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", 'plateforme:harvester'])]
     #[SerializedName('rang_numerateur')]
     private ?int $rangNumerateur = null;
 
     #[ORM\Column]
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", 'plateforme:harvester'])]
     #[SerializedName('rang_denominateur')]
     private ?int $rangDenominateur = null;
 
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", "plateforme:harvester"])]
     #[SerializedName('baps_ids')]
     public function getBapsIds(): array
     {
@@ -188,7 +190,7 @@ class PosteFutur
         return $this;
     }
 
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", "plateforme:harvester"])]
     #[SerializedName('emploi_types_ids')]
     public function getEmploiTypesIds(): array
     {
@@ -222,7 +224,7 @@ class PosteFutur
         return $this;
     }
 
-    #[Groups(["plateforme:detail"])]
+    #[Groups(["plateforme:detail", "plateforme:harvester"])]
     #[SerializedName('modalite_recrutement_id')]
     public function getModaliteRecrutementId(): ?int
     {

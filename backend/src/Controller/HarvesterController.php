@@ -18,7 +18,8 @@ final class HarvesterController extends AbstractController
     #[Route('/harvester/hmt/create', methods: ['POST'])]
     public function gethmt(Request $request): Response
     {
-        $clientId = $request->query->get('clientId', null);
+        $body = json_decode($request->getContent(), true);
+        $clientId = $body['clientId'] ?? null;
         if ($clientId === null) {
             throw new BadRequestHttpException($this->translator->trans('harvester.succes.client_id_obligatoire'));
         }
@@ -139,7 +140,7 @@ final class HarvesterController extends AbstractController
         }
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 
-        return $this->json($plateforme, 200, [], ['groups' => ['plateforme:detail']]);
+        return $this->json($plateforme, 200, [], ['groups' => ['plateforme:detail', 'plateforme:harvester']]);
     }
 
     #[Route('/admin/harvesters', methods: ['GET'])]

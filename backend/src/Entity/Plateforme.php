@@ -15,14 +15,14 @@ class Plateforme
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:list:publique'])]
+    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:harvester', 'plateforme:list:publique'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:list:publique'])]
+    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:harvester', 'plateforme:list:publique'])]
     private ?string $pseudoId = null;
 
-    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:list:publique'])]
+    #[Groups(['plateforme:list', 'plateforme:detail', 'plateforme:harvester', 'plateforme:list:publique'])]
     #[SerializedName('dernier_historique')]
     public function getLastHistorique(): ?PlateformeHistorique
     {
@@ -59,7 +59,7 @@ class Plateforme
 
     #[ORM\Column]
     #[SerializedName("instrument_national")]
-    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:list:publique'])]
+    #[Groups(['plateforme:list', "plateforme:detail", 'plateforme:harvester', 'plateforme:list:publique'])]
     private bool $instrumentNational = false;
 
     #[ORM\OneToMany(mappedBy: "plateforme", targetEntity: PlateformeTags::class, cascade: ["remove"], orphanRemoval: true)]

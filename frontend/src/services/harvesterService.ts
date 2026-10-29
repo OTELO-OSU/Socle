@@ -25,7 +25,7 @@ export async function fetchHarvesterAdmin() {
 }
 
 export async function creerHMT(clientId: string) {
-    const { data } = await symfony.post<{ hmt: string }>('/harvester/hmt/create', { params: { clientId } });
+    const { data } = await symfony.post<{ hmt: string }>('/harvester/hmt/create', { clientId: clientId });
 
     return data;
 }

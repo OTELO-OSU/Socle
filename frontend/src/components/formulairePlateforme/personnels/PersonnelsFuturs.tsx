@@ -2,7 +2,7 @@ import { Autocomplete, Box, Chip, FormControl, Grid, InputLabel, MenuItem, Selec
 import { useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-import type { PosteFutur } from "../../../services/plateformeService";
+import type { PlateformeDictionnaire, PosteFutur } from "../../../services/plateformeService";
 import { getEmploiTypesOptions } from "../../../services/agentFormLogicService";
 
 const PERSONNELS_FIELD_NAME = "postes_futurs";
@@ -24,17 +24,48 @@ function ChampPosteFutur({ children, label }: { children: React.ReactNode; label
 
 function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void }) {
     const { employeurOptions, corps, bap, modalitesRecrutement } = useContext(DictionnaireContext);
+    const { watch } = useFormContext();
 
-    const emploiTypeDisponible: { id: number; nom: string; acronyme: string }[] = getEmploiTypesOptions(poste.baps_ids ?? [], bap, corps.find((c) => c.id === poste.corps_id) ?? null);
+    const dictionnaireDistant = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const employeurOptionsPoste = dictionnaireDistant
+        ? Object.values(dictionnaireDistant.employeurs).map((employeur) => ({
+            value: employeur.id,
+            label: employeur.acronyme ? `${employeur.nom} (${employeur.acronyme})` : employeur.nom ?? "",
+        }))
+        : employeurOptions;
+    const corpsOptionsPoste = dictionnaireDistant
+        ? Object.values(dictionnaireDistant.corps)
+        : corps;
+    const bapOptionsPoste = dictionnaireDistant
+        ? Object.values(dictionnaireDistant.baps).map((option) => ({
+            id: option.id,
+            nom: option.nom ?? "",
+            lettre: "",
+        }))
+        : bap;
+    const modalitesOptionsPoste = dictionnaireDistant
+        ? Object.values(dictionnaireDistant.modalites_recrutement)
+        : modalitesRecrutement;
+    const emploiTypeDisponible = dictionnaireDistant
+        ? Object.values(dictionnaireDistant.emploi_types).map((emploiType) => ({
+            id: emploiType.id,
+            nom: emploiType.nom ?? "",
+            acronyme: emploiType.acronyme ?? "",
+        }))
+        : getEmploiTypesOptions(
+            poste.baps_ids ?? [],
+            bap,
+            corps.find((c) => c.id === poste.corps_id) ?? null
+        );
 
 
     return (
         <Box sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 1, p: 2 }}>
             <ChampPosteFutur label="Employeur">
                 <Autocomplete
-                    options={employeurOptions}
+                    options={employeurOptionsPoste}
                     fullWidth
-                    value={employeurOptions.find((option) => option.value === poste.employeur_id) ?? null}
+                    value={employeurOptionsPoste.find((option) => option.value === poste.employeur_id) ?? null}
                     onChange={(_, value) => onChange?.({ ...poste, employeur_id: value?.value as number })}
                     renderInput={(params) => <TextField {...params} />}
                     isOptionEqualToValue={(option) =>
@@ -50,7 +81,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                     onChange={(e) => onChange?.({ ...poste, modalite_recrutement_id: e.target.value as number })}
                     displayEmpty
                 >
-                    {modalitesRecrutement.map((option) => (
+                    {modalitesOptionsPoste.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
                             {option.nom}
                         </MenuItem>
@@ -64,7 +95,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                     onChange={(e) => onChange?.({ ...poste, corps_id: e.target.value as number })}
                     displayEmpty
                 >
-                    {corps.map((option) => (
+                    {corpsOptionsPoste.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
                             {option.nom}
                         </MenuItem>
@@ -73,10 +104,10 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
             </ChampPosteFutur>
             <ChampPosteFutur label="BAP">
                 <Autocomplete
-                    options={bap}
+                    options={bapOptionsPoste}
                     multiple
                     fullWidth
-                    value={bap.filter((option) => poste.baps_ids?.includes(option.id)) ?? []}
+                    value={bapOptionsPoste.filter((option) => poste.baps_ids?.includes(option.id)) ?? []}
                     getOptionLabel={(x) => `${x.lettre} - ${x.nom}`}
                     renderValue={(value, getItemProps) =>
                         value.map((option, index) => (

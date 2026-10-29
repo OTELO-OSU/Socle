@@ -10,6 +10,7 @@ import { SnackbarContext } from "../../../context/snackbarContext";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { Delete, Edit } from "@mui/icons-material";
+import type { PlateformeDictionnaire } from "../../../services/plateformeService";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
@@ -383,8 +384,14 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate }: PersonnelCardProp
                 : "background.paper";
 
     const dictionnaireContext = useContext(DictionnaireContext);
-    const corps = dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id) ?? null;
-    const typeContrat = dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id) ?? null;
+    const { watch } = useFormContext();
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+        ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+        ?? null;
+    const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+        ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+        ?? null;
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newQuotite, setNewQuotite] = useState<number | null>(personnel.quotite);

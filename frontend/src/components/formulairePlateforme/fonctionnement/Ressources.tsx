@@ -8,13 +8,20 @@ import { formatEmployeurLabel } from "../../../services/formatLabelService";
 import type { SelectOption } from "../../../provider/DictionnaireProvider";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
-import type { SourceFinancement } from "../../../services/plateformeService";
+import type { PlateformeDictionnaire, SourceFinancement } from "../../../services/plateformeService";
 
 function DialogModifDetailTutelle() {
     const [open, setOpen] = useState(false);
     const { getValues, setValue, watch } = useFormContext();
     const contribution_tutelle_detail = watch("contribution_tutelle_detail") || [];
     const dictionnaireContext = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const financeurOptions = plateformeDictionnaire
+        ? Object.values(plateformeDictionnaire.entites).map((entite) => ({
+            value: entite.id,
+            label: entite.acronyme ? `${entite.nom} (${entite.acronyme})` : entite.nom ?? "",
+        }))
+        : dictionnaireContext.employeurOptions;
     const tauxTotaleTutelle = contribution_tutelle_detail.reduce((acc: number, source: SourceFinancement) => acc + (source.taux || 0), 0);
     const estTauxTutelleValide = tauxTotaleTutelle === 100;
     const estAucunTauxA0 = !contribution_tutelle_detail.some((source: SourceFinancement) => source.taux === 0);
@@ -60,9 +67,9 @@ function DialogModifDetailTutelle() {
                     {contribution_tutelle_detail.map((source: SourceFinancement, index: number) => (
                         <Stack key={index} direction="row" spacing={2}>
                             <Autocomplete<SelectOption, false, false, false>
-                                options={dictionnaireContext.employeurOptions}
+                                options={financeurOptions}
                                 fullWidth
-                                value={dictionnaireContext.employeurOptions.find((option) => option.value === source.financeur_id) ?? null}
+                                value={financeurOptions.find((option) => option.value === source.financeur_id) ?? null}
                                 onChange={(_, value) => {
                                     const selectedValue = value?.value;
                                     const financeurId = typeof selectedValue === "number" ? selectedValue : null;
@@ -139,6 +146,8 @@ export default function Ressources() {
         totalTaux();
     });
     const dictionnaireContext = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const entites = plateformeDictionnaire?.entites;
     const contribution_tutelle_taux = watch("contribution_tutelle_taux");
     if (contribution_tutelle_taux < 1) setValue("contribution_tutelle_detail", []);
     const detailTutelle = getValues("contribution_tutelle_detail") || [];
@@ -168,7 +177,9 @@ export default function Ressources() {
                             </Stack>
                             {detailTutelle.length > 0 ? detailTutelle.map((detail: SourceFinancement, index: number) => (
                                 <Typography key={index} variant="body2" component="p">
-                                    {formatEmployeurLabel(dictionnaireContext.employeur.find((tutelle) => tutelle.id === detail.financeur_id))}: {detail.taux}%
+                                    {entites?.[String(detail.financeur_id)]?.nom
+                                        ?? formatEmployeurLabel(dictionnaireContext.employeur.find((tutelle) => tutelle.id === detail.financeur_id))}
+                                    : {detail.taux}%
                                 </Typography>
                             )) : null}
                             {detailTutelle.length === 0 && (

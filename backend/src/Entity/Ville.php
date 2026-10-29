@@ -18,16 +18,16 @@ class Ville
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['ville:list'])]
+    #[Groups(['ville:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['ville:list'])]
+    #[Groups(['ville:list', 'plateforme:harvester'])]
     #[SerializedName("numero_departement")]
     #[ORM\Column]
     private ?string $numeroDepartement = null;
 
-    #[Groups(['ville:list'])]
+    #[Groups(['ville:list', 'plateforme:harvester'])]
     #[ORM\Column(length: 255)]
     private ?string $departement = null;
 

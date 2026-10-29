@@ -2,7 +2,7 @@ import { Box, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Radio, R
 import { useContext, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
-import type { Instrument } from "../../../services/plateformeService";
+import type { Instrument, PlateformeDictionnaire } from "../../../services/plateformeService";
 
 function InstrumentActuelMaintenanceCard({
     instrument,
@@ -14,6 +14,11 @@ function InstrumentActuelMaintenanceCard({
     onEdit: (instrument: Instrument) => void;
 }) {
     const dictionnaireContext = useContext(DictionnaireContext);
+const { watch } = useFormContext();
+const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+const contratsMaintenance = plateformeDictionnaire
+    ? Object.values(plateformeDictionnaire.contrats_maintenance)
+    : dictionnaireContext.typeContratMaintenance;
     const selectedMutualisation = instrument.mutualise_autre_instrument
         ? "mutualiseAutreInstrument"
         : instrument.mutualise_umr_osu
@@ -79,7 +84,7 @@ function InstrumentActuelMaintenanceCard({
                                     aria-labelledby={`${instrument.id}-label`}
                                     name="radio-buttons-group"
                                 >
-                                    {dictionnaireContext.typeContratMaintenance.map((type) => (
+                                    {contratsMaintenance.map((type) => (
                                         <FormControlLabel
                                             value={type.id}
                                             control={
