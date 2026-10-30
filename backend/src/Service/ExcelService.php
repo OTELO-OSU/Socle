@@ -25,17 +25,38 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ExcelService
 {
+    private const EXPORT_REFERENCE_TYPES = [
+        'ville_id' => 'ville',
+        'laboratoire_operateur_id' => 'entite',
+        'tutelles_principales_ids' => 'entite',
+        'tutelles_secondaires_ids' => 'entite',
+        'financeur_id' => 'entite',
+        'employeur_id' => 'entite',
+        'universite_rattachement_id' => 'entite',
+        'type_contrat_id' => 'contrat_personnel',
+        'corps_id' => 'corps',
+        'grade_id' => 'grade',
+        'baps_ids' => 'bap',
+        'emploi_types_ids' => 'emploi_type',
+        'cnu_id' => 'cnu',
+        'section_cnrs_id' => 'section',
+        'modalite_recrutement_id' => 'modalite_recrutement',
+        'contrat_maintenance_id' => 'contrat_maintenance',
+        'determination_tarif_plateforme_id' => 'determination_tarif',
+    ];
 
     public function __construct(
         private EntityManagerInterface $em,
         private Security $security,
         private SerializerInterface $serializerInterface,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly HarvesterService $harvesterService
     ) {}
 
     /** Écrit la valeur en forçant le type texte si elle pourrait être interprétée comme une formule */
@@ -87,22 +108,172 @@ class ExcelService
             throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.exporter'));
         }
 
-        $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);
-
-        return $this->exportPlatformeArrayEnExcel([$json]);
+        return $this->exportPlatformeArrayEnExcel([$this->preparePlatformePourExport($platform)]);
     }
 
-    private function formatVille(?int $villeId): string
+    public function exportAllPlatformsToExcel(): string
+    {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORTER_ABSOLUMENT_TOUT, Plateforme::class)) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_tout'));
+        }
+
+        return $this->exportPlatformsToExcel();
+    }
+
+    public function exportPlatformsByTagToExcel(int $tagId): string
+    {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORT_TAG, Plateforme::class)) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_par_tag'));
+        }
+        return $this->exportPlatformsToExcel($tagId);
+    }
+
+    public function exportPlatformsByUnitRorToExcel(string $rorId): string
+    {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORT_UNITE, Plateforme::class)) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_par_unite'));
+        }
+        return $this->exportPlatformsToExcel(null, $rorId);
+    }
+
+    private function exportPlatformsToExcel(?int $tagId = null, ?string $rorId = null): string
+    {
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
+        $platforms = [];
+
+        foreach ($this->em->getRepository(Plateforme::class)->findAll() as $platform) {
+            $lastHistorique = $platform->getLastHistorique();
+            if ($lastHistorique === null) {
+                continue;
+            }
+
+            if ($tagId !== null && !$platform->getPlateformeTags()->exists(
+                static fn(int $key, \App\Entity\PlateformeTags $tag): bool => $tag->getTagId() === $tagId
+            )) {
+                continue;
+            }
+
+            if ($rorId !== null && $lastHistorique->getLaboratoireOperateur()?->getRorId() !== $rorId) {
+                continue;
+            }
+
+            $exportData = $this->preparePlatformePourExport($platform);
+            $exportData['export_id'] = 'local:' . $platform->getId();
+            $platforms[] = $exportData;
+        }
+
+        foreach ($this->harvesterService->getToutesLesPlateformesHarvestePourExport($tagId, $rorId) as $host => $remotePlatforms) {
+            foreach ($remotePlatforms as $remotePlatform) {
+                $remotePlatformId = $remotePlatform['id'] ?? null;
+                if (!is_int($remotePlatformId) && !(is_string($remotePlatformId) && ctype_digit($remotePlatformId))) {
+                    throw new \UnexpectedValueException('Identifiant de plateforme distante invalide.');
+                }
+
+                $exportData = $this->harvesterService->getPlateformeHarvesteExportDataSansPermission((int) $remotePlatformId, $host);
+                $exportData['export_id'] = 'harvester:' . $host . ':' . $remotePlatformId;
+                $platforms[] = $exportData;
+            }
+        }
+
+        return $this->exportPlatformeArrayEnExcel($platforms);
+    }
+
+    public function preparePlatformePourExport(Plateforme $platform): array
+    {
+        $json = $this->serializerInterface->serialize($platform, 'json', ['groups' => ['plateforme:detail']]);
+        $data = json_decode($json, true);
+
+        if (!is_array($data)) {
+            throw new \UnexpectedValueException('Impossible de préparer les données de la plateforme pour l’export.');
+        }
+
+        $references = [];
+        $this->collectExportReferences($data, $references);
+
+        return ['platform' => $data, 'references' => $references];
+    }
+
+    private function collectExportReferences(array $data, array &$references): void
+    {
+        foreach ($data as $key => $value) {
+            if (isset(self::EXPORT_REFERENCE_TYPES[$key])) {
+                $type = self::EXPORT_REFERENCE_TYPES[$key];
+                $ids = is_array($value) ? $value : [$value];
+                foreach ($ids as $id) {
+                    if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
+                        continue;
+                    }
+
+                    $id = (int) $id;
+                    if (!array_key_exists((string) $id, $references[$type] ?? [])) {
+                        $references[$type][(string) $id] = $this->resolveReferenceLabel($type, $id);
+                    }
+                    if ($type === 'entite' && $key === 'laboratoire_operateur_id' && !array_key_exists((string) $id, $references['laboratoire_directeurs'] ?? [])) {
+                        $entite = $this->em->getRepository(Entite::class)->find($id);
+                        $directeur = $entite?->getDirecteur();
+                        $references['laboratoire_directeurs'][(string) $id] = [
+                            'prenom' => $directeur?->getPrenom() ?? '',
+                            'nom' => $directeur?->getNom() ?? '',
+                            'email' => $directeur?->getEmail() ?? '',
+                        ];
+                    }
+                }
+            }
+
+            if (is_array($value)) {
+                $this->collectExportReferences($value, $references);
+            }
+        }
+    }
+
+    private function resolveReferenceLabel(string $type, int $id): string
+    {
+        return match ($type) {
+            'ville' => $this->formatVille($id),
+            'entite' => $this->formatFinanceur($id),
+            'contrat_personnel' => $this->formatContratPersonnel($id),
+            'contrat_maintenance' => $this->formatContratMaintenance($id),
+            'corps' => $this->formatCorps($id),
+            'grade' => $this->formatGrade($id),
+            'bap' => $this->formatBap($id),
+            'emploi_type' => $this->formatEmploiType($id),
+            'cnu' => $this->formatCNU($id),
+            'section' => $this->formatSection($id),
+            'modalite_recrutement' => $this->formatModaliteRecrutement($id),
+            'determination_tarif' => $this->formatDeterminationTarif($id),
+            default => '',
+        };
+    }
+
+    private function resolvedReference(?int $id, string $type, ?array $references): ?string
+    {
+        if ($references === null) {
+            return null;
+        }
+
+        if (!$id) {
+            return '';
+        }
+
+        return $references[$type][(string) $id] ?? '';
+    }
+
+    private function formatVille(?int $villeId, ?array $references = null): string
     {
         if (!$villeId) return '';
+        if (($resolved = $this->resolvedReference($villeId, 'ville', $references)) !== null) return $resolved;
         $ville = $this->em->getRepository(Ville::class)->find($villeId);
         if (!$ville) return '';
         return $ville->getNom() . " (" . $ville->getNumeroDepartement() . " " . $ville->getDepartement() . ")";
     }
 
-    private function formatLabo(?int $laboId): string
+    private function formatLabo(?int $laboId, ?array $references = null): string
     {
         if (!$laboId) return '';
+        if (($resolved = $this->resolvedReference($laboId, 'entite', $references)) !== null) return $resolved;
         $labo = $this->em->getRepository(Entite::class)->find($laboId);
         if (!$labo) return '';
         $chain = "";
@@ -117,9 +288,10 @@ class ExcelService
         return $chain;
     }
 
-    private function formatFinanceur(?int $financeurId): string
+    private function formatFinanceur(?int $financeurId, ?array $references = null): string
     {
         if (!$financeurId) return '';
+        if (($resolved = $this->resolvedReference($financeurId, 'entite', $references)) !== null) return $resolved;
         $financeur = $this->em->getRepository(Entite::class)->find($financeurId);
         if (!$financeur) return '';
         $chain = "";
@@ -134,33 +306,37 @@ class ExcelService
         return $chain;
     }
 
-    private function formatModaliteRecrutement(?int $modaliteId): string
+    private function formatModaliteRecrutement(?int $modaliteId, ?array $references = null): string
     {
         if (!$modaliteId) return '';
+        if (($resolved = $this->resolvedReference($modaliteId, 'modalite_recrutement', $references)) !== null) return $resolved;
         $modalite = $this->em->getRepository(ModaliteRecrutement::class)->find($modaliteId);
         if (!$modalite) return '';
         return $modalite->getNom();
     }
 
-    private function formatContratPersonnel(?int $contratId): string
+    private function formatContratPersonnel(?int $contratId, ?array $references = null): string
     {
         if (!$contratId) return '';
+        if (($resolved = $this->resolvedReference($contratId, 'contrat_personnel', $references)) !== null) return $resolved;
         $contrat = $this->em->getRepository(TypeContrat::class)->find($contratId);
         if (!$contrat) return '';
         return $contrat->getNom();
     }
 
-    private function formatContratMaintenance(?int $contratId): string
+    private function formatContratMaintenance(?int $contratId, ?array $references = null): string
     {
         if (!$contratId) return '';
+        if (($resolved = $this->resolvedReference($contratId, 'contrat_maintenance', $references)) !== null) return $resolved;
         $contrat = $this->em->getRepository(ContratMaintenance::class)->find($contratId);
         if (!$contrat) return '';
         return $contrat->getNom();
     }
 
-    private function formatCorps(?int $corpsId): string
+    private function formatCorps(?int $corpsId, ?array $references = null): string
     {
         if (!$corpsId) return '';
+        if (($resolved = $this->resolvedReference($corpsId, 'corps', $references)) !== null) return $resolved;
         $corps = $this->em->getRepository(Corps::class)->find($corpsId);
         if (!$corps) return '';
         $chain = "";
@@ -171,25 +347,28 @@ class ExcelService
         return $chain;
     }
 
-    private function formatGrade(?int $gradeId): string
+    private function formatGrade(?int $gradeId, ?array $references = null): string
     {
         if (!$gradeId) return '';
+        if (($resolved = $this->resolvedReference($gradeId, 'grade', $references)) !== null) return $resolved;
         $grade = $this->em->getRepository(Grade::class)->find($gradeId);
         if (!$grade) return '';
         return $grade->getNom();
     }
 
-    private function formatBap(?int $bapId): string
+    private function formatBap(?int $bapId, ?array $references = null): string
     {
         if (!$bapId) return '';
+        if (($resolved = $this->resolvedReference($bapId, 'bap', $references)) !== null) return $resolved;
         $bap = $this->em->getRepository(Bap::class)->find($bapId);
         if (!$bap) return '';
         return $bap->getLettre();
     }
 
-    private function formatEmploiType(?int $emploiTypeId): string
+    private function formatEmploiType(?int $emploiTypeId, ?array $references = null): string
     {
         if (!$emploiTypeId) return '';
+        if (($resolved = $this->resolvedReference($emploiTypeId, 'emploi_type', $references)) !== null) return $resolved;
         $emploiType = $this->em->getRepository(EmploiType::class)->find($emploiTypeId);
         if (!$emploiType) return '';
         $chain = "";
@@ -200,9 +379,10 @@ class ExcelService
         return $chain;
     }
 
-    private function formatCNU(?int $cnuId): string
+    private function formatCNU(?int $cnuId, ?array $references = null): string
     {
         if (!$cnuId) return '';
+        if (($resolved = $this->resolvedReference($cnuId, 'cnu', $references)) !== null) return $resolved;
         $cnu = $this->em->getRepository(Cnu::class)->find($cnuId);
         if (!$cnu) return '';
         return $cnu->getNumero();
@@ -216,17 +396,19 @@ class ExcelService
         return "";
     }
 
-    private function formatSection(?int $sectionId): string
+    private function formatSection(?int $sectionId, ?array $references = null): string
     {
         if (!$sectionId) return '';
+        if (($resolved = $this->resolvedReference($sectionId, 'section', $references)) !== null) return $resolved;
         $section = $this->em->getRepository(SectionCnrs::class)->find($sectionId);
         if (!$section) return '';
         return $section->getNumero();
     }
 
-    private function formatDeterminationTarif(?int $dtmId): string
+    private function formatDeterminationTarif(?int $dtmId, ?array $references = null): string
     {
         if (!$dtmId) return '';
+        if (($resolved = $this->resolvedReference($dtmId, 'determination_tarif', $references)) !== null) return $resolved;
         $dtm = $this->em->getRepository(DeterminationTarifMethode::class)->find($dtmId);
         if (!$dtm) return '';
         return $dtm->getNom();
@@ -456,7 +638,22 @@ class ExcelService
         ];
 
         foreach ($platforms as $plat) {
-            $plat = \json_decode($plat, true);
+            $references = null;
+            if (is_string($plat)) {
+                $plat = \json_decode($plat, true);
+            } elseif (is_array($plat) && isset($plat['platform'], $plat['references'])) {
+                $references = $plat['references'];
+                $plat = $plat['platform'];
+            }
+
+            if (!is_array($plat)) {
+                throw new \UnexpectedValueException('Format de données de plateforme invalide pour l’export.');
+            }
+
+            if (isset($plat['export_id'])) {
+                $plat['id'] = $plat['export_id'];
+            }
+
             $dernierHistorique = $plat["dernier_historique"];
             $sheet1Array[] = [
                 $plat["id"],
@@ -465,7 +662,7 @@ class ExcelService
                 $plat["instrument_national"] ? 'Oui' : 'Non',
                 $dernierHistorique["autre_type_labellisation"] ?? '',
                 $dernierHistorique["site_web"] ?? '',
-                $this->formatVille($dernierHistorique["ville_id"]),
+                $this->formatVille($dernierHistorique["ville_id"], $references),
                 $dernierHistorique["logo_url"] ?? '',
             ];
 
@@ -474,18 +671,25 @@ class ExcelService
             $emailDirLab = '';
             $laboOperateurId = $dernierHistorique["laboratoire_operateur_id"] ?? null;
             if ($laboOperateurId) {
-                $laboOperateur = $this->em->getRepository(Entite::class)->find($laboOperateurId);
-                $dir = $laboOperateur->getDirecteur();
-                if ($dir) {
-                    $prenomDirLab = $dir->getPrenom() ?? '';
-                    $nomDirLab = $dir->getNom() ?? '';
-                    $emailDirLab = $dir->getEmail() ?? '';
+                if ($references !== null) {
+                    $dir = $references['laboratoire_directeurs'][(string) $laboOperateurId] ?? [];
+                    $prenomDirLab = $dir['prenom'] ?? '';
+                    $nomDirLab = $dir['nom'] ?? '';
+                    $emailDirLab = $dir['email'] ?? '';
+                } else {
+                    $laboOperateur = $this->em->getRepository(Entite::class)->find($laboOperateurId);
+                    $dir = $laboOperateur?->getDirecteur();
+                    if ($dir) {
+                        $prenomDirLab = $dir->getPrenom() ?? '';
+                        $nomDirLab = $dir->getNom() ?? '';
+                        $emailDirLab = $dir->getEmail() ?? '';
+                    }
                 }
             }
 
             $sheet3Array[] = [
                 $plat["id"],
-                $this->formatLabo($dernierHistorique["laboratoire_operateur_id"]),
+                $this->formatLabo($dernierHistorique["laboratoire_operateur_id"], $references),
                 $nomDirLab,
                 $prenomDirLab,
                 $emailDirLab,
@@ -499,7 +703,7 @@ class ExcelService
                 $sheet4Array[] = [
                     $plat["id"],
                     'Principale',
-                    $this->formatFinanceur($tutelleId),
+                    $this->formatFinanceur($tutelleId, $references),
                 ];
             }
 
@@ -509,7 +713,7 @@ class ExcelService
                 $sheet4Array[] = [
                     $plat["id"],
                     'Secondaire',
-                    $this->formatFinanceur($tutelleId),
+                    $this->formatFinanceur($tutelleId, $references),
                 ];
             }
 
@@ -519,7 +723,7 @@ class ExcelService
             foreach ($personnels as $pers) {
                 $sheet5Array[] = [
                     $plat["id"],
-                    $this->formatContratPersonnel($pers["utilisateur"]["type_contrat_id"] ?? null),
+                    $this->formatContratPersonnel($pers["utilisateur"]["type_contrat_id"] ?? null, $references),
                     $pers["responsable_scientifique"] ? 'Oui' : 'Non',
                     $pers["responsable_technique"] ? 'Oui' : 'Non',
                     $pers["responsable_plateforme"] ? 'Oui' : 'Non',
@@ -527,16 +731,16 @@ class ExcelService
                     $pers["utilisateur"]["nom"] ?? '',
                     $pers["utilisateur"]["prenom"] ?? '',
                     $pers["utilisateur"]["email"] ?? '',
-                    $this->formatFinanceur($pers["utilisateur"]["employeur_id"]),
-                    $this->formatFinanceur($pers["utilisateur"]["universite_rattachement_id"]),
-                    $this->formatCorps($pers["utilisateur"]["corps_id"]),
-                    $this->formatGrade($pers["utilisateur"]["grade_id"]),
-                    array_key_exists(0, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][0]) : '',
-                    array_key_exists(1, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][1]) : '',
-                    array_key_exists(0, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][0]) : '',
-                    array_key_exists(1, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][1]) : '',
-                    $this->formatCNU($pers["utilisateur"]["cnu_id"]),
-                    $this->formatSection($pers["utilisateur"]["section_cnrs_id"]),
+                    $this->formatFinanceur($pers["utilisateur"]["employeur_id"], $references),
+                    $this->formatFinanceur($pers["utilisateur"]["universite_rattachement_id"], $references),
+                    $this->formatCorps($pers["utilisateur"]["corps_id"], $references),
+                    $this->formatGrade($pers["utilisateur"]["grade_id"], $references),
+                    array_key_exists(0, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][0], $references) : '',
+                    array_key_exists(1, $pers["utilisateur"]["baps_ids"]) ? $this->formatBap($pers["utilisateur"]["baps_ids"][1], $references) : '',
+                    array_key_exists(0, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][0], $references) : '',
+                    array_key_exists(1, $pers["utilisateur"]["emploi_types_ids"]) ? $this->formatEmploiType($pers["utilisateur"]["emploi_types_ids"][1], $references) : '',
+                    $this->formatCNU($pers["utilisateur"]["cnu_id"], $references),
+                    $this->formatSection($pers["utilisateur"]["section_cnrs_id"], $references),
                     $pers["quotite"] ?? '',
                     '',
                 ];
@@ -598,7 +802,7 @@ class ExcelService
                         $bapChaine .= " ; ";
                     }
 
-                    $bapChaine .= $this->formatBap($bap);
+                    $bapChaine .= $this->formatBap($bap, $references);
                 }
 
                 $emploiTypeChaine = "";
@@ -607,15 +811,15 @@ class ExcelService
                         $emploiTypeChaine .= " ; ";
                     }
 
-                    $emploiTypeChaine .= $this->formatEmploiType($emploiType);
+                    $emploiTypeChaine .= $this->formatEmploiType($emploiType, $references);
                 }
 
 
                 $sheet6Array[] = [
                     $plat["id"],
-                    $this->formatFinanceur($pf["employeur_id"]),
-                    $this->formatModaliteRecrutement($pf["modalite_recrutement_id"]),
-                    $this->formatCorps($pf["corps_id"]),
+                    $this->formatFinanceur($pf["employeur_id"], $references),
+                    $this->formatModaliteRecrutement($pf["modalite_recrutement_id"], $references),
+                    $this->formatCorps($pf["corps_id"], $references),
                     $bapChaine,
                     $emploiTypeChaine,
                     $pf["quotite"] ?? '',
@@ -641,7 +845,7 @@ class ExcelService
                         $sheet8Array[] = [
                             $plat["id"] ?? '',
                             $instrument["id"] ?? '',
-                            $this->formatFinanceur($financement["financeur_id"]),
+                            $this->formatFinanceur($financement["financeur_id"], $references),
                             $financement["taux"] ?? '',
                         ];
                     }
@@ -649,7 +853,7 @@ class ExcelService
                     $sheet8BisBisArray[] = [
                         $plat["id"] ?? '',
                         $instrument["id"] ?? '',
-                        $this->formatContratMaintenance($instrument["contrat_maintenance_id"] ?? null),
+                        $this->formatContratMaintenance($instrument["contrat_maintenance_id"] ?? null, $references),
                         $instrument["commentaire_nature_contrat"] ?? '',
                         $instrument["fournisseur_contrat"] ?? '',
                         $this->formatContratMutaliseType($instrument),
@@ -678,7 +882,7 @@ class ExcelService
                         $sheet10Array[] = [
                             $plat["id"] ?? '',
                             $instrument["id"] ?? '',
-                            $this->formatFinanceur($financement["financeur_id"]),
+                            $this->formatFinanceur($financement["financeur_id"], $references),
                             $financement["taux"] ?? '',
                         ];
                     }
@@ -722,14 +926,14 @@ class ExcelService
             foreach ($dernierHistorique["contribution_tutelles"] ?? [] as $contribTutelle) {
                 $sheet14Array[] = [
                     $plat["id"] ?? '',
-                    $this->formatFinanceur($contribTutelle["financeur_id"]),
+                    $this->formatFinanceur($contribTutelle["financeur_id"], $references),
                     $contribTutelle["taux"] ?? '',
                 ];
             }
 
             $sheet15Array[] = [
                 $plat["id"] ?? '',
-                $this->formatDeterminationTarif($dernierHistorique["determination_tarif_plateforme_id"]),
+                $this->formatDeterminationTarif($dernierHistorique["determination_tarif_plateforme_id"], $references),
                 $dernierHistorique["labellisation_qualite"] ? "Oui" : "Non",
                 $dernierHistorique["nom_labellisation_qualite"] ?? '',
                 $dernierHistorique["procedure_transparente_prestation_exterieure"] ? "Oui" : "Non",

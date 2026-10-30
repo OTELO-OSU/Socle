@@ -6,6 +6,7 @@ use App\Service\ExcelService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class ExcelController extends AbstractController
@@ -21,6 +22,49 @@ final class ExcelController extends AbstractController
         return new Response($content, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="plateforme_' . $id . '.xlsx"',
+        ]);
+    }
+
+    #[Route('/export/plateformes', methods: ['GET'])]
+    public function exportToutesLesPlateformes(): Response
+    {
+        $content = $this->es->exportAllPlatformsToExcel();
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plateformes.xlsx"',
+        ]);
+    }
+
+    #[Route('/export/plateformes/tag', methods: ['GET'])]
+    public function exportPlateformesParTag(Request $request): Response
+    {
+        $tagId = $request->query->getInt('tagId');
+        if ($tagId <= 0 || !$request->query->has('tagId')) {
+            throw new BadRequestHttpException('Un identifiant de tag positif est obligatoire.');
+        }
+
+        $content = $this->es->exportPlatformsByTagToExcel($tagId);
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plateformes_tag_' . $tagId . '.xlsx"',
+        ]);
+    }
+
+    #[Route('/export/plateformes/unite', methods: ['GET'])]
+    public function exportPlateformesParUnite(Request $request): Response
+    {
+        $rorId = trim((string) $request->query->get('rorId', ''));
+        if ($rorId === '') {
+            throw new BadRequestHttpException('Un identifiant ROR est obligatoire.');
+        }
+
+        $content = $this->es->exportPlatformsByUnitRorToExcel($rorId);
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plateformes_unite_' . rawurlencode($rorId) . '.xlsx"',
         ]);
     }
 }

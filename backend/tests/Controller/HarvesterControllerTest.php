@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Plateforme;
+use App\Service\ExcelService;
 use App\Service\HarvesterService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -141,5 +142,122 @@ class HarvesterControllerTest extends WebTestCase
         $data = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertSame("ptf_1", $data['pseudoId']);
         $this->assertSame('Plateforme A', $data['dernier_historique']['nom_officiel']);
+    }
+
+    public function testExportPlateformeHarvesterHMTRetourneLesDonneesAvecReferencesResolues(): void
+    {
+        $plateforme = new Plateforme();
+        $exportData = [
+            'platform' => ['id' => 1, 'dernier_historique' => ['ville_id' => 4]],
+            'references' => ['ville' => ['4' => 'Paris (75 Paris)']],
+        ];
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService
+            ->expects($this->once())
+            ->method('getPlateformeDetailPourMachine')
+            ->with('client-123', 'secret-456', 1)
+            ->willReturn($plateforme);
+
+        $excelService = $this->createMock(ExcelService::class);
+        $excelService
+            ->expects($this->once())
+            ->method('preparePlatformePourExport')
+            ->with($plateforme)
+            ->willReturn($exportData);
+
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+        static::getContainer()->set(ExcelService::class, $excelService);
+
+        $headerAuth = 'Basic ' . base64_encode('client-123:secret-456');
+        $this->client->request(
+            'GET',
+            '/api/hmt/plateforme/export-data?plateformeId=1',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => $headerAuth]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSame($exportData, json_decode($this->client->getResponse()->getContent(), true));
+    }
+
+    public function testExportPlateformeHarvesterHMTAllContourneLaPermissionParTags(): void
+    {
+        $plateforme = new Plateforme();
+        $exportData = [
+            'platform' => ['id' => 1, 'dernier_historique' => ['ville_id' => 4]],
+            'references' => ['ville' => ['4' => 'Paris (75 Paris)']],
+        ];
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService
+            ->expects($this->once())
+            ->method('getPlateformeDetailPourMachineSansPermission')
+            ->with('client-123', 'secret-456', 1)
+            ->willReturn($plateforme);
+
+        $excelService = $this->createMock(ExcelService::class);
+        $excelService
+            ->expects($this->once())
+            ->method('preparePlatformePourExport')
+            ->with($plateforme)
+            ->willReturn($exportData);
+
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+        static::getContainer()->set(ExcelService::class, $excelService);
+
+        $this->client->request(
+            'GET',
+            '/api/hmt/plateforme/export-data-all?plateformeId=1',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456')]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSame($exportData, json_decode($this->client->getResponse()->getContent(), true));
+    }
+
+    public function testListePlateformesPourExportTransmetLeFiltreParTag(): void
+    {
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService
+            ->expects($this->once())
+            ->method('getToutesLesPlateformesPourMachine')
+            ->with('client-123', 'secret-456', 17, null)
+            ->willReturn([]);
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+
+        $this->client->request(
+            'GET',
+            '/api/hmt/plateformes/export?tagId=17',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456')]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSame([], json_decode($this->client->getResponse()->getContent(), true));
+    }
+
+    public function testListePlateformesPourExportTransmetLeFiltreParRor(): void
+    {
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService
+            ->expects($this->once())
+            ->method('getToutesLesPlateformesPourMachine')
+            ->with('client-123', 'secret-456', null, '03yrm5c26')
+            ->willReturn([]);
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+
+        $this->client->request(
+            'GET',
+            '/api/hmt/plateformes/export?rorId=03yrm5c26',
+            [],
+            [],
+            ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456')]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSame([], json_decode($this->client->getResponse()->getContent(), true));
     }
 }

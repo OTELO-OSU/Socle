@@ -84,6 +84,11 @@ class Entite
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codeUnite = null;
 
+    #[Groups(['unite:list', 'unite:detail'])]
+    #[SerializedName('ror_id')]
+    #[ORM\Column(length: 9, unique: true, nullable: true)]
+    private ?string $rorId = null;
+
     /**
      * @var Collection<int, Utilisateur>
      */
@@ -415,6 +420,18 @@ class Entite
     public function setCodeUnite(?string $codeUnite): static
     {
         $this->codeUnite = $codeUnite;
+
+        return $this;
+    }
+
+    public function getRorId(): ?string
+    {
+        return $this->rorId;
+    }
+
+    public function setRorId(?string $rorId): static
+    {
+        $this->rorId = $rorId;
 
         return $this;
     }

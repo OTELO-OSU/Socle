@@ -57,6 +57,9 @@ plateforme:
         plateforme_prete_validation: "La plateforme est prête pour la validation."
     exception:
         exporter: "Vous n'avez pas les permissions nécessaires pour exporter les données de cette plateforme."
+        exporter_tout: "Vous n'avez pas les permissions nécessaires pour exporter toutes les plateformes."
+        exporter_par_tag: "Vous n'avez pas les permissions nécessaires pour exporter les plateformes par tag."
+        exporter_par_unite: "Vous n'avez pas les permissions nécessaires pour exporter les plateformes par unité."
         acces_plateforme: "Vous n'avez pas les permissions nécessaires pour accéder à cette plateforme."
         creer_plateforme: "Vous n'avez pas les permissions nécessaires pour créer une plateforme."
         supprimer_plateforme: "Vous n'avez pas les permissions nécessaires pour supprimer cette plateforme."
@@ -98,6 +101,8 @@ harvester:
         client_id_secret_id_obligatoire: "Le clientId et le secretId sont obligatoires."
         client_id_secret_id_obligatoire_plateforme_id: "Le clientId, le secretId et l'identifiant de la plateforme sont obligatoires."
         plateforme_id_host_obligatoire: "L'identifiant de la plateforme et le host sont obligatoires."
+        trop_filtre_export: "Vous ne pouvez pas exporter plus d'un filtre à la fois. Veuillez choisir soit un tag, soit un ROR ID."
+        identifiant_ror_obligatoire: "L'identifiant ROR est obligatoire."
 
 osu:
     succes:

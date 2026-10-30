@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
-import { downloadSinglePlateforme } from "../services/exportService";
+import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
 import { fetchPlateformeHarveste } from "../services/harvesterService";
+import { AuthContext } from "../context/authContext";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -138,6 +139,28 @@ export function ListePlateforme() {
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
+    const [exportTagId, setExportTagId] = useState('');
+    const [exportRorId, setExportRorId] = useState('');
+    const [exportEnCours, setExportEnCours] = useState(false);
+    const [exportErreur, setExportErreur] = useState<string | null>(null);
+
+    const lancerExport = async (action: () => Promise<void>) => {
+        setExportEnCours(true);
+        setExportErreur(null);
+        try {
+            await action();
+        } catch (error) {
+            console.error("Erreur lors de l'export :", error);
+            setExportErreur("L'export a échoué (droits insuffisants ou instance indisponible).");
+        } finally {
+            setExportEnCours(false);
+        }
+    };
+
+    const tagIdValide = /^[1-9]\d*$/.test(exportTagId.trim());
+    const rorIdValide = exportRorId.trim() !== '';
+
+    const authContext = useContext(AuthContext);
 
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
@@ -172,6 +195,42 @@ export function ListePlateforme() {
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
+            {(authContext?.estAdmin || authContext?.estDu) && (
+                <Stack direction="row" spacing={2} sx={{ my: 2, alignItems: "center", flexWrap: "wrap", rowGap: 2 }}>
+                    {authContext?.estAdmin && (
+                        <Button variant="contained" startIcon={<Download />} disabled={exportEnCours} onClick={() => lancerExport(downloadAllPlateformes)}>
+                            Tout exporter
+                        </Button>
+                    )}
+                    <TextField
+                        size="small"
+                        type="number"
+                        label="ID du tag"
+                        value={exportTagId}
+                        onChange={(e) => setExportTagId(e.target.value)}
+                        sx={{ width: 140 }}
+                    />
+                    <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !tagIdValide} onClick={() => lancerExport(() => downloadPlateformesByTag(Number(exportTagId)))}>
+                        Exporter par tag
+                    </Button>
+                    {(authContext?.estAdmin || authContext?.estDu) && (
+                        <>
+                            <TextField
+                                size="small"
+                                label="ROR de l'unité"
+                                value={exportRorId}
+                                onChange={(e) => setExportRorId(e.target.value)}
+                                sx={{ width: 180 }}
+                            />
+                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !rorIdValide} onClick={() => lancerExport(() => downloadPlateformesByUnite(exportRorId.trim()))}>
+                                Exporter par unité
+                            </Button>
+                        </>
+                    )}
+                </Stack>
+            )}
+            {exportEnCours && <LinearProgress sx={{ mb: 2 }} />}
+            {exportErreur && <Typography color="error" sx={{ mb: 2 }}>{exportErreur}</Typography>}
             <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
                 <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
                     <Tab label="Locales" {...allyProps(0)} />

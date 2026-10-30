@@ -2,6 +2,7 @@
 
 namespace App\Security\Voter;
 
+use App\Entity\Entite;
 use App\Entity\Plateforme;
 use App\Entity\Utilisateur;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -17,16 +18,22 @@ final class PlateformeVoter extends Voter
     public const READONLY = 'READONLY';
     public const SAUVEGARDER = 'SAUVEGARDER';
     public const EXPORTER = 'EXPORTER';
+    public const EXPORTER_ABSOLUMENT_TOUT = 'EXPORTER_ABSOLUMENT_TOUT';
     public const SUPPRIMER = 'SUPPRIMER';
+    public const EXPORT_TAG = 'EXPORT_TAG';
+    public const EXPORT_UNITE = 'EXPORT_UNITE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $testA = in_array($attribute, [self::CREER])
+        $testA = in_array($attribute, [self::CREER, self::EXPORTER_ABSOLUMENT_TOUT])
             && $subject === Plateforme::class;
 
         $testB = in_array($attribute, [self::LIRE, self::SAUVEGARDER, self::EXPORTER, self::AFFILIER, self::SUPPRIMER, self::TAG, self::READONLY])
             && $subject instanceof Plateforme;
-        return $testA || $testB;
+
+        $testC = in_array($attribute, [self::EXPORT_TAG, self::EXPORT_UNITE])
+            && $subject instanceof Entite;
+        return $testA || $testB || $testC;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -207,6 +214,21 @@ final class PlateformeVoter extends Voter
                 }
 
                 return false;
+            case self::EXPORT_TAG:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
+            case self::EXPORT_UNITE:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
+            case self::EXPORTER_ABSOLUMENT_TOUT:
+                if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+                break;
             case self::EXPORTER:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
