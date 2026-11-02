@@ -16,7 +16,6 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,7 +26,6 @@ class HarvesterService
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
         private readonly Security $security,
-        private readonly SerializerInterface $serializerInterface,
         private readonly PlateformeService $plateformeService,
         private readonly TranslatorInterface $translator
     ) {}
