@@ -10,6 +10,7 @@ use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\Grade;
+use App\Entity\Harvester;
 use App\Entity\ModaliteRecrutement;
 use App\Entity\Plateforme;
 use App\Entity\SectionCnrs;
@@ -108,7 +109,10 @@ class ExcelService
             throw new AccessDeniedHttpException($this->translator->trans('plateforme.exception.exporter'));
         }
 
-        return $this->exportPlatformeArrayEnExcel([$this->preparePlatformePourExport($platform)]);
+        $exportData = $this->preparePlatformePourExport($platform);
+        $exportData['export_id'] = $platform->getId() . ' - locales';
+
+        return $this->exportPlatformeArrayEnExcel([$exportData]);
     }
 
     public function exportAllPlatformsToExcel(): string
@@ -161,7 +165,7 @@ class ExcelService
             }
 
             $exportData = $this->preparePlatformePourExport($platform);
-            $exportData['export_id'] = 'local:' . $platform->getId();
+            $exportData['export_id'] = $platform->getId() . ' - locales';
             $platforms[] = $exportData;
         }
 
@@ -171,6 +175,7 @@ class ExcelService
             : [];
 
         foreach ($plateformesHarvestees as $host => $remotePlatforms) {
+            $clientId = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $host])?->getClientId() ?? $host;
             foreach ($remotePlatforms as $remotePlatform) {
                 $remotePlatformId = $remotePlatform['id'] ?? null;
                 if (!is_int($remotePlatformId) && !(is_string($remotePlatformId) && ctype_digit($remotePlatformId))) {
@@ -178,7 +183,7 @@ class ExcelService
                 }
 
                 $exportData = $this->harvesterService->getPlateformeHarvesteExportDataSansPermission((int) $remotePlatformId, $host);
-                $exportData['export_id'] = 'harvester:' . $host . ':' . $remotePlatformId;
+                $exportData['export_id'] = $remotePlatformId . ' - ' . $clientId;
                 $platforms[] = $exportData;
             }
         }
@@ -646,10 +651,12 @@ class ExcelService
 
         foreach ($platforms as $plat) {
             $references = null;
+            $exportId = null;
             if (is_string($plat)) {
                 $plat = \json_decode($plat, true);
             } elseif (is_array($plat) && isset($plat['platform'], $plat['references'])) {
                 $references = $plat['references'];
+                $exportId = $plat['export_id'] ?? null;
                 $plat = $plat['platform'];
             }
 
@@ -657,8 +664,9 @@ class ExcelService
                 throw new \UnexpectedValueException('Format de données de plateforme invalide pour l’export.');
             }
 
-            if (isset($plat['export_id'])) {
-                $plat['id'] = $plat['export_id'];
+            $exportId ??= $plat['export_id'] ?? null;
+            if ($exportId !== null) {
+                $plat['id'] = $exportId;
             }
 
             $dernierHistorique = $plat["dernier_historique"];
