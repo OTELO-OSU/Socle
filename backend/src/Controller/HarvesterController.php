@@ -121,20 +121,20 @@ final class HarvesterController extends AbstractController
     {
         [$clientId, $clientSecret] = $this->getMachineCredentials($request);
         $tagId = $request->query->getInt('tagId') ?: null;
-        $rorId = $request->query->get('rorId');
-        $rorId = $rorId === null ? null : trim($rorId);
+        $laboId = $request->query->get('laboId');
+        $laboId = $laboId === null ? null : trim($laboId);
 
-        if ($tagId !== null && $rorId !== null) {
+        if ($tagId !== null && $laboId !== null) {
             throw new BadRequestHttpException($this->translator->trans('harvester.exception.trop_filtre_export'));
         }
         if ($request->query->has('tagId') && $tagId === null) {
             throw new BadRequestHttpException($this->translator->trans('tag.exception.tag_id_manquant'));
         }
-        if ($rorId !== null && trim($rorId) === '') {
-            throw new BadRequestHttpException($this->translator->trans('harvester.exception.identifiant_ror_obligatoire'));
+        if ($laboId !== null && trim($laboId) === '') {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.labo_obligatoire'));
         }
 
-        $plateformes = $this->hs->getToutesLesPlateformesPourMachine($clientId, $clientSecret, $tagId, $rorId);
+        $plateformes = $this->hs->getToutesLesPlateformesPourMachine($clientId, $clientSecret, $tagId, $laboId);
 
         // Seuls les ids sont nécessaires : le détail est récupéré via /hmt/plateforme/export-data-all
         return $this->json(array_map(static fn($plateforme) => ['id' => $plateforme->getId()], $plateformes), 200);

@@ -107,17 +107,17 @@ class HarvesterService
         string $clientId,
         string $clientSecret,
         ?int $tagId = null,
-        ?string $rorId = null
+        ?int $laboId = null
     ): array {
         $this->getUtilisateurMachine($clientId, $clientSecret);
 
-        if ($tagId !== null && $rorId !== null) {
+        if ($tagId !== null && $laboId !== null) {
             throw new BadRequestHttpException('Un seul filtre d’export peut être fourni à la fois.');
         }
 
         return array_values(array_filter(
             $this->em->getRepository(Plateforme::class)->findAll(),
-            static function (Plateforme $platform) use ($tagId, $rorId): bool {
+            static function (Plateforme $platform) use ($tagId, $laboId): bool {
                 $lastHistorique = $platform->getLastHistorique();
                 if ($lastHistorique === null) {
                     return false;
@@ -129,7 +129,7 @@ class HarvesterService
                     return false;
                 }
 
-                return $rorId === null || $lastHistorique->getLaboratoireOperateur()?->getRorId() === $rorId;
+                return $laboId === null || $lastHistorique->getLaboratoireOperateur()?->getId() === $laboId;
             }
         ));
     }
@@ -233,7 +233,7 @@ class HarvesterService
         return $plateformesArray;
     }
 
-    public function getToutesLesPlateformesHarvestePourExport(?int $tagId = null, ?string $rorId = null): array
+    public function getToutesLesPlateformesHarvestePourExport(?int $tagId = null, ?int $laboId = null): array
     {
         if (!$this->security->getUser()) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
@@ -248,7 +248,7 @@ class HarvesterService
                     'timeout' => 10,
                     'query' => array_filter([
                         'tagId' => $tagId,
-                        'rorId' => $rorId,
+                        'laboId' => $laboId,
                     ], static fn(mixed $value): bool => $value !== null),
                     'headers' => [
                         'Accept' => 'application/json',

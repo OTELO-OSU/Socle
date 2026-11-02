@@ -55,16 +55,16 @@ final class ExcelController extends AbstractController
     #[Route('/export/plateformes/unite', methods: ['GET'])]
     public function exportPlateformesParUnite(Request $request): Response
     {
-        $rorId = trim((string) $request->query->get('rorId', ''));
-        if ($rorId === '') {
-            throw new BadRequestHttpException('Un identifiant ROR est obligatoire.');
+        $laboId = trim((string) $request->query->get('laboId', ''));
+        if ($laboId === '') {
+            throw new BadRequestHttpException('Un identifiant laboratoire est obligatoire.');
         }
 
-        $content = $this->es->exportPlatformsByUnitRorToExcel($rorId);
+        $content = $this->es->exportPlatformsByUnitRorToExcel($laboId);
 
         return new Response($content, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="plateformes_unite_' . rawurlencode($rorId) . '.xlsx"',
+            'Content-Disposition' => 'attachment; filename="plateformes_unite_' . rawurlencode($laboId) . '.xlsx"',
         ]);
     }
 }

@@ -64,9 +64,9 @@ export async function downloadPlateformesByTag(tagId: number): Promise<void> {
     saveBlobResponse(response, `plateformes_tag_${tagId}.xlsx`);
 }
 
-export async function downloadPlateformesByUnite(rorId: string): Promise<void> {
-    const response = await symfony.get("/export/plateformes/unite", { params: { rorId }, responseType: "blob" });
-    saveBlobResponse(response, `plateformes_unite_${rorId}.xlsx`);
+export async function downloadPlateformesByUnite(laboId: number): Promise<void> {
+    const response = await symfony.get("/export/plateformes/unite", { params: { laboId }, responseType: "blob" });
+    saveBlobResponse(response, `plateformes_unite_${laboId}.xlsx`);
 }
 
 function saveBlobResponse(response: { data: unknown, headers: Record<string, unknown> }, fallbackFilename: string): void {

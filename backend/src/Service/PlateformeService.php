@@ -43,7 +43,8 @@ class PlateformeService
         private readonly EntityManagerInterface $em,
         private readonly TagService $tagService,
         private readonly Security $security,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly UniteService $uniteService
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
@@ -477,6 +478,7 @@ class PlateformeService
             'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
             'total' => $total,
             'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
+            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser())
         ];
     }
 

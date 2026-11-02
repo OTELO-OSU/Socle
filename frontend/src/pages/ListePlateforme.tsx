@@ -136,6 +136,7 @@ export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
     const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
     const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
+    const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -143,7 +144,7 @@ export function ListePlateforme() {
     const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
     const [exportTagId, setExportTagId] = useState('');
-    const [exportRorId, setExportRorId] = useState('');
+    const [exportLaboId, setExportLaboId] = useState('');
     const [exportEnCours, setExportEnCours] = useState(false);
     const [exportErreur, setExportErreur] = useState<string | null>(null);
 
@@ -161,7 +162,7 @@ export function ListePlateforme() {
     };
 
     const tagIdValide = /^[1-9]\d*$/.test(exportTagId.trim());
-    const rorIdValide = exportRorId.trim() !== '';
+    const laboIdValide = /^[1-9]\d*$/.test(exportLaboId.trim());
 
     const authContext = useContext(AuthContext);
     const dictionnaireContext = useContext(DictionnaireContext);
@@ -169,7 +170,7 @@ export function ListePlateforme() {
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { plateformes, pages_total, tags_export } = await fetchPlateformeListeParPage(page, recherche);
+            const { plateformes, pages_total, tags_export, unites_export } = await fetchPlateformeListeParPage(page, recherche);
             setPlateformes(plateformes);
             setTotalPages(pages_total);
             if (tags_export.includes(-1)) {
@@ -177,6 +178,12 @@ export function ListePlateforme() {
             } else {
                 const tagsOptions = dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value)));
                 setTagsExport(tagsOptions);
+            }
+            if (unites_export.includes(-1)) {
+                setUniteExport(dictionnaireContext.uniteOptions);
+            } else {
+                const unitesOptions = dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value)));
+                setUniteExport(unitesOptions);
             }
         } catch (error) {
             console.error("Erreur lors du chargement des plateformes :", error);
@@ -228,14 +235,14 @@ export function ListePlateforme() {
                     )}
                     {(authContext?.estAdmin || authContext?.estDu) && (
                         <>
-                            <TextField
+                            <Autocomplete
+                                options={uniteExport}
                                 size="small"
-                                label="ROR de l'unité"
-                                value={exportRorId}
-                                onChange={(e) => setExportRorId(e.target.value)}
-                                sx={{ width: 180 }}
+                                onChange={(_event, newValue) => setExportLaboId(newValue?.value.toString() || '')}
+                                sx={{ width: 140 }}
+                                renderInput={(params) => <TextField {...params} label="Unité" />}
                             />
-                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !rorIdValide} onClick={() => lancerExport(() => downloadPlateformesByUnite(exportRorId.trim()))}>
+                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !laboIdValide} onClick={() => lancerExport(() => downloadPlateformesByUnite(exportLaboId ? Number(exportLaboId) : 0))}>
                                 Exporter par unité
                             </Button>
                         </>

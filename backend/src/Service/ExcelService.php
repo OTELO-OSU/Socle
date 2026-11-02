@@ -128,15 +128,15 @@ class ExcelService
         return $this->exportPlatformsToExcel($tagId);
     }
 
-    public function exportPlatformsByUnitRorToExcel(string $rorId): string
+    public function exportPlatformsByUnitRorToExcel(int $laboId): string
     {
-        if (!$this->security->isGranted(PlateformeVoter::EXPORT_UNITE, $this->em->getRepository(Entite::class)->findOneBy(['rorId' => $rorId]))) {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORT_UNITE, $this->em->getRepository(Entite::class)->find($laboId))) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_par_unite'));
         }
-        return $this->exportPlatformsToExcel(null, $rorId);
+        return $this->exportPlatformsToExcel(null, $laboId);
     }
 
-    private function exportPlatformsToExcel(?int $tagId = null, ?string $rorId = null): string
+    private function exportPlatformsToExcel(?int $tagId = null, ?int $laboId = null): string
     {
         if (!$this->security->getUser()) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
@@ -156,7 +156,7 @@ class ExcelService
                 continue;
             }
 
-            if ($rorId !== null && $lastHistorique->getLaboratoireOperateur()?->getRorId() !== $rorId) {
+            if ($laboId !== null && $lastHistorique->getLaboratoireOperateur()?->getId() !== $laboId) {
                 continue;
             }
 
@@ -165,7 +165,7 @@ class ExcelService
             $platforms[] = $exportData;
         }
 
-        foreach ($this->harvesterService->getToutesLesPlateformesHarvestePourExport($tagId, $rorId) as $host => $remotePlatforms) {
+        foreach ($this->harvesterService->getToutesLesPlateformesHarvestePourExport($tagId, $laboId) as $host => $remotePlatforms) {
             foreach ($remotePlatforms as $remotePlatform) {
                 $remotePlatformId = $remotePlatform['id'] ?? null;
                 if (!is_int($remotePlatformId) && !(is_string($remotePlatformId) && ctype_digit($remotePlatformId))) {
