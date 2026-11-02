@@ -1503,4 +1503,20 @@ class PlateformeHistorique
 
         return $this;
     }
+
+    public function estUserResponsablePlateforme(Utilisateur $user): bool
+    {
+        $personnels = $this->getPlateformeHistoriquePersonnels()->filter(function (PlateformeHistoriquePersonnel $personnel) use ($user) {
+            return $personnel->getUtilisateur() === $user;
+        });
+
+        if ($personnels->isEmpty()) {
+            return false;
+        }
+
+        /** @var PlateformeHistoriquePersonnel $personnel */
+        $personnel = $personnels->first();
+
+        return $personnel->isResponsablePlateforme() || $personnel->isResponsableScientifique() || $personnel->isResponsableTechnique();
+    }
 }

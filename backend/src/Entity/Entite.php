@@ -543,4 +543,19 @@ class Entite
 
         return $this;
     }
+
+    public function estUtilisateurDirOuDirDeleg(Utilisateur $user): bool
+    {
+        $dirUnite = $this->getDirecteur();
+        if ($dirUnite == $user) {
+            return true;
+        }
+
+        $dirDelegUnite = $this->getDelegueDirecteur();
+        if ($dirDelegUnite->contains($user)) {
+            return true;
+        }
+
+        return false;
+    }
 }
