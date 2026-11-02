@@ -25,13 +25,13 @@ final class PlateformeVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        $testA = in_array($attribute, [self::CREER, self::EXPORTER_ABSOLUMENT_TOUT])
+        $testA = in_array($attribute, [self::CREER, self::EXPORTER_ABSOLUMENT_TOUT, self::EXPORT_TAG])
             && $subject === Plateforme::class;
 
         $testB = in_array($attribute, [self::LIRE, self::SAUVEGARDER, self::EXPORTER, self::AFFILIER, self::SUPPRIMER, self::TAG, self::READONLY])
             && $subject instanceof Plateforme;
 
-        $testC = in_array($attribute, [self::EXPORT_TAG, self::EXPORT_UNITE])
+        $testC = in_array($attribute, [self::EXPORT_UNITE])
             && $subject instanceof Entite;
         return $testA || $testB || $testC;
     }
@@ -223,6 +223,20 @@ final class PlateformeVoter extends Voter
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU', $user->getRoles())) return true;
                 if (in_array('ROLE_DIR_OSU_DELEGUE', $user->getRoles())) return true;
+
+                /** @var Plateforme $subject */
+                $unite = $subject->getLastHistorique()->getLaboratoireOperateur();
+                if ($unite) {
+                    if ($unite->getDirecteur() === $user) {
+                        return true;
+                    }
+
+                    foreach ($unite->getDelegueDirecteur() as $d) {
+                        if ($d === $user) {
+                            return true;
+                        }
+                    }
+                }
                 break;
             case self::EXPORTER_ABSOLUMENT_TOUT:
                 if (in_array('ROLE_ADMIN', $user->getRoles())) return true;
