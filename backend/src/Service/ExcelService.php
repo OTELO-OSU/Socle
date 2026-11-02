@@ -218,6 +218,7 @@ class ExcelService
                             'prenom' => $directeur?->getPrenom() ?? '',
                             'nom' => $directeur?->getNom() ?? '',
                             'email' => $directeur?->getEmail() ?? '',
+                            'rnsr' => $entite?->getNumeroRnsr() ?? '',
                         ];
                     }
                 }
@@ -438,6 +439,7 @@ class ExcelService
         $sheet3Array[] = [
             "ID_Plateforme",
             "Laboratoire_INSU_OSU_hebergeant_la_plateforme",
+            "Numéro_RNSR",
             "Nom_Directeur",
             "Prénom_Directeur",
             "Email_Directeur",
@@ -669,6 +671,7 @@ class ExcelService
             $prenomDirLab = '';
             $nomDirLab = '';
             $emailDirLab = '';
+            $rnsrLab = '';
             $laboOperateurId = $dernierHistorique["laboratoire_operateur_id"] ?? null;
             if ($laboOperateurId) {
                 if ($references !== null) {
@@ -676,8 +679,10 @@ class ExcelService
                     $prenomDirLab = $dir['prenom'] ?? '';
                     $nomDirLab = $dir['nom'] ?? '';
                     $emailDirLab = $dir['email'] ?? '';
+                    $rnsrLab = $dir['rnsr'] ?? '';
                 } else {
                     $laboOperateur = $this->em->getRepository(Entite::class)->find($laboOperateurId);
+                    $rnsrLab = $laboOperateur?->getNumeroRnsr() ?? '';
                     $dir = $laboOperateur?->getDirecteur();
                     if ($dir) {
                         $prenomDirLab = $dir->getPrenom() ?? '';
@@ -690,6 +695,7 @@ class ExcelService
             $sheet3Array[] = [
                 $plat["id"],
                 $this->formatLabo($dernierHistorique["laboratoire_operateur_id"], $references),
+                $rnsrLab,
                 $nomDirLab,
                 $prenomDirLab,
                 $emailDirLab,

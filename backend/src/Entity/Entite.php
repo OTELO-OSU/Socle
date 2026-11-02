@@ -116,6 +116,9 @@ class Entite
     #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'deleguesDirecteur')]
     private Collection $delegueDirecteur;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numero_rnsr = null;
+
     public function __construct()
     {
         $this->plateformeHistoriques = new ArrayCollection();
@@ -557,5 +560,17 @@ class Entite
         }
 
         return false;
+    }
+
+    public function getNumeroRnsr(): ?string
+    {
+        return $this->numero_rnsr;
+    }
+
+    public function setNumeroRnsr(?string $numero_rnsr): static
+    {
+        $this->numero_rnsr = $numero_rnsr;
+
+        return $this;
     }
 }
