@@ -122,7 +122,7 @@ class ExcelService
 
     public function exportPlatformsByTagToExcel(int $tagId): string
     {
-        if (!$this->security->isGranted(PlateformeVoter::EXPORT_TAG, Plateforme::class)) {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORT_TAG, $tagId)) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_par_tag'));
         }
         return $this->exportPlatformsToExcel($tagId);
@@ -130,7 +130,7 @@ class ExcelService
 
     public function exportPlatformsByUnitRorToExcel(string $rorId): string
     {
-        if (!$this->security->isGranted(PlateformeVoter::EXPORT_UNITE, Plateforme::class)) {
+        if (!$this->security->isGranted(PlateformeVoter::EXPORT_UNITE, $this->em->getRepository(Entite::class)->findOneBy(['rorId' => $rorId]))) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('plateforme.exception.exporter_par_unite'));
         }
         return $this->exportPlatformsToExcel(null, $rorId);

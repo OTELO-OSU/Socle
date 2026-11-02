@@ -9,6 +9,7 @@ import { CustomTabPanel } from "../components/CustomTabPanel";
 import { fetchPlateformeHarveste } from "../services/harvesterService";
 import { AuthContext } from "../context/authContext";
 import { DictionnaireContext } from "../context/dictionnaireContext";
+import type { SelectOption } from "../provider/DictionnaireProvider";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -134,6 +135,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
     const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
+    const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -167,15 +169,21 @@ export function ListePlateforme() {
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { plateformes, pages_total } = await fetchPlateformeListeParPage(page, recherche);
+            const { plateformes, pages_total, tags_export } = await fetchPlateformeListeParPage(page, recherche);
             setPlateformes(plateformes);
             setTotalPages(pages_total);
+            if (tags_export.includes(-1)) {
+                setTagsExport(dictionnaireContext.tagsOptions);
+            } else {
+                const tagsOptions = dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value)));
+                setTagsExport(tagsOptions);
+            }
         } catch (error) {
             console.error("Erreur lors du chargement des plateformes :", error);
         } finally {
             setIsLoading(false);
         }
-    }, [page, recherche]);
+    }, [page, recherche, dictionnaireContext.tagsOptions]);
 
     const fetchPlateformesHarveste = useCallback(async () => {
         setIsLoadingHarvestees(true);
@@ -197,23 +205,27 @@ export function ListePlateforme() {
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
-            {(authContext?.estAdmin || authContext?.estDu) && (
+            {(authContext?.estAdmin || authContext?.estDu || tagsExport.length > 0) && (
                 <Stack direction="row" spacing={2} sx={{ my: 2, alignItems: "center", flexWrap: "wrap", rowGap: 2 }}>
                     {authContext?.estAdmin && (
                         <Button variant="contained" startIcon={<Download />} disabled={exportEnCours} onClick={() => lancerExport(downloadAllPlateformes)}>
                             Tout exporter
                         </Button>
                     )}
-                    <Autocomplete
-                        options={dictionnaireContext.tagsOptions}
-                        size="small"
-                        onChange={(_event, newValue) => setExportTagId(newValue?.value.toString() || '')}
-                        sx={{ width: 140 }}
-                        renderInput={(params) => <TextField {...params} label="Tag" />}
-                    />
-                    <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !tagIdValide} onClick={() => lancerExport(() => downloadPlateformesByTag(Number(exportTagId)))}>
-                        Exporter par tag
-                    </Button>
+                    {tagsExport.length > 0 && (
+                        <>
+                            <Autocomplete
+                                options={tagsExport}
+                                size="small"
+                                onChange={(_event, newValue) => setExportTagId(newValue?.value.toString() || '')}
+                                sx={{ width: 140 }}
+                                renderInput={(params) => <TextField {...params} label="Tag" />}
+                            />
+                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !tagIdValide} onClick={() => lancerExport(() => downloadPlateformesByTag(Number(exportTagId)))}>
+                                Exporter par tag
+                            </Button>
+                        </>
+                    )}
                     {(authContext?.estAdmin || authContext?.estDu) && (
                         <>
                             <TextField

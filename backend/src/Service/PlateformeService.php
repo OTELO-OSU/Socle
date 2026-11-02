@@ -475,7 +475,8 @@ class PlateformeService
             'plateformes' => $plateformes,
             'page' => $page,
             'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
-            'total' => $total
+            'total' => $total,
+            'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
         ];
     }
 
