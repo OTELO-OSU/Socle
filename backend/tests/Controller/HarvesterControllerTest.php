@@ -251,7 +251,7 @@ class HarvesterControllerTest extends WebTestCase
 
         $this->client->request(
             'GET',
-            '/api/hmt/plateformes/export?rorId=03yrm5c26',
+            '/api/hmt/plateformes/export?laboId=03yrm5c26',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456')]
