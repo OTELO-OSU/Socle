@@ -165,7 +165,12 @@ class ExcelService
             $platforms[] = $exportData;
         }
 
-        foreach ($this->harvesterService->getToutesLesPlateformesHarvestePourExport($tagId, $laboId) as $host => $remotePlatforms) {
+        // Une unité est locale : on n'interroge pas les harvesters pour un export par unité
+        $plateformesHarvestees = $laboId === null
+            ? $this->harvesterService->getToutesLesPlateformesHarvestePourExport($tagId)
+            : [];
+
+        foreach ($plateformesHarvestees as $host => $remotePlatforms) {
             foreach ($remotePlatforms as $remotePlatform) {
                 $remotePlatformId = $remotePlatform['id'] ?? null;
                 if (!is_int($remotePlatformId) && !(is_string($remotePlatformId) && ctype_digit($remotePlatformId))) {
