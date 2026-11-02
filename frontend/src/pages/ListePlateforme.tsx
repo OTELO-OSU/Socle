@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Select, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
@@ -8,6 +8,7 @@ import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
 import { fetchPlateformeHarveste } from "../services/harvesterService";
 import { AuthContext } from "../context/authContext";
+import { DictionnaireContext } from "../context/dictionnaireContext";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -161,6 +162,7 @@ export function ListePlateforme() {
     const rorIdValide = exportRorId.trim() !== '';
 
     const authContext = useContext(AuthContext);
+    const dictionnaireContext = useContext(DictionnaireContext);
 
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
@@ -202,13 +204,12 @@ export function ListePlateforme() {
                             Tout exporter
                         </Button>
                     )}
-                    <TextField
+                    <Autocomplete
+                        options={dictionnaireContext.tagsOptions}
                         size="small"
-                        type="number"
-                        label="ID du tag"
-                        value={exportTagId}
-                        onChange={(e) => setExportTagId(e.target.value)}
+                        onChange={(_event, newValue) => setExportTagId(newValue?.value.toString() || '')}
                         sx={{ width: 140 }}
+                        renderInput={(params) => <TextField {...params} label="Tag" />}
                     />
                     <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !tagIdValide} onClick={() => lancerExport(() => downloadPlateformesByTag(Number(exportTagId)))}>
                         Exporter par tag
