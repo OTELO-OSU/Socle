@@ -94,7 +94,10 @@ class HarvesterService
         $plateformesTags = $this->plateformeService->getPlateformeAuxTags($arrayIds);
         $plateformes = [];
         foreach ($plateformesTags as $plateformeTag) {
-            $plateformes[] = $plateformeTag->getPlateforme();
+            $plateforme =  $plateformeTag->getPlateforme();
+            $plateforme->setPourcentageRemplissage($this->plateformeService->getPlateformePourcentage($plateforme->getLastHistorique()));
+            $plateforme->setReadonly(true);
+            $plateformes[] = $plateforme;
         }
 
         return $plateformes;
