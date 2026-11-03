@@ -6,6 +6,7 @@ import { fetchPlateformePublique } from "../services/plateformeService";
 
 type PlateformeMapPoint = {
     id: number;
+    instanceHost: string;
     nom: string;
     siteWeb: string | null;
     villeId: number | null;
@@ -38,6 +39,7 @@ async function getPlateformeMapPoints(): Promise<PlateformeMapPoint[]> {
         })
         .map((plateforme) => ({
             id: plateforme.id,
+            instanceHost: plateforme.instance_host ?? "local",
             nom: plateforme.dernier_historique.nom_officiel,
             siteWeb: plateforme.dernier_historique.site_web,
             villeId: plateforme.dernier_historique.ville_id,
@@ -149,7 +151,7 @@ export default function Home() {
                 </TableHead>
                 <TableBody>
                     {sortedPoints.map((point) => (
-                        <TableRow key={point.id}>
+                        <TableRow key={`${point.instanceHost}-${point.id}`}>
                             <TableCell>{point.laboratoireNom ?? (point.laboratoire ? laboById.get(point.laboratoire) : null) ?? "Laboratoire inconnu"}</TableCell>
                             <TableCell>
                                 {point.siteWeb ? (

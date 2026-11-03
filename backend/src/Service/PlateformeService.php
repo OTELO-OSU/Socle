@@ -418,6 +418,13 @@ class PlateformeService
                 continue;
             }
 
+            foreach ($plateformesDistantes as &$plateformeDistante) {
+                if (is_array($plateformeDistante)) {
+                    $plateformeDistante['instance_host'] = $host;
+                }
+            }
+            unset($plateformeDistante);
+
             $plateformes = array_merge($plateformes, $plateformesDistantes);
         }
 
