@@ -3,7 +3,7 @@ import TauxTextFieldHint from "../../TauxTextFieldHint";
 import { useFormContext } from "react-hook-form";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 
-export default function Utilisation() {
+export default function Utilisation({ disabled = false }: { disabled?: boolean }) {
     const { getValues, watch } = useFormContext();
     watch(["modele_77_2424_taux", "modele_77_1224_taux", "modele_57_2424_taux", "modele_57_1224_taux"], () => {
         totalTauxModele();
@@ -43,10 +43,10 @@ export default function Utilisation() {
                 Sur quel modèle fonctionne/mesure votre plateforme (en pourcentage) ?
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TauxTextFieldHint label="7j/7j, 24h/24h" name="modele_77_2424_taux" helperText="" />
-                <TauxTextFieldHint label="7j/7j, 12h/24h" name="modele_77_1224_taux" helperText="" />
-                <TauxTextFieldHint label="5j/7j, 24h/24h" name="modele_57_2424_taux" helperText="" />
-                <TauxTextFieldHint label="5j/7j, 12h/24h" name="modele_57_1224_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="7j/7j, 24h/24h" name="modele_77_2424_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="7j/7j, 12h/24h" name="modele_77_1224_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="5j/7j, 24h/24h" name="modele_57_2424_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="5j/7j, 12h/24h" name="modele_57_1224_taux" helperText="" />
                 <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
@@ -67,11 +67,11 @@ export default function Utilisation() {
                 Quel est le taux d'utilisation de la plateforme à l'année ?
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TauxTextFieldHint label="En fonctionnement (analyse, prestation, contrôle qualité, blanc, standard...) " name="utilisation_fonctionnement_taux" helperText="" />
-                <TauxTextFieldHint label="En maintenance" name="utilisation_maintenance_taux" helperText="" />
-                <TauxTextFieldHint label="En développement" name="utilisation_developpement_taux" helperText="" />
-                <TauxTextFieldHint label="En panne" name="utilisation_panne_taux" helperText="" />
-                <TauxTextFieldHint label="En temps mort" name="utilisation_temps_mort_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En fonctionnement (analyse, prestation, contrôle qualité, blanc, standard...) " name="utilisation_fonctionnement_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En maintenance" name="utilisation_maintenance_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En développement" name="utilisation_developpement_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En panne" name="utilisation_panne_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En temps mort" name="utilisation_temps_mort_taux" helperText="" />
                 <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"
@@ -92,10 +92,10 @@ export default function Utilisation() {
                 Quel est le taux d'utilisation détaillé de la plateforme en fonctionnement à l'année ?
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TauxTextFieldHint label="Par l’équipe opérante: projet porté par un membre de la plateforme " name="utilisation_equipe_operante_taux" helperText="" />
-                <TauxTextFieldHint label="En collaboration interne: projet porté par quelqu’un d’autre du laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_interne_taux" helperText="" />
-                <TauxTextFieldHint label="En collaboration externe: projet porté par quelqu’un d’un autre laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_externe_taux" helperText="" />
-                <TauxTextFieldHint label="Prestation de service: service à 100%, prestation sans collaboration, et pas d’association aux résultats " name="utilisation_prestation_service_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="Par l’équipe opérante: projet porté par un membre de la plateforme " name="utilisation_equipe_operante_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En collaboration interne: projet porté par quelqu’un d’autre du laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_interne_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="En collaboration externe: projet porté par quelqu’un d’un autre laboratoire en collaboration avec la plateforme " name="utilisation_collaboration_externe_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="Prestation de service: service à 100%, prestation sans collaboration, et pas d’association aux résultats " name="utilisation_prestation_service_taux" helperText="" />
                 <LayoutLabelHintInput label="Somme des taux" helperText="" >
                     <TextField
                         label="Somme des %"

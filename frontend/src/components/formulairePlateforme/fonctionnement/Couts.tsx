@@ -7,7 +7,7 @@ import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 import type { PlateformeDictionnaire } from "../../../services/plateformeService";
 
-export default function Couts() {
+export default function Couts({ disabled = false }: { disabled?: boolean }) {
     const { getValues, watch, control } = useFormContext();
     const dictionnaireContext = useContext(DictionnaireContext);
     const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
@@ -66,7 +66,7 @@ export default function Couts() {
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Comment sont déterminés les tarifs de la plateforme</Typography>
-            <RHFSelect sx={{ mt: 2 }} control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={determinationTarifOptions} />
+            <RHFSelect disabled={disabled} sx={{ mt: 2 }} control={control} name="determination_tarif_plateforme_id" label={""} size="small" items={determinationTarifOptions} />
         </Box>
 
     );

@@ -2,7 +2,7 @@ import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import LayoutLabelHintInput from "./LayoutLabelHintInput";
 
-export default function RadioTextFieldHint({ label, name, helperText }: { label: string; name: string; helperText: string }) {
+export default function RadioTextFieldHint({ label, name, helperText, disabled = false }: { label: string; name: string; helperText: string; disabled?: boolean }) {
     const { control } = useFormContext();
     return (
         <LayoutLabelHintInput label={label} helperText={helperText}>
@@ -20,8 +20,8 @@ export default function RadioTextFieldHint({ label, name, helperText }: { label:
                                 value={radioValue}
                                 onChange={(event) => onChange(event.target.value === "true")}
                             >
-                                <FormControlLabel value="true" control={<Radio />} label="Oui" />
-                                <FormControlLabel value="false" control={<Radio />} label="Non" />
+                                <FormControlLabel disabled={disabled} value="true" control={<Radio />} label="Oui" />
+                                <FormControlLabel disabled={disabled} value="false" control={<Radio />} label="Non" />
                             </RadioGroup>
                         </>
                     )

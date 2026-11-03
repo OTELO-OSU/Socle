@@ -5,26 +5,28 @@ import { CustomTabPanel } from "../CustomTabPanel";
 import Couts from "./fonctionnement/Couts";
 import Ressources from "./fonctionnement/Ressources";
 
-export function Fonctionnement() {
+export function Fonctionnement({ disabled = false }: { disabled?: boolean }) {
     const [value, setValue] = useState(0);
 
     const handleChange = (_: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
     return (
-        <>
+        <Box>
             <Box sx={{ py: 1 }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Coûts" {...allyProps(0)} />
                     <Tab label="Ressources" {...allyProps(1)} />
                 </Tabs>
             </Box>
-            <CustomTabPanel value={value} index={0}>
-                <Couts />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
-                <Ressources />
-            </CustomTabPanel>
-        </>
+            <Box component="fieldset" disabled={disabled} sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
+                <CustomTabPanel value={value} index={0}>
+                    <Couts disabled={disabled} />
+                </CustomTabPanel>
+                <CustomTabPanel value={value} index={1}>
+                    <Ressources disabled={disabled} />
+                </CustomTabPanel>
+            </Box>
+        </Box>
     )
 }

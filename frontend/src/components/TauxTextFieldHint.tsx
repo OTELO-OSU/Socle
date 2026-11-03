@@ -2,11 +2,12 @@ import LayoutLabelHintInput from "./LayoutLabelHintInput";
 import { RHFSelect } from "./RHFTextSelect";
 import { useFormContext } from "react-hook-form";
 
-export default function TauxTextFieldHint({ label, name, helperText }: { label: string; name: string; helperText: string }) {
+export default function TauxTextFieldHint({ label, name, helperText, disabled = false }: { label: string; name: string; helperText: string; disabled?: boolean }) {
     const { control } = useFormContext();
     return (
         <LayoutLabelHintInput label={label} helperText={helperText}>
             <RHFSelect
+                disabled={disabled}
                 name={name}
                 control={control}
                 label="Taux"
