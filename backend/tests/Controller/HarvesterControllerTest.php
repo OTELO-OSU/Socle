@@ -245,13 +245,13 @@ class HarvesterControllerTest extends WebTestCase
         $harvesterService
             ->expects($this->once())
             ->method('getToutesLesPlateformesPourMachine')
-            ->with('client-123', 'secret-456', null, '03yrm5c26')
+            ->with('client-123', 'secret-456', null, '3')
             ->willReturn([]);
         static::getContainer()->set(HarvesterService::class, $harvesterService);
 
         $this->client->request(
             'GET',
-            '/api/hmt/plateformes/export?laboId=03yrm5c26',
+            '/api/hmt/plateformes/export?laboId=3',
             [],
             [],
             ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456')]
