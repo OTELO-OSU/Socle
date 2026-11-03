@@ -8,11 +8,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class AgentController extends AbstractController
 {
-    public function __construct(private readonly AgentService $utilisateurService, private readonly TranslatorInterface $translator) {}
+    public function __construct(
+        private readonly AgentService $utilisateurService,
+        private readonly TranslatorInterface $translator,
+        private readonly NormalizerInterface $normalizer,
+    ) {}
 
     #[Route('/agent', methods: ['GET'])]
     public function getUtilisateurs(Request $request): Response
@@ -20,7 +25,13 @@ final class AgentController extends AbstractController
         $page = max(1, (int)$request->query->get('page', 1));
         $search = $request->query->get('search', null);
         $utilisateurs = $this->utilisateurService->getAgentParPage($page, $search);
-        return $this->json($utilisateurs, 200, [], ['groups' => 'utilisateur:list']);
+        $response = $this->normalizer->normalize($utilisateurs, null, ['groups' => 'utilisateur:list']);
+
+        foreach ($response['agents'] as $index => $agent) {
+            $response['agents'][$index]['is_admin'] = $utilisateurs['agents'][$index]->getIsAdmin();
+        }
+
+        return $this->json($response);
     }
 
     #[Route('/agent/en-attente-du-du', methods: ['GET'])]
@@ -167,6 +178,11 @@ final class AgentController extends AbstractController
             $section = $data['section'];
         }
 
+        $isAdmin = null;
+        if (array_key_exists('is_admin', $data)) {
+            $isAdmin = (bool) $data['is_admin'];
+        }
+
         $utilisateur = $this->utilisateurService->modificationUtilisateur(
             $data['utilisateur_id'],
             $data['nom'],
@@ -182,7 +198,8 @@ final class AgentController extends AbstractController
             $bapsIds,
             $emploiTypesIds,
             $cnu,
-            $section
+            $section,
+            $isAdmin
         );
 
         return $this->json(['message' => $this->translator->trans('admin.succes.utilisateur_modifie'), 'utilisateur' => $utilisateur], 200, [], ['groups' => 'utilisateur:list']);

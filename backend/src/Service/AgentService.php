@@ -279,7 +279,7 @@ class AgentService
         return $user;
     }
 
-    function modificationUtilisateur(int $utilisateurId, string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section): Utilisateur
+    function modificationUtilisateur(int $utilisateurId, string $nom, string $prenom, string $email, int $employeur, int $unite, ?int $corps, ?int $grade, int $typeContrat, bool $doctorant, ?int $universiteRattachement, ?array $baps_ids, ?array $emploi_types_ids, ?int $cnu, ?int $section, ?bool $isAdmin = null): Utilisateur
     {
         /** @var Utilisateur $user */
         $user = $this->em->getRepository(Utilisateur::class)->find($utilisateurId);
@@ -396,6 +396,20 @@ class AgentService
         }
         $user->setCnu($cnuEntity);
         $user->setSectionCnrs($sectionEntity);
+        if ($isAdmin !== null) {
+            if (!$this->security->isGranted('ROLE_ADMIN')) {
+                throw new AccessDeniedHttpException($this->translator->trans('admin.exception.modifier_utilisateur'));
+            }
+
+            $roles = array_values(array_filter(
+                $user->getRoles(),
+                static fn (string $role): bool => $role !== 'ROLE_ADMIN'
+            ));
+            if ($isAdmin) {
+                $roles[] = 'ROLE_ADMIN';
+            }
+            $user->setRoles($roles);
+        }
         $this->em->persist($user);
         $this->em->flush();
 

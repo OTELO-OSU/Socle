@@ -26,6 +26,7 @@ export type Agent = {
     emploi_types_ids?: number[];
     section_cnrs_id?: number | null;
     cnu_id?: number | null;
+    is_admin?: boolean;
 };
 
 export type RetourFetchAgentParPage = {
@@ -50,6 +51,7 @@ export type PayloadSoumettreAgentAuDu = {
     emploi_types_ids: number[];
     section_cnrs_id: number | null;
     cnu_id: number | null;
+    is_admin?: boolean;
 };
 
 export type RetourSoumettreAgentAuDu = {
