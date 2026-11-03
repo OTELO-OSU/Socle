@@ -2,6 +2,8 @@ FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www/backend
 
+RUN chown www-data:www-data /var/www/backend
+
 # Environnement de build (dev ou prod)
 ARG APP_ENV=prod
 
@@ -26,7 +28,7 @@ RUN apk add --no-cache \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 RUN echo "0 3 * * * cd /var/www/backend && php bin/console app:clear-token-expire" > /etc/crontabs/www-data
 
