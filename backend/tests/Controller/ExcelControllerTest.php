@@ -61,11 +61,11 @@ class ExcelControllerTest extends WebTestCase
         $excelService
             ->expects($this->once())
             ->method('exportPlatformsByUnitRorToExcel')
-            ->with('03yrm5c26')
+            ->with('2')
             ->willReturn('xlsx-content');
         static::getContainer()->set(ExcelService::class, $excelService);
 
-        $this->client->request('GET', '/api/export/plateformes/unite?rorId=03yrm5c26');
+        $this->client->request('GET', '/api/export/plateformes/unite?laboId=2');
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertSame('xlsx-content', $this->client->getResponse()->getContent());
