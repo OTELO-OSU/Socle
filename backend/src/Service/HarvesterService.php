@@ -103,6 +103,14 @@ class HarvesterService
         return $plateformes;
     }
 
+    public function getPlateformePubliquePourMachine(string $clientId, string $clientSecret): array
+    {
+        return array_values(array_filter(
+            $this->getPlateformeListePourMachine($clientId, $clientSecret),
+            static fn(Plateforme $plateforme): bool => $plateforme->getLastHistorique()?->isBrouillon() === false
+        ));
+    }
+
     public function getToutesLesPlateformesPourMachine(
         string $clientId,
         string $clientSecret,

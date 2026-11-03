@@ -116,6 +116,15 @@ final class HarvesterController extends AbstractController
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
     }
 
+    #[Route('/hmt/plateformes/publiques', methods: ['GET'])]
+    public function getListePlateformePubliqueHarvesterHMT(Request $request): Response
+    {
+        [$clientId, $clientSecret] = $this->getMachineCredentials($request);
+        $plateformes = $this->hs->getPlateformePubliquePourMachine($clientId, $clientSecret);
+
+        return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list:publique']]);
+    }
+
     #[Route('/hmt/plateformes/export', methods: ['GET'])]
     public function getToutesLesPlateformesPourExport(Request $request): Response
     {
