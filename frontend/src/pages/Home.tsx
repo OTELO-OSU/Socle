@@ -11,6 +11,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { DictionnaireContext } from "../context/dictionnaireContext";
+import { ApplicationSettingsContext } from "../context/applicationSettingsContext";
 import { fetchPlateformePublique } from "../services/plateformeService";
 
 type PlateformeMapPoint = {
@@ -78,13 +79,15 @@ function FitMapToPoints({ points }: { points: Array<{ latitude: number; longitud
 
 export default function Home() {
     const dictionnaire = useContext(DictionnaireContext);
+    const applicationSettings = useContext(ApplicationSettingsContext);
     const { data: points = [] } = useQuery({
         queryKey: ["plateformes", "map-points"],
         queryFn: getPlateformes,
     });
-    const [viewMode, setViewMode] = useState<"list" | "map">("list");
+    const [viewModeOverride, setViewModeOverride] = useState<"list" | "map" | null>(null);
     const [sortField, setSortField] = useState<SortField>("nom");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+    const viewMode = viewModeOverride ?? (applicationSettings?.settings.vue_accueil === "carte" ? "map" : "list");
 
     const villesById = useMemo(() => {
         return new Map(dictionnaire.ville.map((ville) => [ville.id, ville.nom]));
@@ -126,7 +129,7 @@ export default function Home() {
         <ToggleButtonGroup
             value={viewMode}
             exclusive
-            onChange={(_, value: "list" | "map" | null) => value && setViewMode(value)}
+            onChange={(_, value: "list" | "map" | null) => value && setViewModeOverride(value)}
             size="small"
             aria-label="Mode d'affichage"
         >

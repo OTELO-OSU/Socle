@@ -44,6 +44,8 @@ services:
       JWT_PASSPHRASE: passphrase
       TRUSTED_PROXIES: localhost
       CORS_ALLOW_ORIGIN: http://localhost:3000
+    volumes:
+      - ./backend:/var/www/backend:rw
     depends_on:
       database:
         condition: service_healthy

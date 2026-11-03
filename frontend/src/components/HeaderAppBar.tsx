@@ -9,9 +9,11 @@ import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link, Link as RouterLink } from 'react-router-dom'
 import { AccountCircle } from '@mui/icons-material';
 import { FRONT_URL } from '../utils/constante';
+import { ApplicationSettingsContext } from '../context/applicationSettingsContext';
 export default function HeaderAppBar() {
 
     const authContext = useContext(AuthContext)
+    const applicationSettings = useContext(ApplicationSettingsContext)
     const token = authContext?.token ?? null;
     const isConnected = token !== null;
 
@@ -30,9 +32,25 @@ export default function HeaderAppBar() {
 
             <AppBar position="fixed">
                 <Toolbar>
-                    <Typography variant="h6" component={RouterLink} to="/" sx={{ flexGrow: 1 }} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        POE {dev && <Typography variant="caption">DEV</Typography>}
-                    </Typography>
+                    <Box
+                        component={RouterLink}
+                        to="/"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            flexGrow: 1,
+                            minWidth: 0,
+                            color: 'inherit',
+                            textDecoration: 'none',
+                        }}
+                    >
+                        {applicationSettings?.settings.logo_application && (
+                            <Box component="img" src={applicationSettings.settings.logo_application.startsWith('data:') ? applicationSettings.settings.logo_application : `${FRONT_URL}${applicationSettings.settings.logo_application}`} alt="" sx={{ height: 32, maxWidth: 120, objectFit: 'contain', mr: 1 }} />
+                        )}
+                        <Typography variant="h6" component="span" noWrap>
+                            {applicationSettings?.settings.nom_application ?? 'POE'} {dev && <Typography variant="caption" component="span">DEV</Typography>}
+                        </Typography>
+                    </Box>
 
                     {isConnected &&
                         <Button component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>

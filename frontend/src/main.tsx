@@ -2,28 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
 import './index.css'
-import App from './App'
 import { AuthProvider } from './provider/AuthProvider'
 import { SnackbarProvider } from './provider/SnackbarProvider';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DictionnaireProvider } from './provider/DictionnaireProvider';
-import { createTheme, ThemeProvider } from '@mui/material';
+import { ApplicationSettingsProvider } from './provider/ApplicationSettingsProvider';
+import ThemedApplication from './components/ThemedApplication';
 
 const queryClient = new QueryClient();
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#ba272c',
-    },
-    secondary: {
-      main: '#49b6ff',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, sans-serif',
-  },
-});
 
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -48,11 +34,11 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <DictionnaireProvider>
-            <ThemeProvider theme={theme}>
+            <ApplicationSettingsProvider>
               <SnackbarProvider>
-                <App />
+                <ThemedApplication />
               </SnackbarProvider>
-            </ThemeProvider>
+            </ApplicationSettingsProvider>
           </DictionnaireProvider>
         </AuthProvider>
       </QueryClientProvider>

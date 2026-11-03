@@ -2,7 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
-import { AccountCircle, CalendarMonth, CellTower, Group, Hub, LocalOffer } from '@mui/icons-material';
+import { AccountCircle, CalendarMonth, CellTower, Group, Hub, LocalOffer, Settings } from '@mui/icons-material';
 import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 
@@ -23,21 +23,23 @@ export default function AdminLayout() {
             >
                 <List sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, backgroundColor: 'background.paper', p: 1 }}>
                     {authContext?.estAdmin && (
-                        <ListItem disablePadding>
-                            <ListItemButton sx={{
-                                borderRadius: 2,
-                                '&.active': {
-                                    bgcolor: 'action.selected',
-                                    borderLeft: '3px solid',
-                                    borderColor: 'primary.main',
-                                },
-                            }} component={NavLink} to="/admin/adhesion">
-                                <ListItemIcon>
-                                    <HowToRegIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Demande d'adhesion" />
-                            </ListItemButton>
-                        </ListItem>
+                        <>
+                            <ListItem disablePadding>
+                                <ListItemButton sx={{
+                                    borderRadius: 2,
+                                    '&.active': {
+                                        bgcolor: 'action.selected',
+                                        borderLeft: '3px solid',
+                                        borderColor: 'primary.main',
+                                    },
+                                }} component={NavLink} to="/admin/adhesion">
+                                    <ListItemIcon>
+                                        <HowToRegIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Demande d'adhesion" />
+                                </ListItemButton>
+                            </ListItem>
+                        </>
                     )}
 
                     <ListItem disablePadding>
@@ -184,6 +186,19 @@ export default function AdminLayout() {
                                 </ListItemButton>
                             </ListItem>
                         </>
+                    )}
+                    {authContext?.estAdmin && (
+                        <>
+
+                            <ListItem disablePadding>
+                                <ListItemButton sx={{
+                                    borderRadius: 2,
+                                    '&.active': { bgcolor: 'action.selected', borderLeft: '3px solid', borderColor: 'primary.main' },
+                                }} component={NavLink} to="/admin/parametres" end>
+                                    <ListItemIcon><Settings /></ListItemIcon>
+                                    <ListItemText primary="Paramètres de l'application" />
+                                </ListItemButton>
+                            </ListItem></>
                     )}
                 </List>
             </Box>
