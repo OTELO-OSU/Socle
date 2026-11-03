@@ -43,13 +43,25 @@ Firstly you have to rename the .env.example to .env and fill it
 mv .env.example .env
 ```
 
-Then start all the containers
+Then you have to build the main container
 
 ```sh
-docker compose up
+make build-prod
 ```
 
-And finally generate the rsa key for the JWT
+Then you have to start them
 
 ```sh
-docker compose exec -it php php /var/www/backend/bin/console lexik:jwt:generate-keypair
+make up
+```
+
+Generate the rsa key for the JWT
+
+```sh
+make jwt-generate
+```
+
+And finally you are going to migrate all the migrations to have the latest sql schema
+```sh
+make migrate
+```

@@ -15,11 +15,12 @@ services:
       php:
         condition: service_started
 
-
   php:
     build:
       context: .
       dockerfile: ./docker/php-fpm/dockerfile
+      args:
+        - APP_ENV=${APP_ENV}
     environment:
       APP_ENV: ${APP_ENV}
       APP_SECRET: ${APP_SECRET}
@@ -30,8 +31,7 @@ services:
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       CENTRAL_TAG: ${CENTRAL_TAG}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES}
-    volumes:
-      - ./backend:/var/www/backend:rw
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
     depends_on:
       - database
 

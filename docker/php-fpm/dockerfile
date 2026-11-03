@@ -1,5 +1,10 @@
 FROM php:8.3-fpm-alpine
 
+WORKDIR /var/www/backend
+
+# Environnement de build (dev ou prod)
+ARG APP_ENV=prod
+
 RUN apk add --no-cache \
     curl \
     git \
@@ -22,6 +27,22 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Copier les fichiers composer
+COPY /backend/composer.json /backend/composer.lock ./
+
+# Installer les dépendances selon l'environnement
+RUN if [ "$APP_ENV" = "prod" ]; then \
+        composer install --no-dev --optimize-autoloader --no-interaction --no-scripts; \
+    else \
+        composer install --optimize-autoloader --no-interaction --no-scripts; \
+    fi
+
+# Ensuite copier le reste du code source de l'application
+COPY /backend/ ./
+
+# Exécuter les scripts Composer maintenant que le code est présent
+RUN composer run-script post-install-cmd
 
 RUN echo "0 3 * * * cd /var/www/backend && php bin/console app:clear-token-expire" > /etc/crontabs/www-data
 
