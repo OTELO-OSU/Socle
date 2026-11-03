@@ -19,7 +19,7 @@ help:
 
 # Build
 build:
-	docker compose build --build-arg APP_ENV=$(ENV) php
+	docker compose build --build-arg APP_ENV=$(ENV) php nginx
 
 build-dev:
 	$(MAKE) build ENV=dev
