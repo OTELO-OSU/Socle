@@ -16,7 +16,6 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,7 +26,6 @@ class HarvesterService
         private readonly EntityManagerInterface $em,
         private readonly HttpClientInterface $httpClient,
         private readonly Security $security,
-        private readonly SerializerInterface $serializerInterface,
         private readonly PlateformeService $plateformeService,
         private readonly TranslatorInterface $translator
     ) {}
@@ -96,16 +94,49 @@ class HarvesterService
         $plateformesTags = $this->plateformeService->getPlateformeAuxTags($arrayIds);
         $plateformes = [];
         foreach ($plateformesTags as $plateformeTag) {
-            $plateformes[] = $plateformeTag->getPlateforme();
+            $plateforme =  $plateformeTag->getPlateforme();
+            $plateforme->setPourcentageRemplissage($this->plateformeService->getPlateformePourcentage($plateforme->getLastHistorique()));
+            $plateforme->setReadonly(true);
+            $plateformes[] = $plateforme;
         }
 
         return $plateformes;
     }
 
+    public function getToutesLesPlateformesPourMachine(
+        string $clientId,
+        string $clientSecret,
+        ?int $tagId = null,
+        ?int $laboId = null
+    ): array {
+        $this->getUtilisateurMachine($clientId, $clientSecret);
+
+        if ($tagId !== null && $laboId !== null) {
+            throw new BadRequestHttpException('Un seul filtre d’export peut être fourni à la fois.');
+        }
+
+        return array_values(array_filter(
+            $this->em->getRepository(Plateforme::class)->findAll(),
+            static function (Plateforme $platform) use ($tagId, $laboId): bool {
+                $lastHistorique = $platform->getLastHistorique();
+                if ($lastHistorique === null) {
+                    return false;
+                }
+
+                if ($tagId !== null && !$platform->getPlateformeTags()->exists(
+                    static fn(int $key, \App\Entity\PlateformeTags $tag): bool => $tag->getTagId() === $tagId
+                )) {
+                    return false;
+                }
+
+                return $laboId === null || $lastHistorique->getLaboratoireOperateur()?->getId() === $laboId;
+            }
+        ));
+    }
+
     public function getPlateformeDetailPourMachine(string $clientId, string $clientSecret, int $plateformeId): Plateforme
     {
-        $hashedClientSecret = hash('sha256', $clientSecret);
-        $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
+        $harvester = $this->getUtilisateurMachine($clientId, $clientSecret);
         $plateformeMere = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
 
         $tagsUserMachine = $harvester->getUtilisateur()->getUtilisateurTags();
@@ -127,7 +158,24 @@ class HarvesterService
         }
     }
 
-    public function getListePlateformeHarveste(): array
+    public function getPlateformeDetailPourMachineSansPermission(string $clientId, string $clientSecret, int $plateformeId): Plateforme
+    {
+        $this->getUtilisateurMachine($clientId, $clientSecret);
+
+        return $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId, true);
+    }
+
+    private function getUtilisateurMachine(string $clientId, string $clientSecret): UtilisateurMachine
+    {
+        $hashedClientSecret = hash('sha256', $clientSecret);
+
+        return $this->em->getRepository(UtilisateurMachine::class)->findOneBy([
+            'clientId' => $clientId,
+            'clientSecret' => $hashedClientSecret,
+        ]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
+    }
+
+    public function getListePlateformeHarveste(bool $failOnUnavailable = false): array
     {
         // verifier que le user est connecté
         if (!$this->security->getUser()) {
@@ -151,16 +199,25 @@ class HarvesterService
                     ],
                 ]);
             } catch (TransportExceptionInterface $e) {
+                if ($failOnUnavailable) {
+                    throw new ServiceUnavailableHttpException(null, "Impossible de joindre le harvester $host.", $e);
+                }
                 continue;
             }
 
             if ($response->getStatusCode() >= 400) {
+                if ($failOnUnavailable) {
+                    throw new ServiceUnavailableHttpException(null, "Le harvester $host a refusé la récupération de ses plateformes.");
+                }
                 continue;
             }
 
             $plateformes = $response->toArray(false);
 
             if (!is_array($plateformes)) {
+                if ($failOnUnavailable) {
+                    throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                }
                 continue;
             }
 
@@ -174,6 +231,47 @@ class HarvesterService
         }
 
         return $plateformesArray;
+    }
+
+    public function getToutesLesPlateformesHarvestePourExport(?int $tagId = null, ?int $laboId = null): array
+    {
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
+        $platformsByHost = [];
+        foreach ($this->em->getRepository(Harvester::class)->findAll() as $harvester) {
+            $host = $harvester->getHost();
+
+            try {
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes/export", [
+                    'timeout' => 10,
+                    'query' => array_filter([
+                        'tagId' => $tagId,
+                        'laboId' => $laboId,
+                    ], static fn(mixed $value): bool => $value !== null),
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret()),
+                    ],
+                ]);
+            } catch (TransportExceptionInterface $e) {
+                throw new ServiceUnavailableHttpException(null, "Impossible de joindre le harvester $host.", $e);
+            }
+
+            if ($response->getStatusCode() >= 400) {
+                throw new ServiceUnavailableHttpException(null, "Le harvester $host a refusé la récupération de ses plateformes.");
+            }
+
+            $platforms = $response->toArray(false);
+            if (!is_array($platforms) || !array_is_list($platforms)) {
+                throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+            }
+
+            $platformsByHost[$host] = $platforms;
+        }
+
+        return $platformsByHost;
     }
 
     public function getDetailPlateformeHarvester(int $id, string $hosts): array
@@ -266,15 +364,55 @@ class HarvesterService
         return false;
     }
 
-    function getPlateformeHarvesteJson(int $plateformeId, string $hosts): string
+    function getPlateformeHarvesteExportData(int $plateformeId, string $hosts): array
     {
-        // verifier que le user est connecté
+        $this->getDetailPlateformeHarvester($plateformeId, $hosts);
+        return $this->requestPlateformeHarvesteExportData($plateformeId, $hosts, '/api/hmt/plateforme/export-data');
+    }
+
+    function getPlateformeHarvesteExportDataSansPermission(int $plateformeId, string $hosts): array
+    {
         if (!$this->security->getUser()) {
             throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
         }
 
-        $plt = $this->getDetailPlateformeHarvester($plateformeId, $hosts);
-        $json = $this->serializerInterface->serialize($plt, 'json', ['groups' => ['plateforme:detail']]);
-        return $json;
+        return $this->requestPlateformeHarvesteExportData($plateformeId, $hosts, '/api/hmt/plateforme/export-data-all');
+    }
+
+    private function requestPlateformeHarvesteExportData(int $plateformeId, string $hosts, string $path): array
+    {
+        $harvester = $this->em->getRepository(Harvester::class)->findOneBy(['host' => $hosts]);
+
+        if (!$harvester) {
+            throw new NotFoundHttpException($this->translator->trans('harvester.exception.harvester_nf'));
+        }
+
+        try {
+            $response = $this->httpClient->request('GET', "https://{$harvester->getHost()}{$path}?plateformeId=$plateformeId", [
+                'timeout' => 10,
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret()),
+                ],
+            ]);
+        } catch (TransportExceptionInterface $e) {
+            throw new ServiceUnavailableHttpException(null, 'Erreur lors de la récupération des données de la plateforme.', $e);
+        }
+
+        if ($response->getStatusCode() >= 400) {
+            throw new ServiceUnavailableHttpException(null, 'Erreur lors de la récupération des données de la plateforme.');
+        }
+
+        $exportData = $response->toArray(false);
+        if (
+            !isset($exportData['platform'], $exportData['references'])
+            || !is_array($exportData['platform'])
+            || !is_array($exportData['platform']['dernier_historique'] ?? null)
+            || !is_array($exportData['references'])
+        ) {
+            throw new ServiceUnavailableHttpException(null, 'Les données reçues du harvester sont invalides.');
+        }
+
+        return $exportData;
     }
 }

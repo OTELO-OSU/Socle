@@ -84,6 +84,11 @@ class Entite
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codeUnite = null;
 
+    #[Groups(['unite:list', 'unite:detail'])]
+    #[SerializedName('ror_id')]
+    #[ORM\Column(length: 9, unique: true, nullable: true)]
+    private ?string $rorId = null;
+
     /**
      * @var Collection<int, Utilisateur>
      */
@@ -110,6 +115,9 @@ class Entite
     #[Groups(['unite:detail'])]
     #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'deleguesDirecteur')]
     private Collection $delegueDirecteur;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numero_rnsr = null;
 
     public function __construct()
     {
@@ -419,6 +427,18 @@ class Entite
         return $this;
     }
 
+    public function getRorId(): ?string
+    {
+        return $this->rorId;
+    }
+
+    public function setRorId(?string $rorId): static
+    {
+        $this->rorId = $rorId;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Utilisateur>
      */
@@ -523,6 +543,33 @@ class Entite
     public function removeDelegueDirecteur(Utilisateur $delegueDirecteur): static
     {
         $this->delegueDirecteur->removeElement($delegueDirecteur);
+
+        return $this;
+    }
+
+    public function estUtilisateurDirOuDirDeleg(Utilisateur $user): bool
+    {
+        $dirUnite = $this->getDirecteur();
+        if ($dirUnite == $user) {
+            return true;
+        }
+
+        $dirDelegUnite = $this->getDelegueDirecteur();
+        if ($dirDelegUnite->contains($user)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getNumeroRnsr(): ?string
+    {
+        return $this->numero_rnsr;
+    }
+
+    public function setNumeroRnsr(?string $numero_rnsr): static
+    {
+        $this->numero_rnsr = $numero_rnsr;
 
         return $this;
     }

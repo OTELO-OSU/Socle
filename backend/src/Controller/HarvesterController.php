@@ -116,24 +116,35 @@ final class HarvesterController extends AbstractController
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
     }
 
+    #[Route('/hmt/plateformes/export', methods: ['GET'])]
+    public function getToutesLesPlateformesPourExport(Request $request): Response
+    {
+        [$clientId, $clientSecret] = $this->getMachineCredentials($request);
+        $tagId = $request->query->getInt('tagId') ?: null;
+        $laboId = $request->query->get('laboId');
+        $laboId = $laboId === null ? null : trim($laboId);
+
+        if ($tagId !== null && $laboId !== null) {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.trop_filtre_export'));
+        }
+        if ($request->query->has('tagId') && $tagId === null) {
+            throw new BadRequestHttpException($this->translator->trans('tag.exception.tag_id_manquant'));
+        }
+        if ($laboId !== null && trim($laboId) === '') {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.labo_obligatoire'));
+        }
+
+        $plateformes = $this->hs->getToutesLesPlateformesPourMachine($clientId, $clientSecret, $tagId, $laboId);
+
+        // Seuls les ids sont nécessaires : le détail est récupéré via /hmt/plateforme/export-data-all
+        return $this->json(array_map(static fn($plateforme) => ['id' => $plateforme->getId()], $plateformes), 200);
+    }
+
     #[Route('/hmt/plateforme', methods: ['GET'])]
     public function getDetailPlateformeHarvesterHMT(Request $request): Response
     {
         $plateformeId = $request->query->get('plateformeId', null);
-
-        // Récupérer le client id et le secret id dans le header authorization en basic auth
-        $authorizationHeader = $request->headers->get('Authorization');
-        if (!$authorizationHeader) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_manquant'));
-
-        if (strpos($authorizationHeader, 'Basic ') !== 0) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
-
-        $base64Credentials = substr($authorizationHeader, 6);
-        $decodedCredentials = base64_decode($base64Credentials);
-
-        if (!\str_contains($decodedCredentials, ":")) throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
-
-        // Récupération du client id et du secret id
-        list($clientId, $clientSecret) = explode(':', $decodedCredentials, 2);
+        [$clientId, $clientSecret] = $this->getMachineCredentials($request);
 
         if ($plateformeId === null || $clientId === null || $clientSecret === null) {
             throw new BadRequestHttpException($this->translator->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'));
@@ -141,6 +152,35 @@ final class HarvesterController extends AbstractController
         $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
 
         return $this->json($plateforme, 200, [], ['groups' => ['plateforme:detail', 'plateforme:harvester']]);
+    }
+
+    #[Route('/hmt/plateforme/export-data', methods: ['GET'])]
+    public function getPlateformeHarvesterExportData(Request $request): Response
+    {
+        $plateformeId = $request->query->get('plateformeId');
+        [$clientId, $clientSecret] = $this->getMachineCredentials($request);
+
+        if ($plateformeId === null) {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'));
+        }
+
+        $plateforme = $this->hs->getPlateformeDetailPourMachine($clientId, $clientSecret, (int) $plateformeId);
+        return $this->json($this->es->preparePlatformePourExport($plateforme));
+    }
+
+    #[Route('/hmt/plateforme/export-data-all', methods: ['GET'])]
+    public function getPlateformeHarvesterExportDataSansPermission(Request $request): Response
+    {
+        $plateformeId = $request->query->get('plateformeId');
+        [$clientId, $clientSecret] = $this->getMachineCredentials($request);
+
+        if ($plateformeId === null) {
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.client_id_secret_id_obligatoire_plateforme_id'));
+        }
+
+        $plateforme = $this->hs->getPlateformeDetailPourMachineSansPermission($clientId, $clientSecret, (int) $plateformeId);
+
+        return $this->json($this->es->preparePlatformePourExport($plateforme));
     }
 
     #[Route('/admin/harvesters', methods: ['GET'])]
@@ -161,12 +201,34 @@ final class HarvesterController extends AbstractController
             throw new BadRequestHttpException($this->translator->trans('harvester.exception.plateforme_id_host_obligatoire'));
         }
 
-        $entite = $this->hs->getPlateformeHarvesteJson($id, $host);
-        $content = $this->es->exportPlatformeArrayEnExcel([$entite]);
+        $exportData = $this->hs->getPlateformeHarvesteExportData($id, $host);
+        $content = $this->es->exportPlatformeArrayEnExcel([$exportData]);
 
         return new Response($content, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="plateforme_' . $id . '.xlsx"',
         ]);
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    private function getMachineCredentials(Request $request): array
+    {
+        $authorizationHeader = $request->headers->get('Authorization');
+        if (!$authorizationHeader) {
+            throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_manquant'));
+        }
+
+        if (strpos($authorizationHeader, 'Basic ') !== 0) {
+            throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+        }
+
+        $decodedCredentials = base64_decode(substr($authorizationHeader, 6));
+        if ($decodedCredentials === false || !\str_contains($decodedCredentials, ':')) {
+            throw new BadRequestHttpException($this->translator->trans('auth.exception.header_authorization_invalide'));
+        }
+
+        return explode(':', $decodedCredentials, 2);
     }
 }

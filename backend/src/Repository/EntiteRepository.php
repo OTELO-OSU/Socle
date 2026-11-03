@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Entite;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,21 @@ class EntiteRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Entite::class);
+    }
+
+    public function estDirOuDirDeleg(Entite $unite, Utilisateur $user): bool
+    {
+        $dirUnite = $unite->getDirecteur();
+        if ($dirUnite == $user) {
+            return true;
+        }
+
+        $dirDelegUnite = $unite->getDelegueDirecteur();
+        if ($dirDelegUnite->contains($user)) {
+            return true;
+        }
+
+        return false;
     }
 
     //    /**

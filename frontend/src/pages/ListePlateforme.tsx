@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
-import { downloadSinglePlateforme } from "../services/exportService";
+import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
 import { fetchPlateformeHarveste } from "../services/harvesterService";
+import { AuthContext } from "../context/authContext";
+import { DictionnaireContext } from "../context/dictionnaireContext";
+import type { SelectOption } from "../provider/DictionnaireProvider";
 
 function IconeTitre({ brouillon }: { brouillon: boolean }) {
     if (brouillon) {
@@ -132,25 +135,62 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
     const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
+    const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
+    const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
+    const [exportTagId, setExportTagId] = useState('');
+    const [exportLaboId, setExportLaboId] = useState('');
+    const [exportEnCours, setExportEnCours] = useState(false);
+    const [exportErreur, setExportErreur] = useState<string | null>(null);
+
+    const lancerExport = async (action: () => Promise<void>) => {
+        setExportEnCours(true);
+        setExportErreur(null);
+        try {
+            await action();
+        } catch (error) {
+            console.error("Erreur lors de l'export :", error);
+            setExportErreur("L'export a échoué (droits insuffisants ou instance indisponible).");
+        } finally {
+            setExportEnCours(false);
+        }
+    };
+
+    const tagIdValide = /^[1-9]\d*$/.test(exportTagId.trim());
+    const laboIdValide = /^[1-9]\d*$/.test(exportLaboId.trim());
+
+    const authContext = useContext(AuthContext);
+    const dictionnaireContext = useContext(DictionnaireContext);
 
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { plateformes, pages_total } = await fetchPlateformeListeParPage(page, recherche);
+            const { plateformes, pages_total, tags_export, unites_export } = await fetchPlateformeListeParPage(page, recherche);
             setPlateformes(plateformes);
             setTotalPages(pages_total);
+            if (tags_export.includes(-1)) {
+                setTagsExport(dictionnaireContext.tagsOptions);
+            } else {
+                const tagsOptions = dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value)));
+                setTagsExport(tagsOptions);
+            }
+            if (unites_export.includes(-1)) {
+                setUniteExport(dictionnaireContext.uniteOptions);
+            } else {
+                const unitesOptions = dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value)));
+                setUniteExport(unitesOptions);
+            }
         } catch (error) {
             console.error("Erreur lors du chargement des plateformes :", error);
         } finally {
             setIsLoading(false);
         }
-    }, [page, recherche]);
+    }, [page, recherche, dictionnaireContext.tagsOptions]);
 
     const fetchPlateformesHarveste = useCallback(async () => {
         setIsLoadingHarvestees(true);
@@ -172,6 +212,45 @@ export function ListePlateforme() {
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h5" component={"h1"}>Liste des plateformes</Typography>
+            {(authContext?.estAdmin || authContext?.estDu || tagsExport.length > 0) && (
+                <Stack direction="row" spacing={2} sx={{ my: 2, alignItems: "center", flexWrap: "wrap", rowGap: 2 }}>
+                    {authContext?.estAdmin && (
+                        <Button variant="contained" startIcon={<Download />} disabled={exportEnCours} onClick={() => lancerExport(downloadAllPlateformes)}>
+                            Tout exporter
+                        </Button>
+                    )}
+                    {tagsExport.length > 0 && (
+                        <>
+                            <Autocomplete
+                                options={tagsExport}
+                                size="small"
+                                onChange={(_event, newValue) => setExportTagId(newValue?.value.toString() || '')}
+                                sx={{ width: 140 }}
+                                renderInput={(params) => <TextField {...params} label="Tag" />}
+                            />
+                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !tagIdValide} onClick={() => lancerExport(() => downloadPlateformesByTag(Number(exportTagId)))}>
+                                Exporter par tag
+                            </Button>
+                        </>
+                    )}
+                    {(authContext?.estAdmin || authContext?.estDu) && (
+                        <>
+                            <Autocomplete
+                                options={uniteExport}
+                                size="small"
+                                onChange={(_event, newValue) => setExportLaboId(newValue?.value.toString() || '')}
+                                sx={{ width: 140 }}
+                                renderInput={(params) => <TextField {...params} label="Unité" />}
+                            />
+                            <Button variant="outlined" startIcon={<Download />} disabled={exportEnCours || !laboIdValide} onClick={() => lancerExport(() => downloadPlateformesByUnite(exportLaboId ? Number(exportLaboId) : 0))}>
+                                Exporter par unité
+                            </Button>
+                        </>
+                    )}
+                </Stack>
+            )}
+            {exportEnCours && <LinearProgress sx={{ mb: 2 }} />}
+            {exportErreur && <Typography color="error" sx={{ mb: 2 }}>{exportErreur}</Typography>}
             <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
                 <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
                     <Tab label="Locales" {...allyProps(0)} />

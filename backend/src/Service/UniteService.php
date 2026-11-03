@@ -125,4 +125,18 @@ class UniteService
         $uniteEntity->removeDelegueDirecteur($utilisateur);
         $this->em->flush();
     }
+
+    function getUtilisateurUnites(Utilisateur $utilisateur): array
+    {
+        if (in_array('ROLE_ADMIN', $utilisateur->getRoles()) || in_array('ROLE_DIR_OSU', $utilisateur->getRoles()) || in_array('ROLE_DIR_OSU_DELEGUE', $utilisateur->getRoles())) {
+            return [-1];
+        }
+
+        $unites = $this->em->getRepository(Entite::class)->findBy(['laboratoire' => true]);
+        $unites = \array_map(fn(Entite $unite) => $unite->getId(), \array_filter($unites, function (Entite $unite) use ($utilisateur) {
+            return $unite->estUtilisateurDirOuDirDeleg($utilisateur);
+        }));
+
+        return $unites;
+    }
 }

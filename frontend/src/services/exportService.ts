@@ -51,10 +51,29 @@ export async function downloadSinglePlateforme({ plateformeId, harvester, host }
         return;
     }
 
+    saveBlobResponse(response, `plateforme-${plateformeId}.xlsx`);
+}
+
+export async function downloadAllPlateformes(): Promise<void> {
+    const response = await symfony.get("/export/plateformes", { responseType: "blob" });
+    saveBlobResponse(response, "plateformes.xlsx");
+}
+
+export async function downloadPlateformesByTag(tagId: number): Promise<void> {
+    const response = await symfony.get("/export/plateformes/tag", { params: { tagId }, responseType: "blob" });
+    saveBlobResponse(response, `plateformes_tag_${tagId}.xlsx`);
+}
+
+export async function downloadPlateformesByUnite(laboId: number): Promise<void> {
+    const response = await symfony.get("/export/plateformes/unite", { params: { laboId }, responseType: "blob" });
+    saveBlobResponse(response, `plateformes_unite_${laboId}.xlsx`);
+}
+
+function saveBlobResponse(response: { data: unknown, headers: Record<string, unknown> }, fallbackFilename: string): void {
     const blob = response.data as Blob;
     const filename =
-        getFilenameFromContentDisposition(response.headers["content-disposition"]) ||
-        `plateforme-${plateformeId}.xlsx`;
+        getFilenameFromContentDisposition(response.headers["content-disposition"] as string | undefined) ||
+        fallbackFilename;
 
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");

@@ -5,6 +5,8 @@ export type RetourFetchPlateformeParPage = {
     page: number;
     pages_total: number;
     total: number;
+    tags_export: number[];
+    unites_export: number[];
 }
 
 export type PlateformeLight = {

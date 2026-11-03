@@ -230,4 +230,19 @@ class TagService
         $this->em->remove($tag);
         $this->em->flush();
     }
+
+    public function getUtilisateurTags(Utilisateur $utilisateur): array
+    {
+        $tagsCentral = $this->getTags();
+        $validTagIds = array_map(fn($tag) => $tag['id'], $tagsCentral);
+
+        if (in_array('ROLE_ADMIN', $utilisateur->getRoles()) || in_array('ROLE_DIR_OSU', $utilisateur->getRoles()) || in_array('ROLE_DIR_OSU_DELEGUE', $utilisateur->getRoles())) {
+            return [-1];
+        }
+
+        return array_values(array_filter(
+            array_map(fn(UtilisateurTags $ut) => in_array($ut->getTagId(), $validTagIds) ? $ut->getTagId() : null, $utilisateur->getUtilisateurTags()->toArray()),
+            fn($tagId) => !is_null($tagId)
+        ));
+    }
 }
