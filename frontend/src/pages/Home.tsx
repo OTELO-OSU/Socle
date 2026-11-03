@@ -9,9 +9,11 @@ type PlateformeMapPoint = {
     nom: string;
     siteWeb: string | null;
     villeId: number | null;
+    villeNom: string | null;
     latitude: number;
     longitude: number;
     laboratoire: number | null;
+    laboratoireNom: string | null;
 };
 
 type SortField = "laboratoire" | "siteWeb" | "ville" | "nom";
@@ -39,9 +41,11 @@ async function getPlateformeMapPoints(): Promise<PlateformeMapPoint[]> {
             nom: plateforme.dernier_historique.nom_officiel,
             siteWeb: plateforme.dernier_historique.site_web,
             villeId: plateforme.dernier_historique.ville_id,
+            villeNom: plateforme.dernier_historique.ville_nom,
             latitude: plateforme.dernier_historique.latitude as number,
             longitude: plateforme.dernier_historique.longitude as number,
             laboratoire: plateforme.dernier_historique.laboratoire_operateur_id ? plateforme.dernier_historique.laboratoire_operateur_id : null,
+            laboratoireNom: plateforme.dernier_historique.laboratoire_operateur_nom,
         }));
 }
 
@@ -68,9 +72,9 @@ export default function Home() {
                 case "siteWeb":
                     return point.siteWeb ?? "";
                 case "ville":
-                    return point.villeId ? (villesById.get(point.villeId) ?? "") : "";
+                    return point.villeNom ?? (point.villeId ? (villesById.get(point.villeId) ?? "") : "");
                 case "laboratoire":
-                    return point.laboratoire ? (laboById.get(point.laboratoire) ?? "") : "";
+                    return point.laboratoireNom ?? (point.laboratoire ? (laboById.get(point.laboratoire) ?? "") : "");
                 case "nom":
                     return point.nom;
             }
@@ -146,7 +150,7 @@ export default function Home() {
                 <TableBody>
                     {sortedPoints.map((point) => (
                         <TableRow key={point.id}>
-                            <TableCell>{point.laboratoire ? laboById.get(point.laboratoire) : "Laboratoire inconnu"}</TableCell>
+                            <TableCell>{point.laboratoireNom ?? (point.laboratoire ? laboById.get(point.laboratoire) : null) ?? "Laboratoire inconnu"}</TableCell>
                             <TableCell>
                                 {point.siteWeb ? (
                                     <Link href={normalizeWebsiteUrl(point.siteWeb)} target="_blank" rel="noopener noreferrer">
@@ -156,7 +160,7 @@ export default function Home() {
                                     "Pas de site web"
                                 )}
                             </TableCell>
-                            <TableCell>{point.villeId ? villesById.get(point.villeId) : "Ville inconnue"}</TableCell>
+                            <TableCell>{point.villeNom ?? (point.villeId ? villesById.get(point.villeId) : null) ?? "Ville inconnue"}</TableCell>
                             <TableCell>{point.nom}</TableCell>
                         </TableRow>
                     ))}

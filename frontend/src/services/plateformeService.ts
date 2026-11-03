@@ -31,6 +31,7 @@ export type PlateformeLightPublique = {
         site_web: string | null;
         description: string | null;
         ville_id: number | null;
+        ville_nom: string | null;
         logo_url: string | null;
         autre_type_labellisation: string | null;
         longitude: number | null;
@@ -153,10 +154,12 @@ export type DernierHistorique = {
     site_web: string | null;
     description: string | null;
     ville_id: number | null;
+    ville_nom: string | null;
     logo_url: string | null;
     autre_type_labellisation: string | null;
     tags_ids: number[];
     laboratoire_operateur_id: number | null;
+    laboratoire_operateur_nom: string | null;
     tutelles_principales_ids: number[];
     tutelles_secondaires_ids: number[];
     latitude: number | null;
