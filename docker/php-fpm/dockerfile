@@ -52,6 +52,9 @@ COPY --chown=www-data:www-data /backend/ ./
 # Exécuter les scripts Composer maintenant que le code est présent
 RUN composer run-script post-install-cmd
 
+# Retour sur root
+USER root
+
 COPY --chown=www-data:www-data docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod u+x /usr/local/bin/entrypoint.sh
 
