@@ -16,7 +16,11 @@ final class ParametreController extends AbstractController
     #[Route('/parametres/application', methods: ['GET'])]
     public function getApplicationSettings(): Response
     {
-        return $this->json($this->parametreService->getApplicationSettings());
+        $response = $this->json($this->parametreService->getApplicationSettings());
+        $response->setPublic();
+        $response->setMaxAge(300);
+
+        return $response;
     }
 
     #[Route('/parametres/application', methods: ['POST'])]

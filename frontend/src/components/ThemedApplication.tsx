@@ -13,5 +13,7 @@ export default function ThemedApplication() {
         typography: { fontFamily: 'Roboto, sans-serif' },
     }), [applicationSettings?.settings.couleur_principale])
 
+    if (applicationSettings?.loading) return null
+
     return <ThemeProvider theme={theme}><App /></ThemeProvider>
 }
