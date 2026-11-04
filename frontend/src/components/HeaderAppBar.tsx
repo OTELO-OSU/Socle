@@ -53,20 +53,20 @@ export default function HeaderAppBar() {
                     </Box>
 
                     {isConnected &&
-                        <Button component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>
+                        <Button nativeButton={false} component={Link} to="/plateforme" color='inherit' startIcon={<HomeWorkIcon />}>
                             Plateformes
                         </Button>
                     }
                     {isConnected &&
-                        <Button key={token} component={Link} to="/compte" color='inherit' startIcon={<AccountCircle />}>
+                        <Button nativeButton={false} key={token} component={Link} to="/compte" color='inherit' startIcon={<AccountCircle />}>
                             {authContext?.prenom} {authContext?.nom}
                         </Button>
                     }
                     {authContext?.estAdmin ?
-                        <Button component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
+                        <Button nativeButton={false} component={Link} to="/admin" color='inherit' startIcon={<AdminIcon />}>
                             Admin
                         </Button> : authContext?.estDu ?
-                            <Button component={Link} to="/admin/soumission-du" color='inherit' startIcon={<AdminIcon />}>
+                            <Button nativeButton={false} component={Link} to="/admin/soumission-du" color='inherit' startIcon={<AdminIcon />}>
                                 Admin
                             </Button> : <></>
                     }
@@ -75,10 +75,10 @@ export default function HeaderAppBar() {
                             Déconnexion
                         </Button> :
                         <>
-                            <Button component={RouterLink} to="/connexion" color='inherit' startIcon={<ConnexionIcon />}>
+                            <Button nativeButton={false} component={RouterLink} to="/connexion" color='inherit' startIcon={<ConnexionIcon />}>
                                 Connexion
                             </Button>
-                            <Button component={RouterLink} to="/inscription" color='inherit' startIcon={<InscriptionIcon />}>
+                            <Button nativeButton={false} component={RouterLink} to="/inscription" color='inherit' startIcon={<InscriptionIcon />}>
                                 Inscription
                             </Button>
                         </>

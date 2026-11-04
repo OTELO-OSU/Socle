@@ -59,7 +59,7 @@ export default function ApplicationSettingsAdmin() {
                             </Select>
                         </FormControl>
                         <Box>
-                            <Button variant="outlined" component="label">
+                            <Button nativeButton={false} variant="outlined" component="label">
                                 Choisir un logo
                                 <input hidden type="file" accept="image/*" onChange={(event) => setLogo(event.target.files?.[0] ?? null)} />
                             </Button>

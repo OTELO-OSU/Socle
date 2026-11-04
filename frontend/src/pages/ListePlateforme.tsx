@@ -118,11 +118,11 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                     </Box>
                 </CardContent>
                 <CardActions>
-                    <Button component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Button nativeButton={false} component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`} color="primary" sx={{ cursor: 'pointer' }}>
                         <Launch fontSize="small" sx={{ mr: 0.5 }} />
                         Voir les détails
                     </Button>
-                    <Button component={Link} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Button nativeButton={false} component={Link} onClick={() => downloadSinglePlateforme({ plateformeId: plateforme.id, harvester: harvester, host: host! })} color="primary" sx={{ cursor: 'pointer' }}>
                         <Download fontSize="small" sx={{ mr: 0.5 }} />
                         Exporter
                     </Button>

@@ -96,7 +96,7 @@ function PlateformeAdminCard({ plateforme, onEditPlateforme, onDeletePlateforme 
                     </Box>
                 </CardContent>
                 <CardActions>
-                    <Button component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
+                    <Button nativeButton={false} component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}`} color="primary" sx={{ cursor: 'pointer' }}>
                         <Launch fontSize="small" sx={{ mr: 0.5 }} />
                         Voir les détails
                     </Button>
