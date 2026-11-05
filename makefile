@@ -55,13 +55,10 @@ migrate:
 	docker compose run --rm php php bin/console doctrine:migrations:migrate --no-interaction
 
 populate:
-	@printf "Voulez vous créer un administrateur ? (o/n) "; \
-	read answer; \
-	case "$$answer" in \
-		o|O|oui|Oui) docker compose exec php php bin/console app:create-admin ;; \
-		n|N|non|Non) : ;; \
-		*) echo "Réponse invalide"; exit 1 ;; \
-	esac
+	docker compose run --rm php php bin/console app:populate
+
+create-admin:
+	docker compose exec php php bin/console app:create-admin
 
 jwt-generate:
 	docker compose exec php php bin/console lexik:jwt:generate-keypair --no-interaction --overwrite

@@ -13,6 +13,7 @@ A PLAIRe version for the OSU
 ## Requirements
 
 - Docker
+- make
 
 ## Devcontainer
 
@@ -61,7 +62,22 @@ Generate the rsa key for the JWT
 make jwt-generate
 ```
 
-And finally you are going to migrate all the migrations to have the latest sql schema
+Finally you are going to migrate all the migrations to have the latest sql schema
 ```sh
 make migrate
+```
+
+### Create your user as admin
+
+```sh
+# It will ask you a mail and a password to create the first admin user (you)
+make create-admin
+```
+
+### Populate the database for an OSU
+
+The application use a lot of static data (body, cnu, section, etc..) 
+By running this command you can choose an OSU to load all of his laboratories
+```sh
+make populate
 ```
