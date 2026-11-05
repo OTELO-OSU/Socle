@@ -414,7 +414,7 @@ INSERT INTO public.entite (nom,acronyme,statut_juridique,employeur,laboratoire,c
 	 ('Institut terre environnement Strasbourg','ITES',NULL,false,true,'UMR7063',false,false,NULL,NULL,NULL,'202123702B'),
 	 ('Biogéosciences','BGS',NULL,false,true,'UMR6282',false,false,NULL,NULL,NULL,'201220400B'),
 	 ('Centre de recherches pétrographiques et géochimiques','CRPG',NULL,false,true,'UMR7358',false,false,NULL,NULL,NULL,'201320574L'),
-	 ('GéoRessources','GEORESSOURCES',NULL,false,true,'UMR7359',false,false,NULL,NULL,NULL,'201320575M'),
+	 ('GeoRessources','GEORESSOURCES',NULL,false,true,'UMR7359',false,false,NULL,NULL,NULL,'201320575M'),
 	 ('LABORATOIRE ECOLOGIE FONCTIONNELLE ET ENVIRONNEMENT ','ECOLAB',NULL,false,true,'UMR5245',false,false,NULL,NULL,NULL,'200711910V');
 INSERT INTO public.entite (nom,acronyme,statut_juridique,employeur,laboratoire,code_unite,universite,epic,categorie_id,directeur_id,ror_id,numero_rnsr) VALUES
 	 ('COGNITION, LANGUES, LANGAGE, ERGONOMIE ','CLLE',NULL,false,true,'UMR5263',false,false,NULL,NULL,NULL,'200711926M'),
