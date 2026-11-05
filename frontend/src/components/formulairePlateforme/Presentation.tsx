@@ -130,7 +130,7 @@ export function Presentation({ disabled = false }: { disabled?: boolean }) {
                         <RHFTextField
                             name="forme_developpee_nom_officiel"
                             control={control}
-                            label="Signification de l'acronyme (si le nom officiel en est un)"
+                            label="Signification de l'acronyme (si le nom en est un)"
                             placeholder="<Service d'Analyse des Roches et des Minéraux>"
                         />
                     </Stack>
