@@ -26,8 +26,9 @@ export default function ModificationPlateforme() {
         defaultValues: {
             publications: []
         },
-        disabled: searchParams.get('harvester') === 'true' || readonly,
     });
+    const estHarvestee = searchParams.get('harvester') === 'true' && !!searchParams.get('host');
+    const toutDesactive = estHarvestee || readonly;
 
     const {
         formState: { isDirty },
@@ -204,24 +205,28 @@ export default function ModificationPlateforme() {
                                 <Tab label="Publications" {...allyProps(5)} />
                             </Tabs>
                         </Box>
-                        <CustomTabPanel value={value} index={0}>
-                            <Presentation />
-                        </CustomTabPanel>
-                        <CustomTabPanel value={value} index={1}>
-                            <Personnels />
-                        </CustomTabPanel>
-                        <CustomTabPanel value={value} index={2}>
-                            <Equipements />
-                        </CustomTabPanel>
-                        <CustomTabPanel value={value} index={3}>
-                            <Fonctionnement />
-                        </CustomTabPanel>
-                        <CustomTabPanel value={value} index={4}>
-                            <Activites />
-                        </CustomTabPanel>
-                        <CustomTabPanel value={value} index={5}>
-                            <Publications />
-                        </CustomTabPanel>
+                        <Box sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
+                            <CustomTabPanel value={value} index={0}>
+                                <Box component="fieldset" disabled={toutDesactive} sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
+                                    <Presentation disabled={toutDesactive} />
+                                </Box>
+                            </CustomTabPanel>
+                            <CustomTabPanel value={value} index={1}>
+                                <Personnels disabled={toutDesactive} />
+                            </CustomTabPanel>
+                            <CustomTabPanel value={value} index={2}>
+                                <Equipements disabled={toutDesactive} />
+                            </CustomTabPanel>
+                            <CustomTabPanel value={value} index={3}>
+                                <Fonctionnement disabled={toutDesactive} />
+                            </CustomTabPanel>
+                            <CustomTabPanel value={value} index={4}>
+                                <Activites disabled={toutDesactive} />
+                            </CustomTabPanel>
+                            <CustomTabPanel value={value} index={5}>
+                                <Publications disabled={toutDesactive} />
+                            </CustomTabPanel>
+                        </Box>
                     </Card>
                     {errorsArray.length > 0 && (
                         <Box sx={{ mt: 2, p: 2, border: "1px solid", borderColor: "error.main", borderRadius: 1 }}>
@@ -236,17 +241,18 @@ export default function ModificationPlateforme() {
                     )}
 
                     {
-                        searchParams.get('harvester') !== 'true' && (
+                        (
+
                             <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                                <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit" onClick={sauvegarder} disabled={!boutonActif}>
+                                <Button variant="contained" color="primary" sx={{ mt: 2 }} type="submit" onClick={sauvegarder} disabled={!boutonActif || toutDesactive}>
                                     <SendIcon sx={{ mr: 1 }} />
                                     Valider
                                 </Button>
-                                <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme}>
+                                <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme} disabled={toutDesactive}>
                                     <RefreshIcon sx={{ mr: 1 }} />
                                     Tester
                                 </Button>
-                                <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon}>
+                                <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon} disabled={toutDesactive}>
                                     <SaveIcon sx={{ mr: 1 }} />
                                     Enregistrer au brouillon
                                 </Button>

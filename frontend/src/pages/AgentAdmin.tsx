@@ -2,6 +2,7 @@ import { MoreVert } from "@mui/icons-material";
 import {
     Box,
     Button,
+    Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
@@ -19,6 +20,7 @@ import {
     TableRow,
     TextField,
     Typography,
+    FormControlLabel,
 } from "@mui/material";
 import type { AxiosError } from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -27,9 +29,11 @@ import { SnackbarContext } from "../context/snackbarContext";
 import { fetchAgentListeParPage, modifierAgent, type Agent } from "../services/agentService.ts";
 import type { ApiError } from "../utils/axios.ts";
 import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
+import { AuthContext } from "../context/authContext";
 
 export default function AgentAdmin() {
     const snackbar = useContext(SnackbarContext);
+    const authContext = useContext(AuthContext);
 
     const [agents, setAgents] = useState<Agent[]>([]);
     const [recherche, setRecherche] = useState("");
@@ -110,6 +114,7 @@ export default function AgentAdmin() {
                 emploi_types_ids: editableAgent.emploi_types_ids ?? [],
                 section_cnrs_id: editableAgent.section_cnrs_id ?? null,
                 cnu_id: editableAgent.cnu_id ?? null,
+                is_admin: editableAgent.is_admin ?? false,
             });
 
             snackbar?.trigger({
@@ -205,20 +210,34 @@ export default function AgentAdmin() {
                 <DialogTitle>Éditer un agent</DialogTitle>
                 <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
                     {editableAgent && (
-                        <AgentAdvancedFields
-                            value={editableAgent}
-                            onChange={(next) => {
-                                setEditableAgent((current) =>
-                                    current
-                                        ? {
-                                            ...current,
-                                            ...next,
-                                        }
-                                        : current
-                                );
-                            }}
-                            disabled={isSaving}
-                        />
+                        <>
+                            <AgentAdvancedFields
+                                value={editableAgent}
+                                onChange={(next) => {
+                                    setEditableAgent((current) =>
+                                        current
+                                            ? {
+                                                ...current,
+                                                ...next,
+                                            }
+                                            : current
+                                    );
+                                }}
+                                disabled={isSaving}
+                            />
+                            {authContext?.estAdmin && (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={editableAgent.is_admin ?? false}
+                                            onChange={(event) => setEditableAgent((current) => current ? { ...current, is_admin: event.target.checked } : current)}
+                                            disabled={isSaving}
+                                        />
+                                    }
+                                    label="Administrateur"
+                                />
+                            )}
+                        </>
                     )}
                 </DialogContent>
                 <DialogActions>

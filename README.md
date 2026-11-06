@@ -13,6 +13,7 @@ A PLAIRe version for the OSU
 ## Requirements
 
 - Docker
+- make
 
 ## Devcontainer
 
@@ -43,13 +44,40 @@ Firstly you have to rename the .env.example to .env and fill it
 mv .env.example .env
 ```
 
-Then start all the containers
+Then you have to build the main container
 
 ```sh
-docker compose up
+make build-prod
 ```
 
-And finally generate the rsa key for the JWT
+Then you have to start them
 
 ```sh
-docker compose exec -it php php /var/www/backend/bin/console lexik:jwt:generate-keypair
+make up
+```
+
+Generate the rsa key for the JWT
+
+```sh
+make jwt-generate
+```
+
+Finally you are going to migrate all the migrations to have the latest sql schema
+```sh
+make migrate
+```
+
+### Create your user as admin
+
+```sh
+# It will ask you a mail and a password to create the first admin user (you)
+make create-admin
+```
+
+### Populate the database for an OSU
+
+The application use a lot of static data (body, cnu, section, etc..) 
+By running this command you can choose an OSU to load all of his laboratories
+```sh
+make populate
+```

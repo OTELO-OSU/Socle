@@ -1,5 +1,12 @@
 FROM php:8.3-fpm-alpine
 
+WORKDIR /var/www/backend
+
+RUN chown www-data:www-data /var/www/backend
+
+# Environnement de build (dev ou prod)
+ARG APP_ENV=prod
+
 RUN apk add --no-cache \
     curl \
     git \
@@ -21,14 +28,35 @@ RUN apk add --no-cache \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 RUN echo "0 3 * * * cd /var/www/backend && php bin/console app:clear-token-expire" > /etc/crontabs/www-data
 
 RUN chmod 600 /etc/crontabs/www-data
 
-COPY docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copier les fichiers composer
+COPY --chown=www-data:www-data /backend/composer.json /backend/composer.lock ./
+
+USER www-data
+
+# Installer les dépendances selon l'environnement
+RUN if [ "$APP_ENV" = "prod" ]; then \
+        composer install --no-dev --optimize-autoloader --no-interaction --no-scripts; \
+    else \
+        composer install --optimize-autoloader --no-interaction --no-scripts; \
+    fi
+
+# Ensuite copier le reste du code source de l'application
+COPY --chown=www-data:www-data /backend/ ./
+
+# Exécuter les scripts Composer maintenant que le code est présent
+RUN composer run-script post-install-cmd
+
+# Retour sur root
+USER root
+
+COPY --chown=www-data:www-data docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod u+x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]

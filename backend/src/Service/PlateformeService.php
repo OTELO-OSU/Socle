@@ -11,6 +11,7 @@ use App\Entity\DeterminationTarifMethode;
 use App\Entity\EmploiType;
 use App\Entity\Entite;
 use App\Entity\FinancementInstrument;
+use App\Entity\Harvester;
 use App\Entity\Instrument;
 use App\Entity\ModaliteRecrutement;
 use App\Entity\Operation;
@@ -33,6 +34,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PlateformeService
 {
@@ -44,7 +47,8 @@ class PlateformeService
         private readonly TagService $tagService,
         private readonly Security $security,
         private readonly TranslatorInterface $translator,
-        private readonly UniteService $uniteService
+        private readonly UniteService $uniteService,
+        private readonly HttpClientInterface $httpClient
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
@@ -390,9 +394,55 @@ class PlateformeService
             $plateformes = $plateformesCandidates;
         }
 
-        return [
-            'plateformes' => $plateformes,
-        ];
+        foreach ($this->em->getRepository(Harvester::class)->findAll() as $harvester) {
+            $host = $harvester->getHost();
+
+            try {
+                $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes/publiques", [
+                    'timeout' => 10,
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret()),
+                    ],
+                ]);
+            } catch (TransportExceptionInterface) {
+                continue;
+            }
+
+            if ($response->getStatusCode() >= 400) {
+                continue;
+            }
+
+            $plateformesDistantes = $response->toArray(false);
+            if (!is_array($plateformesDistantes) || !array_is_list($plateformesDistantes)) {
+                continue;
+            }
+
+            foreach ($plateformesDistantes as &$plateformeDistante) {
+                if (is_array($plateformeDistante)) {
+                    $plateformeDistante['instance_host'] = $host;
+                }
+            }
+            unset($plateformeDistante);
+
+            $plateformes = array_merge($plateformes, $plateformesDistantes);
+        }
+
+        usort(
+            $plateformes,
+            static function (Plateforme|array $left, Plateforme|array $right): int {
+                $leftName = $left instanceof Plateforme
+                    ? $left->getLastHistorique()?->getNomOfficiel()
+                    : ($left['dernier_historique']['nom_officiel'] ?? null);
+                $rightName = $right instanceof Plateforme
+                    ? $right->getLastHistorique()?->getNomOfficiel()
+                    : ($right['dernier_historique']['nom_officiel'] ?? null);
+
+                return strcasecmp((string) $leftName, (string) $rightName);
+            }
+        );
+
+        return ['plateformes' => $plateformes];
     }
 
     function getPlateformeParPage(int $page, ?string $search): array

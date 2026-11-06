@@ -22,7 +22,7 @@ function ChampPosteFutur({ children, label }: { children: React.ReactNode; label
     )
 }
 
-function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void }) {
+function PersonnelFuturCarte({ poste, onChange, disabled = false }: { poste: PosteFutur; onChange?: (updatedPoste: PosteFutur) => void; disabled?: boolean }) {
     const { employeurOptions, corps, bap, modalitesRecrutement } = useContext(DictionnaireContext);
     const { watch } = useFormContext();
 
@@ -63,6 +63,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
         <Box sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 1, p: 2 }}>
             <ChampPosteFutur label="Employeur">
                 <Autocomplete
+                    disabled={disabled}
                     options={employeurOptionsPoste}
                     fullWidth
                     value={employeurOptionsPoste.find((option) => option.value === poste.employeur_id) ?? null}
@@ -76,6 +77,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
             </ChampPosteFutur>
             <ChampPosteFutur label="Modalité de recrutement">
                 <Select
+                    disabled={disabled}
                     fullWidth
                     value={poste.modalite_recrutement_id ?? ""}
                     onChange={(e) => onChange?.({ ...poste, modalite_recrutement_id: e.target.value as number })}
@@ -90,6 +92,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
             </ChampPosteFutur>
             <ChampPosteFutur label="Corps">
                 <Select
+                    disabled={disabled}
                     fullWidth
                     value={poste.corps_id ?? ""}
                     onChange={(e) => onChange?.({ ...poste, corps_id: e.target.value as number })}
@@ -104,6 +107,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
             </ChampPosteFutur>
             <ChampPosteFutur label="BAP">
                 <Autocomplete
+                    disabled={disabled}
                     options={bapOptionsPoste}
                     multiple
                     fullWidth
@@ -139,7 +143,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
                         const nextEmploiTypeIds = (Array.isArray(value) ? value : [value]).map((v) => v.id);
                         onChange?.({ ...poste, emploi_types_ids: nextEmploiTypeIds });
                     }}
-                    disabled={!poste.baps_ids?.length || !poste.corps_id}
+                    disabled={disabled || !poste.baps_ids?.length || !poste.corps_id}
                     renderInput={(params) => <TextField {...params} />}
                     renderValue={(value, getItemProps) =>
                         value.map((option, index) => (
@@ -223,7 +227,7 @@ function PersonnelFuturCarte({ poste, onChange }: { poste: PosteFutur; onChange?
     )
 }
 
-export function PersonnelFuturs() {
+export function PersonnelFuturs({ disabled = false }: { disabled?: boolean }) {
     const { control, getValues, setValue } = useFormContext();
 
     function handleNombrePostesChange(nombre: number) {
@@ -271,7 +275,7 @@ export function PersonnelFuturs() {
                 <Grid size={"grow"}>
                     <FormControl fullWidth>
                         <InputLabel id="personnels-futurs-nombre-label">Nombre de postes</InputLabel>
-                        <Select labelId="personnels-futurs-nombre-label" id="personnels-futurs-nombre" label="Nombre de postes" value={nombrePostes} onChange={(e) => handleNombrePostesChange(e.target.value as number)}>
+                        <Select disabled={disabled} labelId="personnels-futurs-nombre-label" id="personnels-futurs-nombre" label="Nombre de postes" value={nombrePostes} onChange={(e) => handleNombrePostesChange(e.target.value as number)}>
                             <MenuItem value={0}>0</MenuItem>
                             <MenuItem value={1}>1</MenuItem>
                             <MenuItem value={2}>2</MenuItem>
@@ -296,6 +300,7 @@ export function PersonnelFuturs() {
                             );
                             setValue(PERSONNELS_FIELD_NAME, nextPostes, { shouldDirty: true });
                         }}
+                        disabled={disabled}
                     />
                 </Box>
             ))}

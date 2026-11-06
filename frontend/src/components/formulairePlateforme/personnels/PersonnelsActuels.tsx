@@ -371,7 +371,7 @@ type PersonnelCardProps = {
     onQuotaUpdate: (number: number | null) => void;
 };
 
-function PersonnelCard({ personnel, onDelete, onQuotaUpdate }: PersonnelCardProps) {
+function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: PersonnelCardProps & { disabled: boolean }) {
     const estResponsableScientifique = personnel.responsable_scientifique;
     const estResponsableTechnique = personnel.responsable_technique;
     const estResponsablePlateforme = personnel.responsable_plateforme;
@@ -452,7 +452,7 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate }: PersonnelCardProp
                 {estResponsablePlateforme && <Chip color="secondary" label="Responsable plateforme" size="small" />}
             </Box >
             <Box>
-                <IconButton color="error" onClick={() => setDialogOpen(true)}>
+                <IconButton color="error" disabled={disabled} onClick={() => setDialogOpen(true)}>
                     <Edit />
                 </IconButton>
                 <IconButton color="error" disabled={estResponsableScientifique || estResponsableTechnique || estResponsablePlateforme} onClick={onDelete}>
@@ -465,7 +465,7 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate }: PersonnelCardProp
 
 }
 
-export function PersonnelActuels() {
+export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
     const { getValues, setValue, watch } = useFormContext();
 
     // Remplissage initial
@@ -534,7 +534,9 @@ export function PersonnelActuels() {
                 <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold" }}>
                     Personnels actuels
                 </Typography>
-                <DialogAjoutPersonnel onAdd={handleAddPersonnel} />
+                <Box sx={{ pointerEvents: disabled ? "none" : "auto" }}>
+                    <DialogAjoutPersonnel onAdd={handleAddPersonnel} />
+                </Box>
             </Box>
 
             {personnels.map((personnel) => (
@@ -543,6 +545,7 @@ export function PersonnelActuels() {
                     personnel={personnel}
                     onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
                     onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    disabled={disabled}
                 />
             ))}
             {personnels.length === 0 && (

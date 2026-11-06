@@ -456,6 +456,13 @@ class PlateformeHistorique
         return $this->ville?->getId();
     }
 
+    #[Groups(['plateforme:detail', 'plateforme:list:publique', 'plateforme:list'])]
+    #[SerializedName('ville_nom')]
+    public function getVilleNom(): ?string
+    {
+        return $this->ville?->getNom();
+    }
+
     public function getVille(): ?Ville
     {
         return $this->ville;
@@ -497,6 +504,13 @@ class PlateformeHistorique
     public function getLaboratoireOperateurId(): ?int
     {
         return $this->laboratoireOperateur?->getId();
+    }
+
+    #[Groups(['plateforme:detail', 'plateforme:list:publique', 'plateforme:list'])]
+    #[SerializedName('laboratoire_operateur_nom')]
+    public function getLaboratoireOperateurNom(): ?string
+    {
+        return $this->laboratoireOperateur?->getNom();
     }
 
     public function getLaboratoireOperateur(): ?Entite

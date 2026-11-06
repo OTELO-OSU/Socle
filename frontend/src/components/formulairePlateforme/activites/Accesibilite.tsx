@@ -4,7 +4,7 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 import TauxTextFieldHint from "../../TauxTextFieldHint";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 
-export default function Accesibilite() {
+export default function Accesibilite({ disabled = false }: { disabled?: boolean }) {
     const { setValue } = useFormContext();
 
     const possedeLabellisation = useWatch({ name: "labellisation_qualite", compute: (value) => value === true });
@@ -31,7 +31,7 @@ export default function Accesibilite() {
                         </LayoutLabelHintInput>
                     </>
                 )}
-                <TauxTextFieldHint label="Pourcentage d'accueil international (Projets et prestations internationaux / Projets et prestations totaux)" name="accueil_international_taux" helperText="" />
+                <TauxTextFieldHint disabled={disabled} label="Pourcentage d'accueil international (Projets et prestations internationaux / Projets et prestations totaux)" name="accueil_international_taux" helperText="" />
             </Box>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Votre plateforme a-t-elle une procédure de sélection transparente pour l'accès aux instruments ? (Formulaire, Projet, et comité de pilotage?)

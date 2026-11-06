@@ -27,6 +27,7 @@ import HarvesterAdmin from './pages/HarvesterAdmin'
 import FedeCallback from './pages/FedeCallback'
 import Deconnexion from './pages/Deconnexion'
 import ResetMdp from './pages/ResetMdp'
+import ApplicationSettingsAdmin from './pages/ApplicationSettingsAdmin'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
@@ -83,6 +84,7 @@ function App() {
                 <Route path="soumission-du" element={<SoumissionDUAdmin />} />
                 <Route path="tags" element={<TagsAdmin />} />
                 <Route path="harvester" element={<HarvesterAdmin />} />
+                <Route path="parametres" element={<ApplicationSettingsAdmin />} />
               </Route>
               <Route path="/plateforme" element={<ListePlateforme />} />
               <Route path="/plateforme/edition" element={<ModificationPlateforme />} />

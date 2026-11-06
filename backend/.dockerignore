@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+node_modules
+vendor
+var/cache
+var/log
+.env.local
+.env.*.local

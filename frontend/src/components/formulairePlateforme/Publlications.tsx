@@ -29,7 +29,7 @@ function PublicationRow({ numero, onDelete }: { numero: number; onDelete: () => 
     );
 }
 
-export function Publications() {
+export function Publications({ disabled = false }: { disabled?: boolean }) {
     const { control } = useFormContext<DernierHistorique>();
     const { fields, replace, remove } = useFieldArray({
         control,
@@ -37,7 +37,7 @@ export function Publications() {
     });
 
     return (
-        <Box sx={{ mt: 2 }}>
+        <Box component="fieldset" disabled={disabled} sx={{ mt: 2, border: 0, p: 0, minWidth: 0 }}>
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 2 }}>
                 Publications de l'année dans des revues à comité de lecture
             </Typography>

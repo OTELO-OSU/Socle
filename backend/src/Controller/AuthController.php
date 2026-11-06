@@ -155,7 +155,7 @@ final class AuthController extends AbstractController
     public function refresh(Request $request): Response
     {
         $refreshToken = $request->cookies->get('refresh_token');
-        if (!$refreshToken) throw new BadRequestHttpException($this->translator->trans('exception.bad_request.refresh_token_manquant'));
+        if (!$refreshToken) throw new BadRequestHttpException($this->translator->trans('auth.exception.refresh_token_manquant'));
 
         $couple = $this->authService->checkRefreshToken($refreshToken);
         $response = $this->json(['token' => $couple['token']], 200);

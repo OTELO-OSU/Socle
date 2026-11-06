@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 
-export default function EmpreinteCarbone() {
+export default function EmpreinteCarbone({ disabled = false }: { disabled?: boolean }) {
     const { getValues, setValue, watch } = useFormContext();
     watch(["bges_domicile_travail", "bges_mission", "bges_mission_ext", "bges_consommable", "bges_equipement", "bges_envoi_echantillon", "bges_batiment", "bges_dechet"], () => {
         totalBGES();
@@ -44,17 +44,17 @@ export default function EmpreinteCarbone() {
             <Typography variant="subtitle1" component="p">
                 L’IR RéGEF recommande l’utilisation de l’outil Labo 1.5 <Link href="https://labos1point5.org/" target="_blank" rel="noopener noreferrer">https://labos1point5.org/</Link> et plus spécifiquement de la feuille de calcul dédiée aux Infrastructures de Recherche pour le calcul de votre Empreinte Carbone (EC en kg eCO2)
             </Typography>
-            <RadioTextFieldHint label="Avez-vous réalisé un BGES à l’échelle de la plateforme ?" name="bges_realise" helperText="" />
+            <RadioTextFieldHint disabled={disabled} label="Avez-vous réalisé un BGES à l’échelle de la plateforme ?" name="bges_realise" helperText="" />
             {bgesRealise && (
                 <>
-                    <NombreTextFieldHint label="Domicile-Travail" name="bges_domicile_travail" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Missions" name="bges_mission" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Missions ext." name="bges_mission_ext" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Consommables" name="bges_consommable" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Equipements" name="bges_equipement" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Envoi des échantillons" name="bges_envoi_echantillon" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Bâtiment" name="bges_batiment" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
-                    <NombreTextFieldHint label="Déchets" name="bges_dechet" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Domicile-Travail" name="bges_domicile_travail" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Missions" name="bges_mission" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Missions ext." name="bges_mission_ext" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Consommables" name="bges_consommable" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Equipements" name="bges_equipement" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Envoi des échantillons" name="bges_envoi_echantillon" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Bâtiment" name="bges_batiment" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
+                    <NombreTextFieldHint disabled={disabled} label="Déchets" name="bges_dechet" helperText="" slotProps={{ input: { endAdornment: "kg" } }} />
                     <LayoutLabelHintInput label="Somme des postes" helperText="" >
                         <TextField
                             label="Somme des kg eCO2"

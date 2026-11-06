@@ -14,11 +14,11 @@ function InstrumentActuelMaintenanceCard({
     onEdit: (instrument: Instrument) => void;
 }) {
     const dictionnaireContext = useContext(DictionnaireContext);
-const { watch } = useFormContext();
-const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
-const contratsMaintenance = plateformeDictionnaire
-    ? Object.values(plateformeDictionnaire.contrats_maintenance)
-    : dictionnaireContext.typeContratMaintenance;
+    const { watch } = useFormContext();
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+    const contratsMaintenance = plateformeDictionnaire
+        ? Object.values(plateformeDictionnaire.contrats_maintenance)
+        : dictionnaireContext.typeContratMaintenance;
     const selectedMutualisation = instrument.mutualise_autre_instrument
         ? "mutualiseAutreInstrument"
         : instrument.mutualise_umr_osu
@@ -39,13 +39,15 @@ const contratsMaintenance = plateformeDictionnaire
                 boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
             }}
         >
-            <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
-                {instrument.nom}
-            </Typography>
+            {instrument.annee_acquisition && (
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                    Acquis en {instrument.annee_acquisition}
+                </Typography>
+            )}
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                        {instrument.nom || "Equipement sans nom"}
+                        {instrument.nom || "Equipement sans nom"} {instrument.marque} {instrument.modele}
                     </Typography>
 
                     <Grid container spacing={1.5} sx={{ mb: 1.5, alignItems: "end" }}>

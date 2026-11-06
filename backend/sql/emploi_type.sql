@@ -1,0 +1,105 @@
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (1,'Ingénieur et ingénieure biologiste en plateforme scientifique ','A1A42'),
+	 (2,'Ingénieur et ingénieure biologiste en analyse de données ','A1A41'),
+	 (3,'Ingénieur et ingénieure biologiste en laboratoire ','A1A43'),
+	 (4,'Ingénieur et ingénieure biologiste en traitement de données ','A2A41'),
+	 (5,'Ingénieur et ingénieure en expérimentation et instrumentation biologiques ','A2A42'),
+	 (6,'Ingénieur et ingénieure de recherche en environnements géo-naturels et anthropisés ','A1D47'),
+	 (7,'Assistant ingénieur et assistante ingénieure en expérimentation et instrumentation biologiques ','A3A42'),
+	 (8,'Assistant ingénieur et assistante ingénieure en biologie, sciences de la vie et de la terre ','A3A43'),
+	 (9,'Assistant ingénieur et assistante ingénieure en centre d’expérimentation animale ','A3B45'),
+	 (10,'Ingénieur et ingénieure en études d’environnements géo-naturels et anthropisés ','A2D47');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (11,'Assistant ingénieur et assistante ingénieure en études d’environnements géo-naturels et anthropisés ','A3D47'),
+	 (12,'Technicien et technicienne biologiste ','A4A41'),
+	 (13,'Ingénieur et ingénieure en techniques biologiques ','A2A43'),
+	 (14,'Zootechnicien et zootechnicienne ','A4B43'),
+	 (15,'Assistant ingénieur et assistante ingénieure biologiste en traitement de données ','A3A41'),
+	 (16,'Ingénieur et ingénieure de recherche en science des matériaux / caractérisation ','B1C43'),
+	 (17,'Ingénieur et ingénieure de recherche en synthèse chimique ','B1B42'),
+	 (18,'Ingénieur et ingénieure de recherche en science des matériaux / élaboration ','B1D44'),
+	 (19,'Technicien et technicienne en expérimentation animale ','A4B44'),
+	 (20,'Ingénieur et ingénieure de recherche en analyse chimique ','B1A41');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (21,'Ingénieur et ingénieure en analyse chimique ','B2A41'),
+	 (22,'Ingénieur et ingénieure en synthèse chimique ','B2B42'),
+	 (23,'Ingénieur et ingénieure en science des matériaux / caractérisation ','B2C43'),
+	 (24,'Ingénieur et ingénieure en élaboration de matériaux en couches minces ','B2D44'),
+	 (25,'Assistant ingénieur et assistante ingénieure en analyse chimique ','B3A41'),
+	 (26,'Expert et experte en développement d’expérimentation ','C1B42'),
+	 (27,'Expert et experte en développement d’instrument ','C1B43'),
+	 (28,'Expert électronicien et experte électronicienne ','C1C44'),
+	 (29,'Expert et experte en conception mécanique ','C1D47'),
+	 (30,'Ingénieur et ingénieure en techniques expérimentales ','C2B42');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (31,'Ingénieur et ingénieure en conception instrumentale ','C2B43'),
+	 (32,'Ingénieur et ingénieure d’exploitation d’instrument ','C2B44'),
+	 (33,'Ingénieur électronicien et ingénieure électronicienne ','C2C45'),
+	 (34,'Ingénieur et ingénieure en études mécaniques ','C2D48'),
+	 (35,'Ingénieur et ingénieure en réalisation Domaines : mécanique, chaudronnerie, verrerie ','C2D49'),
+	 (36,'Assistant ingénieur et assistante ingénieure en instrumentation et techniques expérimentales ','C3B41'),
+	 (37,'Assistant ingénieur et assistante ingénieure d’exploitation d’instrument ','C3B42'),
+	 (38,'Assistant ingénieur électronicien et assistante ingénieure électronicienne ','C3C43'),
+	 (39,'Assistant ingénieur et assistante ingénieure en études mécaniques ','C3D46'),
+	 (40,'Assistant ingénieur et assistante ingénieure en réalisation mécanique ','C3D47');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (41,'Technicien et technicienne en instrumentation, expérimentation et mesure ','C4B41'),
+	 (42,'Technicien et technicienne en réalisation mécanique ','C4D46'),
+	 (43,'Ingénieur et ingénieure de recherche en production, traitement et analyse de données ','D1A41'),
+	 (44,'Assistant ingénieur et assistante ingénieure en synthèse chimique ','B3B42'),
+	 (45,'Assistant ingénieur et assistante ingénieure en science des matériaux / caractérisation ','B3C43'),
+	 (46,'Technicien et technicienne en chimie et sciences physiques ','B4X41'),
+	 (47,'Ingénieur et ingénieure de recherche en analyses des sources historiques et culturelles ','D1C43'),
+	 (48,'Ingénieur et ingénieure de recherche en archéologie ','D1D44'),
+	 (49,'Ingénieur et ingénieure d’études en production, traitement, analyse de données et enquêtes ','D2A41'),
+	 (50,'Ingénieur et ingénieure d’études en sciences de l’information géographique ','D2B42');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (51,'Ingénieur et ingénieure d’études en analyses des sources historiques et culturelles ','D2C43'),
+	 (52,'Expert et experte en calcul scientifi que ','E1E45'),
+	 (53,'Administrateur et administratrice des systèmes d’information ','E2A41'),
+	 (54,'Administrateur et administratrice systèmes et réseaux ','E2B43'),
+	 (55,'Ingénieur et ingénieure en ingénierie logicielle ','E2C45'),
+	 (56,'Ingénieur statisticien et ingénieure statisticienne ','E2D46'),
+	 (57,'Ingénieur et ingénieure en calcul scientifi que ','E2E47'),
+	 (58,'Gestionnaire d’application / assistance support ','E3A41'),
+	 (59,'Gestionnaire d’infrastructures ','E3B42'),
+	 (60,'Assistant et assistante en ingénierie logicielle ','E3C43');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (61,'Technicien et  technicienne d’exploitation, d’assistance et de traitement de l''information ','E4X41'),
+	 (62,'Responsable des ressources et de l’ingénierie documentaire ','F1A41'),
+	 (63,'Responsable de la communication ','F1B45'),
+	 (64,'Chargé et chargée des ressources documentaires ','F2A42'),
+	 (65,'Chargé et chargée de communication ','F2B49'),
+	 (66,'Éditeur et éditrice ','F2C51'),
+	 (67,'Assistant et assistante de ressources documentaires et scientifi ques ','F3A41'),
+	 (68,'Assistant et assistante de communication ','F3B46'),
+	 (69,'Technicien et technicienne d’information documentaire et de collections patrimoniales ','F4A41'),
+	 (70,'Chef et cheffe de projet ou expert et experte en ingénierie des systèmes d’information ','E1A41');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (71,'Chef et cheffe de projet ou expert et experte en infrastructures ','E1B42'),
+	 (72,'Chef et cheffe de projet ou expert et experte en ingéniérie logicielle ','E1C43'),
+	 (73,'Chargé et chargée d''opérations immobilières ','G2A41'),
+	 (74,'Chargé et chargée de la maintenance et de l''exploitation du patrimoine immobilier ','G2A42'),
+	 (75,'Ingénieur et ingénieure de prévention des risques ','G2C45'),
+	 (76,'Chef et cheffe d''exploitation de maintenance des bâtiments ','G3A45'),
+	 (77,'Gestionnaire logistique ','G3B47'),
+	 (78,'Responsable de l’administration et du pilotage ','J1C45'),
+	 (79,'Chargé et chargée du partenariat et de la valorisation de la recherche ','J2B43'),
+	 (80,'Chargé et chargée de gestion administrative et d’aide au pilotage opérationnel ','J2C46');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (81,'Chargé et chargée des achats et des marchés ','J2C48'),
+	 (82,'Chargé et chargée de la gestion des ressources humaines ','J2D49'),
+	 (83,'Chargé et chargée du développement des ressources humaines ','J2D51'),
+	 (84,'Chargé et chargée de la gestion fi nancière et comptable ','J2E52'),
+	 (85,'Assistant et assistante en partenariat, valorisation de la recherche et coopération internationale ','J3B43'),
+	 (86,'Assistant et assistante en gestion administrative ','J3C44'),
+	 (87,'Assistant et assistante des ressources humaines ','J3D45'),
+	 (88,'Assistant et assistante en gestion fi nancière et comptable ','J3E47'),
+	 (89,'Technicien et technicienne en gestion administrative ','J4C42'),
+	 (90,'Technicien et technicienne en aménagement, maintenance et exploitation du bâti ','G4A46');
+INSERT INTO public.emploi_type (id,nom,acronyme) VALUES
+	 (91,'Gestionnaire fi nancier et fi nancière et comptable ','J4E44'),
+	 (92,'Adjoint et ajointe en gestion administrative ','J5X41'),
+	 (93,'Technicien et technicienne logistique ','G4B48'),
+	 (94,'Responsable du partenariat et de la valorisation de la recherche ','J1B43'),
+	 (95,'Gestionnaire des ressources humaines ','J4D43');

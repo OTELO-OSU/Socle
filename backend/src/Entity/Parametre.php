@@ -16,7 +16,7 @@ class Parametre
     #[ORM\Column(length: 255)]
     private ?string $cle = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text')]
     private ?string $valeur = null;
 
     public function getId(): ?int

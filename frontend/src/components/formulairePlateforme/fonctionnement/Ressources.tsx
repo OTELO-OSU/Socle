@@ -10,7 +10,7 @@ import LayoutLabelHintInput from "../../LayoutLabelHintInput";
 import NombreTextFieldHint from "../../NombreTextFieldHint";
 import type { PlateformeDictionnaire, SourceFinancement } from "../../../services/plateformeService";
 
-function DialogModifDetailTutelle() {
+function DialogModifDetailTutelle({ disabled = false }: { disabled?: boolean }) {
     const [open, setOpen] = useState(false);
     const { getValues, setValue, watch } = useFormContext();
     const contribution_tutelle_detail = watch("contribution_tutelle_detail") || [];
@@ -28,11 +28,11 @@ function DialogModifDetailTutelle() {
     const tutelleNonRenseignee = contribution_tutelle_detail.some((source: SourceFinancement) => source.financeur_id === null);
     return (
         <>
-            <IconButton size="small" sx={{ width: "fit-content", mt: 1 }} onClick={() => setOpen(true)}>
+            <IconButton disabled={disabled} size="small" sx={{ width: "fit-content", mt: 1 }} onClick={() => setOpen(true)}>
                 <EditIcon />
             </IconButton>
             <Dialog open={open} onClose={() => setOpen(false)}>
-                <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box component="fieldset" disabled={disabled} sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2, border: 0 }}>
                     <Typography variant="h6" component="h2">
                         Détail de la contribution des tutelles
                     </Typography>
@@ -140,7 +140,7 @@ function DialogModifDetailTutelle() {
     )
 }
 
-export default function Ressources() {
+export default function Ressources({ disabled = false }: { disabled?: boolean }) {
     const { getValues, watch, setValue } = useFormContext();
     watch(["contribution_tutelle_taux", "contribution_fond_public_taux", "contribution_fond_prive_taux", "contribution_credit_taux", "contribution_projet_recherche_taux", "contribution_structure_pia_taux"], () => {
         totalTaux();
@@ -173,7 +173,7 @@ export default function Ressources() {
                                 <Typography variant="subtitle2" component="h3" sx={{ fontWeight: "bold" }}>
                                     Détail de la contribution des tutelles
                                 </Typography>
-                                <DialogModifDetailTutelle />
+                                <DialogModifDetailTutelle disabled={disabled} />
                             </Stack>
                             {detailTutelle.length > 0 ? detailTutelle.map((detail: SourceFinancement, index: number) => (
                                 <Typography key={index} variant="body2" component="p">

@@ -469,7 +469,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('message', $data);
-        $this->assertEquals(static::getContainer()->get('translator')->trans('exception.bad_request.refresh_token_manquant'), $data['message']);
+        $this->assertEquals(static::getContainer()->get('translator')->trans('auth.exception.refresh_token_manquant'), $data['message']);
 
         self::assertEmailCount(0);
     }

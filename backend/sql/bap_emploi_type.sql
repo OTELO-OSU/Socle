@@ -1,0 +1,105 @@
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (1,1),
+	 (1,2),
+	 (1,3),
+	 (1,4),
+	 (1,5),
+	 (1,6),
+	 (1,7),
+	 (1,8),
+	 (1,9),
+	 (1,10);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (1,11),
+	 (1,12),
+	 (1,13),
+	 (1,14),
+	 (1,15),
+	 (2,16),
+	 (2,17),
+	 (2,18),
+	 (1,19),
+	 (2,20);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (2,21),
+	 (2,22),
+	 (2,23),
+	 (2,24),
+	 (2,25),
+	 (3,26),
+	 (3,27),
+	 (3,28),
+	 (3,29),
+	 (3,30);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (3,31),
+	 (3,32),
+	 (3,33),
+	 (3,34),
+	 (3,35),
+	 (3,36),
+	 (3,37),
+	 (3,38),
+	 (3,39),
+	 (3,40);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (3,41),
+	 (3,42),
+	 (4,43),
+	 (2,44),
+	 (2,45),
+	 (2,46),
+	 (4,47),
+	 (4,48),
+	 (4,49),
+	 (4,50);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (4,51),
+	 (5,52),
+	 (5,53),
+	 (5,54),
+	 (5,55),
+	 (5,56),
+	 (5,57),
+	 (5,58),
+	 (5,59),
+	 (5,60);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (5,61),
+	 (6,62),
+	 (6,63),
+	 (6,64),
+	 (6,65),
+	 (6,66),
+	 (6,67),
+	 (6,68),
+	 (6,69),
+	 (5,70);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (5,71),
+	 (5,72),
+	 (7,73),
+	 (7,74),
+	 (7,75),
+	 (7,76),
+	 (7,77),
+	 (8,78),
+	 (8,79),
+	 (8,80);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (8,81),
+	 (8,82),
+	 (8,83),
+	 (8,84),
+	 (8,85),
+	 (8,86),
+	 (8,87),
+	 (8,88),
+	 (8,89),
+	 (7,90);
+INSERT INTO public.bap_emploi_type (bap_id,emploi_type_id) VALUES
+	 (8,91),
+	 (8,92),
+	 (7,93),
+	 (8,94),
+	 (8,95);

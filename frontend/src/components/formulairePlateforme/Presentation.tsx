@@ -53,27 +53,28 @@ function FitMapToPoints({ point }: { point: MapPoint }) {
     return null;
 }
 
-function PreviewMap() {
-    const { watch, setValue } = useFormContext();
+function MapClickHandler() {
+    const { setValue } = useFormContext();
+    useMapEvents({
+        click(e) {
+            setValue("latitude", e.latlng.lat);
+            setValue("longitude", e.latlng.lng);
+        }
+    });
+
+    return null;
+}
+
+function PreviewMap({ disabled = false }: { disabled?: boolean }) {
+    const { watch } = useFormContext();
     const point = {
         latitude: toNullableNumber(watch("latitude")),
         longitude: toNullableNumber(watch("longitude")),
     }
 
-    function MapClickHandler() {
-        useMapEvents({
-            click(e) {
-                setValue("latitude", e.latlng.lat);
-                setValue("longitude", e.latlng.lng);
-            }
-        });
-
-        return null;
-    }
-
     return (
         <>
-            <MapContainer style={{ cursor: "crosshair" }} className="h-full w-full" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
+            <MapContainer style={{ cursor: disabled ? "default" : "crosshair" }} className="h-full w-full" center={[46.5, 2.5]} zoom={6} minZoom={3} maxZoom={18} maxBounds={[[-85, -180],
             [85, 180],
             ]} scrollWheelZoom={true} maxBoundsViscosity={1.0}
                 worldCopyJump={true}
@@ -83,8 +84,7 @@ function PreviewMap() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <FitMapToPoints point={point} />
-                <MapClickHandler />
-                {hasValidCoordinates(point) && (
+                {!disabled && <MapClickHandler />}                {hasValidCoordinates(point) && (
                     <Marker position={[point.latitude, point.longitude]} />
                 )}
             </MapContainer>
@@ -92,7 +92,7 @@ function PreviewMap() {
     )
 }
 
-export function Presentation() {
+export function Presentation({ disabled = false }: { disabled?: boolean }) {
     const { control, watch } = useFormContext();
     const authContext = useContext(AuthContext);
     const { villeOptions, uniteOptions, employeurOptions, tagsOptions } = useContext(DictionnaireContext);
@@ -130,7 +130,7 @@ export function Presentation() {
                         <RHFTextField
                             name="forme_developpee_nom_officiel"
                             control={control}
-                            label="Signification de l'acronyme (si le nom officiel en est un)"
+                            label="Signification de l'acronyme (si le nom en est un)"
                             placeholder="<Service d'Analyse des Roches et des Minéraux>"
                         />
                     </Stack>
@@ -299,7 +299,7 @@ export function Presentation() {
                     </Typography>
                 </Grid>
                 <Grid size="grow" sx={{ height: 400 }}>
-                    <PreviewMap />
+                    <PreviewMap disabled={disabled} />
                 </Grid>
             </Grid>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
