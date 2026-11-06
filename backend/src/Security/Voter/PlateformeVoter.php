@@ -134,7 +134,7 @@ final class PlateformeVoter extends Voter
                 $tagsPlateforme = $subject->getPlateformeTags()->map(fn($pt) => $pt->getTagId())->toArray();
                 $tagsUtilisateur = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
                 if (count(array_intersect($tagsPlateforme, $tagsUtilisateur)) > 0) {
-                    return true;
+                    return false;
                 }
 
                 break;
@@ -167,6 +167,13 @@ final class PlateformeVoter extends Voter
                 if ($unite && $unite->estUtilisateurDirOuDirDeleg($user)) return true;
                 $dernierHistorique = $subject->getLastHistorique();
                 if ($dernierHistorique->estUserResponsablePlateforme($user)) return true;
+
+                /** @var Utilisateur $user */
+                $tagsPlateforme = $subject->getPlateformeTags()->map(fn($pt) => $pt->getTagId())->toArray();
+                $tagsUtilisateur = $user->getUtilisateurTags()->map(fn($ut) => $ut->getTagId())->toArray();
+                if (count(array_intersect($tagsPlateforme, $tagsUtilisateur)) > 0) {
+                    return true;
+                }
 
                 return false;
             case self::EXPORT_TAG:
