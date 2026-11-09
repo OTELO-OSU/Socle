@@ -7,6 +7,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    needs:
+      - audit-frontend
+      - audit-backend
     container: composer:2
     services:
       database:
@@ -61,6 +64,32 @@ jobs:
           name: rapport-tests-backend
           path: backend/report.xml
           if-no-files-found: warn
+
+
+  audit-frontend:
+    runs-on: ubuntu-latest
+    container: node:24-alpine
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer les dépendances
+        run: npm ci --prefix frontend
+
+      - name: Vérifier les dépendances pour les vulnérabilités
+        run: npm audit --audit-level=high --prefix frontend
+
+  audit-backend:
+    runs-on: ubuntu-latest
+    container: composer:2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer les dépendances
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Vérifier les dépendances pour les vulnérabilités
+        run: composer audit
+
 
   deploy:
     needs: test
