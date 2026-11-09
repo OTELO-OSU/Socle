@@ -1,0 +1,63 @@
+name: Tests backend
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: composer:2
+    services:
+      database:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: poe_test
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+        options: >-
+          --health-cmd "pg_isready -U root -d poe_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "postgresql://root:root@database:5432/poe_test?serverVersion=16&charset=utf8"
+      MAILER_DSN: "null://null"
+      FRONT_HOST: "http://localhost"
+      NOREPLY_EMAIL: "noreply@ul.fr"
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer les extensions PHP
+        run: |
+          apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev
+          docker-php-ext-configure gd --with-freetype --with-jpeg
+          docker-php-ext-install gd pdo pdo_pgsql intl zip
+
+      - name: Installer les dépendances
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Préparer la base de données
+        run: |
+          php bin/console lexik:jwt:generate-keypair --overwrite
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:schema:drop --force --full-database --env=test || true
+          php bin/console doctrine:schema:create --env=test
+
+      - name: Exécuter les tests
+        run: php bin/phpunit --log-junit report.xml
+
+      - name: Conserver le rapport de tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-tests-backend
+          path: backend/report.xml
+          if-no-files-found: warn
