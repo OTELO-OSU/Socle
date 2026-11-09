@@ -61,3 +61,48 @@ jobs:
           name: rapport-tests-backend
           path: backend/report.xml
           if-no-files-found: warn
+
+  deploy:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Récupérer le code testé
+        uses: actions/checkout@v4
+
+      - name: Préparer les noms des images
+        id: image
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          echo "base=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Se connecter à GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construire et publier nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/nginx/dockerfile
+          push: true
+          tags: ${{ steps.image.outputs.base }}/nginx:${{ steps.image.outputs.version }}
+
+      - name: Construire et publier PHP
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/php-fpm/dockerfile
+          push: true
+          build-args: APP_ENV=prod
+          tags: ${{ steps.image.outputs.base }}/php:${{ steps.image.outputs.version }}
