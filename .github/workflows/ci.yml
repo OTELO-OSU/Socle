@@ -72,6 +72,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Aller dans le répertoire frontend
+        run: cd frontend
+
       - name: Installer les dépendances
         run: npm ci --prefix frontend
 
@@ -83,6 +86,9 @@ jobs:
     container: composer:2
     steps:
       - uses: actions/checkout@v4
+
+      - name: Aller dans le répertoire backend
+        run: cd backend
 
       - name: Installer les dépendances
         run: composer install --no-interaction --prefer-dist --no-progress
