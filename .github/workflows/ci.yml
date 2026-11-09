@@ -69,11 +69,13 @@ jobs:
   audit-frontend:
     runs-on: ubuntu-latest
     container: node:24-alpine
+
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Aller dans le répertoire frontend
-        run: cd frontend
 
       - name: Installer les dépendances
         run: npm ci --prefix frontend
@@ -84,11 +86,13 @@ jobs:
   audit-backend:
     runs-on: ubuntu-latest
     container: composer:2
+
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Aller dans le répertoire backend
-        run: cd backend
 
       - name: Installer les dépendances
         run: composer install --no-interaction --prefer-dist --no-progress
