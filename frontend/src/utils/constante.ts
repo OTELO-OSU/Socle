@@ -3,7 +3,3 @@ export const API_URL =
 
 export const FRONT_URL =
 	import.meta.env.VITE_FRONT_URL || "http://127.0.0.1:80";
-
-export const ORCID_URL =
-	import.meta.env.VITE_ORCID_URL ||
-	"https://sandbox.orcid.org/oauth/authorize?client_id=APP-CW44BXPPHFVH45PL&response_type=code&scope=/authenticate&redirect_uri=http://127.0.0.1:5173/orcid";

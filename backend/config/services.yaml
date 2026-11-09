@@ -8,10 +8,6 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     front_host: "%env(FRONT_HOST)%"
-    domaine_orcid: "%env(DOMAINE_ORCID)%"
-    orcid_id: "%env(ORCID_ID)%"
-    orcid_secret: "%env(ORCID_SECRET)%"
-    orcid_redirect_uri: "%env(ORCID_REDIRECT_URI)%"
     email_logo: "%env(EMAIL_LOGO)%"
     noreply: "%env(NOREPLY_EMAIL)%"
     central_tag: "%env(CENTRAL_TAG)%"

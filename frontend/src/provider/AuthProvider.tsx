@@ -61,11 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(data.token);
     }, [setToken]);
 
-    const connexionViaOrcid = useCallback(async (code: string) => {
-        const { data } = await authService.connexionViaOrcid(code);
-        setToken(data.token);
-    }, [setToken]);
-
     const deconnexion = useCallback(async () => {
         if (!token) {
             clearToken();
@@ -90,7 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setToken,
             clearToken,
             connexion,
-            connexionViaOrcid,
             deconnexion,
             isAuthLoading,
             estConnecte: Boolean(token),
@@ -101,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             prenom: decodedToken?.prenom || null,
             nom: decodedToken?.nom || null,
         }),
-        [clearToken, setToken, connexion, connexionViaOrcid, deconnexion, isAuthLoading, token, decodedToken],
+        [clearToken, setToken, connexion, deconnexion, isAuthLoading, token, decodedToken],
     )
 
     useEffect(() => {

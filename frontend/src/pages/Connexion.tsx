@@ -1,14 +1,12 @@
 import { Box, Button, Card, Divider, FormControl, FormLabel, Link, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import MdpOublie from "../components/MdpOublie";
-import OrcidIcon from "../components/icons/OrcidIcon";
 import { AccountBalance } from "@mui/icons-material";
 import { AuthContext } from "../context/authContext";
 import type { AxiosError } from "axios";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { ApiError } from "../utils/axios";
 import { useNavigate } from "react-router-dom";
-import { ORCID_URL } from "../utils/constante";
 
 export default function Connexion() {
     const [emailError, setEmailError] = useState(false);
@@ -155,14 +153,6 @@ export default function Connexion() {
                 </Box>
                 <Divider>ou</Divider>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        onClick={() => window.location.href = `${ORCID_URL}`}
-                        startIcon={<OrcidIcon />}
-                    >
-                        Se connecter avec ORCID
-                    </Button>
                     <Button
                         fullWidth
                         variant="outlined"

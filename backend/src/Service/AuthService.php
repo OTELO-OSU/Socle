@@ -35,7 +35,6 @@ class AuthService
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $tokenManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly OrcidService $orcidService,
         private readonly MailerService $mailerService,
         private readonly ParameterBagInterface $params,
         private readonly TranslatorInterface $translator
@@ -69,25 +68,6 @@ class AuthService
         $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["email" => $email, "attenteApprobationDU" => false]);
 
         if (!$user) $this->creationInscriptionOAuth($email, $prenom, $nom, null);
-
-        if (!$user->isEmailValide()) {
-            $this->envoyerEmailVerification($user);
-            throw new UtilisateurMailNonValideException();
-        }
-        if (!$user->isAdmis()) throw new UtilisateurNonAdmisException();
-
-        return $this->genererTokenCookieAvecRefreshToken($user);
-    }
-
-    function connexionOrcid(string $code)
-    {
-        $accessToken = $this->orcidService->getTokenOrcid($code);
-        $profile = $this->orcidService->getProfileOrcid($accessToken);
-        $user = $this->em->getRepository(Utilisateur::class)->findOneBy(["sub_orcid" => $profile["sub"]]);
-
-        $email = $profile["email"] ?? null;
-        if ($email) $email = strtolower($email);
-        if (!$user) $this->creationInscriptionOAuth($email, $profile["given_name"] ?? null, $profile["family_name"] ?? null, $profile["sub"]);
 
         if (!$user->isEmailValide()) {
             $this->envoyerEmailVerification($user);
@@ -138,7 +118,7 @@ class AuthService
      * pour qu'il puisse réuiliser ces informations lors de son inscription.
      * @throws UtilisateurOAuthExistePasException Lance cette erreur à chaque fois pour que les controlleurs puissent l'intercepter et récupérer le token et le payload dans l'erreur.
      */
-    function creationInscriptionOAuth(?string $email, ?string $prenom, ?string $nom, ?string $subOrcid)
+    function creationInscriptionOAuth(?string $email, ?string $prenom, ?string $nom)
     {
         //* Vérifier si l'email n'est pas déjà dans une procédure de création de compte OAuth
         $OAuthExistant = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(["email" => $email]);
@@ -152,7 +132,6 @@ class AuthService
         if ($email) $newOAuth->setEmail($email);
         if ($prenom) $newOAuth->setPrenom($prenom);
         if ($nom) $newOAuth->setNom($nom);
-        if ($subOrcid) $newOAuth->setSubOrcid($subOrcid);
 
         $token = bin2hex(random_bytes(64));
 
@@ -197,8 +176,6 @@ class AuthService
 
         if ($inscriptionOAuth->getNom()) $user->setNom($inscriptionOAuth->getNom());
         else $user->setNom($dto->nom);
-
-        if ($inscriptionOAuth->getSubOrcid()) $user->setSubOrcid($inscriptionOAuth->getSubOrcid());
 
         // Vérifier que l'entité est une unité est qu'elle est valide
         /** @var Entite|null $unite */

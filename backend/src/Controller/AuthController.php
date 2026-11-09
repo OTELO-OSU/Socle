@@ -130,27 +130,6 @@ final class AuthController extends AbstractController
         return $this->json(['message' => $this->translator->trans('auth.succes.inscription_reussie')], 201);
     }
 
-    #[Route('/orcid/connexion/{code}', methods: ['POST', 'OPTIONS'])]
-    public function connexionOrcid(string $code): Response
-    {
-        try {
-            $couple = $this->authService->connexionOrcid($code);
-            $response = $this->json(['token' => $couple['token']]);
-            $response->headers->setCookie($couple['cookie']);
-            return $response;
-        } catch (UtilisateurOAuthExistePasException $e) {
-            return $this->json([
-                'redirect' => $this->params->get('front_host') . "/inscription?" . http_build_query([
-                    'ssmdp' => true,
-                    'token' => $e->getToken(),
-                    'payload' => $e->getPayload(),
-                    'message' => $e->getMessageb64()
-                ]),
-            ], 200);
-        }
-    }
-
-
     #[Route('/refresh', methods: ['POST'])]
     public function refresh(Request $request): Response
     {

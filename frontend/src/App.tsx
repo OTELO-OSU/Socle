@@ -5,7 +5,6 @@ import Connexion from './pages/Connexion'
 import { Alert, Box, CircularProgress, Snackbar, Toolbar } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { SnackbarContext } from './context/snackbarContext'
-import OrcidCallback from './pages/OrcidCallback'
 import Inscription from './pages/Inscription'
 import VerificationMailCallback from './pages/VerificationMailCallback'
 import AdminLayout from './layout/AdminLayout'
@@ -68,7 +67,6 @@ function App() {
               <Route path="/connexion" element={<Connexion />} />
               <Route path="/inscription" element={<Inscription />} />
               <Route path="/callbackCas" element={<FedeCallback />} />
-              <Route path="/orcid" element={<OrcidCallback />} />
               <Route path="/verification-email" element={<VerificationMailCallback />} />
               <Route path="/compte" element={<MonCompte />} />
               <Route path="/deconnexion" element={<Deconnexion />} />

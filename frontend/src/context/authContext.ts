@@ -3,7 +3,6 @@ import { createContext } from 'react'
 export type AuthContextType = {
   token: string | null
   connexion: (email: string, mdp: string) => Promise<void>
-  connexionViaOrcid: (code: string) => Promise<void>
   deconnexion: () => Promise<void>
   setToken: (value: string | null) => void
   clearToken: () => void

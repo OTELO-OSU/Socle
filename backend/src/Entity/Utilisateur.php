@@ -45,10 +45,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $mdp = null;
 
     #[Ignore]
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $subOrcid = null;
-
-    #[Ignore]
     #[ORM\Column]
     private ?bool $emailValide = null;
 
@@ -212,18 +208,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setMdp(?string $mdp): static
     {
         $this->mdp = $mdp;
-
-        return $this;
-    }
-
-    public function getSubOrcid(): ?string
-    {
-        return $this->subOrcid;
-    }
-
-    public function setSubOrcid(?string $subOrcid): static
-    {
-        $this->subOrcid = $subOrcid;
 
         return $this;
     }

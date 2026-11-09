@@ -11,12 +11,6 @@ export async function connexion(email: string, mdp: string) {
     return { data, status };
 }
 
-export async function connexionViaOrcid(code: string) {
-    const { data, status } = await symfony.post(`/orcid/connexion/${code}`);
-
-    return { data, status };
-}
-
 export async function refreshSession() {
     const { data, status } = await symfony.post('/refresh', {}, { withCredentials: true });
 

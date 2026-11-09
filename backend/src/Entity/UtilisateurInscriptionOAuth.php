@@ -21,9 +21,6 @@ class UtilisateurInscriptionOAuth
     private ?\DateTime $expiration = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $subOrcid = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -57,18 +54,6 @@ class UtilisateurInscriptionOAuth
     public function setExpiration(\DateTime $expiration): static
     {
         $this->expiration = $expiration;
-
-        return $this;
-    }
-
-    public function getSubOrcid(): ?string
-    {
-        return $this->subOrcid;
-    }
-
-    public function setSubOrcid(?string $subOrcid): static
-    {
-        $this->subOrcid = $subOrcid;
 
         return $this;
     }
