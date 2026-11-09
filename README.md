@@ -1,4 +1,4 @@
-# PLAIRe-OSU
+# Socle
 
 A PLAIRe version for the OSU
 
@@ -21,7 +21,7 @@ A devcontainer gives every contributor the same clean, reproducible environment.
 
 ## How it works
 
-PLAIRe OSU is an application to maintain an SIP (Strategic Instrumentation Plan) over the years. All information is contained within platforms. A user in charge to write the SIP of his platform will have the right to edit his platform. A platform is in a laboratory which is itself in the OSU.
+Socle is an application to maintain an SIP (Strategic Instrumentation Plan) over the years. All information is contained within platforms. A user in charge to write the SIP of his platform will have the right to edit his platform. A platform is in a laboratory which is itself in the OSU.
 A platform can have multiple tags from among those defined in the central tag repository. Users with the same tag as a platform are automatically platform manager
 
 ### Roles

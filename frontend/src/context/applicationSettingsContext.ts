@@ -14,7 +14,7 @@ export type ApplicationSettingsContextType = {
 }
 
 export const DEFAULT_APPLICATION_SETTINGS: ApplicationSettings = {
-    nom_application: 'POE',
+    nom_application: 'SOCLE',
     couleur_principale: '#ba272c',
     logo_application: null,
     vue_accueil: 'carte',

@@ -48,7 +48,7 @@ export default function HeaderAppBar() {
                             <Box component="img" src={applicationSettings.settings.logo_application.startsWith('data:') ? applicationSettings.settings.logo_application : `${FRONT_URL}${applicationSettings.settings.logo_application}`} alt="" sx={{ height: 32, maxWidth: 120, objectFit: 'contain', mr: 1 }} />
                         )}
                         <Typography variant="h6" component="span" noWrap>
-                            {applicationSettings?.settings.nom_application ?? 'POE'} {dev && <Typography variant="caption" component="span">DEV</Typography>}
+                            {applicationSettings?.settings.nom_application ?? 'SOCLE'} {dev && <Typography variant="caption" component="span">DEV</Typography>}
                         </Typography>
                     </Box>
 
