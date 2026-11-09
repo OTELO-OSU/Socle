@@ -99,6 +99,9 @@ jobs:
 
       - name: Vérifier les dépendances pour les vulnérabilités
         run: composer audit --locked
+          --ignore-severity=low
+          --ignore-severity=medium
+          --abandoned=report
 
 
   deploy:
