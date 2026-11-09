@@ -95,12 +95,49 @@ export default function Connexion() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '100%',
-                minHeight: (theme) => `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`
+                minHeight: (theme) => `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+                px: 2,
+                py: 4,
             }}
         >
-            <Card sx={{ p: 4, width: '100%', maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography variant="h4" component="h1" align="center">Connexion</Typography>
-                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
+            <Card sx={{
+                p: { xs: 3, sm: 4 },
+                width: '100%',
+                maxWidth: 480,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2.5,
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                boxShadow: '0 10px 30px rgba(15,23,42,0.08)',
+            }}>
+                <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" component="h1">Connexion</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Accédez à votre espace avec votre établissement ou votre compte.
+                    </Typography>
+                </Box>
+                <Button
+                    fullWidth
+                    size="large"
+                    variant="contained"
+                    onClick={() => window.location.href = "/loginCAS"}
+                    startIcon={<AccountBalance />}
+                    sx={{
+                        minHeight: 68,
+                        px: 2.5,
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                        lineHeight: 1.4,
+                        textTransform: 'none',
+                        '& .MuiButton-startIcon svg': { fontSize: '1.5rem' },
+                    }}
+                >
+                    Se connecter avec votre établissement
+                </Button>
+                <Divider><Typography variant="body2" color="text.secondary">ou avec un compte</Typography></Divider>
+                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2.5 }}>
                     <FormControl>
                         <FormLabel htmlFor="email">Email</FormLabel>
                         <TextField
@@ -137,7 +174,7 @@ export default function Connexion() {
                     <Button
                         type="submit"
                         fullWidth
-                        variant="contained"
+                        variant="outlined"
                     >
                         Se connecter
                     </Button>
@@ -150,17 +187,6 @@ export default function Connexion() {
                     >
                         Mot de passe oublié ?
                     </Link>
-                </Box>
-                <Divider>ou</Divider>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        onClick={() => window.location.href = "/loginCAS"}
-                        startIcon={<AccountBalance />}
-                    >
-                        Se connecter avec votre établissement
-                    </Button>
                 </Box>
             </Card>
         </Box>
