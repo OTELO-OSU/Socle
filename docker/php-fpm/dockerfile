@@ -7,6 +7,10 @@ RUN chown www-data:www-data /var/www/backend
 # Environnement de build (dev ou prod)
 ARG APP_ENV=prod
 
+ARG APP_VERSION
+
+ENV APP_VERSION=${APP_VERSION}
+
 RUN apk add --no-cache \
     curl \
     git \

@@ -70,7 +70,7 @@ function App() {
 
             {data?.updateAvailable && (
               <Alert severity="info">
-                Une nouvelle version de SIPSI est disponible :
+                Une nouvelle version de Socle est disponible :
                 {' '}{data.latest}
                 {' '}(version actuelle : {data.current})
                 {' '}<Link href='https://github.com/OTELO-OSU/Socle/blob/production/docs/mise-a-jour.md' target='_blank' rel='noopener noreferrer'>Comment mettre à jour ?</Link>
