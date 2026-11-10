@@ -1,5 +1,5 @@
 export const API_URL =
-	import.meta.env.VITE_API_URL || "http://127.0.0.1:80/api";
+	window.APP_CONFIG?.API_URL || import.meta.env.VITE_API_URL;
 
 export const FRONT_URL =
-	import.meta.env.VITE_FRONT_URL || "http://127.0.0.1:80";
+	window.APP_CONFIG?.FRONT_URL || import.meta.env.VITE_FRONT_URL;
