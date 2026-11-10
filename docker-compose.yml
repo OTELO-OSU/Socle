@@ -1,8 +1,6 @@
 services:
   nginx:
-    build:
-      context: .
-      dockerfile: ./docker/nginx/dockerfile
+    image: ghcr.io/otelo-osu/socle/nginx:${APP_VERSION:-1.0.0}
     environment:
       - API_URL=${API_URL}
       - FRONT_URL=${FRONT_HOST}
@@ -16,11 +14,7 @@ services:
         condition: service_started
 
   php:
-    build:
-      context: .
-      dockerfile: ./docker/php-fpm/dockerfile
-      args:
-        - APP_ENV=${APP_ENV}
+    image: ghcr.io/otelo-osu/socle/php:${APP_VERSION:-1.0.0}
     environment:
       APP_ENV: ${APP_ENV}
       APP_SECRET: ${APP_SECRET}
