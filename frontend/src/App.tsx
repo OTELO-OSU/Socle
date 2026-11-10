@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import HeaderAppBar from './components/HeaderAppBar'
 import Connexion from './pages/Connexion'
-import { Alert, Box, CircularProgress, Snackbar, Toolbar } from '@mui/material'
+import { Alert, Box, CircularProgress, Link, Snackbar, Toolbar } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { SnackbarContext } from './context/snackbarContext'
 import Inscription from './pages/Inscription'
@@ -27,11 +27,13 @@ import FedeCallback from './pages/FedeCallback'
 import Deconnexion from './pages/Deconnexion'
 import ResetMdp from './pages/ResetMdp'
 import ApplicationSettingsAdmin from './pages/ApplicationSettingsAdmin'
+import { useAppVersion } from './hook/useAppVersion'
 
 function App() {
   const snackbarContext = useContext(SnackbarContext);
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
+  const { data, isLoading, isError } = useAppVersion();
 
   useEffect(() => {
     registerNavigator((path: string) => {
@@ -56,6 +58,26 @@ function App() {
         }}
       >
         <Toolbar />
+        {authContext?.estAdmin && (
+          <>
+            {isLoading && <CircularProgress />}
+
+            {isError && (
+              <Alert severity="warning">
+                Impossible de vérifier la disponibilité des mises à jour.
+              </Alert>
+            )}
+
+            {data?.updateAvailable && (
+              <Alert severity="info">
+                Une nouvelle version de SIPSI est disponible :
+                {' '}{data.latest}
+                {' '}(version actuelle : {data.current})
+                {' '}<Link href='https://github.com/OTELO-OSU/Socle/blob/production/docs/mise-a-jour.md' target='_blank' rel='noopener noreferrer'>Comment mettre à jour ?</Link>
+              </Alert>
+            )}
+          </>
+        )}
         <Box component="main" sx={{ flex: 1, minHeight: 0 }}>
           {authContext?.isAuthLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
