@@ -9,13 +9,13 @@ Dans l'image précédente on me précise que la nouvelle version v1.0.0 est disp
 Dans mon .env je peux actuellement retrouver
 
 ```
-APP_VERSION=v0.0.0
+APP_VERSION=0.0.0
 ```
 
 Je vais simplement la modifier de manière à avoir la nouvelle version comme ci-dessous.
 
 ```
-APP_VERSION=v1.0.0
+APP_VERSION=1.0.0
 ```
 
 Je vais en suite supprimer les conteneures actuels avec la commande
