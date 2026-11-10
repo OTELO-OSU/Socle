@@ -147,6 +147,6 @@ jobs:
           file: docker/php-fpm/dockerfile
           push: true
           build-args: |
-            APP_VERSION: ${{ steps.image.outputs.version }}
-            APP_ENV: prod
+            APP_VERSION=${{ steps.image.outputs.version }}
+            APP_ENV=prod
           tags: ${{ steps.image.outputs.base }}/php:${{ steps.image.outputs.version }}
