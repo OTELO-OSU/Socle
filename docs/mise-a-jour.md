@@ -1,6 +1,6 @@
 # Comment mettre à jour une instance de SOCLE
 
-[Image de la notification](./assets/maj.png)
+![Image de la notification](./assets/maj.png)
 
 ## Exemple :
 
