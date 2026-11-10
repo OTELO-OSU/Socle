@@ -47,7 +47,6 @@ class ExceptionListener
                 ], $e->getStatusCode())
             );
         } else {
-            \dd($e);
             $event->setResponse(
                 new JsonResponse([
                     'message' => 'Une erreur est survenue.',
