@@ -57,7 +57,8 @@ class ExcelService
         private Security $security,
         private SerializerInterface $serializerInterface,
         private readonly TranslatorInterface $translator,
-        private readonly HarvesterService $harvesterService
+        private readonly HarvesterService $harvesterService,
+        private readonly TagService $tagService
     ) {}
 
     /** Écrit la valeur en forçant le type texte si elle pourrait être interprétée comme une formule */
@@ -446,6 +447,14 @@ class ExcelService
             "Logo_URL"
         ];
 
+        $sheet2Array = [];
+        $sheet2Array[] = [
+            "ID_Plateforme",
+            "Autre_Nom_Plateforme",
+            "ID_Tag",
+            "Nom_tag",
+        ];
+
         $sheet3Array = [];
         $sheet3Array[] = [
             "ID_Plateforme",
@@ -668,6 +677,17 @@ class ExcelService
             "DOI"
         ];
 
+        $recupTags = [];
+
+        try {
+            $recupTags = $this->tagService->getTags();
+            foreach ($recupTags as $tag) {
+                $recupTags[$tag['id']] = $tag['nom'];
+            }
+        } catch (\Exception $e) {
+            // En cas de central tags down on ignore les tags et on continue l'export
+        }
+
         foreach ($platforms as $plat) {
             $references = null;
             $exportId = null;
@@ -702,6 +722,17 @@ class ExcelService
                 $this->formatVille($dernierHistorique["ville_id"], $references),
                 $dernierHistorique["logo_url"] ?? '',
             ];
+
+            $tagsPlateforme = $plat["tags_ids"] ?? [];
+
+            foreach ($tagsPlateforme as $tagId) {
+                $sheet2Array[] = [
+                    $plat["id"],
+                    $pseudoId,
+                    $tagId,
+                    array_key_exists($tagId, $recupTags) ? $recupTags[$tagId] : '',
+                ];
+            }
 
             $prenomDirLab = '';
             $nomDirLab = '';
@@ -1059,6 +1090,16 @@ class ExcelService
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet1Array); $row++) {
                 $this->setSafeCellValue($sheet1, $col . $row, $sheet1Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+            }
+        }
+
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Tags');
+        $sheet2->getStyle('1')->getFont()->setBold(true);
+        $lastLetter = Coordinate::stringFromColumnIndex(count($sheet2Array[0]) + 1);
+        for ($col = "A"; $col !== $lastLetter; $col++) {
+            for ($row = 1; $row <= count($sheet2Array); $row++) {
+                $this->setSafeCellValue($sheet2, $col . $row, $sheet2Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
