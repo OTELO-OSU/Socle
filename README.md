@@ -6,8 +6,8 @@ A PLAIRe version for the OSU
 
 | Package | Stack | Dev port | Description |
 | - | - | - | - |
-| [Backend](backend) | Symfony | 80 | Backend API behind a /api reverse proxy |
-| [Frontend](frontend) | Vue + Vite | 80 | App behind a / reverse proxy |
+| [Backend](backend) | Symfony | 3000 | Backend API behind a /api reverse proxy |
+| [Frontend](frontend) | Vue + Vite | 3000 | App behind a / reverse proxy |
 | Central tag | nginx | 125 | An nginx exposing a json file of tags |
 
 ## Requirements
