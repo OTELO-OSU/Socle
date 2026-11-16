@@ -76,7 +76,8 @@ symfony.interceptors.response.use(
         const isAuthEndpoint =
             originalRequest?.url?.includes('/connexion') ||
             originalRequest?.url?.includes('/inscription') ||
-            originalRequest?.url?.includes('/deconnexion');
+            originalRequest?.url?.includes('/deconnexion') ||
+            originalRequest?.url?.includes('/verifie-mail');
         const shouldTryRefresh = status === 401;
 
         if (shouldTryRefresh && originalRequest && !originalRequest._retry && !isRefreshRequest && !isAuthEndpoint) {
