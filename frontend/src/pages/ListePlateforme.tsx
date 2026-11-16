@@ -35,7 +35,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
                             {plateforme.pseudoId && (
-                                <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
+                                <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', mb: 1, alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
                             )}
                             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
                             {plateforme.instrument_national && (
