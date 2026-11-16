@@ -12,7 +12,7 @@ export type RetourFetchPlateformeParPage = {
 export type PlateformeLight = {
     id: number;
     instance_host?: string;
-    pseudo_id: string;
+    pseudoId: string;
     instrument_national: boolean;
     dernier_historique: DernierHistorique & {
         brouillon: boolean;
