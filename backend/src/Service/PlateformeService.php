@@ -479,6 +479,7 @@ class PlateformeService
                         pp.responsable_scientifique = true
                         OR pp.responsable_technique = true
                     )
+                OR p.pseudo_id LIKE :search
                 )
             )');
             $idsQb->setParameter('search', '%' . $search . '%');
