@@ -7,6 +7,11 @@ export type RetourFetchPlateformeParPage = {
     total: number;
     tags_export: number[];
     unites_export: number[];
+    filtres: {
+        id: number;
+        nom: string;
+        nombre_plateformes: number;
+    }[];
 }
 
 export type PlateformeLight = {
@@ -53,11 +58,12 @@ export async function fetchPlateformePublique(): Promise<PlateformeLight[]> {
     return data.plateformes;
 }
 
-export async function fetchPlateformeListeParPage(page: number, recherche: string) {
+export async function fetchPlateformeListeParPage(page: number, recherche: string, tags: number[] | null = null) {
     const { data } = await symfony.get<RetourFetchPlateformeParPage>('/plateforme', {
         params: {
             page: page,
             search: recherche,
+            tags: tags ? tags.join(',') : null
         }
     });
 

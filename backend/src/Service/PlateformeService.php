@@ -27,6 +27,7 @@ use App\Entity\Utilisateur;
 use App\Entity\Ville;
 use App\Security\Voter\PlateformeVoter;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -445,7 +446,7 @@ class PlateformeService
         return ['plateformes' => $plateformes];
     }
 
-    function getPlateformeParPage(int $page, ?string $search): array
+    function getPlateformeParPage(int $page, ?string $search, ?array $tags): array
     {
         if ($this->security->getUser() === null) {
             throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
@@ -463,7 +464,13 @@ class PlateformeService
             ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
             ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
             ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id')
+            ->leftJoin('p', 'plateforme_tags', 'pt', 'pt.plateforme_id = p.id')
             ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
+
+        if ($tags) {
+            $idsQb->andWhere('pt.tag_id IN (:tags)');
+            $idsQb->setParameter('tags', $tags, ArrayParameterType::INTEGER);
+        }
 
         if ($search) {
             $idsQb->andWhere('(
@@ -523,13 +530,32 @@ class PlateformeService
             }
         }
 
+        $tags = $this->tagService->getTags();
+
+        // Compter combien de plateformes sont associées à chaque tag pour l'utilisateur courant.
+        $tagsExport = [];
+        foreach ($tags as $tag) {
+            $plateformesAvecTag = $this->getPlateformeAuxTags([$tag['id']]);
+            $plateformesVisibles = array_filter(
+                $plateformesAvecTag,
+                fn(PlateformeTags $association): bool => $association->getPlateforme()->getLastHistorique() !== null
+                    && $this->security->isGranted(PlateformeVoter::LIRE, $association->getPlateforme())
+            );
+            $tagsExport[] = [
+                'id' => $tag["id"],
+                'nom' => $tag["nom"],
+                'nombre_plateformes' => count($plateformesVisibles),
+            ];
+        }
+
         return [
             'plateformes' => $plateformes,
             'page' => $page,
             'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
             'total' => $total,
             'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
-            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser())
+            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser()),
+            'filtres' => $tagsExport
         ];
     }
 

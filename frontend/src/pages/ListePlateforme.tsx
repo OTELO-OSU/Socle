@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Autocomplete, Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, Container, Divider, FormControlLabel, FormGroup, LinearProgress, Link, List, Pagination, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
@@ -110,7 +110,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                     <BarChart />
                                     Taux de remplissage : {plateforme.pourcentage_remplissage ?? 0}%
                                 </Typography>
-                                <LinearProgress variant="determinate" value={plateforme.pourcentage_remplissage ?? 0} sx={{ height: 10, width: "500px", mt: 2, borderRadius: 5 }} />
+                                <LinearProgress variant="determinate" value={plateforme.pourcentage_remplissage ?? 0} sx={{ height: 10, width: "100%", maxWidth: "500px", mt: 2, borderRadius: 5 }} />
                             </Box>
                         </Box>
                         {plateforme.dernier_historique.logo_url &&
@@ -141,9 +141,12 @@ export function ListePlateforme() {
     const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
     const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
+    const [tagsSelectionnes, setTagsSelectionnes] = useState<number[]>([]);
+    const [nombresParTag, setNombresParTag] = useState<Map<number, number>>(new Map());
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [erreurChargement, setErreurChargement] = useState<string | null>(null);
     const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
     const [tabs, setTabs] = useState(0);
     const [exportTagId, setExportTagId] = useState('');
@@ -170,30 +173,34 @@ export function ListePlateforme() {
     const authContext = useContext(AuthContext);
     const dictionnaireContext = useContext(DictionnaireContext);
 
-    const fetchPlateformes = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const { plateformes, pages_total, tags_export, unites_export } = await fetchPlateformeListeParPage(page, recherche);
-            setPlateformes(plateformes);
-            setTotalPages(pages_total);
-            if (tags_export.includes(-1)) {
-                setTagsExport(dictionnaireContext.tagsOptions);
-            } else {
-                const tagsOptions = dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value)));
-                setTagsExport(tagsOptions);
+    useEffect(() => {
+        let actif = true;
+        const fetchPlateformes = async () => {
+            setIsLoading(true);
+            setErreurChargement(null);
+            try {
+                const { plateformes, pages_total, tags_export, unites_export, filtres } = await fetchPlateformeListeParPage(page, recherche, tagsSelectionnes.length ? tagsSelectionnes : null);
+                if (!actif) return;
+                setPlateformes(plateformes);
+                setNombresParTag(new Map(filtres.map(tag => [tag.id, tag.nombre_plateformes])));
+                setTotalPages(Math.max(1, pages_total));
+                setTagsExport(tags_export.includes(-1)
+                    ? dictionnaireContext.tagsOptions
+                    : dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value))));
+                setUniteExport(unites_export.includes(-1)
+                    ? dictionnaireContext.uniteOptions
+                    : dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value))));
+            } catch (error) {
+                if (!actif) return;
+                console.error("Erreur lors du chargement des plateformes :", error);
+                setErreurChargement("Impossible de charger les plateformes locales.");
+            } finally {
+                if (actif) setIsLoading(false);
             }
-            if (unites_export.includes(-1)) {
-                setUniteExport(dictionnaireContext.uniteOptions);
-            } else {
-                const unitesOptions = dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value)));
-                setUniteExport(unitesOptions);
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement des plateformes :", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [page, recherche, dictionnaireContext.tagsOptions]);
+        };
+        fetchPlateformes();
+        return () => { actif = false; };
+    }, [page, recherche, tagsSelectionnes, dictionnaireContext.tagsOptions, dictionnaireContext.uniteOptions]);
 
     const fetchPlateformesHarveste = useCallback(async () => {
         setIsLoadingHarvestees(true);
@@ -208,9 +215,8 @@ export function ListePlateforme() {
     }, []);
 
     useEffect(() => {
-        fetchPlateformes();
         fetchPlateformesHarveste();
-    }, [fetchPlateformes, fetchPlateformesHarveste]);
+    }, [fetchPlateformesHarveste]);
 
     return (
         <Container sx={{ py: 4 }}>
@@ -261,42 +267,77 @@ export function ListePlateforme() {
                 </Tabs>
             </Box>
             <CustomTabPanel value={tabs} index={0}>
-                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                    <TextField
-                        type="text"
-                        placeholder="Rechercher une plateforme..."
-                        value={recherche}
-                        onChange={(e) => setRecherche(e.target.value)}
-                        sx={{ width: '55%' }}
-                    />
-                    <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={(_, newPage) => setPage(newPage)}
-                    />
-                </Stack>
-
-                {isLoading ? (
-                    <Typography component={'p'} variant="h6">Chargement...</Typography>
-                ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {plateformes.map((plateforme) => (
-                            <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
-                        ))}
-                        {plateformes.length === 0 && (
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                Aucune plateforme locale trouvée.
-                            </Typography>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, alignItems: "flex-start" }}>
+                    <Paper component="aside" variant="outlined" sx={{ p: 2, width: { xs: "100%", md: 240 }, flexShrink: 0, boxSizing: "border-box" }}>
+                        <Typography component="h2" variant="h6">Filtrer par tag</Typography>
+                        <Typography variant="body2" color="text.secondary">Au moins un des tags sélectionnés</Typography>
+                        <FormGroup>
+                            {dictionnaireContext.tags.map(tag => (
+                                <FormControlLabel
+                                    key={tag.id}
+                                    control={<Checkbox
+                                        checked={tagsSelectionnes.includes(tag.id)}
+                                        onChange={(_, checked) => {
+                                            setTagsSelectionnes(current => checked ? [...current, tag.id] : current.filter(id => id !== tag.id));
+                                            setPage(1);
+                                        }}
+                                    />}
+                                    label={<Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, width: "100%" }}>
+                                        <span>{tag.nom}</span>
+                                        <span>{nombresParTag.has(tag.id) ? nombresParTag.get(tag.id) : "—"}</span>
+                                    </Box>}
+                                    sx={{ mr: 0, ".MuiFormControlLabel-label": { flex: 1, minWidth: 0 } }}
+                                />
+                            ))}
+                        </FormGroup>
+                        {dictionnaireContext.tags.length === 0 && <Typography variant="body2">Aucun tag disponible.</Typography>}
+                        {tagsSelectionnes.length > 0 && (
+                            <Button onClick={() => { setTagsSelectionnes([]); setPage(1); }}>
+                                Effacer les filtres
+                            </Button>
                         )}
+                    </Paper>
+                    <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+                        <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
+                            <TextField
+                                type="text"
+                                placeholder="Rechercher une plateforme..."
+                                value={recherche}
+                                onChange={(e) => { setRecherche(e.target.value); setPage(1); }}
+                                sx={{ width: '55%' }}
+                            />
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={(_, newPage) => setPage(newPage)}
+                            />
+                        </Stack>
+
+                        {isLoading ? (
+                            <Typography component={'p'} variant="h6">Chargement...</Typography>
+                        ) : erreurChargement ? (
+                            <Typography color="error" role="alert">{erreurChargement}</Typography>
+                        ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                {plateformes.map((plateforme) => (
+                                    <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
+                                ))}
+                                {plateformes.length === 0 && (
+                                    <Typography variant="body1" sx={{ mb: 2 }}>
+                                        Aucune plateforme locale trouvée.
+                                    </Typography>
+                                )}
+                            </Box>
+                        )}
+                        <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+                            Précédent
+                        </Button>
+                        <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
+                        <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
+                            Suivant
+                        </Button>
                     </Box>
-                )}
-                <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
-                    Précédent
-                </Button>
-                <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
-                <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
-                    Suivant
-                </Button>
+                </Box>
             </CustomTabPanel>
 
             <CustomTabPanel value={tabs} index={1}>
