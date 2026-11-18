@@ -142,7 +142,7 @@ export function ListePlateforme() {
     const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
     const [tagsSelectionnes, setTagsSelectionnes] = useState<number[]>([]);
-    const [nombresParTag, setNombresParTag] = useState<Map<number, number>>(new Map());
+    const [tagsDispo, setTagsDispo] = useState<{ id: number; nom: string, nombre_plateformes: number }[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -182,7 +182,7 @@ export function ListePlateforme() {
                 const { plateformes, pages_total, tags_export, unites_export, filtres } = await fetchPlateformeListeParPage(page, recherche, tagsSelectionnes.length ? tagsSelectionnes : null);
                 if (!actif) return;
                 setPlateformes(plateformes);
-                setNombresParTag(new Map(filtres.map(tag => [tag.id, tag.nombre_plateformes])));
+                setTagsDispo(filtres);
                 setTotalPages(Math.max(1, pages_total));
                 setTagsExport(tags_export.includes(-1)
                     ? dictionnaireContext.tagsOptions
@@ -272,7 +272,7 @@ export function ListePlateforme() {
                         <Typography component="h2" variant="h6">Filtrer par tag</Typography>
                         <Typography variant="body2" color="text.secondary">Au moins un des tags sélectionnés</Typography>
                         <FormGroup>
-                            {dictionnaireContext.tags.map(tag => (
+                            {tagsDispo.map(tag => (
                                 <FormControlLabel
                                     key={tag.id}
                                     control={<Checkbox
@@ -284,7 +284,7 @@ export function ListePlateforme() {
                                     />}
                                     label={<Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, width: "100%" }}>
                                         <span>{tag.nom}</span>
-                                        <span>{nombresParTag.has(tag.id) ? nombresParTag.get(tag.id) : "—"}</span>
+                                        <span>{tag.nombre_plateformes}</span>
                                     </Box>}
                                     sx={{ mr: 0, ".MuiFormControlLabel-label": { flex: 1, minWidth: 0 } }}
                                 />

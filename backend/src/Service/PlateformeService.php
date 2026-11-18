@@ -541,6 +541,11 @@ class PlateformeService
                 fn(PlateformeTags $association): bool => $association->getPlateforme()->getLastHistorique() !== null
                     && $this->security->isGranted(PlateformeVoter::LIRE, $association->getPlateforme())
             );
+
+            if (count($plateformesVisibles) === 0) {
+                continue;
+            }
+
             $tagsExport[] = [
                 'id' => $tag["id"],
                 'nom' => $tag["nom"],
