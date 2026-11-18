@@ -34,16 +34,18 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
-                            {plateforme.pseudoId && (
-                                <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', mb: 1, alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
-                            )}
-                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
-                            {plateforme.instrument_national && (
-                                <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
-                                    <Verified fontSize="small" />
-                                    Instrument national
-                                </Typography>
-                            )}
+                            <Box component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`}>
+                                {plateforme.pseudoId && (
+                                    <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', mb: 1, alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
+                                )}
+                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
+                                {plateforme.instrument_national && (
+                                    <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
+                                        <Verified fontSize="small" />
+                                        Instrument national
+                                    </Typography>
+                                )}
+                            </Box>
                             {plateforme.dernier_historique.description && (
                                 <Box sx={{ mt: 2 }}>
                                     <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
