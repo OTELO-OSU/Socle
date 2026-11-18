@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
 import { Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, Container, Divider, FormControlLabel, FormGroup, LinearProgress, Link, List, Pagination, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
+import { BarChart, Description, Done, Download, Group, Key, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
 import { allyProps } from "../components/formulairePlateforme/allyProps";
 import { CustomTabPanel } from "../components/CustomTabPanel";
@@ -24,9 +24,6 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 
     const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
     const responsableTechnique = personnel.filter(p => p.responsable_technique);
-    const responsablePlateforme = personnel.filter(p => p.responsable_plateforme);
-
-
 
     return (
         <>
@@ -91,17 +88,17 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                         </List>
                                     </Box>
                                 </>)}
-                            {responsablePlateforme.length > 0 && (
+                            {plateforme.ayant_acces && plateforme.ayant_acces.length > 0 && (
                                 <>
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
-                                            <Group />
-                                            Responsable Plateforme :
+                                            <Key />
+                                            Personnes ayant accès à la plateforme :
                                         </Typography>
                                         <List sx={{ px: 4 }}>
-                                            {responsablePlateforme.map((personnel) => (
-                                                <Typography key={personnel.utilisateur_id} variant="body2" color="textPrimary">
-                                                    {personnel.utilisateur.prenom} {personnel.utilisateur.nom} | {personnel.utilisateur.email}
+                                            {plateforme.ayant_acces.map((user) => (
+                                                <Typography key={user.id} variant="body2" color="textPrimary">
+                                                    {user.prenom} {user.nom} | {user.email}
                                                 </Typography>
                                             ))}
                                         </List>

@@ -499,6 +499,8 @@ class PlateformeService
         $idRows = $idsQb->executeQuery()->fetchAllAssociative();
         $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
 
+        $toutUser = $this->em->getRepository(Utilisateur::class)->findAll();
+
         // 2) Charger les entités candidates puis appliquer le voter LIRE.
         $plateformesAutorisees = [];
         if ($plateformeIds !== []) {
@@ -528,6 +530,9 @@ class PlateformeService
             } else {
                 $plateforme->setReadonly(false);
             }
+
+            $ayantAcces = $this->em->getRepository(Utilisateur::class)->findUserAyantAccesPlateforme($plateforme);
+            $plateforme->setAyantAcces($ayantAcces);
         }
 
         $tags = $this->tagService->getTags();
@@ -552,6 +557,7 @@ class PlateformeService
                 'nombre_plateformes' => count($plateformesVisibles),
             ];
         }
+
 
         return [
             'plateformes' => $plateformes,

@@ -24,6 +24,12 @@ export type PlateformeLight = {
     };
     pourcentage_remplissage?: number | null;
     readonly?: boolean;
+    ayant_acces?: {
+        id: number;
+        nom: string;
+        prenom: string;
+        email: string;
+    }[];
 }
 
 export type PlateformeLightPublique = {
