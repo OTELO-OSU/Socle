@@ -528,6 +528,70 @@ export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
         });
     };
 
+    const dictionnaireContext = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+
+    const personnelsItStatutaire = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "IT Statutaire";
+    });
+
+    const personnelsItCDD = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "IT CDD";
+    });
+
+    const personnelsChercheursStatutaires = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Chercheur Statutaire";
+    });
+
+    const personnelsChercheursCDD = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Chercheur CDD";
+    });
+
+    const doctorants = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Doctorant";
+    });
+
+    const autres = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        const label = typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant);
+        return label !== "IT Statutaire" && label !== "IT CDD" && label !== "Chercheur Statutaire" && label !== "Chercheur CDD" && label !== "Doctorant";
+    });
+
     return (
         <Box sx={{ p: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -539,7 +603,10 @@ export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
                 </Box>
             </Box>
 
-            {personnels.map((personnel) => (
+            <Typography variant="subtitle2" component="h3">
+                Personnel Technique Statutaire
+            </Typography>
+            {personnelsItStatutaire.map((personnel) => (
                 <PersonnelCard
                     key={personnel.utilisateur_id}
                     personnel={personnel}
@@ -548,10 +615,94 @@ export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
                     disabled={disabled}
                 />
             ))}
-            {personnels.length === 0 && (
-                <Typography sx={{ mt: 2 }} color="text.secondary">
-                    Aucun personnel actuel.
+            {personnelsItStatutaire.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel technique statutaire.
                 </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Technique CDD
+            </Typography>
+            {personnelsItCDD.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsItCDD.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel technique CDD.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Chercheur Statutaire
+            </Typography>
+            {personnelsChercheursStatutaires.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsChercheursStatutaires.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel chercheur statutaire.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Chercheur CDD
+            </Typography>
+            {personnelsChercheursCDD.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsChercheursCDD.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel chercheur CDD.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Doctorants
+            </Typography>
+            {doctorants.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    disabled={disabled}
+                />
+            ))}
+            {doctorants.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun doctorant.
+                </Typography>
+            )}
+            {autres.length > 0 && (
+                <>
+                    <Typography variant="subtitle2" component="h3">
+                        Autre
+                    </Typography>
+                    {autres.map((personnel) => (
+                        <PersonnelCard
+                            key={personnel.utilisateur_id}
+                            personnel={personnel}
+                            onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                            onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                            disabled={disabled}
+                        />
+                    ))}
+                </>
             )}
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Autres étudiants en formation longue sur la plateforme
