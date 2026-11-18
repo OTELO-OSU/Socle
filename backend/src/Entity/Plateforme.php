@@ -73,7 +73,7 @@ class Plateforme
     {
         $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
-        $this->ayantAcces = new ArrayCollection();
+        $this->ayantAcces = [];
         $this->plateformeTags = new ArrayCollection();
     }
 

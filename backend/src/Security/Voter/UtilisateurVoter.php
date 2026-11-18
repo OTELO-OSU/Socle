@@ -151,6 +151,24 @@ final class UtilisateurVoter extends Voter
                     }
                 }
 
+                if (in_array('ROLE_ADMIN', $subject->getRoles())) return false;
+                if (in_array('ROLE_DIR_OSU', $subject->getRoles())) return false;
+                if (in_array('ROLE_DIR_OSU_DELEGUE', $subject->getRoles())) return false;
+
+                // Si il est directeur d'unité ou délégué d'unité il peut modifier n'importe quel compte
+                $du = $user->getEntites()->count();
+                $duDelegue = $user->getDeleguesDirecteur()->count();
+                if ($du > 0 || $duDelegue > 0) {
+                    return true;
+                }
+
+                // Si il est responsable de SNO il peut modifier n'importe quel compte
+                foreach ($user->getPlateformeHistoriquePersonnels() as $personnel) {
+                    if ($personnel->isResponsableScientifique() || $personnel->isResponsableTechnique() || $personnel->isResponsablePlateforme()) {
+                        return true;
+                    }
+                }
+
                 if ($user->getId() === $subject->getId()) {
                     return true;
                 }

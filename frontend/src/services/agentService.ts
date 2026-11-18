@@ -83,9 +83,12 @@ export async function soumettreAgentAuDu(payload: PayloadSoumettreAgentAuDu) {
 }
 
 export async function modifierAgent(id: number, payload: PayloadSoumettreAgentAuDu) {
+    const { cnu_id, section_cnrs_id, ...agentData } = payload;
     const { data } = await symfony.put<RetourSoumettreAgentAuDu>(`/agent`, {
         utilisateur_id: id,
-        ...payload
+        ...agentData,
+        cnu: cnu_id,
+        section: section_cnrs_id,
     });
 
     return data;
