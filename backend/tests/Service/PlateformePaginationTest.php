@@ -112,13 +112,15 @@ class PlateformePaginationTest extends TestCase
     {
         $locale = new Plateforme();
         $locale->addPlateformeHistorique((new PlateformeHistorique())->setAnnee(2026)->setNomOfficiel('Alpha'));
-        $distantes = [['id' => 1, 'instance_host' => 'disponible', 'tags_ids' => [1],
+        $ayantAcces = [['id' => 9, 'prenom' => 'Alice', 'nom' => 'Distante', 'email' => 'alice@example.org']];
+        $distantes = [['id' => 1, 'instance_host' => 'disponible', 'tags_ids' => [1], 'ayant_acces' => $ayantAcces,
             'dernier_historique' => ['nom_officiel' => 'Beta']]];
         $resultat = $this->service($distantes, $locale, ['indisponible'])->getPlateformeParPage(1, null, null);
 
         self::assertSame(2, $resultat['total']);
         self::assertSame($locale, $resultat['plateformes'][0]);
         self::assertSame('Beta', $resultat['plateformes'][1]['dernier_historique']['nom_officiel']);
+        self::assertSame($ayantAcces, $resultat['plateformes'][1]['ayant_acces']);
         self::assertSame(['indisponible'], $resultat['instances_indisponibles']);
     }
 }

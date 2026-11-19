@@ -3,8 +3,13 @@
 namespace App\Tests\Service;
 
 use App\Entity\Harvester;
+use App\Entity\Plateforme;
+use App\Entity\PlateformeHistorique;
+use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
+use App\Entity\UtilisateurMachine;
 use App\Entity\UtilisateurTags;
+use App\Repository\UtilisateurRepository;
 use App\Service\HarvesterService;
 use App\Service\PlateformeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +25,38 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HarvesterCacheTest extends TestCase
 {
+    public function testListeMachineContientLesUtilisateursDeInstanceSource(): void
+    {
+        $machineUser = new Utilisateur();
+        $machineUser->addUtilisateurTag(new UtilisateurTags($machineUser, 1));
+        $machine = (new UtilisateurMachine())->setUtilisateur($machineUser);
+        $machineRepository = $this->createMock(EntityRepository::class);
+        $machineRepository->expects($this->exactly(2))->method('findOneBy')
+            ->with(['clientId' => 'client', 'clientSecret' => hash('sha256', 'secret')])
+            ->willReturn($machine);
+
+        $plateforme = new Plateforme();
+        $plateforme->addPlateformeHistorique((new PlateformeHistorique())->setNomOfficiel('Alpha')->setBrouillon(false));
+        $ayantAcces = (new Utilisateur())->setPrenom('Alice')->setNom('Distante')->setEmail('alice@example.org');
+        $utilisateurs = $this->createMock(UtilisateurRepository::class);
+        $utilisateurs->expects($this->once())->method('findUserAyantAccesPlateforme')
+            ->with($plateforme)->willReturn([$ayantAcces]);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+        $em->method('getRepository')->willReturnCallback(static fn(string $class) => match ($class) {
+            UtilisateurMachine::class => $machineRepository,
+            Utilisateur::class => $utilisateurs,
+        });
+        $plateformeService = $this->createStub(PlateformeService::class);
+        $plateformeService->method('getPlateformeAuxTags')->willReturn([new PlateformeTags($plateforme, 1)]);
+        $plateformeService->method('getPlateformePourcentage')->willReturn(50.0);
+        $service = new HarvesterService($em, new MockHttpClient(), $this->createStub(Security::class), $plateformeService, $this->createStub(TranslatorInterface::class), new ArrayAdapter());
+
+        $resultat = $service->getPlateformeListePourMachine('client', 'secret');
+        self::assertSame([$ayantAcces], $resultat[0]->getAyantAcces());
+        self::assertCount(1, $service->getPlateformePubliquePourMachine('client', 'secret'));
+    }
+
     public function testCacheExpireApresUneHeureEtDroitsReevalues(): void
     {
         $harvester = (new Harvester())->setHost('example.org')->setClientId('client')->setClientSecret('secret');
@@ -36,7 +73,7 @@ class HarvesterCacheTest extends TestCase
         $client = new MockHttpClient(function () use (&$requests) {
             ++$requests;
             return new MockResponse(json_encode([
-                ['id' => 1, 'tags_ids' => [1], 'dernier_historique' => ['nom_officiel' => 'Alpha']],
+                ['id' => 1, 'tags_ids' => [1], 'ayant_acces' => [['id' => 7, 'prenom' => 'Alice', 'nom' => 'Distante', 'email' => 'alice@example.org']], 'dernier_historique' => ['nom_officiel' => 'Alpha']],
                 ['id' => 1, 'tags_ids' => [1], 'dernier_historique' => ['nom_officiel' => 'Alpha']],
                 ['id' => 2, 'tags_ids' => [2], 'dernier_historique' => ['nom_officiel' => 'Beta']],
             ], JSON_THROW_ON_ERROR));
@@ -51,6 +88,7 @@ class HarvesterCacheTest extends TestCase
         self::assertCount(1, $liste['plateformes']);
         self::assertSame([], $liste['instances_indisponibles']);
         self::assertSame('example.org', $liste['plateformes'][0]['instance_host']);
+        self::assertSame('alice@example.org', $liste['plateformes'][0]['ayant_acces'][0]['email']);
         $user->removeUtilisateurTag($tag);
         $user->addUtilisateurTag(new UtilisateurTags($user, 2));
         $now = $now->modify('+3599 seconds');

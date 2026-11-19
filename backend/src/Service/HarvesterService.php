@@ -86,7 +86,7 @@ class HarvesterService
         $this->em->flush();
     }
 
-    public function getPlateformeListePourMachine(string $clientId, string $clientSecret): array
+    public function getPlateformeListePourMachine(string $clientId, string $clientSecret, bool $inclureAyantAcces = true): array
     {
         $hashedClientSecret = hash('sha256', $clientSecret);
         $harvester = $this->em->getRepository(UtilisateurMachine::class)->findOneBy(["clientId" => $clientId, "clientSecret" => $hashedClientSecret]) ?? throw new NotFoundHttpException($this->translator->trans('utilisateur.exception.utilisateur_machine_nf'));
@@ -101,6 +101,9 @@ class HarvesterService
             $plateforme =  $plateformeTag->getPlateforme();
             $plateforme->setPourcentageRemplissage($this->plateformeService->getPlateformePourcentage($plateforme->getLastHistorique()));
             $plateforme->setReadonly(true);
+            if ($inclureAyantAcces) {
+                $plateforme->setAyantAcces($this->em->getRepository(Utilisateur::class)->findUserAyantAccesPlateforme($plateforme));
+            }
             $plateformes[] = $plateforme;
         }
 
@@ -110,7 +113,7 @@ class HarvesterService
     public function getPlateformePubliquePourMachine(string $clientId, string $clientSecret): array
     {
         return array_values(array_filter(
-            $this->getPlateformeListePourMachine($clientId, $clientSecret),
+            $this->getPlateformeListePourMachine($clientId, $clientSecret, false),
             static fn(Plateforme $plateforme): bool => $plateforme->getLastHistorique()?->isBrouillon() === false
         ));
     }
@@ -258,9 +261,9 @@ class HarvesterService
         $instancesIndisponibles = [];
         foreach ($this->em->getRepository(Harvester::class)->findAll() as $harvester) {
             $host = $harvester->getHost();
-            $cacheKey = 'plateformes_moissonnees_' . substr(hash('sha256', json_encode([
+            $cacheKey = 'plateformes_moissonnees_v2_' . substr(hash('sha256', json_encode([
                 $host, $harvester->getClientId(), $harvester->getClientSecret()
-            ], JSON_THROW_ON_ERROR)), 0, 40);
+            ], JSON_THROW_ON_ERROR)), 0, 36);
 
             try {
                 $plateformes = $this->cache->get($cacheKey, function (ItemInterface $item) use ($harvester, $host): array {
