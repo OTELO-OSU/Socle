@@ -26,6 +26,7 @@ services:
       CENTRAL_TAG: https://socle-tags.otelo.univ-lorraine.fr
       TRUSTED_PROXIES: ${TRUSTED_PROXIES}
       CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
+      EMAIL_LOGO: ${EMAIL_LOGO_URL}
     volumes:
       - jwt_keys:/var/www/backend/config/jwt
     depends_on:
