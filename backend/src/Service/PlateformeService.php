@@ -193,6 +193,7 @@ class PlateformeService
         $newInstrument = new Instrument();
         $newInstrument->setPlateformeHistorique($plateformeHistorique);
         $newInstrument->setNom($instrument->getNom());
+        $newInstrument->setNombre($instrument->getNombre());
         $newInstrument->setMarque($instrument->getMarque());
         $newInstrument->setModele($instrument->getModele());
         $newInstrument->setAnneeAcquisition($instrument->getAnneeAcquisition());
