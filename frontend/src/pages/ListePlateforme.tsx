@@ -1,12 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, Container, Divider, FormControlLabel, FormGroup, LinearProgress, Link, List, Pagination, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, Container, Divider, FormControlLabel, FormGroup, LinearProgress, Link, List, Pagination, Paper, Stack, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { BarChart, Description, Done, Download, Group, Key, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
-import { allyProps } from "../components/formulairePlateforme/allyProps";
-import { CustomTabPanel } from "../components/CustomTabPanel";
-import { fetchPlateformeHarveste } from "../services/harvesterService";
 import { AuthContext } from "../context/authContext";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import type { SelectOption } from "../provider/DictionnaireProvider";
@@ -32,6 +29,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
                             <Box component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`}>
+                                {harvester && <Typography variant="caption">Moissonnée : {host}</Typography>}
                                 {plateforme.pseudoId && (
                                     <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', mb: 1, alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
                                 )}
@@ -136,7 +134,6 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
-    const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
     const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
     const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
@@ -146,8 +143,7 @@ export function ListePlateforme() {
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [erreurChargement, setErreurChargement] = useState<string | null>(null);
-    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
-    const [tabs, setTabs] = useState(0);
+    const [instancesIndisponibles, setInstancesIndisponibles] = useState<string[]>([]);
     const [exportTagId, setExportTagId] = useState('');
     const [exportLaboId, setExportLaboId] = useState('');
     const [exportEnCours, setExportEnCours] = useState(false);
@@ -178,11 +174,17 @@ export function ListePlateforme() {
             setIsLoading(true);
             setErreurChargement(null);
             try {
-                const { plateformes, pages_total, tags_export, unites_export, filtres } = await fetchPlateformeListeParPage(page, recherche, tagsSelectionnes.length ? tagsSelectionnes : null);
+                const { plateformes, pages_total, tags_export, unites_export, filtres, instances_indisponibles } = await fetchPlateformeListeParPage(page, recherche, tagsSelectionnes.length ? tagsSelectionnes : null);
                 if (!actif) return;
+                const pagesDisponibles = Math.max(1, pages_total);
+                if (page > pagesDisponibles) {
+                    setPage(pagesDisponibles);
+                    return;
+                }
                 setPlateformes(plateformes);
                 setTagsDispo(filtres);
-                setTotalPages(Math.max(1, pages_total));
+                setTotalPages(pagesDisponibles);
+                setInstancesIndisponibles(instances_indisponibles);
                 setTagsExport(tags_export.includes(-1)
                     ? dictionnaireContext.tagsOptions
                     : dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value))));
@@ -192,7 +194,7 @@ export function ListePlateforme() {
             } catch (error) {
                 if (!actif) return;
                 console.error("Erreur lors du chargement des plateformes :", error);
-                setErreurChargement("Impossible de charger les plateformes locales.");
+                setErreurChargement("Impossible de charger les plateformes locales et moissonnées.");
             } finally {
                 if (actif) setIsLoading(false);
             }
@@ -200,22 +202,6 @@ export function ListePlateforme() {
         fetchPlateformes();
         return () => { actif = false; };
     }, [page, recherche, tagsSelectionnes, dictionnaireContext.tagsOptions, dictionnaireContext.uniteOptions]);
-
-    const fetchPlateformesHarveste = useCallback(async () => {
-        setIsLoadingHarvestees(true);
-        try {
-            const data = await fetchPlateformeHarveste();
-            setPlateformesHarvestees(data);
-        } catch (error) {
-            console.error("Erreur lors du chargement des plateformes :", error);
-        } finally {
-            setIsLoadingHarvestees(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchPlateformesHarveste();
-    }, [fetchPlateformesHarveste]);
 
     return (
         <Container sx={{ py: 4 }}>
@@ -259,13 +245,12 @@ export function ListePlateforme() {
             )}
             {exportEnCours && <LinearProgress sx={{ mb: 2 }} />}
             {exportErreur && <Typography color="error" sx={{ mb: 2 }}>{exportErreur}</Typography>}
-            <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
-                <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
-                    <Tab label="Locales" {...allyProps(0)} />
-                    <Tab label="Moissonnées" {...allyProps(1)} />
-                </Tabs>
-            </Box>
-            <CustomTabPanel value={tabs} index={0}>
+            {!isLoading && !erreurChargement && instancesIndisponibles.length > 0 && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    La liste est incomplète : impossible de charger les plateformes des instances suivantes : {instancesIndisponibles.join(', ')}.
+                    Les totaux et les filtres ne tiennent pas compte de ces plateformes.
+                </Alert>
+            )}
                 <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, alignItems: "flex-start" }}>
                     <Paper component="aside" variant="outlined" sx={{ p: 2, width: { xs: "100%", md: 240 }, flexShrink: 0, boxSizing: "border-box" }}>
                         <Typography component="h2" variant="h6">Filtrer par tag</Typography>
@@ -319,11 +304,11 @@ export function ListePlateforme() {
                         ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 {plateformes.map((plateforme) => (
-                                    <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
+                                    <PlateformeCard key={`${plateforme.instance_host ?? 'local'}/${plateforme.id}`} harvester={!!plateforme.instance_host} host={plateforme.instance_host} plateforme={plateforme} />
                                 ))}
                                 {plateformes.length === 0 && (
                                     <Typography variant="body1" sx={{ mb: 2 }}>
-                                        Aucune plateforme locale trouvée.
+                                        Aucune plateforme trouvée.
                                     </Typography>
                                 )}
                             </Box>
@@ -337,39 +322,6 @@ export function ListePlateforme() {
                         </Button>
                     </Box>
                 </Box>
-            </CustomTabPanel>
-
-            <CustomTabPanel value={tabs} index={1}>
-                {isLoadingHarvestees ? (
-                    <Typography component={'p'} variant="h6">Chargement...</Typography>
-                ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {Object.entries(plateformesHarvestees).map(([host, plateformes]) => (
-                            <Box key={host}>
-                                <Typography variant="h6" sx={{ mb: 2 }}>
-                                    {host}
-                                </Typography>
-
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    {plateformes.map((plateforme) => (
-                                        <PlateformeCard
-                                            key={`${host}/${plateforme.id}`}
-                                            harvester={true}
-                                            host={host}
-                                            plateforme={plateforme}
-                                        />
-                                    ))}
-                                </Box>
-                            </Box>
-                        ))}
-                        {Object.entries(plateformesHarvestees).length === 0 && (
-                            <Typography variant="body1">
-                                Aucune plateforme moissonnée trouvée.
-                            </Typography>
-                        )}
-                    </Box>
-                )}
-            </CustomTabPanel>
         </Container>
     );
 }

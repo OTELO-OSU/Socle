@@ -24,6 +24,8 @@ A devcontainer gives every contributor the same clean, reproducible environment.
 Socle is an application to maintain an SIP (Strategic Instrumentation Plan) over the years. All information is contained within platforms. A user in charge to write the SIP of his platform will have the right to edit his platform. A platform is in a laboratory which is itself in the OSU.
 A platform can have multiple tags from among those defined in the central tag repository. Users with the same tag as a platform are automatically platform manager
 
+The authenticated platform list combines local and harvested platforms, with shared search, tag filters and alphabetical pagination. Harvested lists are cached per remote instance for one hour; user access is checked on every request. If a remote instance cannot be reached, the available results remain visible with a warning that counts and filters are incomplete.
+
 ### Roles
 
 ```Admin``` - Can do everything

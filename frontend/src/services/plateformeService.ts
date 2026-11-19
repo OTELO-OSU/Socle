@@ -5,6 +5,7 @@ export type RetourFetchPlateformeParPage = {
     page: number;
     pages_total: number;
     total: number;
+    instances_indisponibles: string[];
     tags_export: number[];
     unites_export: number[];
     filtres: {

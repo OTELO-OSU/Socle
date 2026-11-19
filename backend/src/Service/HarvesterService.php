@@ -16,6 +16,9 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,7 +30,8 @@ class HarvesterService
         private readonly HttpClientInterface $httpClient,
         private readonly Security $security,
         private readonly PlateformeService $plateformeService,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly CacheInterface $cache,
     ) {}
 
     public function creerHMT(string $clientId): array
@@ -239,6 +243,71 @@ class HarvesterService
         }
 
         return $plateformesArray;
+    }
+
+    /**
+     * @return array{plateformes: array, instances_indisponibles: list<string>}
+     */
+    public function getPlateformesMoissonnees(): array
+    {
+        if (!$this->security->getUser()) {
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.non_connecte'));
+        }
+
+        $resultat = [];
+        $instancesIndisponibles = [];
+        foreach ($this->em->getRepository(Harvester::class)->findAll() as $harvester) {
+            $host = $harvester->getHost();
+            $cacheKey = 'plateformes_moissonnees_' . substr(hash('sha256', json_encode([
+                $host, $harvester->getClientId(), $harvester->getClientSecret()
+            ], JSON_THROW_ON_ERROR)), 0, 40);
+
+            try {
+                $plateformes = $this->cache->get($cacheKey, function (ItemInterface $item) use ($harvester, $host): array {
+                    try {
+                        $response = $this->httpClient->request('GET', "https://$host/api/hmt/plateformes", [
+                            'timeout' => 10,
+                            'headers' => [
+                                'Accept' => 'application/json',
+                                'Authorization' => 'Basic ' . base64_encode($harvester->getClientId() . ':' . $harvester->getClientSecret()),
+                            ],
+                        ]);
+                        $status = $response->getStatusCode();
+                        if ($status >= 400) {
+                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a retourné une erreur HTTP $status.");
+                        }
+                        $plateformes = $response->toArray(false);
+                    } catch (TransportExceptionInterface | DecodingExceptionInterface $e) {
+                        throw new ServiceUnavailableHttpException(null, "Impossible de récupérer les plateformes du harvester $host.", $e);
+                    }
+
+                    if (!array_is_list($plateformes)) {
+                        throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                    }
+                    foreach ($plateformes as $plateforme) {
+                        if (!is_array($plateforme) || !isset($plateforme['id'], $plateforme['dernier_historique']['nom_officiel'], $plateforme['tags_ids'])
+                            || !is_array($plateforme['tags_ids'])) {
+                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une plateforme invalide.");
+                        }
+                    }
+                    $item->expiresAfter(3600);
+                    return $plateformes;
+                });
+            } catch (ServiceUnavailableHttpException) {
+                $instancesIndisponibles[] = $host;
+                continue;
+            }
+
+            $ids = [];
+            foreach ($plateformes as $plateforme) {
+                if ($this->verifPermission($plateforme['tags_ids']) && !isset($ids[$plateforme['id']])) {
+                    $ids[$plateforme['id']] = true;
+                    $plateforme['instance_host'] = $host;
+                    $resultat[] = $plateforme;
+                }
+            }
+        }
+        return ['plateformes' => $resultat, 'instances_indisponibles' => $instancesIndisponibles];
     }
 
     public function getToutesLesPlateformesHarvestePourExport(?int $tagId = null, ?int $laboId = null): array

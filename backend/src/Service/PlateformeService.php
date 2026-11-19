@@ -31,6 +31,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -49,7 +50,9 @@ class PlateformeService
         private readonly Security $security,
         private readonly TranslatorInterface $translator,
         private readonly UniteService $uniteService,
-        private readonly HttpClientInterface $httpClient
+        private readonly HttpClientInterface $httpClient,
+        #[Autowire(lazy: true)]
+        private readonly HarvesterService $harvesterService,
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
@@ -499,8 +502,6 @@ class PlateformeService
         $idRows = $idsQb->executeQuery()->fetchAllAssociative();
         $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
 
-        $toutUser = $this->em->getRepository(Utilisateur::class)->findAll();
-
         // 2) Charger les entités candidates puis appliquer le voter LIRE.
         $plateformesAutorisees = [];
         if ($plateformeIds !== []) {
@@ -519,11 +520,30 @@ class PlateformeService
             ));
         }
 
-        // 3) Paginer après application des autorisations pour garder un total cohérent.
+        $moissonnage = $this->harvesterService->getPlateformesMoissonnees();
+        $plateformesMoissonnees = $moissonnage['plateformes'];
+        $plateformesDistantesFiltrees = array_filter(
+            $plateformesMoissonnees,
+            fn(array $plateforme): bool => (!$tags || count(array_intersect($tags, $plateforme['tags_ids'])) > 0)
+                && (!$search || $this->plateformeMoissonneeCorrespondRecherche($plateforme, $search))
+        );
+        $plateformesAutorisees = array_merge($plateformesAutorisees, $plateformesDistantesFiltrees);
+        usort($plateformesAutorisees, static function (Plateforme|array $a, Plateforme|array $b): int {
+            $nomA = $a instanceof Plateforme ? $a->getLastHistorique()->getNomOfficiel() : $a['dernier_historique']['nom_officiel'];
+            $nomB = $b instanceof Plateforme ? $b->getLastHistorique()->getNomOfficiel() : $b['dernier_historique']['nom_officiel'];
+            $comparaison = strcmp(mb_strtolower($nomA ?? ''), mb_strtolower($nomB ?? ''));
+            if ($comparaison !== 0) return $comparaison;
+            $hostA = $a instanceof Plateforme ? '' : $a['instance_host'];
+            $hostB = $b instanceof Plateforme ? '' : $b['instance_host'];
+            return ($hostA <=> $hostB) ?: (($a instanceof Plateforme ? $a->getId() : $a['id']) <=> ($b instanceof Plateforme ? $b->getId() : $b['id']));
+        });
+
+        // Paginer après application des autorisations et fusion des deux sources.
         $total = count($plateformesAutorisees);
         $plateformes = array_slice($plateformesAutorisees, $offset, self::PLATEFORME_PAR_PAGE);
 
         foreach ($plateformes as $plateforme) {
+            if (is_array($plateforme)) continue;
             $plateforme->setPourcentageRemplissage($this->getPlateformePourcentage($plateforme->getLastHistorique()));
             if ($this->security->isGranted(PlateformeVoter::READONLY, $plateforme)) {
                 $plateforme->setReadonly(true);
@@ -547,27 +567,53 @@ class PlateformeService
                     && $this->security->isGranted(PlateformeVoter::LIRE, $association->getPlateforme())
             );
 
-            if (count($plateformesVisibles) === 0) {
+            $nombreMoissonnees = count(array_filter(
+                $plateformesMoissonnees,
+                static fn(array $plateforme): bool => in_array($tag['id'], $plateforme['tags_ids'])
+            ));
+
+            if (count($plateformesVisibles) + $nombreMoissonnees === 0) {
                 continue;
             }
 
             $tagsExport[] = [
                 'id' => $tag["id"],
                 'nom' => $tag["nom"],
-                'nombre_plateformes' => count($plateformesVisibles),
+                'nombre_plateformes' => count($plateformesVisibles) + $nombreMoissonnees,
             ];
         }
-
 
         return [
             'plateformes' => $plateformes,
             'page' => $page,
             'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
             'total' => $total,
+            'instances_indisponibles' => $moissonnage['instances_indisponibles'],
             'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
             'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser()),
             'filtres' => $tagsExport
         ];
+    }
+
+    private function plateformeMoissonneeCorrespondRecherche(array $plateforme, string $search): bool
+    {
+        $historique = $plateforme['dernier_historique'];
+        $champs = [
+            $historique['nom_officiel'],
+            $historique['forme_developpee_nom_officiel'] ?? '',
+            $plateforme['pseudoId'] ?? $plateforme['pseudo_id'] ?? '',
+        ];
+        foreach ($historique['personnels'] ?? [] as $personnel) {
+            if (($personnel['responsable_scientifique'] ?? false) || ($personnel['responsable_technique'] ?? false)) {
+                foreach (['prenom', 'nom', 'email'] as $champ) {
+                    $champs[] = $personnel['utilisateur'][$champ] ?? '';
+                }
+            }
+        }
+        foreach ($champs as $champ) {
+            if (mb_stripos($champ ?? '', $search) !== false) return true;
+        }
+        return false;
     }
 
     function getPlateformeAuxTags(array $tagsIds)
