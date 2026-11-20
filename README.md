@@ -46,13 +46,7 @@ Firstly you have to rename the .env.example to .env and fill it
 mv .env.example .env
 ```
 
-Then you have to build the main container
-
-```sh
-make build-prod
-```
-
-Then you have to start them
+Then you have to start the containers
 
 ```sh
 make up

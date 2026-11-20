@@ -32,7 +32,6 @@ services:
     depends_on:
       - database
 
-  ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:16-alpine
     ports:  
@@ -48,7 +47,6 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data
-  ###< doctrine/doctrine-bundle ###
 
 networks:
   default:
