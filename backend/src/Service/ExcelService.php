@@ -58,7 +58,8 @@ class ExcelService
         private SerializerInterface $serializerInterface,
         private readonly TranslatorInterface $translator,
         private readonly HarvesterService $harvesterService,
-        private readonly TagService $tagService
+        private readonly TagService $tagService,
+        private readonly PlateformePseudoIdMappingService $pseudoIdMappingService
     ) {}
 
     /** Écrit la valeur en forçant le type texte si elle pourrait être interprétée comme une formule */
@@ -707,7 +708,7 @@ class ExcelService
                 $plat['id'] = $exportId;
             }
 
-            $pseudoId = $plat["pseudoId"] ?? "";
+            $pseudoId = $this->applyPseudoIdOverride($plat["id"], $plat["pseudoId"] ?? "");
 
             $dernierHistorique = $plat["dernier_historique"];
             $sheet1Array[] = [
@@ -1285,5 +1286,28 @@ class ExcelService
         unset($spreadsheet, $writer);
 
         return $content;
+    }
+
+    private function applyPseudoIdOverride(mixed $plateformeId, string $originalPseudoId): string
+    {
+        // Check if this is a remote platform (contains ' - ' in the export_id format)
+        // Remote platforms have export_id like "12345 - remote_client_id"
+        // Local platforms have export_id like "12345 - locales"
+        
+        if (is_string($plateformeId) && str_contains($plateformeId, ' - ')) {
+            $parts = explode(' - ', (string)$plateformeId);
+            $actualId = (int)$parts[0];
+            $source = $parts[1];
+            
+            // Check if it's not a local platform
+            if ($source !== 'locales') {
+                $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId($actualId);
+                if ($mappedPseudoId) {
+                    return $mappedPseudoId;
+                }
+            }
+        }
+
+        return $originalPseudoId;
     }
 }

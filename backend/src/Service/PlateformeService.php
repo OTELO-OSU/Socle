@@ -53,6 +53,7 @@ class PlateformeService
         private readonly HttpClientInterface $httpClient,
         #[Autowire(lazy: true)]
         private readonly HarvesterService $harvesterService,
+        private readonly PlateformePseudoIdMappingService $pseudoIdMappingService,
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
@@ -426,6 +427,7 @@ class PlateformeService
             foreach ($plateformesDistantes as &$plateformeDistante) {
                 if (is_array($plateformeDistante)) {
                     $plateformeDistante['instance_host'] = $host;
+                    $plateformeDistante = $this->applyPseudoIdOverrideToRemotePlatform($plateformeDistante);
                 }
             }
             unset($plateformeDistante);
@@ -523,6 +525,13 @@ class PlateformeService
 
         $moissonnage = $this->harvesterService->getPlateformesMoissonnees();
         $plateformesMoissonnees = $moissonnage['plateformes'];
+        
+        // Apply pseudo_id overrides to remote platforms
+        $plateformesMoissonnees = array_map(
+            fn(array $plateforme): array => $this->applyPseudoIdOverrideToRemotePlatform($plateforme),
+            $plateformesMoissonnees
+        );
+        
         $plateformesDistantesFiltrees = array_filter(
             $plateformesMoissonnees,
             fn(array $plateforme): bool => (!$tags || count(array_intersect($tags, $plateforme['tags_ids'])) > 0)
@@ -1511,5 +1520,17 @@ class PlateformeService
         }
 
         return $plateformeHisto;
+    }
+
+    private function applyPseudoIdOverrideToRemotePlatform(array $plateforme): array
+    {
+        // Check if this is a remote platform (has instance_host field)
+        if (isset($plateforme['instance_host']) && isset($plateforme['id'])) {
+            $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId((int)$plateforme['id']);
+            if ($mappedPseudoId) {
+                $plateforme['pseudoId'] = $mappedPseudoId;
+            }
+        }
+        return $plateforme;
     }
 }
