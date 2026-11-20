@@ -10,7 +10,7 @@ jobs:
     needs:
       - audit-frontend
       - audit-backend
-    container: composer:2
+    container: composer:2.8-php8.5
     services:
       database:
         image: postgres:16-alpine
@@ -85,7 +85,7 @@ jobs:
 
   audit-backend:
     runs-on: ubuntu-latest
-    container: composer:2
+    container: composer:2.8-php8.5
 
     defaults:
       run:
