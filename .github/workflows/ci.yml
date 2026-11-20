@@ -40,10 +40,9 @@ jobs:
 
       - name: Installer les extensions PHP
         run: |
-          apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev curl
+          apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev
           docker-php-ext-configure gd --with-freetype --with-jpeg
           docker-php-ext-install gd pdo pdo_pgsql intl zip
-          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
       - name: Installer les dépendances
         run: composer install --no-interaction --prefer-dist --no-progress
@@ -95,8 +94,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Installer Composer
+      - name: Installer Composer et Git
         run: |
+          apk add --no-cache git curl
           curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
       - name: Autoriser le répertoire du dépôt pour Git
