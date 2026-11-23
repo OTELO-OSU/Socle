@@ -1526,7 +1526,7 @@ class PlateformeService
     {
         // Check if this is a remote platform (has instance_host field)
         if (isset($plateforme['instance_host']) && isset($plateforme['id'])) {
-            $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId((int)$plateforme['id']);
+            $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId((int)$plateforme['id'], $plateforme['instance_host']);
             if ($mappedPseudoId) {
                 $plateforme['pseudoId'] = $mappedPseudoId;
             }
@@ -1558,6 +1558,7 @@ class PlateformeService
                     'id' => $plateforme['id'],
                     'nomOfficiel' => $plateforme['dernier_historique']['nom_officiel'] ?? 'N/A',
                     'pseudoId' => $plateforme['pseudoId'] ?? null,
+                    'instance_host' => $plateforme['instance_host'] ?? null,
                 ];
             }
         }

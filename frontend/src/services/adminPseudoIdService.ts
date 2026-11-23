@@ -3,6 +3,7 @@ import { symfony } from "../utils/axios";
 export type PseudoIdMapping = {
     id: number;
     plateformeId: number;
+    instanceHost: string | null;
     pseudoIdMapped: string;
     updatedAt: string;
 };
@@ -11,6 +12,7 @@ export type PlateformeSelectOption = {
     id: number;
     nomOfficiel: string;
     pseudoId: string;
+    instance_host?: string;
 };
 
 export async function fetchAllPseudoIdMappings(): Promise<PseudoIdMapping[]> {
@@ -18,9 +20,13 @@ export async function fetchAllPseudoIdMappings(): Promise<PseudoIdMapping[]> {
     return data;
 }
 
-export async function fetchPseudoIdMapping(plateformeId: number): Promise<PseudoIdMapping | null> {
+export async function fetchPseudoIdMapping(plateformeId: number, instanceHost?: string): Promise<PseudoIdMapping | null> {
     try {
-        const { data } = await symfony.get<PseudoIdMapping>(`/admin/plateforme/pseudo-id/${plateformeId}`);
+        const params = new URLSearchParams();
+        if (instanceHost) {
+            params.append('instanceHost', instanceHost);
+        }
+        const { data } = await symfony.get<PseudoIdMapping>(`/admin/plateforme/pseudo-id/${plateformeId}${params.toString() ? '?' + params.toString() : ''}`);
         return data;
     } catch (error: any) {
         if (error.response?.status === 404) {
@@ -37,17 +43,23 @@ export async function fetchPlateformesForSelect(): Promise<PlateformeSelectOptio
 
 export async function createOrUpdatePseudoIdMapping(
     plateformeId: number,
-    pseudoId: string
+    pseudoId: string,
+    instanceHost?: string
 ): Promise<PseudoIdMapping> {
     const { data } = await symfony.post<PseudoIdMapping>('/admin/plateforme/pseudo-id', {
         plateformeId,
         pseudoId,
+        instanceHost,
     });
     return data;
 }
 
-export async function deletePseudoIdMapping(plateformeId: number): Promise<{ message: string }> {
-    const { data } = await symfony.delete<{ message: string }>(`/admin/plateforme/pseudo-id/${plateformeId}`);
+export async function deletePseudoIdMapping(plateformeId: number, instanceHost?: string): Promise<{ message: string }> {
+    const params = new URLSearchParams();
+    if (instanceHost) {
+        params.append('instanceHost', instanceHost);
+    }
+    const { data } = await symfony.delete<{ message: string }>(`/admin/plateforme/pseudo-id/${plateformeId}${params.toString() ? '?' + params.toString() : ''}`);
     return data;
 }
 

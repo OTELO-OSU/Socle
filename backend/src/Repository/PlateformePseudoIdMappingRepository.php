@@ -21,8 +21,14 @@ class PlateformePseudoIdMappingRepository extends ServiceEntityRepository
         return $this->findOneBy(['plateformeId' => $plateformeId]);
     }
 
+    public function findByPlateformeIdAndHost(int $plateformeId, ?string $instanceHost = null): ?PlateformePseudoIdMapping
+    {
+        return $this->findOneBy(['plateformeId' => $plateformeId, 'instanceHost' => $instanceHost]);
+    }
+
     public function findAllMappings(): array
     {
         return $this->findAll();
     }
 }
+

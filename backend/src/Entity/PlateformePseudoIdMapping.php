@@ -16,6 +16,9 @@ class PlateformePseudoIdMapping
     #[ORM\Column]
     private ?int $plateformeId = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $instanceHost = null;
+
     #[ORM\Column(length: 255)]
     private ?string $pseudoIdMapped = null;
 
@@ -38,6 +41,18 @@ class PlateformePseudoIdMapping
     public function setPlateformeId(int $plateformeId): static
     {
         $this->plateformeId = $plateformeId;
+
+        return $this;
+    }
+
+    public function getInstanceHost(): ?string
+    {
+        return $this->instanceHost;
+    }
+
+    public function setInstanceHost(?string $instanceHost): static
+    {
+        $this->instanceHost = $instanceHost;
 
         return $this;
     }

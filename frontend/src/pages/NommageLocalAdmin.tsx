@@ -26,6 +26,7 @@ export default function NommageLocalAdmin() {
     const [selectedMapping, setSelectedMapping] = useState<PseudoIdMapping | null>(null);
     const [newPseudoId, setNewPseudoId] = useState("");
     const [newPlateformeId, setNewPlateformeId] = useState("");
+    const [newInstanceHost, setNewInstanceHost] = useState("");
     const snackbar = useContext(SnackbarContext);
 
     const fetchMappings = useCallback(async () => {
@@ -83,7 +84,7 @@ export default function NommageLocalAdmin() {
         }
 
         try {
-            await createOrUpdatePseudoIdMapping(selectedMapping.plateformeId, newPseudoId);
+            await createOrUpdatePseudoIdMapping(selectedMapping.plateformeId, newPseudoId, selectedMapping.instanceHost || undefined);
             snackbar?.trigger({
                 message: "Pseudo ID mis à jour avec succès",
                 couleur: "success",
@@ -103,7 +104,7 @@ export default function NommageLocalAdmin() {
         if (!selectedMapping) return;
 
         try {
-            await deletePseudoIdMapping(selectedMapping.plateformeId);
+            await deletePseudoIdMapping(selectedMapping.plateformeId, selectedMapping.instanceHost || undefined);
             snackbar?.trigger({
                 message: "Mapping supprimé avec succès",
                 couleur: "success",
@@ -129,7 +130,9 @@ export default function NommageLocalAdmin() {
         }
 
         try {
-            await createOrUpdatePseudoIdMapping(parseInt(newPlateformeId), newPseudoId);
+            const plateforme = plateformes.find(p => p.id === parseInt(newPlateformeId));
+            const instanceHost = plateforme?.instance_host || undefined;
+            await createOrUpdatePseudoIdMapping(parseInt(newPlateformeId), newPseudoId, instanceHost);
             snackbar?.trigger({
                 message: "Nouveau mapping créé avec succès",
                 couleur: "success",
@@ -137,6 +140,7 @@ export default function NommageLocalAdmin() {
             await fetchMappings();
             setNewPlateformeId("");
             setNewPseudoId("");
+            setNewInstanceHost("");
         } catch (error) {
             const errorAxios = error as AxiosError<ApiError>;
             snackbar?.trigger({
@@ -169,10 +173,17 @@ export default function NommageLocalAdmin() {
         return plateforme ? `${plateforme.nomOfficiel} (ID: ${plateformeId})` : `ID: ${plateformeId}`;
     };
 
+    const getInstanceHostDisplay = (mapping: PseudoIdMapping): string => {
+        if (mapping.instanceHost) {
+            return mapping.instanceHost;
+        }
+        return "Local";
+    };
+
     return (
         <AdminPageShell
             title="Nommage Local des Plateformes"
-            subtitle="Gérez les pseudo_ids personnalisés pour les plateformes distantes"
+            subtitle="Gérez les pseudo_ids personnalisés pour les plateformes locales et distantes"
         >
             <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
                 <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -209,7 +220,11 @@ export default function NommageLocalAdmin() {
                     <FormControl sx={{ flex: 1, minWidth: 250 }}>
                         <Select
                             value={newPlateformeId}
-                            onChange={(e) => setNewPlateformeId(e.target.value)}
+                            onChange={(e) => {
+                                setNewPlateformeId(e.target.value);
+                                const plateforme = plateformes.find(p => p.id === parseInt(e.target.value));
+                                setNewInstanceHost(plateforme?.instance_host || "");
+                            }}
                             displayEmpty
                         >
                             <MenuItem value="">
@@ -217,7 +232,7 @@ export default function NommageLocalAdmin() {
                             </MenuItem>
                             {plateformes.map((plateforme) => (
                                 <MenuItem key={plateforme.id} value={plateforme.id}>
-                                    {plateforme.nomOfficiel} (ID: {plateforme.id})
+                                    {plateforme.nomOfficiel} (ID: {plateforme.id}) {plateforme.instance_host ? ` - ${plateforme.instance_host}` : " - Local"}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -249,6 +264,7 @@ export default function NommageLocalAdmin() {
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                                         <TableCell sx={{ fontWeight: "bold" }}>Plateforme</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Instance/Host</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Pseudo ID Mappé</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Dernière Mise à Jour</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }} align="right">Actions</TableCell>
@@ -256,8 +272,9 @@ export default function NommageLocalAdmin() {
                                 </TableHead>
                                 <TableBody>
                                     {paginatedMappings.map((mapping) => (
-                                        <TableRow key={mapping.id}>
+                                        <TableRow key={`${mapping.id}-${mapping.instanceHost}`}>
                                             <TableCell>{getPlateformeName(mapping.plateformeId)}</TableCell>
+                                            <TableCell>{getInstanceHostDisplay(mapping)}</TableCell>
                                             <TableCell>{mapping.pseudoIdMapped}</TableCell>
                                             <TableCell>
                                                 {new Date(mapping.updatedAt).toLocaleDateString()}
@@ -302,4 +319,5 @@ export default function NommageLocalAdmin() {
         </AdminPageShell>
     );
 }
+
 

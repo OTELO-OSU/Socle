@@ -110,6 +110,7 @@ final class AdminController extends AbstractController
 
         $plateformeId = $json['plateformeId'] ?? null;
         $pseudoId = $json['pseudoId'] ?? null;
+        $instanceHost = $json['instanceHost'] ?? null;
 
         if ($plateformeId === null) {
             throw new BadRequestHttpException('plateformeId is required');
@@ -119,29 +120,34 @@ final class AdminController extends AbstractController
             throw new BadRequestHttpException('pseudoId is required');
         }
 
-        // For local platforms, modify the pseudo_id directly
-        $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId);
-        if ($plateforme) {
-            $plateforme->setPseudoId($pseudoId);
+        // For local platforms (no instanceHost), modify the pseudo_id directly
+        if ($instanceHost === null) {
+            $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId);
+            if ($plateforme) {
+                $plateforme->setPseudoId($pseudoId);
+                $this->plateformeService->persist($plateforme);
+            }
         }
 
         // For remote platforms, create a mapping
-        $mapping = $this->pseudoIdMappingService->createOrUpdateMapping($plateformeId, $pseudoId);
+        $mapping = $this->pseudoIdMappingService->createOrUpdateMapping($plateformeId, $pseudoId, $instanceHost);
 
         return $this->json([
             'message' => 'Pseudo ID updated successfully',
             'id' => $mapping->getId(),
             'plateformeId' => $mapping->getPlateformeId(),
+            'instanceHost' => $mapping->getInstanceHost(),
             'pseudoIdMapped' => $mapping->getPseudoIdMapped(),
             'updatedAt' => $mapping->getUpdatedAt()?->format(\DateTime::ATOM),
         ], 201);
     }
 
     #[Route('/admin/plateforme/pseudo-id/{plateformeId}', methods: ['DELETE'], requirements: ['plateformeId' => '\\d+'])]
-    public function deletePseudoIdMapping(int $plateformeId): Response
+    public function deletePseudoIdMapping(int $plateformeId, Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        $this->pseudoIdMappingService->deleteMapping($plateformeId);
+        $instanceHost = $request->query->get('instanceHost');
+        $this->pseudoIdMappingService->deleteMapping($plateformeId, $instanceHost);
         return $this->json(['message' => 'Mapping deleted successfully']);
     }
 
