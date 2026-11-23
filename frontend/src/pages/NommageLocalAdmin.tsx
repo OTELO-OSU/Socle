@@ -26,7 +26,6 @@ export default function NommageLocalAdmin() {
     const [selectedMapping, setSelectedMapping] = useState<PseudoIdMapping | null>(null);
     const [newPseudoId, setNewPseudoId] = useState("");
     const [newPlateformeId, setNewPlateformeId] = useState("");
-    const [newInstanceHost, setNewInstanceHost] = useState("");
     const snackbar = useContext(SnackbarContext);
 
     const fetchMappings = useCallback(async () => {
@@ -140,7 +139,6 @@ export default function NommageLocalAdmin() {
             await fetchMappings();
             setNewPlateformeId("");
             setNewPseudoId("");
-            setNewInstanceHost("");
         } catch (error) {
             const errorAxios = error as AxiosError<ApiError>;
             snackbar?.trigger({
@@ -220,11 +218,7 @@ export default function NommageLocalAdmin() {
                     <FormControl sx={{ flex: 1, minWidth: 250 }}>
                         <Select
                             value={newPlateformeId}
-                            onChange={(e) => {
-                                setNewPlateformeId(e.target.value);
-                                const plateforme = plateformes.find(p => p.id === parseInt(e.target.value));
-                                setNewInstanceHost(plateforme?.instance_host || "");
-                            }}
+                            onChange={(e) => setNewPlateformeId(e.target.value)}
                             displayEmpty
                         >
                             <MenuItem value="">
