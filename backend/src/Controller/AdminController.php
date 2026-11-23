@@ -162,6 +162,6 @@ final class AdminController extends AbstractController
         $tags = $request->query->get('tags') ? array_map('intval', explode(',', $request->query->get('tags'))) : null;
         
         $result = $this->plateformeService->getLocalPlateformeParPage($page, $search, $tags);
-        return $this->json($result);
+        return $this->json($result, 200, [], ['groups' => ['plateforme:list']]);
     }
 }
