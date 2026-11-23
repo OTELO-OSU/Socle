@@ -7,6 +7,12 @@ export type PseudoIdMapping = {
     updatedAt: string;
 };
 
+export type PlateformeSelectOption = {
+    id: number;
+    nomOfficiel: string;
+    pseudoId: string;
+};
+
 export async function fetchAllPseudoIdMappings(): Promise<PseudoIdMapping[]> {
     const { data } = await symfony.get<PseudoIdMapping[]>('/admin/plateforme/pseudo-id');
     return data;
@@ -24,6 +30,11 @@ export async function fetchPseudoIdMapping(plateformeId: number): Promise<Pseudo
     }
 }
 
+export async function fetchPlateformesForSelect(): Promise<PlateformeSelectOption[]> {
+    const { data } = await symfony.get<PlateformeSelectOption[]>('/admin/plateformes/select');
+    return data;
+}
+
 export async function createOrUpdatePseudoIdMapping(
     plateformeId: number,
     pseudoId: string
@@ -39,3 +50,4 @@ export async function deletePseudoIdMapping(plateformeId: number): Promise<{ mes
     const { data } = await symfony.delete<{ message: string }>(`/admin/plateforme/pseudo-id/${plateformeId}`);
     return data;
 }
+

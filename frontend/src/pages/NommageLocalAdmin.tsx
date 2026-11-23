@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Pagination, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, Paper, IconButton } from "@mui/material";
+import { Box, Button, Dialog, Pagination, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, Paper, IconButton, FormControl, Select, MenuItem, FormHelperText } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { SnackbarContext } from "../context/snackbarContext";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
@@ -8,7 +8,9 @@ import {
     fetchAllPseudoIdMappings,
     createOrUpdatePseudoIdMapping,
     deletePseudoIdMapping,
+    fetchPlateformesForSelect,
     type PseudoIdMapping,
+    type PlateformeSelectOption,
 } from "../services/adminPseudoIdService";
 import { AdminPageShell, AdminSurface } from "../components/admin/AdminPageShell";
 
@@ -16,6 +18,7 @@ const ITEMS_PER_PAGE = 10;
 
 export default function NommageLocalAdmin() {
     const [mappings, setMappings] = useState<PseudoIdMapping[]>([]);
+    const [plateformes, setPlateformes] = useState<PlateformeSelectOption[]>([]);
     const [page, setPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -41,9 +44,23 @@ export default function NommageLocalAdmin() {
         }
     }, [snackbar]);
 
+    const fetchPlateformes = useCallback(async () => {
+        try {
+            const data = await fetchPlateformesForSelect();
+            setPlateformes(data);
+        } catch (error) {
+            console.error("Erreur lors du chargement des plateformes :", error);
+            snackbar?.trigger({
+                message: "Erreur lors du chargement des plateformes",
+                couleur: "error",
+            });
+        }
+    }, [snackbar]);
+
     useEffect(() => {
         fetchMappings();
-    }, [fetchMappings]);
+        fetchPlateformes();
+    }, [fetchMappings, fetchPlateformes]);
 
     const handleEditClick = (mapping: PseudoIdMapping) => {
         setSelectedMapping(mapping);
@@ -103,9 +120,9 @@ export default function NommageLocalAdmin() {
     }
 
     async function handleCreateNew() {
-        if (!newPlateformeId.trim() || !newPseudoId.trim()) {
+        if (!newPlateformeId || !newPseudoId.trim()) {
             snackbar?.trigger({
-                message: "L'ID plateforme et le pseudo_id ne peuvent pas être vides",
+                message: "La plateforme et le pseudo_id ne peuvent pas être vides",
                 couleur: "error",
             });
             return;
@@ -147,6 +164,11 @@ export default function NommageLocalAdmin() {
 
     const totalPages = Math.ceil(mappings.length / ITEMS_PER_PAGE);
 
+    const getPlateformeName = (plateformeId: number): string => {
+        const plateforme = plateformes.find((p) => p.id === plateformeId);
+        return plateforme ? `${plateforme.nomOfficiel} (ID: ${plateformeId})` : `ID: ${plateformeId}`;
+    };
+
     return (
         <AdminPageShell
             title="Nommage Local des Plateformes"
@@ -172,7 +194,7 @@ export default function NommageLocalAdmin() {
                 <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography variant="h4" component="h2">Supprimer le mapping</Typography>
                     <Typography variant="body1">
-                        Êtes-vous sûr de vouloir supprimer ce mapping pour la plateforme {selectedMapping?.plateformeId} ?
+                        Êtes-vous sûr de vouloir supprimer ce mapping pour la plateforme {getPlateformeName(selectedMapping?.plateformeId ?? 0)} ?
                     </Typography>
                     <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                         <Button color="inherit" onClick={handleCloseDeleteDialog}>Annuler</Button>
@@ -183,21 +205,31 @@ export default function NommageLocalAdmin() {
 
             <AdminSurface>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>Créer un nouveau mapping</Typography>
-                <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'flex-end' }}>
-                    <TextField
-                        label="ID Plateforme"
-                        type="number"
-                        value={newPlateformeId}
-                        onChange={(e) => setNewPlateformeId(e.target.value)}
-                        sx={{ flex: 1 }}
-                    />
+                <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    <FormControl sx={{ flex: 1, minWidth: 250 }}>
+                        <Select
+                            value={newPlateformeId}
+                            onChange={(e) => setNewPlateformeId(e.target.value)}
+                            displayEmpty
+                        >
+                            <MenuItem value="">
+                                <em>Sélectionner une plateforme</em>
+                            </MenuItem>
+                            {plateformes.map((plateforme) => (
+                                <MenuItem key={plateforme.id} value={plateforme.id}>
+                                    {plateforme.nomOfficiel} (ID: {plateforme.id})
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <FormHelperText>Choisir la plateforme</FormHelperText>
+                    </FormControl>
                     <TextField
                         label="Pseudo ID"
                         value={newPseudoId}
                         onChange={(e) => setNewPseudoId(e.target.value)}
-                        sx={{ flex: 2 }}
+                        sx={{ flex: 2, minWidth: 200 }}
                     />
-                    <Button variant="contained" color="primary" onClick={handleCreateNew}>
+                    <Button variant="contained" color="primary" onClick={handleCreateNew} sx={{ mt: 1 }}>
                         Ajouter
                     </Button>
                 </Box>
@@ -216,7 +248,7 @@ export default function NommageLocalAdmin() {
                             <Table>
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                                        <TableCell sx={{ fontWeight: "bold" }}>ID Plateforme</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Plateforme</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Pseudo ID Mappé</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Dernière Mise à Jour</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }} align="right">Actions</TableCell>
@@ -225,7 +257,7 @@ export default function NommageLocalAdmin() {
                                 <TableBody>
                                     {paginatedMappings.map((mapping) => (
                                         <TableRow key={mapping.id}>
-                                            <TableCell>{mapping.plateformeId}</TableCell>
+                                            <TableCell>{getPlateformeName(mapping.plateformeId)}</TableCell>
                                             <TableCell>{mapping.pseudoIdMapped}</TableCell>
                                             <TableCell>
                                                 {new Date(mapping.updatedAt).toLocaleDateString()}
@@ -270,3 +302,4 @@ export default function NommageLocalAdmin() {
         </AdminPageShell>
     );
 }
+

@@ -1533,4 +1533,18 @@ class PlateformeService
         }
         return $plateforme;
     }
+
+    public function getAllPlateformesForAdmin(): array
+    {
+        $plateformes = $this->em->getRepository(Plateforme::class)->findAll();
+        $data = [];
+        foreach ($plateformes as $plateforme) {
+            $data[] = [
+                'id' => $plateforme->getId(),
+                'nomOfficiel' => $plateforme->getLastHistorique()?->getNomOfficiel() ?? 'N/A',
+                'pseudoId' => $plateforme->getPseudoId(),
+            ];
+        }
+        return $data;
+    }
 }

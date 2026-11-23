@@ -144,4 +144,12 @@ final class AdminController extends AbstractController
         $this->pseudoIdMappingService->deleteMapping($plateformeId);
         return $this->json(['message' => 'Mapping deleted successfully']);
     }
+
+    #[Route('/admin/plateformes/select', methods: ['GET'])]
+    public function getPlateformesForSelect(): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $plateformes = $this->plateformeService->getAllPlateformesForAdmin();
+        return $this->json($plateformes);
+    }
 }
