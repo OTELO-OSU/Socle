@@ -77,6 +77,18 @@ export async function fetchPlateformeListeParPage(page: number, recherche: strin
     return data;
 }
 
+export async function fetchLocalPlateformeListeParPage(page: number, recherche: string, tags: number[] | null = null) {
+    const { data } = await symfony.get<RetourFetchPlateformeParPage>('/admin/plateforme', {
+        params: {
+            page: page,
+            search: recherche,
+            tags: tags ? tags.join(',') : null
+        }
+    });
+
+    return data;
+}
+
 export async function creerPlateforme(nom: string) {
     const { data } = await symfony.post<PlateformeCree>('/plateforme', {
         nom: nom

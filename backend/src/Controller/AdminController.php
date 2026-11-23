@@ -152,4 +152,16 @@ final class AdminController extends AbstractController
         $plateformes = $this->plateformeService->getAllPlateformesForAdmin();
         return $this->json($plateformes);
     }
+
+    #[Route('/admin/plateforme', methods: ['GET'])]
+    public function getLocalPlateformes(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $page = (int) ($request->query->get('page') ?? 1);
+        $search = $request->query->get('search');
+        $tags = $request->query->get('tags') ? array_map('intval', explode(',', $request->query->get('tags'))) : null;
+        
+        $result = $this->plateformeService->getLocalPlateformeParPage($page, $search, $tags);
+        return $this->json($result);
+    }
 }
