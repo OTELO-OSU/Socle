@@ -1547,8 +1547,8 @@ class PlateformeService
             ];
         }
         
-        // Plateformes distantes/moissonnées
-        $moissonnage = $this->harvesterService->getPlateformesMoissonnees();
+        // Plateformes distantes/moissonnées - sans vérification de permissions pour l'admin
+        $moissonnage = $this->harvesterService->getPlateformesHarvesterPourAdmin();
         $plateformesDistantes = $moissonnage['plateformes'] ?? [];
         
         foreach ($plateformesDistantes as $plateforme) {
