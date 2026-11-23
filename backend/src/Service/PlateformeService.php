@@ -682,6 +682,11 @@ class PlateformeService
         }
     }
 
+    public function getMappedPseudoIdForRemotePlatform(int $plateformeId, string $instanceHost): ?string
+    {
+        return $this->pseudoIdMappingService->getMappedPseudoId($plateformeId, $instanceHost);
+    }
+
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
     {
         $payloadParId = [];

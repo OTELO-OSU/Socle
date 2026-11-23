@@ -555,6 +555,20 @@ class HarvesterService
             throw new ServiceUnavailableHttpException(null, 'Les données reçues du harvester sont invalides.');
         }
 
+        // Apply pseudo_id override for remote platform
+        $exportData['platform'] = $this->applyPseudoIdOverrideToRemotePlatformExport($exportData['platform'], $hosts);
+
         return $exportData;
+    }
+
+    private function applyPseudoIdOverrideToRemotePlatformExport(array $plateforme, string $instanceHost): array
+    {
+        if (isset($plateforme['id'])) {
+            $mappedPseudoId = $this->plateformeService->getMappedPseudoIdForRemotePlatform((int)$plateforme['id'], $instanceHost);
+            if ($mappedPseudoId) {
+                $plateforme['pseudoId'] = $mappedPseudoId;
+            }
+        }
+        return $plateforme;
     }
 }
