@@ -79,6 +79,7 @@ final class AdminController extends AbstractController
                 'plateformeId' => $mapping->getPlateformeId(),
                 'pseudoIdMapped' => $mapping->getPseudoIdMapped(),
                 'updatedAt' => $mapping->getUpdatedAt()?->format(\DateTime::ATOM),
+                'instanceHost' => $mapping->getInstanceHost(),
             ];
         }
         return $this->json($data);
