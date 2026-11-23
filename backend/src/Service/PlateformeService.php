@@ -1536,15 +1536,32 @@ class PlateformeService
 
     public function getAllPlateformesForAdmin(): array
     {
-        $plateformes = $this->em->getRepository(Plateforme::class)->findAll();
+        // Plateformes locales
+        $plateformesLocales = $this->em->getRepository(Plateforme::class)->findAll();
         $data = [];
-        foreach ($plateformes as $plateforme) {
+        foreach ($plateformesLocales as $plateforme) {
             $data[] = [
                 'id' => $plateforme->getId(),
                 'nomOfficiel' => $plateforme->getLastHistorique()?->getNomOfficiel() ?? 'N/A',
                 'pseudoId' => $plateforme->getPseudoId(),
             ];
         }
+        
+        // Plateformes distantes/moissonnées
+        $moissonnage = $this->harvesterService->getPlateformesMoissonnees();
+        $plateformesDistantes = $moissonnage['plateformes'] ?? [];
+        
+        foreach ($plateformesDistantes as $plateforme) {
+            if (is_array($plateforme)) {
+                $plateforme = $this->applyPseudoIdOverrideToRemotePlatform($plateforme);
+                $data[] = [
+                    'id' => $plateforme['id'],
+                    'nomOfficiel' => $plateforme['dernier_historique']['nom_officiel'] ?? 'N/A',
+                    'pseudoId' => $plateforme['pseudoId'] ?? null,
+                ];
+            }
+        }
+        
         return $data;
     }
 
