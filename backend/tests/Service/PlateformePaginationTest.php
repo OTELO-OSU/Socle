@@ -8,6 +8,7 @@ use App\Entity\PlateformeTags;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use App\Service\HarvesterService;
+use App\Service\PlateformePseudoIdMappingService;
 use App\Service\PlateformeService;
 use App\Service\TagService;
 use App\Service\UniteService;
@@ -62,8 +63,9 @@ class PlateformePaginationTest extends TestCase
             'plateformes' => $distantes,
             'instances_indisponibles' => $instancesIndisponibles,
         ]);
+        $pseudoIdMapping = $this->createStub(PlateformePseudoIdMappingService::class);
 
-        return new PlateformeService($em, $tags, $security, $this->createStub(TranslatorInterface::class), $unites, $this->createStub(HttpClientInterface::class), $harvester);
+        return new PlateformeService($em, $tags, $security, $this->createStub(TranslatorInterface::class), $unites, $this->createStub(HttpClientInterface::class), $harvester, $pseudoIdMapping);
     }
 
     public function testPaginationTrieLesDeuxSourcesAvantDecoupage(): void
