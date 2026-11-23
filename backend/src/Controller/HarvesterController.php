@@ -68,14 +68,6 @@ final class HarvesterController extends AbstractController
         return $this->json(['message' => $this->translator->trans('harvester.succes.hmt_ajoute')], 200);
     }
 
-    #[Route('/harvester/plateformes', methods: ['GET'])]
-    public function getListePlateformeHarvester(): Response
-    {
-        $plateformes = $this->hs->getListePlateformeHarveste();
-
-        return $this->json($plateformes, 200);
-    }
-
     #[Route('/harvester/plateforme', methods: ['GET'])]
     public function getDetailPlateformeHarvester(Request $request): Response
     {

@@ -2,7 +2,7 @@ import { Box, List, ListItem, ListItemText, Divider, ListItemButton, ListItemIco
 import { NavLink, Outlet } from 'react-router-dom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeWork from '@mui/icons-material/HomeWork';
-import { AccountCircle, CalendarMonth, CellTower, Group, Hub, LocalOffer, Settings } from '@mui/icons-material';
+import { AccountCircle, CalendarMonth, CellTower, Group, Hub, LocalOffer, Settings, Label } from '@mui/icons-material';
 import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 
@@ -114,6 +114,26 @@ export default function AdminLayout() {
                                 <ListItemText primary="Plateforme" />
                             </ListItemButton>
                         </ListItem>
+                    )}
+
+                    {authContext?.estAdmin && (
+                        <>
+                            <ListItem disablePadding>
+                                <ListItemButton sx={{
+                                    borderRadius: 2,
+                                    '&.active': {
+                                        bgcolor: 'action.selected',
+                                        borderLeft: '3px solid',
+                                        borderColor: 'primary.main',
+                                    },
+                                }} component={NavLink} to="/admin/nommage-local" end>
+                                    <ListItemIcon>
+                                        <Label />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Nommage Local" />
+                                </ListItemButton>
+                            </ListItem>
+                        </>
                     )}
 
                     {(authContext?.estAdmin || authContext?.estDu) && (

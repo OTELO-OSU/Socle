@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardActions, CardContent, Dialog, FormControl, FormLabel, List, Pagination, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { creerPlateforme, deletePlateforme, fetchPlateformeListeParPage, patchResponsablePlateforme, type PlateformeLight } from "../services/plateformeService";
+import { creerPlateforme, deletePlateforme, fetchLocalPlateformeListeParPage, patchResponsablePlateforme, type PlateformeLight } from "../services/plateformeService";
 import { SnackbarContext } from "../context/snackbarContext";
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import { Delete, Download, Group, Launch, ManageAccounts } from "@mui/icons-material";
@@ -128,7 +128,7 @@ export default function PlateformeAdmin() {
     const fetchPlateformes = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { plateformes, pages_total } = await fetchPlateformeListeParPage(page, recherche);
+            const { plateformes, pages_total } = await fetchLocalPlateformeListeParPage(page, recherche);
             setPlateformes(plateformes);
             setTotalPages(pages_total);
         } catch (error) {

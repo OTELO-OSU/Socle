@@ -53,7 +53,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?bool $admis = null;
 
     #[Ignore]
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(type: 'jsonb')]
     private array $roles = [];
 
     /**

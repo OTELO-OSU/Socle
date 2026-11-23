@@ -6,8 +6,8 @@ A PLAIRe version for the OSU
 
 | Package | Stack | Dev port | Description |
 | - | - | - | - |
-| [Backend](backend) | Symfony | 80 | Backend API behind a /api reverse proxy |
-| [Frontend](frontend) | Vue + Vite | 80 | App behind a / reverse proxy |
+| [Backend](backend) | Symfony | 3000 | Backend API behind a /api reverse proxy |
+| [Frontend](frontend) | Vue + Vite | 3000 | App behind a / reverse proxy |
 | Central tag | nginx | 125 | An nginx exposing a json file of tags |
 
 ## Requirements
@@ -23,6 +23,8 @@ A devcontainer gives every contributor the same clean, reproducible environment.
 
 Socle is an application to maintain an SIP (Strategic Instrumentation Plan) over the years. All information is contained within platforms. A user in charge to write the SIP of his platform will have the right to edit his platform. A platform is in a laboratory which is itself in the OSU.
 A platform can have multiple tags from among those defined in the central tag repository. Users with the same tag as a platform are automatically platform manager
+
+The authenticated platform list combines local and harvested platforms, with shared search, tag filters and alphabetical pagination. For harvested platforms, the users shown as having access come from the remote instance. Harvested lists are cached per remote instance for one hour; user access is checked on every request. If a remote instance cannot be reached, the available results remain visible with a warning that counts and filters are incomplete.
 
 ### Roles
 
@@ -44,13 +46,7 @@ Firstly you have to rename the .env.example to .env and fill it
 mv .env.example .env
 ```
 
-Then you have to build the main container
-
-```sh
-make build-prod
-```
-
-Then you have to start them
+Then you have to start the containers
 
 ```sh
 make up

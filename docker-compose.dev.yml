@@ -1,0 +1,61 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/dockerfile
+    environment:
+      - API_URL=${API_URL}
+      - FRONT_URL=${FRONT_HOST}
+    ports:
+      - ${NGINX_PORT}:80
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./backend:/var/www/backend:ro
+    depends_on:
+      php:
+        condition: service_started
+
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/dockerfile
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_SECRET: ${APP_SECRET}
+      FRONT_HOST: ${FRONT_HOST}
+      DATABASE_URL: ${DATABASE_URL}
+      MAILER_DSN: ${MAILER_DSN}
+      NOREPLY_EMAIL: ${NOREPLY_EMAIL}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      CENTRAL_TAG: https://socle-tags.otelo.univ-lorraine.fr
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
+      EMAIL_LOGO: ${EMAIL_LOGO_URL}
+    volumes:
+      - jwt_keys:/var/www/backend/config/jwt
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16-alpine
+    ports:  
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "poe", "-U", "root"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  database_data:
+  jwt_keys:

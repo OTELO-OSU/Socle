@@ -1,8 +1,9 @@
-import { Autocomplete, Box, Button, Dialog, Grid, IconButton, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, IconButton, Stack, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import TauxTextFieldHint from "../../TauxTextFieldHint";
 import EditIcon from '@mui/icons-material/Edit';
-import { useContext, useState } from "react";
+import { Add, Delete } from "@mui/icons-material";
+import { useContext, useEffect, useState } from "react";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { formatEmployeurLabel } from "../../../services/formatLabelService";
 import type { SelectOption } from "../../../provider/DictionnaireProvider";
@@ -26,78 +27,102 @@ function DialogModifDetailTutelle({ disabled = false }: { disabled?: boolean }) 
     const estTauxTutelleValide = tauxTotaleTutelle === 100;
     const estAucunTauxA0 = !contribution_tutelle_detail.some((source: SourceFinancement) => source.taux === 0);
     const tutelleNonRenseignee = contribution_tutelle_detail.some((source: SourceFinancement) => source.financeur_id === null);
+
+    const handleAddSource = () => {
+        const currentSources = (getValues("contribution_tutelle_detail") as SourceFinancement[] | undefined) || [];
+        setValue(
+            "contribution_tutelle_detail",
+            [...currentSources, { financeur_id: null, taux: 0 }],
+            { shouldDirty: true, shouldValidate: true },
+        );
+    };
+
+    const handleRemoveSource = (index: number) => {
+        const currentSources = (getValues("contribution_tutelle_detail") as SourceFinancement[] | undefined) || [];
+        setValue(
+            "contribution_tutelle_detail",
+            currentSources.filter((_, sourceIndex) => sourceIndex !== index),
+            { shouldDirty: true, shouldValidate: true },
+        );
+    };
+
+    useEffect(() => {
+        if (open && contribution_tutelle_detail.length === 0) {
+            setValue(
+                "contribution_tutelle_detail",
+                [{ financeur_id: null, taux: 0 }],
+                { shouldDirty: true, shouldValidate: true },
+            );
+        }
+    }, [open, contribution_tutelle_detail.length, setValue]);
+
     return (
         <>
             <IconButton disabled={disabled} size="small" sx={{ width: "fit-content", mt: 1 }} onClick={() => setOpen(true)}>
                 <EditIcon />
             </IconButton>
-            <Dialog open={open} onClose={() => setOpen(false)}>
+            <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
                 <Box component="fieldset" disabled={disabled} sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2, border: 0 }}>
                     <Typography variant="h6" component="h2">
                         Détail de la contribution des tutelles
                     </Typography>
-                    <Grid container spacing={2} sx={{ mb: 4 }}>
-                        <Grid size={{ xs: 6 }}>
-                            <Typography variant="body2">Combien il y a t'il de sources de financement pour cette equipement ?</Typography>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
-                            <Select fullWidth size="small" value={contribution_tutelle_detail.length} onChange={(e) => {
-                                const value = Number(e.target.value);
-                                const currentSources = getValues("contribution_tutelle_detail") || [];
-                                if (value > currentSources.length) {
-                                    const newSources = [...currentSources];
-                                    for (let i = currentSources.length; i < value; i++) {
-                                        newSources.push({ financeur_id: null, taux: 0 });
-                                    }
-                                    setValue("contribution_tutelle_detail", newSources);
-                                } else if (value < currentSources.length) {
-                                    setValue("contribution_tutelle_detail", currentSources.slice(0, value));
-                                }
-
-                            }}>
-                                <MenuItem value={0}>0</MenuItem>
-                                <MenuItem value={1}>1</MenuItem>
-                                <MenuItem value={2}>2</MenuItem>
-                                <MenuItem value={3}>3</MenuItem>
-                                <MenuItem value={4}>4</MenuItem>
-                                <MenuItem value={5}>5</MenuItem>
-                            </Select>
-                        </Grid>
-                    </Grid>
+                    <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Typography variant="body2">Sources de financement des tutelles</Typography>
+                        <IconButton aria-label="Ajouter une contribution de tutelle" color="primary" onClick={handleAddSource}>
+                            <Add />
+                        </IconButton>
+                    </Stack>
                     {contribution_tutelle_detail.map((source: SourceFinancement, index: number) => (
-                        <Stack key={index} direction="row" spacing={2}>
-                            <Autocomplete<SelectOption, false, false, false>
-                                options={financeurOptions}
-                                fullWidth
-                                value={financeurOptions.find((option) => option.value === source.financeur_id) ?? null}
-                                onChange={(_, value) => {
-                                    const selectedValue = value?.value;
-                                    const financeurId = typeof selectedValue === "number" ? selectedValue : null;
-                                    const currentSources = (getValues("contribution_tutelle_detail") as SourceFinancement[] | undefined) || [];
-                                    const newSources = [...currentSources];
-                                    newSources[index] = { ...newSources[index], financeur_id: financeurId };
-                                    setValue("contribution_tutelle_detail", newSources);
-                                }}
-                                renderInput={(params) => <TextField {...params} label={`Tutelle financeur #${index + 1}`} size="small" />}
-                            />
-                            <TextField
-                                fullWidth
-                                size="small"
-                                label={`Taux de contribution`}
-                                value={source.taux}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value) || 0;
-                                    const currentSources = getValues("contribution_tutelle_detail") || [];
-                                    const newSources = [...currentSources];
-                                    newSources[index] = { ...newSources[index], taux: value };
-                                    setValue("contribution_tutelle_detail", newSources);
-                                }}
-                                slotProps={{
-                                    input: {
-                                        endAdornment: <Typography variant="body2">%</Typography>,
-                                    }
-                                }}
-                            />
+                        <Stack
+                            key={index}
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={1}
+                            sx={{ alignItems: { xs: "stretch", sm: "center" } }}
+                        >
+                            <Box sx={{ flex: "2 1 0", width: { xs: "100%", sm: "auto" }, minWidth: 0 }}>
+                                <Autocomplete<SelectOption, false, false, false>
+                                    options={financeurOptions}
+                                    fullWidth
+                                    value={financeurOptions.find((option) => option.value === source.financeur_id) ?? null}
+                                    onChange={(_, value) => {
+                                        const selectedValue = value?.value;
+                                        const financeurId = typeof selectedValue === "number" ? selectedValue : null;
+                                        const currentSources = (getValues("contribution_tutelle_detail") as SourceFinancement[] | undefined) || [];
+                                        const newSources = [...currentSources];
+                                        newSources[index] = { ...newSources[index], financeur_id: financeurId };
+                                        setValue("contribution_tutelle_detail", newSources);
+                                    }}
+                                    renderInput={(params) => <TextField {...params} label={`Tutelle financeur #${index + 1}`} size="small" />}
+                                />
+                            </Box>
+                            <Box sx={{ flex: "1 1 0", width: { xs: "100%", sm: "auto" }, minWidth: 0 }}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Taux de contribution"
+                                    value={source.taux}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value) || 0;
+                                        const currentSources = getValues("contribution_tutelle_detail") || [];
+                                        const newSources = [...currentSources];
+                                        newSources[index] = { ...newSources[index], taux: value };
+                                        setValue("contribution_tutelle_detail", newSources);
+                                    }}
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: <Typography variant="body2">%</Typography>,
+                                        }
+                                    }}
+                                />
+                            </Box>
+                            <IconButton
+                                aria-label={`Supprimer la contribution de tutelle ${index + 1}`}
+                                color="error"
+                                onClick={() => handleRemoveSource(index)}
+                                sx={{ alignSelf: { xs: "flex-end", sm: "center" }, flexShrink: 0 }}
+                            >
+                                <Delete />
+                            </IconButton>
                         </Stack>
                     ))}
                     {contribution_tutelle_detail.length === 0 && (

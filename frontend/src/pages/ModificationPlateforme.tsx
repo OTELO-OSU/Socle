@@ -250,7 +250,7 @@ export default function ModificationPlateforme() {
                                 </Button>
                                 <Button variant="contained" color="warning" sx={{ mt: 2 }} type="button" onClick={testPlateforme} disabled={toutDesactive}>
                                     <RefreshIcon sx={{ mr: 1 }} />
-                                    Tester
+                                    Vérifier
                                 </Button>
                                 <Button variant="contained" color="secondary" sx={{ mt: 2 }} type="button" onClick={sauvegarderAuBroullon} disabled={toutDesactive}>
                                     <SaveIcon sx={{ mr: 1 }} />

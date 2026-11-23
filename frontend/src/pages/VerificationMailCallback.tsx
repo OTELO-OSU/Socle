@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SnackbarContext } from "../context/snackbarContext";
 import type { AxiosError } from "axios";
@@ -8,29 +8,38 @@ import { verifierMail } from "../services/authService";
 
 export default function VerificationMailCallback() {
 
-    const snackbarContext = useContext(SnackbarContext);
+    const trigger = useContext(SnackbarContext)?.trigger;
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
+    const verification = useRef<{ token: string; promise: ReturnType<typeof verifierMail> } | null>(null);
 
     useEffect(() => {
-        const token = searchParams.get("token");
-
         if (!token) {
             navigate('/')
             return;
         }
 
+        // StrictMode rejoue l'effet : la même promesse évite de consommer deux fois le token.
+        if (verification.current?.token !== token) {
+            verification.current = { token, promise: verifierMail(token) };
+        }
+
+        let active = true;
+        const promise = verification.current.promise;
         (async () => {
             try {
-                const { data } = await verifierMail(token!);
-                snackbarContext?.trigger({
+                const { data } = await promise;
+                if (!active) return;
+                trigger?.({
                     message: data.message || "Votre adresse mail a été validée avec succès",
                     couleur: "success",
                 });
                 navigate('/');
             } catch (error) {
+                if (!active) return;
                 const errorAxios = error as AxiosError<ApiError>;
-                snackbarContext?.trigger({
+                trigger?.({
                     message: errorAxios.response?.data.message || "Une erreur est survenue lors de la validation de votre adresse mail",
                     couleur: "error",
                 });
@@ -38,7 +47,10 @@ export default function VerificationMailCallback() {
             }
         })();
 
-    }, [searchParams, snackbarContext, navigate]);
+        return () => {
+            active = false;
+        };
+    }, [token, trigger, navigate]);
 
     return (
         <Box

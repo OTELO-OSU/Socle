@@ -30,7 +30,12 @@ final class PlateformeController extends AbstractController
     {
         $page = max(1, (int)$request->query->get('page', 1));
         $search = $request->query->get('search', null);
-        $plateformes = $this->plateformeService->getPlateformeParPage($page, $search);
+        $tags = $request->query->get('tags', null);
+        if ($tags !== null) {
+            $tags = explode(',', $tags);
+            $tags = array_map('intval', $tags);
+        }
+        $plateformes = $this->plateformeService->getPlateformeParPage($page, $search, $tags);
         return $this->json($plateformes, 200, [], ['groups' => ['plateforme:list']]);
     }
 
