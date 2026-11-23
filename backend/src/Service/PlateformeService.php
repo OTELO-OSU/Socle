@@ -669,6 +669,19 @@ class PlateformeService
         return $plateforme;
     }
 
+    public function updatePseudoIdForLocalPlateforme(int $plateformeId, string $pseudoId): void
+    {
+        try {
+            $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+            if ($plateforme) {
+                $plateforme->setPseudoId($pseudoId);
+                $this->em->flush();
+            }
+        } catch (\Exception $e) {
+            // Silently fail if platform doesn't exist locally
+        }
+    }
+
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
     {
         $payloadParId = [];

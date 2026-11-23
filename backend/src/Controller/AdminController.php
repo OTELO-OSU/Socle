@@ -89,7 +89,7 @@ final class AdminController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $mapping = $this->pseudoIdMappingService->getMapping($plateformeId);
-        
+
         if (!$mapping) {
             return $this->json(['error' => 'Mapping not found'], 404);
         }
@@ -121,12 +121,8 @@ final class AdminController extends AbstractController
         }
 
         // For local platforms (no instanceHost), modify the pseudo_id directly
-        if ($instanceHost === null) {
-            $plateforme = $this->plateformeService->getPlateformeAvecDernierHistorique($plateformeId);
-            if ($plateforme) {
-                $plateforme->setPseudoId($pseudoId);
-                $this->plateformeService->persist($plateforme);
-            }
+        if (!$instanceHost) {
+            $this->plateformeService->updatePseudoIdForLocalPlateforme($plateformeId, $pseudoId);
         }
 
         // For remote platforms, create a mapping
@@ -166,7 +162,7 @@ final class AdminController extends AbstractController
         $page = (int) ($request->query->get('page') ?? 1);
         $search = $request->query->get('search');
         $tags = $request->query->get('tags') ? array_map('intval', explode(',', $request->query->get('tags'))) : null;
-        
+
         $result = $this->plateformeService->getLocalPlateformeParPage($page, $search, $tags);
         return $this->json($result, 200, [], ['groups' => ['plateforme:list']]);
     }
