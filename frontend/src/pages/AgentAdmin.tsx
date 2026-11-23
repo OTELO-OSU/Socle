@@ -208,9 +208,9 @@ export default function AgentAdmin() {
 
             <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
                 <DialogTitle>Éditer un agent</DialogTitle>
-                <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+                <DialogContent>
                     {editableAgent && (
-                        <>
+                        <Stack spacing={2} sx={{ pt: 1 }}>
                             <AgentAdvancedFields
                                 value={editableAgent}
                                 onChange={(next) => {
@@ -237,7 +237,7 @@ export default function AgentAdmin() {
                                     label="Administrateur"
                                 />
                             )}
-                        </>
+                        </Stack>
                     )}
                 </DialogContent>
                 <DialogActions>

@@ -45,6 +45,10 @@ class Plateforme
     #[SerializedName("readonly")]
     private ?bool $readonly = null;
 
+    #[Groups(["plateforme:list", "plateforme:detail"])]
+    #[SerializedName("ayant_acces")]
+    private array $ayantAcces;
+
     /**
      * @var Collection<int, UtilisateurInscription>
      */
@@ -69,6 +73,7 @@ class Plateforme
     {
         $this->utilisateurInscriptions = new ArrayCollection();
         $this->plateformeHistoriques = new ArrayCollection();
+        $this->ayantAcces = [];
         $this->plateformeTags = new ArrayCollection();
     }
 
@@ -220,6 +225,18 @@ class Plateforme
     public function setReadonly(?bool $readonly): static
     {
         $this->readonly = $readonly;
+
+        return $this;
+    }
+
+    public function getAyantAcces(): array
+    {
+        return $this->ayantAcces;
+    }
+
+    public function setAyantAcces(array $ayantAcces): static
+    {
+        $this->ayantAcces = $ayantAcces;
 
         return $this;
     }

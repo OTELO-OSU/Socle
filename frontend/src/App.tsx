@@ -27,6 +27,7 @@ import FedeCallback from './pages/FedeCallback'
 import Deconnexion from './pages/Deconnexion'
 import ResetMdp from './pages/ResetMdp'
 import ApplicationSettingsAdmin from './pages/ApplicationSettingsAdmin'
+import NommageLocalAdmin from './pages/NommageLocalAdmin'
 import { useAppVersion } from './hook/useAppVersion'
 
 function App() {
@@ -97,6 +98,7 @@ function App() {
                 <Route index element={<Navigate to="adhesion" replace />} />
                 <Route path="adhesion" element={<AdhesionAdmin />} />
                 <Route path="plateforme" element={<PlateformeAdmin />} />
+                <Route path="nommage-local" element={<NommageLocalAdmin />} />
                 <Route path="agent" element={<AgentAdmin />} />
                 <Route path="unite" element={<UniteAdmin />} />
                 <Route path="osu" element={<OsuAdmin />} />

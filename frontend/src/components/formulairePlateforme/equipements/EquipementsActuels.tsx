@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { RHFTextField } from "../../RHFTextField";
@@ -7,6 +7,7 @@ import TroisPoints from "@mui/icons-material/MoreVert";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import type { Instrument, PlateformeDictionnaire, SourceFinancement } from "../../../services/plateformeService";
 import NombreTextField from "../../NombreTextField";
+import { Add, Delete } from "@mui/icons-material";
 
 function InstrumentActuelCard({
     instrument,
@@ -167,6 +168,24 @@ function DialogInstrumentActuel({
         (source) => source.financeur_id === null,
     );
 
+    const handleAddSourceFinancement = () => {
+        const currentSources = getValues("source_financement") || [];
+        setValue(
+            "source_financement",
+            [...currentSources, { financeur_id: null, taux: 0 }],
+            { shouldDirty: true, shouldValidate: true },
+        );
+    };
+
+    const handleRemoveSourceFinancement = (index: number) => {
+        const currentSources = getValues("source_financement") || [];
+        setValue(
+            "source_financement",
+            currentSources.filter((_, sourceIndex) => sourceIndex !== index),
+            { shouldDirty: true, shouldValidate: true },
+        );
+    };
+
     useEffect(() => {
         if (!open) {
             return;
@@ -202,6 +221,16 @@ function DialogInstrumentActuel({
             })),
         });
     }, [open, instrumentToEdit, reset]);
+
+    useEffect(() => {
+        if (step === 1 && sourceFinancement.length === 0) {
+            setValue(
+                "source_financement",
+                [{ financeur_id: null, taux: 0 }],
+                { shouldDirty: true, shouldValidate: true },
+            );
+        }
+    }, [step, sourceFinancement.length, setValue]);
 
     const onSubmit = (data: Instrument) => {
         const total = (data.source_financement || []).reduce(
@@ -323,67 +352,65 @@ function DialogInstrumentActuel({
                         <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
                             Sources de financement
                         </Typography>
-                        <Grid container spacing={2} sx={{ mb: 2 }}>
-                            <Grid size={{ xs: 6 }}>
-                                <Typography variant="body2">Combien il y a t'il de sources de financement pour cette equipement ?</Typography>
-                            </Grid>
-                            <Grid size={{ xs: 6 }}>
-                                <Select fullWidth size="small" value={sourceFinancement.length} onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    const currentSources = getValues("source_financement") || [];
-                                    if (value > currentSources.length) {
-                                        const newSources = [...currentSources];
-                                        for (let i = currentSources.length; i < value; i++) {
-                                            newSources.push({ financeur_id: null, taux: 0 });
-                                        }
-                                        setValue("source_financement", newSources);
-                                    } else if (value < currentSources.length) {
-                                        setValue("source_financement", currentSources.slice(0, value));
-                                    }
-
-                                }}>
-                                    <MenuItem value={0}>0</MenuItem>
-                                    <MenuItem value={1}>1</MenuItem>
-                                    <MenuItem value={2}>2</MenuItem>
-                                    <MenuItem value={3}>3</MenuItem>
-                                    <MenuItem value={4}>4</MenuItem>
-                                    <MenuItem value={5}>5</MenuItem>
-                                </Select>
-                            </Grid>
-                        </Grid>
+                        <Stack direction="row" sx={{ mb: 2, alignItems: "center", justifyContent: "space-between" }}>
+                            <Typography variant="body2">Sources de financement de cet équipement</Typography>
+                            <IconButton
+                                aria-label="Ajouter une source de financement"
+                                color="primary"
+                                onClick={handleAddSourceFinancement}
+                            >
+                                <Add />
+                            </IconButton>
+                        </Stack>
                         {sourceFinancement.map((_, index) => (
-                            <Stack key={index} direction="row" spacing={2} sx={{ mb: 2 }}>
-                                <TreeViewFinance
-                                    selectedId={sourceFinancement[index].financeur_id ?? undefined}
-                                    onSelectedIdChange={(id) => {
-                                        const currentSources = getValues("source_financement") || [];
-                                        const updatedSources = [...currentSources];
-                                        updatedSources[index] = {
-                                            ...updatedSources[index],
-                                            financeur_id: id,
-                                        };
-                                        setValue("source_financement", updatedSources);
-                                    }}
-                                />
-                                <NombreTextField
-                                    size="medium"
-                                    name={`source_financement.${index}.taux`}
-                                    label="Taux (%)"
-                                    type="number"
-                                    fullWidth
-                                    sx={{ mb: 2 }}
-                                    rules={{
-                                        required: "Le taux est requis",
-                                        validate: (value) =>
-                                            Number(value) > 0 || "Le taux doit etre strictement superieur a 0%",
-                                    }}
-                                    slotProps={{
-                                        htmlInput: {
-                                            min: 0.01,
-                                            step: 0.01,
-                                        },
-                                    }}
-                                />
+                            <Stack
+                                key={index}
+                                direction={{ xs: "column", sm: "row" }}
+                                spacing={1}
+                                sx={{ mb: 2, alignItems: { xs: "stretch", sm: "center" } }}
+                            >
+                                <Box sx={{ flex: "2 1 0", width: { xs: "100%", sm: "auto" }, minWidth: 0 }}>
+                                    <TreeViewFinance
+                                        selectedId={sourceFinancement[index].financeur_id ?? undefined}
+                                        onSelectedIdChange={(id) => {
+                                            const currentSources = getValues("source_financement") || [];
+                                            const updatedSources = [...currentSources];
+                                            updatedSources[index] = {
+                                                ...updatedSources[index],
+                                                financeur_id: id,
+                                            };
+                                            setValue("source_financement", updatedSources);
+                                        }}
+                                    />
+                                </Box>
+                                <Box sx={{ flex: "1 1 0", width: { xs: "100%", sm: "auto" }, minWidth: 0 }}>
+                                    <NombreTextField
+                                        size="medium"
+                                        name={`source_financement.${index}.taux`}
+                                        label="Taux (%)"
+                                        type="number"
+                                        fullWidth
+                                        rules={{
+                                            required: "Le taux est requis",
+                                            validate: (value) =>
+                                                Number(value) > 0 || "Le taux doit etre strictement superieur a 0%",
+                                        }}
+                                        slotProps={{
+                                            htmlInput: {
+                                                min: 0.01,
+                                                step: 0.01,
+                                            },
+                                        }}
+                                    />
+                                </Box>
+                                <IconButton
+                                    aria-label={`Supprimer la source de financement ${index + 1}`}
+                                    color="error"
+                                    onClick={() => handleRemoveSourceFinancement(index)}
+                                    sx={{ alignSelf: { xs: "flex-end", sm: "center" }, flexShrink: 0 }}
+                                >
+                                    <Delete />
+                                </IconButton>
                             </Stack>
                         ))}
 

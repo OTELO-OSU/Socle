@@ -5,20 +5,32 @@ export type RetourFetchPlateformeParPage = {
     page: number;
     pages_total: number;
     total: number;
+    instances_indisponibles: string[];
     tags_export: number[];
     unites_export: number[];
+    filtres: {
+        id: number;
+        nom: string;
+        nombre_plateformes: number;
+    }[];
 }
 
 export type PlateformeLight = {
     id: number;
     instance_host?: string;
-    pseudo_id: string;
+    pseudoId: string;
     instrument_national: boolean;
     dernier_historique: DernierHistorique & {
         brouillon: boolean;
     };
     pourcentage_remplissage?: number | null;
     readonly?: boolean;
+    ayant_acces?: {
+        id: number;
+        nom: string;
+        prenom: string;
+        email: string;
+    }[];
 }
 
 export type PlateformeLightPublique = {
@@ -53,11 +65,24 @@ export async function fetchPlateformePublique(): Promise<PlateformeLight[]> {
     return data.plateformes;
 }
 
-export async function fetchPlateformeListeParPage(page: number, recherche: string) {
+export async function fetchPlateformeListeParPage(page: number, recherche: string, tags: number[] | null = null) {
     const { data } = await symfony.get<RetourFetchPlateformeParPage>('/plateforme', {
         params: {
             page: page,
             search: recherche,
+            tags: tags ? tags.join(',') : null
+        }
+    });
+
+    return data;
+}
+
+export async function fetchLocalPlateformeListeParPage(page: number, recherche: string, tags: number[] | null = null) {
+    const { data } = await symfony.get<RetourFetchPlateformeParPage>('/admin/plateforme', {
+        params: {
+            page: page,
+            search: recherche,
+            tags: tags ? tags.join(',') : null
         }
     });
 

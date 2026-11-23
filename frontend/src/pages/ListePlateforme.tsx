@@ -1,12 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchPlateformeListeParPage, type PlateformeLight } from "../services/plateformeService";
-import { Autocomplete, Box, Button, Card, CardActions, CardContent, Container, Divider, LinearProgress, Link, List, Pagination, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, Container, Divider, FormControlLabel, FormGroup, LinearProgress, Link, List, Pagination, Paper, Stack, TextField, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { BarChart, Description, Done, Download, Group, Launch, Save, Verified } from "@mui/icons-material";
+import { BarChart, Description, Done, Download, Group, Key, Launch, Save, Verified } from "@mui/icons-material";
 import { downloadAllPlateformes, downloadPlateformesByTag, downloadPlateformesByUnite, downloadSinglePlateforme } from "../services/exportService";
-import { allyProps } from "../components/formulairePlateforme/allyProps";
-import { CustomTabPanel } from "../components/CustomTabPanel";
-import { fetchPlateformeHarveste } from "../services/harvesterService";
 import { AuthContext } from "../context/authContext";
 import { DictionnaireContext } from "../context/dictionnaireContext";
 import type { SelectOption } from "../provider/DictionnaireProvider";
@@ -24,9 +21,6 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 
     const responsableScientifique = personnel.filter(p => p.responsable_scientifique);
     const responsableTechnique = personnel.filter(p => p.responsable_technique);
-    const responsablePlateforme = personnel.filter(p => p.responsable_plateforme);
-
-
 
     return (
         <>
@@ -34,13 +28,19 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
-                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
-                            {plateforme.instrument_national && (
-                                <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
-                                    <Verified fontSize="small" />
-                                    Instrument national
-                                </Typography>
-                            )}
+                            <Box component={LinkRouter} to={`/plateforme/edition?id=${plateforme.id}&harvester=${harvester}&host=${host}`}>
+                                {harvester && <Typography variant="caption">Moissonnée : {host}</Typography>}
+                                {plateforme.pseudoId && (
+                                    <Typography variant="subtitle1" color="primary" sx={{ display: 'flex', mb: 1, alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}>{plateforme.pseudoId}</Typography>
+                                )}
+                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 'bold' }}><IconeTitre brouillon={plateforme.dernier_historique.brouillon} />{plateforme.dernier_historique.nom_officiel}</Typography>
+                                {plateforme.instrument_national && (
+                                    <Typography variant="subtitle1" color="textPrimary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1, fontWeight: "bold" }}>
+                                        <Verified fontSize="small" />
+                                        Instrument national
+                                    </Typography>
+                                )}
+                            </Box>
                             {plateforme.dernier_historique.description && (
                                 <Box sx={{ mt: 2 }}>
                                     <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
@@ -86,17 +86,17 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                         </List>
                                     </Box>
                                 </>)}
-                            {responsablePlateforme.length > 0 && (
+                            {plateforme.ayant_acces && plateforme.ayant_acces.length > 0 && (
                                 <>
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="body1" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: "medium" }}>
-                                            <Group />
-                                            Responsable Plateforme :
+                                            <Key />
+                                            Personnes ayant accès à la plateforme :
                                         </Typography>
                                         <List sx={{ px: 4 }}>
-                                            {responsablePlateforme.map((personnel) => (
-                                                <Typography key={personnel.utilisateur_id} variant="body2" color="textPrimary">
-                                                    {personnel.utilisateur.prenom} {personnel.utilisateur.nom} | {personnel.utilisateur.email}
+                                            {plateforme.ayant_acces.map((user) => (
+                                                <Typography key={user.id} variant="body2" color="textPrimary">
+                                                    {user.prenom} {user.nom} | {user.email}
                                                 </Typography>
                                             ))}
                                         </List>
@@ -107,7 +107,7 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
                                     <BarChart />
                                     Taux de remplissage : {plateforme.pourcentage_remplissage ?? 0}%
                                 </Typography>
-                                <LinearProgress variant="determinate" value={plateforme.pourcentage_remplissage ?? 0} sx={{ height: 10, width: "500px", mt: 2, borderRadius: 5 }} />
+                                <LinearProgress variant="determinate" value={plateforme.pourcentage_remplissage ?? 0} sx={{ height: 10, width: "100%", maxWidth: "500px", mt: 2, borderRadius: 5 }} />
                             </Box>
                         </Box>
                         {plateforme.dernier_historique.logo_url &&
@@ -134,15 +134,16 @@ function PlateformeCard({ plateforme, harvester, host }: { plateforme: Plateform
 
 export function ListePlateforme() {
     const [plateformes, setPlateformes] = useState<PlateformeLight[]>([]);
-    const [plateformesHarvestees, setPlateformesHarvestees] = useState<Record<string, PlateformeLight[]>>({});
     const [tagsExport, setTagsExport] = useState<SelectOption[]>([]);
     const [uniteExport, setUniteExport] = useState<SelectOption[]>([]);
     const [recherche, setRecherche] = useState('');
+    const [tagsSelectionnes, setTagsSelectionnes] = useState<number[]>([]);
+    const [tagsDispo, setTagsDispo] = useState<{ id: number; nom: string, nombre_plateformes: number }[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingHarvestees, setIsLoadingHarvestees] = useState(false);
-    const [tabs, setTabs] = useState(0);
+    const [erreurChargement, setErreurChargement] = useState<string | null>(null);
+    const [instancesIndisponibles, setInstancesIndisponibles] = useState<string[]>([]);
     const [exportTagId, setExportTagId] = useState('');
     const [exportLaboId, setExportLaboId] = useState('');
     const [exportEnCours, setExportEnCours] = useState(false);
@@ -167,47 +168,40 @@ export function ListePlateforme() {
     const authContext = useContext(AuthContext);
     const dictionnaireContext = useContext(DictionnaireContext);
 
-    const fetchPlateformes = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const { plateformes, pages_total, tags_export, unites_export } = await fetchPlateformeListeParPage(page, recherche);
-            setPlateformes(plateformes);
-            setTotalPages(pages_total);
-            if (tags_export.includes(-1)) {
-                setTagsExport(dictionnaireContext.tagsOptions);
-            } else {
-                const tagsOptions = dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value)));
-                setTagsExport(tagsOptions);
-            }
-            if (unites_export.includes(-1)) {
-                setUniteExport(dictionnaireContext.uniteOptions);
-            } else {
-                const unitesOptions = dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value)));
-                setUniteExport(unitesOptions);
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement des plateformes :", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [page, recherche, dictionnaireContext.tagsOptions]);
-
-    const fetchPlateformesHarveste = useCallback(async () => {
-        setIsLoadingHarvestees(true);
-        try {
-            const data = await fetchPlateformeHarveste();
-            setPlateformesHarvestees(data);
-        } catch (error) {
-            console.error("Erreur lors du chargement des plateformes :", error);
-        } finally {
-            setIsLoadingHarvestees(false);
-        }
-    }, []);
-
     useEffect(() => {
+        let actif = true;
+        const fetchPlateformes = async () => {
+            setIsLoading(true);
+            setErreurChargement(null);
+            try {
+                const { plateformes, pages_total, tags_export, unites_export, filtres, instances_indisponibles } = await fetchPlateformeListeParPage(page, recherche, tagsSelectionnes.length ? tagsSelectionnes : null);
+                if (!actif) return;
+                const pagesDisponibles = Math.max(1, pages_total);
+                if (page > pagesDisponibles) {
+                    setPage(pagesDisponibles);
+                    return;
+                }
+                setPlateformes(plateformes);
+                setTagsDispo(filtres);
+                setTotalPages(pagesDisponibles);
+                setInstancesIndisponibles(instances_indisponibles);
+                setTagsExport(tags_export.includes(-1)
+                    ? dictionnaireContext.tagsOptions
+                    : dictionnaireContext.tagsOptions.filter(tag => tags_export.includes(Number(tag.value))));
+                setUniteExport(unites_export.includes(-1)
+                    ? dictionnaireContext.uniteOptions
+                    : dictionnaireContext.uniteOptions.filter(unite => unites_export.includes(Number(unite.value))));
+            } catch (error) {
+                if (!actif) return;
+                console.error("Erreur lors du chargement des plateformes :", error);
+                setErreurChargement("Impossible de charger les plateformes locales et moissonnées.");
+            } finally {
+                if (actif) setIsLoading(false);
+            }
+        };
         fetchPlateformes();
-        fetchPlateformesHarveste();
-    }, [fetchPlateformes, fetchPlateformesHarveste]);
+        return () => { actif = false; };
+    }, [page, recherche, tagsSelectionnes, dictionnaireContext.tagsOptions, dictionnaireContext.uniteOptions]);
 
     return (
         <Container sx={{ py: 4 }}>
@@ -251,82 +245,83 @@ export function ListePlateforme() {
             )}
             {exportEnCours && <LinearProgress sx={{ mb: 2 }} />}
             {exportErreur && <Typography color="error" sx={{ mb: 2 }}>{exportErreur}</Typography>}
-            <Box sx={{ borderBottom: 1, my: 2, borderColor: 'divider' }}>
-                <Tabs value={tabs} onChange={(_, newValue) => setTabs(newValue)} aria-label="basic tabs example">
-                    <Tab label="Locales" {...allyProps(0)} />
-                    <Tab label="Moissonnées" {...allyProps(1)} />
-                </Tabs>
-            </Box>
-            <CustomTabPanel value={tabs} index={0}>
-                <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
-                    <TextField
-                        type="text"
-                        placeholder="Rechercher une plateforme..."
-                        value={recherche}
-                        onChange={(e) => setRecherche(e.target.value)}
-                        sx={{ width: '55%' }}
-                    />
-                    <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={(_, newPage) => setPage(newPage)}
-                    />
-                </Stack>
-
-                {isLoading ? (
-                    <Typography component={'p'} variant="h6">Chargement...</Typography>
-                ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {plateformes.map((plateforme) => (
-                            <PlateformeCard key={plateforme.id} harvester={false} plateforme={plateforme} />
-                        ))}
-                        {plateformes.length === 0 && (
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                Aucune plateforme locale trouvée.
-                            </Typography>
+            {!isLoading && !erreurChargement && instancesIndisponibles.length > 0 && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    La liste est incomplète : impossible de charger les plateformes des instances suivantes : {instancesIndisponibles.join(', ')}.
+                    Les totaux et les filtres ne tiennent pas compte de ces plateformes.
+                </Alert>
+            )}
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, alignItems: "flex-start" }}>
+                    <Paper component="aside" variant="outlined" sx={{ p: 2, width: { xs: "100%", md: 240 }, flexShrink: 0, boxSizing: "border-box" }}>
+                        <Typography component="h2" variant="h6">Filtrer par tag</Typography>
+                        <Typography variant="body2" color="text.secondary">Au moins un des tags sélectionnés</Typography>
+                        <FormGroup>
+                            {tagsDispo.map(tag => (
+                                <FormControlLabel
+                                    key={tag.id}
+                                    control={<Checkbox
+                                        checked={tagsSelectionnes.includes(tag.id)}
+                                        onChange={(_, checked) => {
+                                            setTagsSelectionnes(current => checked ? [...current, tag.id] : current.filter(id => id !== tag.id));
+                                            setPage(1);
+                                        }}
+                                    />}
+                                    label={<Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, width: "100%" }}>
+                                        <span>{tag.nom}</span>
+                                        <span>{tag.nombre_plateformes}</span>
+                                    </Box>}
+                                    sx={{ mr: 0, ".MuiFormControlLabel-label": { flex: 1, minWidth: 0 } }}
+                                />
+                            ))}
+                        </FormGroup>
+                        {dictionnaireContext.tags.length === 0 && <Typography variant="body2">Aucun tag disponible.</Typography>}
+                        {tagsSelectionnes.length > 0 && (
+                            <Button onClick={() => { setTagsSelectionnes([]); setPage(1); }}>
+                                Effacer les filtres
+                            </Button>
                         )}
-                    </Box>
-                )}
-                <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
-                    Précédent
-                </Button>
-                <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
-                <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
-                    Suivant
-                </Button>
-            </CustomTabPanel>
+                    </Paper>
+                    <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+                        <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={2} sx={{ my: 2, alignItems: "center" }}>
+                            <TextField
+                                type="text"
+                                placeholder="Rechercher une plateforme..."
+                                value={recherche}
+                                onChange={(e) => { setRecherche(e.target.value); setPage(1); }}
+                                sx={{ width: '55%' }}
+                            />
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={(_, newPage) => setPage(newPage)}
+                            />
+                        </Stack>
 
-            <CustomTabPanel value={tabs} index={1}>
-                {isLoadingHarvestees ? (
-                    <Typography component={'p'} variant="h6">Chargement...</Typography>
-                ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {Object.entries(plateformesHarvestees).map(([host, plateformes]) => (
-                            <Box key={host}>
-                                <Typography variant="h6" sx={{ mb: 2 }}>
-                                    {host}
-                                </Typography>
-
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    {plateformes.map((plateforme) => (
-                                        <PlateformeCard
-                                            key={`${host}/${plateforme.id}`}
-                                            harvester={true}
-                                            host={host}
-                                            plateforme={plateforme}
-                                        />
-                                    ))}
-                                </Box>
+                        {isLoading ? (
+                            <Typography component={'p'} variant="h6">Chargement...</Typography>
+                        ) : erreurChargement ? (
+                            <Typography color="error" role="alert">{erreurChargement}</Typography>
+                        ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                {plateformes.map((plateforme) => (
+                                    <PlateformeCard key={`${plateforme.instance_host ?? 'local'}/${plateforme.id}`} harvester={!!plateforme.instance_host} host={plateforme.instance_host} plateforme={plateforme} />
+                                ))}
+                                {plateformes.length === 0 && (
+                                    <Typography variant="body1" sx={{ mb: 2 }}>
+                                        Aucune plateforme trouvée.
+                                    </Typography>
+                                )}
                             </Box>
-                        ))}
-                        {Object.entries(plateformesHarvestees).length === 0 && (
-                            <Typography variant="body1">
-                                Aucune plateforme moissonnée trouvée.
-                            </Typography>
                         )}
+                        <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+                            Précédent
+                        </Button>
+                        <Typography variant="body2" component={'span'}> Page {page} sur {totalPages} </Typography>
+                        <Button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>
+                            Suivant
+                        </Button>
                     </Box>
-                )}
-            </CustomTabPanel>
+                </Box>
         </Container>
     );
 }

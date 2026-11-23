@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Plateforme;
+use App\Entity\Utilisateur;
 use App\Service\ExcelService;
 use App\Service\HarvesterService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -107,6 +108,44 @@ class HarvesterControllerTest extends WebTestCase
         $this->assertCount(2, $data);
         $this->assertSame(1, $data[0]['id']);
         $this->assertSame(2, $data[1]['id']);
+    }
+
+    public function testListeMachineSerialiseLesPersonnesAyantAcces(): void
+    {
+        $utilisateur = (new Utilisateur())->setPrenom('Alice')->setNom('Distante')->setEmail('alice@example.org');
+        $plateforme = (new Plateforme())->setAyantAcces([$utilisateur]);
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService->expects($this->once())->method('getPlateformeListePourMachine')
+            ->with('client-123', 'secret-456')->willReturn([$plateforme]);
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+
+        $this->client->request('GET', '/api/hmt/plateformes', [], [], [
+            'HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456'),
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        self::assertSame('Alice', $data[0]['ayant_acces'][0]['prenom']);
+        self::assertSame('Distante', $data[0]['ayant_acces'][0]['nom']);
+        self::assertSame('alice@example.org', $data[0]['ayant_acces'][0]['email']);
+    }
+
+    public function testListePubliqueMachineNeSerialisePasLesPersonnesAyantAcces(): void
+    {
+        $utilisateur = (new Utilisateur())->setPrenom('Alice')->setNom('Distante')->setEmail('alice@example.org');
+        $plateforme = (new Plateforme())->setAyantAcces([$utilisateur]);
+        $harvesterService = $this->createMock(HarvesterService::class);
+        $harvesterService->expects($this->once())->method('getPlateformePubliquePourMachine')
+            ->with('client-123', 'secret-456')->willReturn([$plateforme]);
+        static::getContainer()->set(HarvesterService::class, $harvesterService);
+
+        $this->client->request('GET', '/api/hmt/plateformes/publiques', [], [], [
+            'HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('client-123:secret-456'),
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        self::assertArrayNotHasKey('ayant_acces', $data[0]);
     }
 
     public function testGetDetailPlateformeHarvesterRetourne400QuandParametresManquants(): void

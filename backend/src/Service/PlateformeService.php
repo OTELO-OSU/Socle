@@ -27,9 +27,11 @@ use App\Entity\Utilisateur;
 use App\Entity\Ville;
 use App\Security\Voter\PlateformeVoter;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -48,7 +50,10 @@ class PlateformeService
         private readonly Security $security,
         private readonly TranslatorInterface $translator,
         private readonly UniteService $uniteService,
-        private readonly HttpClientInterface $httpClient
+        private readonly HttpClientInterface $httpClient,
+        #[Autowire(lazy: true)]
+        private readonly HarvesterService $harvesterService,
+        private readonly PlateformePseudoIdMappingService $pseudoIdMappingService,
     ) {}
 
     function getAnneeDeSaisieEnCours(): int
@@ -189,6 +194,7 @@ class PlateformeService
         $newInstrument = new Instrument();
         $newInstrument->setPlateformeHistorique($plateformeHistorique);
         $newInstrument->setNom($instrument->getNom());
+        $newInstrument->setNombre($instrument->getNombre());
         $newInstrument->setMarque($instrument->getMarque());
         $newInstrument->setModele($instrument->getModele());
         $newInstrument->setAnneeAcquisition($instrument->getAnneeAcquisition());
@@ -421,6 +427,7 @@ class PlateformeService
             foreach ($plateformesDistantes as &$plateformeDistante) {
                 if (is_array($plateformeDistante)) {
                     $plateformeDistante['instance_host'] = $host;
+                    $plateformeDistante = $this->applyPseudoIdOverrideToRemotePlatform($plateformeDistante);
                 }
             }
             unset($plateformeDistante);
@@ -445,7 +452,7 @@ class PlateformeService
         return ['plateformes' => $plateformes];
     }
 
-    function getPlateformeParPage(int $page, ?string $search): array
+    function getPlateformeParPage(int $page, ?string $search, ?array $tags): array
     {
         if ($this->security->getUser() === null) {
             throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
@@ -463,7 +470,13 @@ class PlateformeService
             ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
             ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
             ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id')
+            ->leftJoin('p', 'plateforme_tags', 'pt', 'pt.plateforme_id = p.id')
             ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
+
+        if ($tags) {
+            $idsQb->andWhere('pt.tag_id IN (:tags)');
+            $idsQb->setParameter('tags', $tags, ArrayParameterType::INTEGER);
+        }
 
         if ($search) {
             $idsQb->andWhere('(
@@ -479,6 +492,7 @@ class PlateformeService
                         pp.responsable_scientifique = true
                         OR pp.responsable_technique = true
                     )
+                OR p.pseudo_id ILIKE :search
                 )
             )');
             $idsQb->setParameter('search', '%' . $search . '%');
@@ -509,17 +523,74 @@ class PlateformeService
             ));
         }
 
-        // 3) Paginer après application des autorisations pour garder un total cohérent.
+        $moissonnage = $this->harvesterService->getPlateformesMoissonnees();
+        $plateformesMoissonnees = $moissonnage['plateformes'];
+        
+        // Apply pseudo_id overrides to remote platforms
+        $plateformesMoissonnees = array_map(
+            fn(array $plateforme): array => $this->applyPseudoIdOverrideToRemotePlatform($plateforme),
+            $plateformesMoissonnees
+        );
+        
+        $plateformesDistantesFiltrees = array_filter(
+            $plateformesMoissonnees,
+            fn(array $plateforme): bool => (!$tags || count(array_intersect($tags, $plateforme['tags_ids'])) > 0)
+                && (!$search || $this->plateformeMoissonneeCorrespondRecherche($plateforme, $search))
+        );
+        $plateformesAutorisees = array_merge($plateformesAutorisees, $plateformesDistantesFiltrees);
+        usort($plateformesAutorisees, static function (Plateforme|array $a, Plateforme|array $b): int {
+            $nomA = $a instanceof Plateforme ? $a->getLastHistorique()->getNomOfficiel() : $a['dernier_historique']['nom_officiel'];
+            $nomB = $b instanceof Plateforme ? $b->getLastHistorique()->getNomOfficiel() : $b['dernier_historique']['nom_officiel'];
+            $comparaison = strcmp(mb_strtolower($nomA ?? ''), mb_strtolower($nomB ?? ''));
+            if ($comparaison !== 0) return $comparaison;
+            $hostA = $a instanceof Plateforme ? '' : $a['instance_host'];
+            $hostB = $b instanceof Plateforme ? '' : $b['instance_host'];
+            return ($hostA <=> $hostB) ?: (($a instanceof Plateforme ? $a->getId() : $a['id']) <=> ($b instanceof Plateforme ? $b->getId() : $b['id']));
+        });
+
+        // Paginer après application des autorisations et fusion des deux sources.
         $total = count($plateformesAutorisees);
         $plateformes = array_slice($plateformesAutorisees, $offset, self::PLATEFORME_PAR_PAGE);
 
         foreach ($plateformes as $plateforme) {
+            if (is_array($plateforme)) continue;
             $plateforme->setPourcentageRemplissage($this->getPlateformePourcentage($plateforme->getLastHistorique()));
             if ($this->security->isGranted(PlateformeVoter::READONLY, $plateforme)) {
                 $plateforme->setReadonly(true);
             } else {
                 $plateforme->setReadonly(false);
             }
+
+            $ayantAcces = $this->em->getRepository(Utilisateur::class)->findUserAyantAccesPlateforme($plateforme);
+            $plateforme->setAyantAcces($ayantAcces);
+        }
+
+        $tags = $this->tagService->getTags();
+
+        // Compter combien de plateformes sont associées à chaque tag pour l'utilisateur courant.
+        $tagsExport = [];
+        foreach ($tags as $tag) {
+            $plateformesAvecTag = $this->getPlateformeAuxTags([$tag['id']]);
+            $plateformesVisibles = array_filter(
+                $plateformesAvecTag,
+                fn(PlateformeTags $association): bool => $association->getPlateforme()->getLastHistorique() !== null
+                    && $this->security->isGranted(PlateformeVoter::LIRE, $association->getPlateforme())
+            );
+
+            $nombreMoissonnees = count(array_filter(
+                $plateformesMoissonnees,
+                static fn(array $plateforme): bool => in_array($tag['id'], $plateforme['tags_ids'])
+            ));
+
+            if (count($plateformesVisibles) + $nombreMoissonnees === 0) {
+                continue;
+            }
+
+            $tagsExport[] = [
+                'id' => $tag["id"],
+                'nom' => $tag["nom"],
+                'nombre_plateformes' => count($plateformesVisibles) + $nombreMoissonnees,
+            ];
         }
 
         return [
@@ -527,9 +598,32 @@ class PlateformeService
             'page' => $page,
             'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
             'total' => $total,
+            'instances_indisponibles' => $moissonnage['instances_indisponibles'],
             'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
-            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser())
+            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser()),
+            'filtres' => $tagsExport
         ];
+    }
+
+    private function plateformeMoissonneeCorrespondRecherche(array $plateforme, string $search): bool
+    {
+        $historique = $plateforme['dernier_historique'];
+        $champs = [
+            $historique['nom_officiel'],
+            $historique['forme_developpee_nom_officiel'] ?? '',
+            $plateforme['pseudoId'] ?? $plateforme['pseudo_id'] ?? '',
+        ];
+        foreach ($historique['personnels'] ?? [] as $personnel) {
+            if (($personnel['responsable_scientifique'] ?? false) || ($personnel['responsable_technique'] ?? false)) {
+                foreach (['prenom', 'nom', 'email'] as $champ) {
+                    $champs[] = $personnel['utilisateur'][$champ] ?? '';
+                }
+            }
+        }
+        foreach ($champs as $champ) {
+            if (mb_stripos($champ ?? '', $search) !== false) return true;
+        }
+        return false;
     }
 
     function getPlateformeAuxTags(array $tagsIds)
@@ -573,6 +667,24 @@ class PlateformeService
         }
 
         return $plateforme;
+    }
+
+    public function updatePseudoIdForLocalPlateforme(int $plateformeId, string $pseudoId): void
+    {
+        try {
+            $plateforme = $this->em->getRepository(Plateforme::class)->find($plateformeId);
+            if ($plateforme) {
+                $plateforme->setPseudoId($pseudoId);
+                $this->em->flush();
+            }
+        } catch (\Exception $e) {
+            // Silently fail if platform doesn't exist locally
+        }
+    }
+
+    public function getMappedPseudoIdForRemotePlatform(int $plateformeId, string $instanceHost): ?string
+    {
+        return $this->pseudoIdMappingService->getMappedPseudoId($plateformeId, $instanceHost);
     }
 
     private function synchroniserInstrumentsActuels(PlateformeHistorique $plateformeHisto, array $value): void
@@ -1426,5 +1538,171 @@ class PlateformeService
         }
 
         return $plateformeHisto;
+    }
+
+    private function applyPseudoIdOverrideToRemotePlatform(array $plateforme): array
+    {
+        // Check if this is a remote platform (has instance_host field)
+        if (isset($plateforme['instance_host']) && isset($plateforme['id'])) {
+            $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId((int)$plateforme['id'], $plateforme['instance_host']);
+            if ($mappedPseudoId) {
+                $plateforme['pseudoId'] = $mappedPseudoId;
+            }
+        }
+        return $plateforme;
+    }
+
+    public function getAllPlateformesForAdmin(): array
+    {
+        // Plateformes locales
+        $plateformesLocales = $this->em->getRepository(Plateforme::class)->findAll();
+        $data = [];
+        foreach ($plateformesLocales as $plateforme) {
+            $data[] = [
+                'id' => $plateforme->getId(),
+                'nomOfficiel' => $plateforme->getLastHistorique()?->getNomOfficiel() ?? 'N/A',
+                'pseudoId' => $plateforme->getPseudoId(),
+            ];
+        }
+        
+        // Plateformes distantes/moissonnées - sans vérification de permissions pour l'admin
+        $moissonnage = $this->harvesterService->getPlateformesHarvesterPourAdmin();
+        $plateformesDistantes = $moissonnage['plateformes'] ?? [];
+        
+        foreach ($plateformesDistantes as $plateforme) {
+            if (is_array($plateforme)) {
+                $plateforme = $this->applyPseudoIdOverrideToRemotePlatform($plateforme);
+                $data[] = [
+                    'id' => $plateforme['id'],
+                    'nomOfficiel' => $plateforme['dernier_historique']['nom_officiel'] ?? 'N/A',
+                    'pseudoId' => $plateforme['pseudoId'] ?? null,
+                    'instance_host' => $plateforme['instance_host'] ?? null,
+                ];
+            }
+        }
+        
+        return $data;
+    }
+
+    public function getLocalPlateformeParPage(int $page, ?string $search, ?array $tags): array
+    {
+        if ($this->security->getUser() === null) {
+            throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
+        }
+
+        $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
+
+        $conn = $this->em->getConnection();
+
+        // Récupérer les IDs des plateformes locales selon la recherche
+        $idsQb = $conn->createQueryBuilder();
+        $idsQb
+            ->select('p.id AS plateforme_id', 'ph.nom_officiel AS tri_nom_officiel')
+            ->from('plateforme', 'p')
+            ->innerJoin('p', 'plateforme_historique', 'ph', 'ph.plateforme_id = p.id')
+            ->leftJoin('ph', 'plateforme_historique_personnel', 'pp', 'pp.plateforme_historique_id = ph.id')
+            ->leftJoin('pp', 'utilisateur', 'u', 'u.id = pp.utilisateur_id')
+            ->leftJoin('p', 'plateforme_tags', 'pt', 'pt.plateforme_id = p.id')
+            ->where('ph.annee = (SELECT MAX(ph2.annee) FROM plateforme_historique ph2 WHERE ph2.plateforme_id = p.id)');
+
+        if ($tags) {
+            $idsQb->andWhere('pt.tag_id IN (:tags)');
+            $idsQb->setParameter('tags', $tags, ArrayParameterType::INTEGER);
+        }
+
+        if ($search) {
+            $idsQb->andWhere('(
+                ph.nom_officiel ILIKE :search
+                OR ph.forme_developpee_nom_officiel ILIKE :search
+                OR (
+                    (
+                        u.prenom ILIKE :search
+                        OR u.nom ILIKE :search
+                        OR u.email ILIKE :search
+                    )
+                    AND (
+                        pp.responsable_scientifique = true
+                        OR pp.responsable_technique = true
+                    )
+                OR p.pseudo_id ILIKE :search
+                )
+            )');
+            $idsQb->setParameter('search', '%' . $search . '%');
+        }
+
+        $idsQb
+            ->groupBy('p.id, ph.nom_officiel')
+            ->orderBy('ph.nom_officiel', 'ASC');
+
+        $idRows = $idsQb->executeQuery()->fetchAllAssociative();
+        $plateformeIds = array_map(static fn(array $row): int => (int) $row['plateforme_id'], $idRows);
+
+        // Charger les entités candidates puis appliquer le voter LIRE
+        $plateformesAutorisees = [];
+        if ($plateformeIds !== []) {
+            $plateformesCandidates = $this->em->getRepository(Plateforme::class)->findBy(['id' => $plateformeIds]);
+
+            // Conserver l'ordre défini par la requête IDs
+            $ordreParId = array_flip($plateformeIds);
+            usort(
+                $plateformesCandidates,
+                static fn(Plateforme $a, Plateforme $b): int => ($ordreParId[$a->getId()] ?? PHP_INT_MAX) <=> ($ordreParId[$b->getId()] ?? PHP_INT_MAX)
+            );
+
+            $plateformesAutorisees = array_values(array_filter(
+                $plateformesCandidates,
+                fn(Plateforme $plateforme): bool => $this->security->isGranted(PlateformeVoter::LIRE, $plateforme)
+            ));
+        }
+
+        // Paginer
+        $total = count($plateformesAutorisees);
+        $plateformes = array_slice($plateformesAutorisees, $offset, self::PLATEFORME_PAR_PAGE);
+
+        foreach ($plateformes as $plateforme) {
+            $plateforme->setPourcentageRemplissage($this->getPlateformePourcentage($plateforme->getLastHistorique()));
+            if ($this->security->isGranted(PlateformeVoter::READONLY, $plateforme)) {
+                $plateforme->setReadonly(true);
+            } else {
+                $plateforme->setReadonly(false);
+            }
+
+            $ayantAcces = $this->em->getRepository(Utilisateur::class)->findUserAyantAccesPlateforme($plateforme);
+            $plateforme->setAyantAcces($ayantAcces);
+        }
+
+        $tags = $this->tagService->getTags();
+
+        // Compter combien de plateformes sont associées à chaque tag pour l'utilisateur courant
+        $tagsExport = [];
+        foreach ($tags as $tag) {
+            $plateformesAvecTag = $this->getPlateformeAuxTags([$tag['id']]);
+            $plateformesVisibles = array_filter(
+                $plateformesAvecTag,
+                fn(PlateformeTags $association): bool => $association->getPlateforme()->getLastHistorique() !== null
+                    && $this->security->isGranted(PlateformeVoter::LIRE, $association->getPlateforme())
+            );
+
+            if (count($plateformesVisibles) === 0) {
+                continue;
+            }
+
+            $tagsExport[] = [
+                'id' => $tag["id"],
+                'nom' => $tag["nom"],
+                'nombre_plateformes' => count($plateformesVisibles),
+            ];
+        }
+
+        return [
+            'plateformes' => $plateformes,
+            'page' => $page,
+            'pages_total' => ceil($total / self::PLATEFORME_PAR_PAGE),
+            'total' => $total,
+            'instances_indisponibles' => [],
+            'tags_export' => $this->tagService->getUtilisateurTags($this->security->getUser()),
+            'unites_export' => $this->uniteService->getUtilisateurUnites($this->security->getUser()),
+            'filtres' => $tagsExport
+        ];
     }
 }

@@ -10,7 +10,7 @@ jobs:
     needs:
       - audit-frontend
       - audit-backend
-    container: composer:2
+    container: php:8.5-fpm-alpine
     services:
       database:
         image: postgres:16-alpine
@@ -40,9 +40,10 @@ jobs:
 
       - name: Installer les extensions PHP
         run: |
-          apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev
+          apk add --no-cache postgresql-dev icu-dev libzip-dev unzip git freetype-dev libjpeg-turbo-dev libpng-dev curl
           docker-php-ext-configure gd --with-freetype --with-jpeg
           docker-php-ext-install gd pdo pdo_pgsql intl zip
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
       - name: Installer les dépendances
         run: composer install --no-interaction --prefer-dist --no-progress
@@ -85,7 +86,7 @@ jobs:
 
   audit-backend:
     runs-on: ubuntu-latest
-    container: composer:2
+    container: php:8.5-fpm-alpine
 
     defaults:
       run:
@@ -93,6 +94,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Installer Composer et Git
+        run: |
+          apk add --no-cache git curl
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
       - name: Autoriser le répertoire du dépôt pour Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"

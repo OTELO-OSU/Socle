@@ -1,9 +1,10 @@
-import { Box, Button, Card, CardActions, CardContent, Chip, Dialog, IconButton, Link, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Stack, TextField, Typography } from "@mui/material";
 import Account from '@mui/icons-material/AccountCircle';
+import ManageAccounts from "@mui/icons-material/ManageAccounts";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useContext, useEffect, useState } from "react";
 import { AgentAutocompleteField } from "../../AgentAutocompleteField";
-import { type Agent, soumettreAgentAuDu } from "../../../services/agentService";
+import { modifierAgent, type Agent, soumettreAgentAuDu } from "../../../services/agentService";
 import { typePersonnelLabel } from "../../../services/formatLabelService";
 import { AgentAdvancedFields } from "../../AgentAdvancedFields";
 import { SnackbarContext } from "../../../context/snackbarContext";
@@ -11,6 +12,8 @@ import NombreTextFieldHint from "../../NombreTextFieldHint";
 import { DictionnaireContext } from "../../../context/dictionnaireContext";
 import { Delete, Edit } from "@mui/icons-material";
 import type { PlateformeDictionnaire } from "../../../services/plateformeService";
+import type { AxiosError } from "axios";
+import type { ApiError } from "../../../utils/axios";
 
 type PersonnelActuelFormValue = {
     utilisateur_id: number;
@@ -369,9 +372,10 @@ type PersonnelCardProps = {
     personnel: PersonnelActuelFormValue;
     onDelete: () => void;
     onQuotaUpdate: (number: number | null) => void;
+    onAgentUpdate: (agent: Agent) => void;
 };
 
-function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: PersonnelCardProps & { disabled: boolean }) {
+function PersonnelCard({ personnel, onDelete, onQuotaUpdate, onAgentUpdate, disabled }: PersonnelCardProps & { disabled: boolean }) {
     const estResponsableScientifique = personnel.responsable_scientifique;
     const estResponsableTechnique = personnel.responsable_technique;
     const estResponsablePlateforme = personnel.responsable_plateforme;
@@ -395,6 +399,65 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: Personn
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newQuotite, setNewQuotite] = useState<number | null>(personnel.quotite);
+    const [agentDialogOpen, setAgentDialogOpen] = useState(false);
+    const [editableAgent, setEditableAgent] = useState<Agent | null>(null);
+    const [isSavingAgent, setIsSavingAgent] = useState(false);
+    const snackbar = useContext(SnackbarContext);
+
+    const handleOpenAgentDialog = () => {
+        setEditableAgent({ ...personnel.utilisateur, id: personnel.utilisateur_id });
+        setAgentDialogOpen(true);
+    };
+
+    const handleCloseAgentDialog = () => {
+        if (isSavingAgent) {
+            return;
+        }
+        setAgentDialogOpen(false);
+        setEditableAgent(null);
+    };
+
+    const handleSaveAgent = async () => {
+        if (!editableAgent) {
+            return;
+        }
+
+        setIsSavingAgent(true);
+        try {
+            const result = await modifierAgent(personnel.utilisateur_id, {
+                nom: editableAgent.nom,
+                prenom: editableAgent.prenom,
+                email: editableAgent.email,
+                employeur_id: editableAgent.employeur_id ?? null,
+                corps_id: editableAgent.corps_id ?? null,
+                grade_id: editableAgent.grade_id ?? null,
+                type_contrat_id: editableAgent.type_contrat_id ?? null,
+                unite_id: editableAgent.unite_id ?? null,
+                doctorant: editableAgent.doctorant ?? false,
+                universite_rattachement_id: editableAgent.universite_rattachement_id ?? null,
+                baps_ids: editableAgent.baps_ids ?? [],
+                emploi_types_ids: editableAgent.emploi_types_ids ?? [],
+                section_cnrs_id: editableAgent.section_cnrs_id ?? null,
+                cnu_id: editableAgent.cnu_id ?? null,
+            });
+
+            onAgentUpdate(result.utilisateur);
+            setAgentDialogOpen(false);
+            setEditableAgent(null);
+            snackbar?.trigger({
+                message: "Informations de l'agent mises à jour",
+                couleur: "success",
+            });
+        } catch (error) {
+            const errorAxios = error as AxiosError<ApiError>;
+            snackbar?.trigger({
+                message: errorAxios.response?.data.message ?? "Erreur lors de la mise à jour des informations de l'agent",
+                couleur: "error",
+            });
+        } finally {
+            setIsSavingAgent(false);
+        }
+    };
 
     return (
         <Box sx={{
@@ -420,6 +483,14 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: Personn
                             }}
                             slotProps={{ htmlInput: { min: 0, max: 100 } }}
                         />
+                        <Button
+                            sx={{ mt: 2 }}
+                            startIcon={<ManageAccounts />}
+                            onClick={handleOpenAgentDialog}
+                            disabled={disabled}
+                        >
+                            Modifier les informations de l'agent
+                        </Button>
                     </CardContent>
                     <CardActions sx={{ display: "flex", justifyContent: "end" }}>
                         <Button onClick={() => setDialogOpen(false)} color="primary">
@@ -433,6 +504,28 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: Personn
                         </Button>
                     </CardActions>
                 </Card>
+                <Dialog open={agentDialogOpen} onClose={handleCloseAgentDialog} fullWidth maxWidth="md">
+                    <DialogTitle>Modifier les informations de l'agent</DialogTitle>
+                    <DialogContent>
+                        {editableAgent && (
+                            <Stack spacing={2} sx={{ pt: 1 }}>
+                                <AgentAdvancedFields
+                                    value={editableAgent}
+                                    onChange={(next) => setEditableAgent(next)}
+                                    disabled={isSavingAgent}
+                                />
+                            </Stack>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button color="inherit" onClick={handleCloseAgentDialog} disabled={isSavingAgent}>
+                            Annuler
+                        </Button>
+                        <Button variant="contained" onClick={handleSaveAgent} disabled={isSavingAgent || !editableAgent}>
+                            Enregistrer
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Dialog>
 
 
@@ -452,10 +545,13 @@ function PersonnelCard({ personnel, onDelete, onQuotaUpdate, disabled }: Personn
                 {estResponsablePlateforme && <Chip color="secondary" label="Responsable plateforme" size="small" />}
             </Box >
             <Box>
-                <IconButton color="error" disabled={disabled} onClick={() => setDialogOpen(true)}>
+                <IconButton color="primary" disabled={disabled} aria-label="Modifier la quotité" onClick={() => {
+                    setNewQuotite(personnel.quotite);
+                    setDialogOpen(true);
+                }}>
                     <Edit />
                 </IconButton>
-                <IconButton color="error" disabled={estResponsableScientifique || estResponsableTechnique || estResponsablePlateforme} onClick={onDelete}>
+                <IconButton color="primary" disabled={estResponsableScientifique || estResponsableTechnique || estResponsablePlateforme} onClick={onDelete}>
                     <Delete />
                 </IconButton>
             </Box>
@@ -528,6 +624,85 @@ export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
         });
     };
 
+    const handleUpdateAgent = (utilisateur_id: number, agent: Agent) => {
+        const currentPersonnels = (getValues(PERSONNELS_FIELD_NAME) as PersonnelActuelFormValue[] | undefined) ?? [];
+        const updatedPersonnels = currentPersonnels.map((personnel) =>
+            personnel.utilisateur_id === utilisateur_id
+                ? { ...personnel, utilisateur: agent }
+                : personnel
+        );
+
+        setValue(PERSONNELS_FIELD_NAME, updatedPersonnels, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+        });
+    };
+
+    const dictionnaireContext = useContext(DictionnaireContext);
+    const plateformeDictionnaire = watch("dictionnaire") as PlateformeDictionnaire | undefined;
+
+    const personnelsItStatutaire = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "IT Statutaire";
+    });
+
+    const personnelsItCDD = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "IT CDD";
+    });
+
+    const personnelsChercheursStatutaires = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Chercheur Statutaire";
+    });
+
+    const personnelsChercheursCDD = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Chercheur CDD";
+    });
+
+    const doctorants = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        return typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant) == "Doctorant";
+    });
+
+    const autres = personnels.filter((personnel) => {
+        const corps = plateformeDictionnaire?.corps?.[String(personnel.utilisateur.corps_id)]
+            ?? dictionnaireContext?.corps.find(c => c.id === personnel.utilisateur.corps_id)
+            ?? null;
+        const typeContrat = plateformeDictionnaire?.types_contrat?.[String(personnel.utilisateur.type_contrat_id)]
+            ?? dictionnaireContext?.typeContrat.find(t => t.id === personnel.utilisateur.type_contrat_id)
+            ?? null;
+        const label = typePersonnelLabel(corps?.acronyme, typeContrat?.nom, personnel.utilisateur.doctorant);
+        return label !== "IT Statutaire" && label !== "IT CDD" && label !== "Chercheur Statutaire" && label !== "Chercheur CDD" && label !== "Doctorant";
+    });
+
     return (
         <Box sx={{ p: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -539,19 +714,112 @@ export function PersonnelActuels({ disabled = false }: { disabled?: boolean }) {
                 </Box>
             </Box>
 
-            {personnels.map((personnel) => (
+            <Typography variant="subtitle2" component="h3">
+                Personnel Technique Statutaire
+            </Typography>
+            {personnelsItStatutaire.map((personnel) => (
                 <PersonnelCard
                     key={personnel.utilisateur_id}
                     personnel={personnel}
                     onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
                     onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
                     disabled={disabled}
                 />
             ))}
-            {personnels.length === 0 && (
-                <Typography sx={{ mt: 2 }} color="text.secondary">
-                    Aucun personnel actuel.
+            {personnelsItStatutaire.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel technique statutaire.
                 </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Technique CDD
+            </Typography>
+            {personnelsItCDD.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsItCDD.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel technique CDD.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Chercheur Statutaire
+            </Typography>
+            {personnelsChercheursStatutaires.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsChercheursStatutaires.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel chercheur statutaire.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Personnel Chercheur CDD
+            </Typography>
+            {personnelsChercheursCDD.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
+                    disabled={disabled}
+                />
+            ))}
+            {personnelsChercheursCDD.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun personnel chercheur CDD.
+                </Typography>
+            )}
+            <Typography variant="subtitle2" component="h3">
+                Doctorants
+            </Typography>
+            {doctorants.map((personnel) => (
+                <PersonnelCard
+                    key={personnel.utilisateur_id}
+                    personnel={personnel}
+                    onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                    onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                    onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
+                    disabled={disabled}
+                />
+            ))}
+            {doctorants.length === 0 && (
+                <Typography sx={{ my: 2 }} color="text.secondary">
+                    Aucun doctorant.
+                </Typography>
+            )}
+            {autres.length > 0 && (
+                <>
+                    <Typography variant="subtitle2" component="h3">
+                        Autre
+                    </Typography>
+                    {autres.map((personnel) => (
+                        <PersonnelCard
+                            key={personnel.utilisateur_id}
+                            personnel={personnel}
+                            onDelete={() => handleDeletePersonnel(personnel.utilisateur_id)}
+                            onQuotaUpdate={(number) => handleUpdateQuotite(personnel.utilisateur_id, number)}
+                            onAgentUpdate={(agent) => handleUpdateAgent(personnel.utilisateur_id, agent)}
+                            disabled={disabled}
+                        />
+                    ))}
+                </>
             )}
             <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", mt: 4 }}>
                 Autres étudiants en formation longue sur la plateforme

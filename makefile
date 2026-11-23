@@ -1,45 +1,46 @@
-.PHONY: help build build-dev build-prod up down restart logs bash console composer migrate cache-clear test
+.PHONY: help dev-build dev-up dev-down up down bash console composer migrate populate create-admin jwt-generate cache-clear test
 
-# Environnement par défaut
-ENV ?= prod
-
-# Afficher l'aide
 help:
 	@echo "Commandes disponibles :"
-	@echo "  make build       - Construire l'image"
-	@echo "  make build-dev   - Construire l'image de développement"
-	@echo "  make build-prod  - Construire l'image de production"
-	@echo "  make up          - Démarrer les conteneurs"
-	@echo "  make down        - Arrêter les conteneurs"
-	@echo "  make logs        - Afficher les logs"
-	@echo "  make bash        - Ouvrir un shell PHP"
-	@echo "  make console     - Exécuter une commande Symfony"
-	@echo "  make migrate     - Exécuter les migrations"
-	@echo "  make populate    - Peupler la base de données"
-	@echo "  make test        - Lancer les tests"
-
+	@echo ""
+	@echo "  Build :"
+	@echo "    make dev-build       - Construire les images de développement"
+	@echo ""
+	@echo "  Docker Compose :"
+	@echo "    make up              - Démarrer les conteneurs de production"
+	@echo "    make down            - Arrêter les conteneurs de production"
+	@echo "    make dev-up          - Démarrer les conteneurs de développement"
+	@echo "    make dev-down        - Arrêter les conteneurs de développement"
+	@echo ""
+	@echo "  Symfony :"
+	@echo "    make bash            - Ouvrir un shell PHP"
+	@echo "    make console         - Exécuter une commande Symfony"
+	@echo "    make composer        - Exécuter une commande Composer"
+	@echo "    make migrate         - Exécuter les migrations Doctrine"
+	@echo "    make populate        - Peupler la base de données"
+	@echo "    make create-admin    - Créer un administrateur"
+	@echo "    make jwt-generate    - Générer les clés JWT"
+	@echo "    make cache-clear     - Vider le cache Symfony"
+	@echo ""
+	@echo "  Tests :"
+	@echo "    make test            - Lancer les tests PHPUnit"
+	
 # Build
-build:
-	docker compose build --build-arg APP_ENV=$(ENV) php nginx
-
-build-dev:
-	$(MAKE) build ENV=dev
-
-build-prod:
-	$(MAKE) build ENV=prod
+dev-build:
+	docker compose -f docker-compose.dev.yml build --build-arg APP_ENV=dev php nginx
 
 # Docker Compose
+dev-up:
+	docker compose -f docker-compose.dev.yml up -d
+
 up:
 	docker compose up -d
 
 down:
 	docker compose down
 
-restart:
-	docker compose restart
-
-logs:
-	docker compose logs -f
+dev-down:
+	docker compose -f docker-compose.dev.yml down
 
 # Symfony
 bash:

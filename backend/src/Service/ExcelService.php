@@ -57,7 +57,9 @@ class ExcelService
         private Security $security,
         private SerializerInterface $serializerInterface,
         private readonly TranslatorInterface $translator,
-        private readonly HarvesterService $harvesterService
+        private readonly HarvesterService $harvesterService,
+        private readonly TagService $tagService,
+        private readonly PlateformePseudoIdMappingService $pseudoIdMappingService
     ) {}
 
     /** Écrit la valeur en forçant le type texte si elle pourrait être interprétée comme une formule */
@@ -436,6 +438,7 @@ class ExcelService
         $sheet1Array = [];
         $sheet1Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Nom_Officiel",
             "Forme_Développée_Nom_Officiel",
             "Instrument_National",
@@ -445,9 +448,18 @@ class ExcelService
             "Logo_URL"
         ];
 
+        $sheet2Array = [];
+        $sheet2Array[] = [
+            "ID_Plateforme",
+            "Autre_Nom_Plateforme",
+            "ID_Tag",
+            "Nom_tag",
+        ];
+
         $sheet3Array = [];
         $sheet3Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Laboratoire_INSU_OSU_hebergeant_la_plateforme",
             "Numéro_RNSR",
             "Nom_Directeur",
@@ -460,6 +472,7 @@ class ExcelService
         $sheet4Array = [];
         $sheet4Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Statut",
             "Tutelle"
         ];
@@ -467,10 +480,10 @@ class ExcelService
         $sheet5Array = [];
         $sheet5Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Contrat",
             "Responsable_Scientifique",
             "Responsable_Technique",
-            "Responsable_Plateforme",
             "Doctorant",
             "Nom",
             "Prenom",
@@ -492,6 +505,7 @@ class ExcelService
         $sheet6Array = [];
         $sheet6Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Employeur",
             "Modalité_Recrutement",
             "Corps",
@@ -504,6 +518,7 @@ class ExcelService
         $sheet7Array = [];
         $sheet7Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "Nom_Equipement",
             "Marque",
@@ -517,6 +532,7 @@ class ExcelService
         $sheet8Array = [];
         $sheet8Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "Contributeur",
             "Pourcentage_Contribution",
@@ -525,6 +541,7 @@ class ExcelService
         $sheet8BisBisArray = [];
         $sheet8BisBisArray[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "Type_Contrat_Maintenance",
             "Commentaire_Nature_Contrat",
@@ -536,6 +553,7 @@ class ExcelService
         $sheet8BisArray = [];
         $sheet8BisArray[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "#ID_Equipement_Mutualise",
         ];
@@ -543,6 +561,7 @@ class ExcelService
         $sheet9Array = [];
         $sheet9Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "Nom_Equipement_Prospective",
             "Marque",
@@ -554,6 +573,7 @@ class ExcelService
         $sheet10Array = [];
         $sheet10Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "#ID_Equipement",
             "Prospective_Contributeur",
             "Prospective_Pourcentage_Contribution",
@@ -562,6 +582,7 @@ class ExcelService
         $sheet11Array = [];
         $sheet11Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Materiel_Consommables_k€",
             "Contrats_Entretien_k€",
             "Etudes_Prestations_k€",
@@ -573,6 +594,7 @@ class ExcelService
         $sheet12Array = [];
         $sheet12Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Bureaux_m2",
             "Laboratoire_m2",
         ];
@@ -580,6 +602,7 @@ class ExcelService
         $sheet13Array = [];
         $sheet13Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Ressources_Tutelles",
             "Ressources_Prestations_Fonds_Publics",
             "Ressources_Prestations_Fonds_Privés",
@@ -592,6 +615,7 @@ class ExcelService
         $sheet14Array = [];
         $sheet14Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Tutelle",
             "Taux_Contribution_Tutelle",
         ];
@@ -599,6 +623,7 @@ class ExcelService
         $sheet15Array = [];
         $sheet15Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "Tarifs_Plateforme",
             "Certification",
             "Libellé_Certification",
@@ -623,6 +648,7 @@ class ExcelService
         $sheet16Array = [];
         $sheet16Array[] = [
             "ID_Plateforme",
+            "Autre_Nom_Plateforme",
             "BGES_Realise",
             "Domicile_Travail",
             "Missions",
@@ -636,6 +662,7 @@ class ExcelService
 
         $sheet17Array[] = [
             "ID_PLateforme",
+            "Autre_Nom_Plateforme",
             "#Publications_Equipe",
             "#Publications_Collaboration_Interne",
             "#Publications_Collaboration_Externe",
@@ -645,9 +672,21 @@ class ExcelService
 
         $sheet18Array[] = [
             "ID_PLateforme",
+            "Autre_Nom_Plateforme",
             "Numero_Publication",
             "DOI"
         ];
+
+        $recupTags = [];
+
+        try {
+            $recupTags = $this->tagService->getTags();
+            foreach ($recupTags as $tag) {
+                $recupTags[$tag['id']] = $tag['nom'];
+            }
+        } catch (\Exception $e) {
+            // En cas de central tags down on ignore les tags et on continue l'export
+        }
 
         foreach ($platforms as $plat) {
             $references = null;
@@ -669,9 +708,12 @@ class ExcelService
                 $plat['id'] = $exportId;
             }
 
+            $pseudoId = $this->applyPseudoIdOverride($plat["id"], $plat["pseudoId"] ?? "");
+
             $dernierHistorique = $plat["dernier_historique"];
             $sheet1Array[] = [
                 $plat["id"],
+                $pseudoId,
                 $dernierHistorique["nom_officiel"],
                 $dernierHistorique["forme_developpee_nom_officiel"],
                 $plat["instrument_national"] ? 'Oui' : 'Non',
@@ -680,6 +722,17 @@ class ExcelService
                 $this->formatVille($dernierHistorique["ville_id"], $references),
                 $dernierHistorique["logo_url"] ?? '',
             ];
+
+            $tagsPlateforme = $plat["tags_ids"] ?? [];
+
+            foreach ($tagsPlateforme as $tagId) {
+                $sheet2Array[] = [
+                    $plat["id"],
+                    $pseudoId,
+                    $tagId,
+                    array_key_exists($tagId, $recupTags) ? $recupTags[$tagId] : '',
+                ];
+            }
 
             $prenomDirLab = '';
             $nomDirLab = '';
@@ -707,6 +760,7 @@ class ExcelService
 
             $sheet3Array[] = [
                 $plat["id"],
+                $pseudoId,
                 $this->formatLabo($dernierHistorique["laboratoire_operateur_id"], $references),
                 $rnsrLab,
                 $nomDirLab,
@@ -721,6 +775,7 @@ class ExcelService
             foreach ($tutellesPrincipales as $tutelleId) {
                 $sheet4Array[] = [
                     $plat["id"],
+                    $pseudoId,
                     'Principale',
                     $this->formatFinanceur($tutelleId, $references),
                 ];
@@ -731,6 +786,7 @@ class ExcelService
             foreach ($tutellesSecondaires as $tutelleId) {
                 $sheet4Array[] = [
                     $plat["id"],
+                    $pseudoId,
                     'Secondaire',
                     $this->formatFinanceur($tutelleId, $references),
                 ];
@@ -742,10 +798,10 @@ class ExcelService
             foreach ($personnels as $pers) {
                 $sheet5Array[] = [
                     $plat["id"],
+                    $pseudoId,
                     $this->formatContratPersonnel($pers["utilisateur"]["type_contrat_id"] ?? null, $references),
                     $pers["responsable_scientifique"] ? 'Oui' : 'Non',
                     $pers["responsable_technique"] ? 'Oui' : 'Non',
-                    $pers["responsable_plateforme"] ? 'Oui' : 'Non',
                     $pers["utilisateur"]["doctorant"] ? 'Oui' : 'Non',
                     $pers["utilisateur"]["nom"] ?? '',
                     $pers["utilisateur"]["prenom"] ?? '',
@@ -767,6 +823,7 @@ class ExcelService
 
             $sheet5Array[] = [
                 $plat["id"],
+                $pseudoId,
                 "Autres Etudiants",
                 "",
                 "",
@@ -791,6 +848,7 @@ class ExcelService
 
             $sheet5Array[] = [
                 $plat["id"],
+                $pseudoId,
                 "Apprentis / Alternants",
                 "",
                 "",
@@ -836,6 +894,7 @@ class ExcelService
 
                 $sheet6Array[] = [
                     $plat["id"],
+                    $pseudoId,
                     $this->formatFinanceur($pf["employeur_id"], $references),
                     $this->formatModaliteRecrutement($pf["modalite_recrutement_id"], $references),
                     $this->formatCorps($pf["corps_id"], $references),
@@ -850,6 +909,7 @@ class ExcelService
                 if (!$instrument["futur"]) {
                     $sheet7Array[] = [
                         $plat["id"],
+                        $pseudoId,
                         $instrument["id"] ?? '',
                         $instrument["nom"] ?? '',
                         $instrument["marque"] ?? '',
@@ -863,6 +923,7 @@ class ExcelService
                     foreach ($instrument["source_financement"] ?? [] as $financement) {
                         $sheet8Array[] = [
                             $plat["id"] ?? '',
+                            $pseudoId,
                             $instrument["id"] ?? '',
                             $this->formatFinanceur($financement["financeur_id"], $references),
                             $financement["taux"] ?? '',
@@ -871,6 +932,7 @@ class ExcelService
 
                     $sheet8BisBisArray[] = [
                         $plat["id"] ?? '',
+                        $pseudoId,
                         $instrument["id"] ?? '',
                         $this->formatContratMaintenance($instrument["contrat_maintenance_id"] ?? null, $references),
                         $instrument["commentaire_nature_contrat"] ?? '',
@@ -882,6 +944,7 @@ class ExcelService
                     foreach ($instrument["mutualise_autre_instrument_ids"] ?? [] as $mutualisation) {
                         $sheet8BisArray[] = [
                             $plat["id"] ?? '',
+                            $pseudoId,
                             $instrument["id"] ?? '',
                             $mutualisation
                         ];
@@ -889,6 +952,7 @@ class ExcelService
                 } else {
                     $sheet9Array[] = [
                         $plat["id"] ?? '',
+                        $pseudoId,
                         $instrument["id"] ?? '',
                         $instrument["nom"] ?? '',
                         $instrument["marque"] ?? '',
@@ -900,6 +964,7 @@ class ExcelService
                     foreach ($instrument["source_financement"] ?? [] as $financement) {
                         $sheet10Array[] = [
                             $plat["id"] ?? '',
+                            $pseudoId,
                             $instrument["id"] ?? '',
                             $this->formatFinanceur($financement["financeur_id"], $references),
                             $financement["taux"] ?? '',
@@ -917,6 +982,7 @@ class ExcelService
 
             $sheet11Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $dernierHistorique["materiel_consommable"] ?? '',
                 $dernierHistorique["contrat_entretien"] ?? '',
                 $dernierHistorique["etude_prestation"] ?? '',
@@ -927,12 +993,14 @@ class ExcelService
 
             $sheet12Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $dernierHistorique["espace_bureau"] ?? '',
                 $dernierHistorique["espace_laboratoire"] ?? '',
             ];
 
             $sheet13Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $dernierHistorique["contribution_tutelle_taux"] ?? '',
                 $dernierHistorique["contribution_fond_public_taux"] ?? '',
                 $dernierHistorique["contribution_fond_prive_taux"] ?? '',
@@ -945,6 +1013,7 @@ class ExcelService
             foreach ($dernierHistorique["contribution_tutelles"] ?? [] as $contribTutelle) {
                 $sheet14Array[] = [
                     $plat["id"] ?? '',
+                    $pseudoId,
                     $this->formatFinanceur($contribTutelle["financeur_id"], $references),
                     $contribTutelle["taux"] ?? '',
                 ];
@@ -952,6 +1021,7 @@ class ExcelService
 
             $sheet15Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $this->formatDeterminationTarif($dernierHistorique["determination_tarif_plateforme_id"], $references),
                 $dernierHistorique["labellisation_qualite"] ? "Oui" : "Non",
                 $dernierHistorique["nom_labellisation_qualite"] ?? '',
@@ -975,6 +1045,7 @@ class ExcelService
 
             $sheet16Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $dernierHistorique["bges_realise"] ? "Oui" : "Non",
                 $dernierHistorique["bges_domicile_travail"] ?? '',
                 $dernierHistorique["bges_mission"] ?? '',
@@ -988,6 +1059,7 @@ class ExcelService
 
             $sheet17Array[] = [
                 $plat["id"] ?? '',
+                $pseudoId,
                 $dernierHistorique["publication_equipe_operante"] ?? '',
                 $dernierHistorique["publication_collaboration_interne"] ?? '',
                 $dernierHistorique["publication_collaboration_externe"] ?? '',
@@ -998,6 +1070,7 @@ class ExcelService
             foreach ($plat["publications"] ?? [] as $publication) {
                 $sheet18Array[] = [
                     $plat["id"] ?? '',
+                    $pseudoId,
                     $publication["numero"] ?? '',
                     $publication["doi"] ?? '',
                 ];
@@ -1016,6 +1089,16 @@ class ExcelService
         for ($col = "A"; $col !== $lastLetter; $col++) {
             for ($row = 1; $row <= count($sheet1Array); $row++) {
                 $this->setSafeCellValue($sheet1, $col . $row, $sheet1Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
+            }
+        }
+
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Tags');
+        $sheet2->getStyle('1')->getFont()->setBold(true);
+        $lastLetter = Coordinate::stringFromColumnIndex(count($sheet2Array[0]) + 1);
+        for ($col = "A"; $col !== $lastLetter; $col++) {
+            for ($row = 1; $row <= count($sheet2Array); $row++) {
+                $this->setSafeCellValue($sheet2, $col . $row, $sheet2Array[$row - 1][Coordinate::columnIndexFromString($col) - 1]);
             }
         }
 
@@ -1203,5 +1286,28 @@ class ExcelService
         unset($spreadsheet, $writer);
 
         return $content;
+    }
+
+    private function applyPseudoIdOverride(mixed $plateformeId, string $originalPseudoId): string
+    {
+        // Check if this is a remote platform (contains ' - ' in the export_id format)
+        // Remote platforms have export_id like "12345 - remote_client_id"
+        // Local platforms have export_id like "12345 - locales"
+        
+        if (is_string($plateformeId) && str_contains($plateformeId, ' - ')) {
+            $parts = explode(' - ', (string)$plateformeId);
+            $actualId = (int)$parts[0];
+            $source = $parts[1];
+            
+            // Check if it's not a local platform
+            if ($source !== 'locales') {
+                $mappedPseudoId = $this->pseudoIdMappingService->getMappedPseudoId($actualId);
+                if ($mappedPseudoId) {
+                    return $mappedPseudoId;
+                }
+            }
+        }
+
+        return $originalPseudoId;
     }
 }
