@@ -181,7 +181,7 @@ class ExcelService
             foreach ($remotePlatforms as $remotePlatform) {
                 $remotePlatformId = $remotePlatform['id'] ?? null;
                 if (!is_int($remotePlatformId) && !(is_string($remotePlatformId) && ctype_digit($remotePlatformId))) {
-                    throw new \UnexpectedValueException('Identifiant de plateforme distante invalide.');
+                    throw new \UnexpectedValueException($this->translator->trans('excel.exception.plateforme_distante_invalide'));
                 }
 
                 $exportData = $this->harvesterService->getPlateformeHarvesteExportDataSansPermission((int) $remotePlatformId, $host);
@@ -199,7 +199,7 @@ class ExcelService
         $data = json_decode($json, true);
 
         if (!is_array($data)) {
-            throw new \UnexpectedValueException('Impossible de préparer les données de la plateforme pour l’export.');
+            throw new \UnexpectedValueException($this->translator->trans('excel.exception.preparation_donnees_export_impossible'));
         }
 
         $references = [];
@@ -700,7 +700,7 @@ class ExcelService
             }
 
             if (!is_array($plat)) {
-                throw new \UnexpectedValueException('Format de données de plateforme invalide pour l’export.');
+                throw new \UnexpectedValueException($this->translator->trans('excel.exception.format_donnees_plateforme_invalide'));
             }
 
             $exportId ??= $plat['export_id'] ?? null;

@@ -6,6 +6,7 @@ use App\Entity\Parametre;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ParametreService
 {
@@ -17,6 +18,7 @@ class ParametreService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     public function getApplicationSettings(): array
@@ -38,7 +40,7 @@ class ParametreService
     public function updateApplicationSettings(string $name, string $primaryColor, string $homeView, ?string $logo): array
     {
         if (!$this->security->isGranted('ROLE_ADMIN')) {
-            throw new AccessDeniedHttpException('Vous devez être administrateur pour modifier les paramètres.');
+            throw new AccessDeniedHttpException($this->translator->trans('admin.exception.administrateur_requis'));
         }
 
         $values = [

@@ -147,11 +147,11 @@ class AuthService
     {
         // Récupérer les infos de la table d'inscription OAuth
         $inscriptionOAuth = $this->em->getRepository(UtilisateurInscriptionOAuth::class)->findOneBy(["token" => $dto->token]);
-        if (!$inscriptionOAuth) throw new UnauthorizedHttpException('Bearer', "Token d'inscription OAuth invalide.");
+        if (!$inscriptionOAuth) throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.oauth_token_invalide'));
         if ($inscriptionOAuth->getExpiration() < new DateTime()) {
             $this->em->remove($inscriptionOAuth);
             $this->em->flush();
-            throw new UnauthorizedHttpException('Bearer', "Token d'inscription OAuth expiré.");
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.oauth_token_expire'));
         }
 
         $user = new Utilisateur();

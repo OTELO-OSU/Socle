@@ -20,6 +20,9 @@ auth:
         mdp_compromise: "Le mot de passe fourni est compromis. Veuillez choisir un mot de passe plus sûr."
         token_expire: "Le token de vérification a expiré."
         email_deja_utilise: "L'adresse e-mail est déjà utilisée par un autre utilisateur."
+        oauth_token_invalide: "Token d'inscription OAuth invalide."
+        oauth_token_expire: "Token d'inscription OAuth expiré."
+        authentification_requise: "Vous devez être authentifié."
 
 admin:
     succes:
@@ -34,6 +37,9 @@ admin:
         affilier_plateforme: "Vous n'avez pas les permissions nécessaires pour modifier les responsables de la plateforme."
         lister_utilisateur: "Vous n'avez pas les permissions nécessaires pour lister les agents."
         modifier_utilisateur: "Vous n'avez pas les permissions nécessaires pour modifier cet utilisateur."
+        plateforme_id_obligatoire: "L'identifiant de la plateforme est obligatoire."
+        pseudo_id_obligatoire: "L'identifiant pseudo est obligatoire."
+        administrateur_requis: "Vous devez être administrateur pour modifier les paramètres."
 
 unite:
     succes:
@@ -103,6 +109,16 @@ harvester:
         plateforme_id_host_obligatoire: "L'identifiant de la plateforme et le host sont obligatoires."
         trop_filtre_export: "Vous ne pouvez pas exporter plus d'un filtre à la fois. Veuillez choisir soit un tag, soit un ROR ID."
         identifiant_ror_obligatoire: "L'identifiant ROR est obligatoire."
+        un_seul_filtre_export: "Un seul filtre d'export peut être fourni à la fois."
+        harvester_indisponible: "Impossible de joindre le harvester."
+        harvester_refused: "Le harvester a refusé la récupération de ses plateformes."
+        harvester_invalide_list: "Le harvester a renvoyé une liste de plateformes invalide."
+        harvester_erreur_http: "Le harvester a retourné une erreur HTTP."
+        harvester_indisponible_fetch: "Impossible de récupérer les plateformes du harvester."
+        harvester_invalide_platform: "Le harvester a renvoyé une plateforme invalide."
+        harvester_donnees_indisponibles: "Erreur lors de la récupération des données de la plateforme."
+        harvester_donnees_invalides: "Les données reçues du harvester sont invalides."
+        acces_plateforme: "Vous n'avez pas les permissions nécessaires pour accéder à cette plateforme."
 
 osu:
     succes:
@@ -121,6 +137,10 @@ tag:
         tag_id_manquant: "L'identifiant du tag est requis."
         utilisateur_pas_tag: "L'utilisateur n'a pas ce tag."
         utilisateur_deja_tag: "L'utilisateur a déjà ce tag."
+        tag_invalide: "Tag invalide."
+        service_central_indisponible: "Impossible de joindre le service central des tags."
+        reponse_centrale_invalide: "La réponse de l'URL centrale n'est pas un JSON valide."
+        erreur_http_service_central: "Le service central des tags a retourné une erreur HTTP."
 
 utilisateur:
     exception:
@@ -137,14 +157,17 @@ utilisateur:
         grade_non_appartient_corps: "Le grade spécifié n'appartient pas au corps spécifié."
         utilisateur_id_manquant: "L'identifiant de l'utilisateur est manquant."
 
-exception:
-    bad_request:
-        champs_manquants: "Certains champs obligatoires sont manquants."
-        champs_approbation_boolean: "Le champ 'approbation' doit être un booléen."
-        operation_invalide: "Opération invalide. L'opération doit être 'add' ou 'remove'."
+parametre:
+    exception:
+        nom_couleur_vue_obligatoire: "Le nom, une couleur hexadécimale valide et une vue d'accueil valide sont obligatoires."
+        logo_image_invalide: "Le logo doit être une image valide."
+        logo_trop_volumineux: "Le logo ne doit pas dépasser 2 Mo."
+        logo_non_lisible: "Le logo ne peut pas être lu."
 
-    rate_limit:
-        tentative_connexion: "Trop de tentatives de connexion. Veuillez réessayer plus tard."
-        tentative_inscription: "Trop de tentatives d'inscription. Veuillez réessayer plus tard."
-        tentative_verification: "Trop de tentatives de vérification. Veuillez réessayer plus tard."
-        tentative_mdp_oublie: "Trop de tentatives de réinitialisation de mot de passe. Veuillez réessayer plus tard."
+excel:
+    exception:
+        tag_id_positif_obligatoire: "Un identifiant de tag positif est obligatoire."
+        labo_id_obligatoire: "Un identifiant laboratoire est obligatoire."
+        plateforme_distante_invalide: "Identifiant de plateforme distante invalide."
+        preparation_donnees_export_impossible: "Impossible de préparer les données de la plateforme pour l'export."
+        format_donnees_plateforme_invalide: "Format de données de plateforme invalide pour l'export."

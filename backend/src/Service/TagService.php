@@ -131,17 +131,17 @@ class TagService
                 ],
             ]);
         } catch (TransportExceptionInterface $e) {
-            throw new ServiceUnavailableHttpException("Impossible de joindre le service central des tags ($centralUrl): " . $e->getMessage(), 0, $e);
+            throw new ServiceUnavailableHttpException($this->translator->trans('tag.exception.service_central_indisponible'), 0, $e);
         }
 
         if ($response->getStatusCode() >= 400) {
-            throw new ServiceUnavailableHttpException("Le service central des tags a retourne une erreur HTTP " . $response->getStatusCode() . ".");
+            throw new ServiceUnavailableHttpException(sprintf($this->translator->trans('tag.exception.erreur_http_service_central'), $response->getStatusCode()));
         }
 
         $tags = $response->toArray(false);
 
         if (!is_array($tags)) {
-            throw new ServiceUnavailableHttpException("La réponse de l'URL centrale n'est pas un JSON valide.");
+            throw new ServiceUnavailableHttpException($this->translator->trans('tag.exception.reponse_centrale_invalide'));
         }
 
         $tags = array_values(array_filter($tags, function ($tag) use ($arrayTags) {
@@ -172,7 +172,7 @@ class TagService
 
         foreach ($tagIds as $tagId) {
             if (!in_array($tagId, $validTagIds)) {
-                throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
+                throw new BadRequestHttpException($this->translator->trans('tag.exception.tag_invalide'));
             }
             $existingTag = $this->em->getRepository(PlateformeTags::class)->findOneBy([
                 'plateforme' => $plateforme,
@@ -203,7 +203,7 @@ class TagService
         $validTagIds = array_map(fn($tag) => $tag['id'], $tagsCentral);
 
         if (!in_array($tagId, $validTagIds)) {
-            throw new BadRequestHttpException("Tag avec l'ID $tagId est invalide.");
+            throw new BadRequestHttpException($this->translator->trans('tag.exception.tag_invalide'));
         }
 
         $utilisateur->getUtilisateurTags()->filter(fn(UtilisateurTags $ut) => $ut->getTagId() === $tagId)->first() && throw new ConflictHttpException($this->translator->trans('tag.exception.utilisateur_deja_tag'));
