@@ -28,7 +28,7 @@ class EmploiType
     /**
      * @var Collection<int, Bap>
      */
-    #[ORM\ManyToMany(targetEntity: Bap::class)]
+    #[ORM\ManyToMany(targetEntity: Bap::class, mappedBy: 'emploiTypes')]
     private Collection $baps;
 
     public function __construct()
