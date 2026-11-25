@@ -12,6 +12,8 @@ A PLAIRe version for the OSU
 
 ## Requirements
 
+- PHP `8.5`
+- Node `26` (only for build)
 - Docker
 - make
 
