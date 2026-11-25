@@ -115,11 +115,11 @@ final class AdminController extends AbstractController
         $instanceHost = $json['instanceHost'] ?? null;
 
         if ($plateformeId === null) {
-            throw new BadRequestHttpException('plateformeId is required');
+            throw new BadRequestHttpException($this->translator->trans('admin.exception.plateforme_id_obligatoire'));
         }
 
         if ($pseudoId === null) {
-            throw new BadRequestHttpException('pseudoId is required');
+            throw new BadRequestHttpException($this->translator->trans('admin.exception.pseudo_id_obligatoire'));
         }
 
         // For local platforms (no instanceHost), modify the pseudo_id directly

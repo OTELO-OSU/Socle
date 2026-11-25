@@ -8,10 +8,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ExcelController extends AbstractController
 {
-    public function __construct(private readonly ExcelService $es) {}
+    public function __construct(
+        private readonly ExcelService $es,
+        private readonly TranslatorInterface $translator
+    ) {}
 
     #[Route('/export/plateforme', methods: ['GET'])]
     public function exportPlateforme(Request $request): Response
@@ -41,7 +45,7 @@ final class ExcelController extends AbstractController
     {
         $tagId = $request->query->getInt('tagId');
         if ($tagId <= 0 || !$request->query->has('tagId')) {
-            throw new BadRequestHttpException('Un identifiant de tag positif est obligatoire.');
+            throw new BadRequestHttpException($this->translator->trans('excel.exception.tag_id_positif_obligatoire'));
         }
 
         $content = $this->es->exportPlatformsByTagToExcel($tagId);
@@ -57,7 +61,7 @@ final class ExcelController extends AbstractController
     {
         $laboId = trim((string) $request->query->get('laboId', ''));
         if ($laboId === '') {
-            throw new BadRequestHttpException('Un identifiant laboratoire est obligatoire.');
+            throw new BadRequestHttpException($this->translator->trans('excel.exception.labo_id_obligatoire'));
         }
 
         $content = $this->es->exportPlatformsByUnitRorToExcel($laboId);

@@ -127,7 +127,7 @@ class HarvesterService
         $this->getUtilisateurMachine($clientId, $clientSecret);
 
         if ($tagId !== null && $laboId !== null) {
-            throw new BadRequestHttpException('Un seul filtre d’export peut être fourni à la fois.');
+            throw new BadRequestHttpException($this->translator->trans('harvester.exception.un_seul_filtre_export'));
         }
 
         return array_values(array_filter(
@@ -215,14 +215,14 @@ class HarvesterService
                 ]);
             } catch (TransportExceptionInterface $e) {
                 if ($failOnUnavailable) {
-                    throw new ServiceUnavailableHttpException(null, "Impossible de joindre le harvester $host.", $e);
+                    throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_indisponible'), $host), $e);
                 }
                 continue;
             }
 
             if ($response->getStatusCode() >= 400) {
                 if ($failOnUnavailable) {
-                    throw new ServiceUnavailableHttpException(null, "Le harvester $host a refusé la récupération de ses plateformes.");
+                    throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_refused'), $host));
                 }
                 continue;
             }
@@ -231,7 +231,7 @@ class HarvesterService
 
             if (!is_array($plateformes)) {
                 if ($failOnUnavailable) {
-                    throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                    throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_list'), $host));
                 }
                 continue;
             }
@@ -277,20 +277,20 @@ class HarvesterService
                         ]);
                         $status = $response->getStatusCode();
                         if ($status >= 400) {
-                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a retourné une erreur HTTP $status.");
+                            throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_erreur_http'), $host, $status));
                         }
                         $plateformes = $response->toArray(false);
                     } catch (TransportExceptionInterface | DecodingExceptionInterface $e) {
-                        throw new ServiceUnavailableHttpException(null, "Impossible de récupérer les plateformes du harvester $host.", $e);
+                        throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_indisponible_fetch'), $host), $e);
                     }
 
                     if (!array_is_list($plateformes)) {
-                        throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                        throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_list'), $host));
                     }
                     foreach ($plateformes as $plateforme) {
                         if (!is_array($plateforme) || !isset($plateforme['id'], $plateforme['dernier_historique']['nom_officiel'], $plateforme['tags_ids'])
                             || !is_array($plateforme['tags_ids'])) {
-                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une plateforme invalide.");
+                            throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_platform'), $host));
                         }
                     }
                     $item->expiresAfter(3600);
@@ -339,20 +339,20 @@ class HarvesterService
                         ]);
                         $status = $response->getStatusCode();
                         if ($status >= 400) {
-                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a retourné une erreur HTTP $status.");
+                            throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_erreur_http'), $host, $status));
                         }
                         $plateformes = $response->toArray(false);
                     } catch (TransportExceptionInterface | DecodingExceptionInterface $e) {
-                        throw new ServiceUnavailableHttpException(null, "Impossible de récupérer les plateformes du harvester $host.", $e);
+                        throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_indisponible_fetch'), $host), $e);
                     }
 
                     if (!array_is_list($plateformes)) {
-                        throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                        throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_list'), $host));
                     }
                     foreach ($plateformes as $plateforme) {
                         if (!is_array($plateforme) || !isset($plateforme['id'], $plateforme['dernier_historique']['nom_officiel'], $plateforme['tags_ids'])
                             || !is_array($plateforme['tags_ids'])) {
-                            throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une plateforme invalide.");
+                            throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_platform'), $host));
                         }
                     }
                     $item->expiresAfter(3600);
@@ -398,16 +398,16 @@ class HarvesterService
                     ],
                 ]);
             } catch (TransportExceptionInterface $e) {
-                throw new ServiceUnavailableHttpException(null, "Impossible de joindre le harvester $host.", $e);
+                throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_indisponible'), $host), $e);
             }
 
             if ($response->getStatusCode() >= 400) {
-                throw new ServiceUnavailableHttpException(null, "Le harvester $host a refusé la récupération de ses plateformes.");
+                throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_refused'), $host));
             }
 
             $platforms = $response->toArray(false);
             if (!is_array($platforms) || !array_is_list($platforms)) {
-                throw new ServiceUnavailableHttpException(null, "Le harvester $host a renvoyé une liste de plateformes invalide.");
+                throw new ServiceUnavailableHttpException(null, sprintf($this->translator->trans('harvester.exception.harvester_invalide_list'), $host));
             }
 
             $platformsByHost[$host] = $platforms;
@@ -439,13 +439,13 @@ class HarvesterService
                 ],
             ]);
         } catch (Exception $e) {
-            throw new ServiceUnavailableHttpException(null, "Erreur lors de la récupération des données de la plateforme.");
+            throw new ServiceUnavailableHttpException(null, $this->translator->trans('harvester.exception.harvester_donnees_indisponibles'));
         }
 
         $plateforme = $response->toArray(false);
 
         if (!is_array($plateforme)) {
-            throw new ServiceUnavailableHttpException(null, "Erreur lors de la récupération des données de la plateforme.");
+            throw new ServiceUnavailableHttpException(null, $this->translator->trans('harvester.exception.harvester_donnees_indisponibles'));
         }
 
         $tagsPlateforme = $plateforme['tags_ids'] ?? [];
@@ -538,11 +538,11 @@ class HarvesterService
                 ],
             ]);
         } catch (TransportExceptionInterface $e) {
-            throw new ServiceUnavailableHttpException(null, 'Erreur lors de la récupération des données de la plateforme.', $e);
+            throw new ServiceUnavailableHttpException(null, $this->translator->trans('harvester.exception.harvester_donnees_indisponibles'), $e);
         }
 
         if ($response->getStatusCode() >= 400) {
-            throw new ServiceUnavailableHttpException(null, 'Erreur lors de la récupération des données de la plateforme.');
+            throw new ServiceUnavailableHttpException(null, $this->translator->trans('harvester.exception.harvester_donnees_indisponibles'));
         }
 
         $exportData = $response->toArray(false);
@@ -552,7 +552,7 @@ class HarvesterService
             || !is_array($exportData['platform']['dernier_historique'] ?? null)
             || !is_array($exportData['references'])
         ) {
-            throw new ServiceUnavailableHttpException(null, 'Les données reçues du harvester sont invalides.');
+            throw new ServiceUnavailableHttpException(null, $this->translator->trans('harvester.exception.harvester_donnees_invalides'));
         }
 
         // Apply pseudo_id override for remote platform

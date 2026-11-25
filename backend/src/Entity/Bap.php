@@ -6,6 +6,7 @@ use App\Repository\BapRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinTable;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: BapRepository::class)]
@@ -29,8 +30,8 @@ class Bap
      * @var Collection<int, EmploiType>
      */
     #[Groups(["bap:list"])]
-    #[ORM\ManyToMany(targetEntity: EmploiType::class)]
-    #[ORM\JoinTable(name: 'bap_emploi_type')]
+    #[ORM\ManyToMany(targetEntity: EmploiType::class, inversedBy: 'baps')]
+    #[JoinTable(name: 'bap_emploi_type')]
     private Collection $emploiTypes;
 
     public function __construct()

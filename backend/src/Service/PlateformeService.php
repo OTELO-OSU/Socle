@@ -455,7 +455,7 @@ class PlateformeService
     function getPlateformeParPage(int $page, ?string $search, ?array $tags): array
     {
         if ($this->security->getUser() === null) {
-            throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.authentification_requise'));
         }
 
         $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;
@@ -635,7 +635,7 @@ class PlateformeService
     {
         if (!$byPassSecurity) {
             if ($this->security->getUser() === null) {
-                throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
+                throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.authentification_requise'));
             }
         }
 
@@ -1587,7 +1587,7 @@ class PlateformeService
     public function getLocalPlateformeParPage(int $page, ?string $search, ?array $tags): array
     {
         if ($this->security->getUser() === null) {
-            throw new UnauthorizedHttpException('Bearer', "Vous devez être authentifié.");
+            throw new UnauthorizedHttpException('Bearer', $this->translator->trans('auth.exception.authentification_requise'));
         }
 
         $offset = ($page - 1) * self::PLATEFORME_PAR_PAGE;

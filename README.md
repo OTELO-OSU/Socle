@@ -12,6 +12,8 @@ A PLAIRe version for the OSU
 
 ## Requirements
 
+- PHP `8.5`
+- Node `26` (only for build)
 - Docker
 - make
 
@@ -77,3 +79,9 @@ By running this command you can choose an OSU to load all of his laboratories
 ```sh
 make populate
 ```
+
+## More
+
+[Architecture](./docs/architecture.md)
+
+[Dictionnaire](./docs/dico.md)
