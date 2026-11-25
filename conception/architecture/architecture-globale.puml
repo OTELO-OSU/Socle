@@ -1,0 +1,22 @@
+@startuml Architecture Globale
+
+package "Conteneur Nginx" {
+  [Nginx] --> [/var/www/frontend]:/
+  frame "/var/www/frontend" {
+    [frontend buildé]
+  }
+}
+
+package "Conteneur PHP" {
+  [PHP-FPM]
+}
+
+package "Conteneur Postgres" {
+  database Postgres
+}
+
+HTTP -right-> Nginx
+[Nginx] --> [PHP-FPM]:/api
+[Postgres] <-up-> [PHP-FPM]
+
+@enduml

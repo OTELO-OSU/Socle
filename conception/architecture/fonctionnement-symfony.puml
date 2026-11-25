@@ -1,0 +1,51 @@
+@startuml Architecture_Symfony
+
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+actor "Client HTTP" as HTTP
+
+package "Backend Symfony" {
+
+    component "Controller" as Controller
+    component "Service" as Service
+    component "Voter" as Voter
+    component "Repository" as Repository
+
+    Controller --> Service : Logique métier
+    Service --> Voter : Vérification des permissions
+    Service --> Repository : Accès aux données
+}
+
+database "PostgreSQL" as DB
+
+HTTP --> Controller : Requête HTTP
+
+Repository --> DB : Doctrine ORM
+Service --> DB : SQL direct
+
+note bottom of Controller
+    /backend/src/Controller
+end note
+
+note bottom of Service
+    /backend/src/Service
+end note
+
+note bottom of Voter
+    /backend/src/Security/Voter
+end note
+
+note bottom of Repository
+    /backend/src/Repository
+end note
+
+note bottom of DB
+    Base de données
+end note
+
+@enduml

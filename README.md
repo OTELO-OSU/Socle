@@ -77,3 +77,9 @@ By running this command you can choose an OSU to load all of his laboratories
 ```sh
 make populate
 ```
+
+## More
+
+[Architecture](./docs/architecture.md)
+
+[Dictionnaire](./docs/dico.md)
